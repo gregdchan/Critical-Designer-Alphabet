@@ -1,0 +1,50 @@
+@use "node_modules/@picocss/pico/scss/pico" ;
+
+
+    h1 {
+        color: red;
+    }
+
+    .container {
+        padding-top: 2rem;
+    }
+
+    nav {
+        display: flex;
+        justify-content: top;
+        padding: 1em;
+        background-color: #f0f0f0;
+        margin-top: -20px;
+      }
+    
+      ul {
+        display: flex;
+        list-style-type: none;
+      }
+    
+      a {
+        text-decoration: none;
+        color: black;
+        margin-left: 1em;
+      }
+
+      a:visited {
+        color: #00895A;
+      }
+    
+      a:hover {
+        color: blue;
+      }
+
+      a:active {
+        color: purple;
+      }
+      
+      .active-link {
+        color: var(--active-link-color); /* Replace this with your desired active link color */
+        font-weight: bold; /* Optional: Make the active link bold */
+      }
+      
+      :root {
+        --active-link-color: #ff4500; /* Example color */
+      }
