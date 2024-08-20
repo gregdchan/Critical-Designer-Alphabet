@@ -1,4 +1,6 @@
-@use "node_modules/@picocss/pico/scss/pico" ;
+@use "node_modules/@picocss/pico/scss/pico" with (
+  $theme-color: "amber"
+);
 
 
     h1 {
@@ -47,4 +49,8 @@
       
       :root {
         --active-link-color: #ff4500; /* Example color */
+      }
+      #bottom {
+        margin-top: auto;
+        align-self: flex-start; /* Optional: If you want the button aligned to the left */
       }
