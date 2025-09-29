@@ -4,69 +4,72 @@
 CREATE DATABASE IF NOT EXISTS critical_designer_alphabet;
 USE critical_designer_alphabet;
 
--- Sessions table
 CREATE TABLE IF NOT EXISTS sessions (
-    code VARCHAR(10) PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    status ENUM('planned', 'live', 'done') DEFAULT 'planned',
-    template_id VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  code VARCHAR(16) PRIMARY KEY,
+  title VARCHAR(255),
+  template_id VARCHAR(64),
+  status ENUM('planned','live','done') DEFAULT 'planned',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Participants table
 CREATE TABLE IF NOT EXISTS participants (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    room_code VARCHAR(10) NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    role ENUM('facilitator', 'participant') NOT NULL,
-    color VARCHAR(20) NOT NULL,
-    points INT DEFAULT 0,
-    badges JSON,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
-    INDEX idx_room_code (room_code)
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  room_code VARCHAR(16),
+  name VARCHAR(128),
+  role ENUM('facilitator','participant'),
+  color VARCHAR(16),
+  points INT DEFAULT 0,
+  badges JSON,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
+  INDEX idx_participants_room_code (room_code)
 );
 
--- Responses table
+CREATE TABLE IF NOT EXISTS questions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  room_code VARCHAR(16),
+  section VARCHAR(64),
+  text TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
+  INDEX idx_questions_room_code (room_code)
+);
+
 CREATE TABLE IF NOT EXISTS responses (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    room_code VARCHAR(10) NOT NULL,
-    lens VARCHAR(50) NOT NULL, -- Risk, Work, Sustainability, Ethics
-    type ENUM('usecase', 'concern', 'goal', 'metric') NOT NULL,
-    text TEXT NOT NULL,
-    cards JSON, -- array of linked card slugs
-    author VARCHAR(100) NOT NULL,
-    votes INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
-    INDEX idx_room_code (room_code),
-    INDEX idx_lens (lens),
-    INDEX idx_type (type)
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  room_code VARCHAR(16),
+  question_id INT,
+  participant_id INT,
+  text TEXT,
+  cards JSON,
+  votes INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
+  FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
+  FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE SET NULL,
+  INDEX idx_responses_room_code (room_code)
 );
 
--- Timeline table
 CREATE TABLE IF NOT EXISTS timeline (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    room_code VARCHAR(10) NOT NULL,
-    label ENUM('Now', 'Next', 'Later') NOT NULL,
-    item_text TEXT NOT NULL,
-    owner VARCHAR(100),
-    metric VARCHAR(255),
-    risk_note TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
-    INDEX idx_room_code (room_code),
-    INDEX idx_label (label)
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  room_code VARCHAR(16),
+  label ENUM('Now','Next','Later'),
+  item_text TEXT,
+  owner VARCHAR(128),
+  metric VARCHAR(128),
+  risk_note TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
+  INDEX idx_timeline_room_code (room_code)
 );
 
--- Optional: Chat table for arcade chat feature
 CREATE TABLE IF NOT EXISTS chat (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    room_code VARCHAR(10) NOT NULL,
-    author VARCHAR(100) NOT NULL,
-    message TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
-    INDEX idx_room_code (room_code),
-    INDEX idx_created_at (created_at)
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  room_code VARCHAR(16),
+  participant_id INT,
+  message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (room_code) REFERENCES sessions(code) ON DELETE CASCADE,
+  FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE SET NULL,
+  INDEX idx_chat_room_code (room_code)
 );

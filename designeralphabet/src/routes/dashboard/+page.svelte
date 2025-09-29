@@ -249,11 +249,10 @@
           <h2 class="text-lg font-semibold text-slate-100 mb-6">Recent Sessions</h2>
           <div class="space-y-4">
             {#each sessions as session}
-              <div
-                class="p-4 rounded-lg border border-slate-600 cursor-pointer transition-colors {selectedSession?.id === session.id ? 'bg-blue-600/20 border-blue-500/50' : 'hover:bg-slate-700'}"
+              <button
+                type="button"
+                class="w-full text-left p-4 rounded-lg border border-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 {selectedSession?.id === session.id ? 'bg-blue-600/20 border-blue-500/50' : 'hover:bg-slate-700'}"
                 on:click={() => loadSessionDetails(session)}
-                role="button"
-                tabindex="0"
               >
                 <div class="flex items-center justify-between mb-2">
                   <h3 class="font-medium text-slate-100">{session.name}</h3>
@@ -267,7 +266,7 @@
                   <p>{session.participantCount} participants • {session.responseCount} ideas</p>
                   <p class="text-xs">{formatDate(session.createdAt)}</p>
                 </div>
-              </div>
+              </button>
             {/each}
           </div>
         </div>
