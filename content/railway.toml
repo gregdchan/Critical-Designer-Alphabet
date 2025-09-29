@@ -1,0 +1,16 @@
+# Railway Railpack TOML for Sanity CMS
+
+[build]
+  command = "npm install && npm run build"
+
+[deploy]
+  start = "npm run start"
+
+# Environment variables for Sanity CMS
+[variables]
+VITE_SANITY_PROJECT_ID=pctfp1xq
+VITE_SANITY_DATASET=production
+VITE_SANITY_API_VERSION=2024-09-01
+
+[static]
+  directory = "static"
