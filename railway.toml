@@ -29,3 +29,4 @@ SUPABASE_SERVICE_ROLE=
 [static]
   # Uncomment if you have static assets
   # directory = "static"
+  
