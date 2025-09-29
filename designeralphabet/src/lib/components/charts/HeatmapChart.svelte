@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from 'svelte';
   import * as d3 from 'd3';
 
-  export type Response = {
+  type Response = {
     lens?: string;
     text?: string;
     votes?: number;
@@ -408,31 +408,31 @@
     mix-blend-mode: screen;
   }
 
-  .chart-tooltip .tooltip-heading {
+  :global(.chart-tooltip .tooltip-heading) {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 700;
     margin-bottom: 0.35rem;
   }
 
-  .chart-tooltip .tooltip-count {
+  :global(.chart-tooltip .tooltip-count) {
     font-size: 0.68rem;
     opacity: 0.8;
     margin-bottom: 0.6rem;
   }
 
-  .chart-tooltip .tooltip-list {
+  :global(.chart-tooltip .tooltip-list) {
     display: grid;
     gap: 0.25rem;
     font-size: 0.68rem;
     opacity: 0.8;
   }
 
-  g.cell.dimmed {
+  :global(g.cell.dimmed) {
     opacity: 0.25;
   }
 
-  g.cell.highlighted {
+  :global(g.cell.highlighted) {
     opacity: 1;
   }
 </style>

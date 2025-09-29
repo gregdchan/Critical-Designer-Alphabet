@@ -1,0 +1,25 @@
+# Railway Railpack TOML for SvelteKit + Node.js + Supabase
+[build]
+  command = "npm install && npm run build"
+  output = ".svelte-kit/output"
+
+[deploy]
+  start = "npm run preview"
+
+[variables]
+  # Add your environment variables here
+  # Example:
+  # SUPABASE_URL = "https://your-project.supabase.co"
+  # SUPABASE_ANON_KEY = "your-anon-key"
+  # VITE_SANITY_PROJECT_ID = "your-sanity-id"
+  # VITE_SANITY_DATASET = "production"
+
+[services]
+  # Example: add a PostgreSQL database if needed
+  # [[services.postgresql]]
+  #   plan = "starter"
+  #   name = "Supabase DB"
+
+[static]
+  # Uncomment if you have static assets
+  # directory = "static"

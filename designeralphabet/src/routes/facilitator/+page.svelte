@@ -359,7 +359,7 @@
                   <div>
                     <span class="text-slate-400">Lenses:</span>
                     <div class="flex flex-wrap gap-1 mt-1">
-                      {#each template.lenses as lens}
+                      {#each template.lenses ?? [] as lens}
                         <span class="px-2 py-1 bg-cyan-400/20 text-cyan-300 rounded">{lens}</span>
                       {/each}
                     </div>

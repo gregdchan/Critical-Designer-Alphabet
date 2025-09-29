@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from 'svelte';
   import * as d3 from 'd3';
 
-  export type RoadmapResponse = {
+  type RoadmapResponse = {
     text?: string;
     votes?: number;
     lens?: string;
@@ -491,20 +491,20 @@
     box-shadow: 0 20px 40px rgba(14, 165, 233, 0.28);
   }
 
-  .chart-tooltip .tooltip-heading {
+  :global(.chart-tooltip .tooltip-heading) {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 700;
     margin-bottom: 0.45rem;
   }
 
-  .chart-tooltip .tooltip-body {
+  :global(.chart-tooltip .tooltip-body) {
     font-size: 0.7rem;
     opacity: 0.85;
     margin-bottom: 0.6rem;
   }
 
-  .chart-tooltip .tooltip-meta {
+  :global(.chart-tooltip .tooltip-meta) {
     font-size: 0.64rem;
     opacity: 0.7;
     letter-spacing: 0.08em;

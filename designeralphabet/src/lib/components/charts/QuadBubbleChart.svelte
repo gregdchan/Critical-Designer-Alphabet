@@ -306,9 +306,9 @@
 
     const simulation = d3
       .forceSimulation<BubbleNode>(simulationNodes)
-      .force('x', d3.forceX((d) => xScale(d.targetX)).strength(0.6))
-      .force('y', d3.forceY((d) => yScale(d.targetY)).strength(0.6))
-      .force('collide', d3.forceCollide((d) => d.radius + 6))
+      .force('x', d3.forceX<BubbleNode>((d) => xScale(d.targetX)).strength(0.6))
+      .force('y', d3.forceY<BubbleNode>((d) => yScale(d.targetY)).strength(0.6))
+      .force('collide', d3.forceCollide<BubbleNode>((d) => d.radius + 6))
       .stop();
 
     for (let i = 0; i < 200; i += 1) {
@@ -535,14 +535,14 @@
     transition: opacity 120ms ease;
   }
 
-  .chart-tooltip .tooltip-title {
+  :global(.chart-tooltip .tooltip-title) {
     font-weight: 700;
     margin-bottom: 0.4rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
 
-  .chart-tooltip .tooltip-metadata {
+  :global(.chart-tooltip .tooltip-metadata) {
     display: flex;
     gap: 0.6rem;
     margin-top: 0.45rem;
@@ -550,7 +550,7 @@
     opacity: 0.75;
   }
 
-  .chart-tooltip .tooltip-footer {
+  :global(.chart-tooltip .tooltip-footer) {
     margin-top: 0.6rem;
     font-size: 0.65rem;
     letter-spacing: 0.06em;
