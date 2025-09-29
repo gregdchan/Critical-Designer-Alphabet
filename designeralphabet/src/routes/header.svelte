@@ -5,10 +5,10 @@
   import { IconStar as Sparkles, IconMenu2 as Menu, IconX as X } from '@tabler/icons-svelte';
 
   const links = [
-    { href: '/', label: 'Dashboard' },
+    { href: '/', label: 'Home' },
+    { href: '/dashboard', label: 'Dashboard' },
     { href: '/cards', label: 'Card Library' },
     { href: '/session', label: 'Live Session' },
-    { href: '/design-system', label: 'Design System' },
     { href: '/about', label: 'About' }
   ];
 
