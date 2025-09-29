@@ -23,34 +23,34 @@
     method: 'cyan'
   };
 
-  const CARD_VARIANTS = {
+  const NEON_VARIANTS = {
     cyan: {
-      border: 'border-cyan-500/30',
+      border: 'border-neonCyan/40',
       glow: 'shadow-neon-cyan',
-      accent: 'text-cyan-400',
-      chip: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
+      accent: 'text-neonCyan',
+      chip: 'border-neonCyan/40 bg-neonCyan/10 text-neonCyan'
     },
     pink: {
-      border: 'border-pink-500/30',
+      border: 'border-neonPink/40',
       glow: 'shadow-neon-pink',
-      accent: 'text-pink-400',
-      chip: 'border-pink-500/30 bg-pink-500/10 text-pink-400'
+      accent: 'text-neonPink',
+      chip: 'border-neonPink/40 bg-neonPink/10 text-neonPink'
     },
     lime: {
-      border: 'border-lime-500/30',
+      border: 'border-neonLime/40',
       glow: 'shadow-neon-lime',
-      accent: 'text-lime-400',
-      chip: 'border-lime-500/30 bg-lime-500/10 text-lime-400'
+      accent: 'text-neonLime',
+      chip: 'border-neonLime/40 bg-neonLime/10 text-neonLime'
     },
     purple: {
-      border: 'border-purple-500/30',
-      glow: 'shadow-soft',
-      accent: 'text-purple-400',
-      chip: 'border-purple-500/30 bg-purple-500/10 text-purple-400'
+      border: 'border-retroPurple/40',
+      glow: 'shadow-neon-pink',
+      accent: 'text-retroPurple',
+      chip: 'border-retroPurple/40 bg-retroPurple/10 text-retroPurple'
     }
   } as const;
 
-  type VariantAttr = keyof (typeof CARD_VARIANTS)[VariantName];
+  type VariantAttr = keyof (typeof NEON_VARIANTS)[VariantName];
 
   function getVariant(card: Card): VariantName {
     const neonKey = card.category ? CATEGORY_VARIANTS[card.category] : undefined;
@@ -58,7 +58,7 @@
   }
 
   function variantClass(card: Card, key: VariantAttr) {
-    return CARD_VARIANTS[getVariant(card)][key];
+    return NEON_VARIANTS[getVariant(card)][key];
   }
 
   let cards: Card[] = [];
