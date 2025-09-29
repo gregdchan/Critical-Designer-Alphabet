@@ -1,13 +1,18 @@
-// sanity.ts
 import { createClient } from '@sanity/client';
-import groq from 'groq';
 
-export const client = createClient({
-  projectId: 'pctfp1xq',
-  dataset: 'production',
-  useCdn: true, // set to `false` to bypass the edge cache
-  apiVersion: '2023-05-03', // use current date (YYYY-MM-DD) to target the latest API version
-  // token: process.env.SANITY_SECRET_TOKEN // Only if you want to update content with the client
+const projectId = import.meta.env.VITE_SANITY_PROJECT_ID;
+const dataset = import.meta.env.VITE_SANITY_DATASET;
+const apiVersion = import.meta.env.VITE_SANITY_API_VERSION ?? '2024-09-01';
+
+if (!projectId || !dataset) {
+  throw new Error('Missing Sanity configuration. Set VITE_SANITY_PROJECT_ID and VITE_SANITY_DATASET.');
+}
+
+const client = createClient({
+  projectId,
+  dataset,
+  apiVersion,
+  useCdn: true
 });
 
 export default client;

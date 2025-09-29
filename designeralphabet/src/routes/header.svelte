@@ -1,85 +1,112 @@
-<script>
-  import { onMount } from 'svelte';
+<script lang="ts">
+  import { derived } from 'svelte/store';
+  import { page } from '$app/stores';
   import logo from '$lib/logo.png';
+  import { IconStar as Sparkles, IconMenu2 as Menu, IconX as X } from '@tabler/icons-svelte';
 
-  let activePath = '';
+  const links = [
+    { href: '/', label: 'Dashboard' },
+    { href: '/cards', label: 'Card Library' },
+    { href: '/session', label: 'Live Session' },
+    { href: '/design-system', label: 'Design System' },
+    { href: '/about', label: 'About' }
+  ];
 
-  // Ensure this code only runs in the browser
-  onMount(() => {
-    activePath = window.location.pathname;
+  const activePath = derived(page, ($page) => $page.url.pathname);
+  let menuOpen = false;
 
-    // Update activePath whenever the URL changes
-    const updatePath = () => {
-      activePath = window.location.pathname;
-    };
+  function toggleMenu() {
+    menuOpen = !menuOpen;
+  }
 
-    window.addEventListener('popstate', updatePath);
-
-    // Clean up the event listener when the component is destroyed
-    return () => {
-      window.removeEventListener('popstate', updatePath);
-    };
-  });
-
-  // Function to update the active path when a link is clicked
-  // @ts-ignore
-  function handleLinkClick(event) {
-    activePath = event.currentTarget.getAttribute('href');
+  function closeMenu() {
+    menuOpen = false;
   }
 </script>
 
+<header class="sticky top-0 z-40 border-b border-slate-700 bg-slate-800/95 backdrop-blur-sm">
+  <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+    <a
+      href="/"
+      class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-100 transition hover:bg-slate-700"
+      aria-label="Designer's Critical Alphabet home"
+      on:click={closeMenu}
+    >
+      <span class="flex h-8 w-8 items-center justify-center rounded bg-slate-700">
+        <img src={logo} alt="Designer's Critical Alphabet" class="h-6 w-6" />
+      </span>
+      <div class="flex flex-col text-left">
+        <span class="text-sm font-semibold">Critical Alphabet</span>
+        <span class="text-xs text-slate-400">Design Workshops</span>
+      </div>
+    </a>
 
-<nav>
-  <ul>
-    <li>
-        <img src="{logo}" alt="Logo" class="logo"/> <span class="title">Designer's Critical Alphabet</span>
-    </li>
-  </ul>
-  <ul>
-    <li><a href="/" class="{activePath === '/' ? 'active' : ''}" on:click={handleLinkClick}>Home</a></li>
-    <li><a href="/cards" class="{activePath === '/cards' ? 'active' : ''}" on:click={handleLinkClick}>Cards</a></li>
-    <li><a href="/session" class="{activePath === '/session' ? 'active' : ''}" on:click={handleLinkClick}>Session</a></li>
-    <li><a href="/about" class="{activePath === '/about' ? 'active' : ''}" on:click={handleLinkClick}>About</a></li>
-  </ul>
-</nav>
+    <nav aria-label="Primary navigation" class="hidden items-center gap-1 md:flex">
+      {#each links as link}
+        <a
+          href={link.href}
+          class={`rounded-md px-3 py-2 text-sm font-medium transition ${
+            $activePath === link.href
+              ? 'bg-blue-600 text-white'
+              : 'text-slate-300 hover:bg-slate-700 hover:text-slate-100'
+          }`}
+          aria-current={$activePath === link.href ? 'page' : undefined}
+        >
+          {link.label}
+        </a>
+      {/each}
+    </nav>
 
-<style>
-  nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: var(--nav-background-color, #f0f0f0); /* Replace '#f0f0f0' with your desired background color */
-  }
+    <div class="flex items-center gap-3">
+      <a
+        class="hidden items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 sm:flex"
+        href="/session"
+      >
+        <Sparkles class="h-4 w-4" />
+        Start Workshop
+      </a>
+      <button
+        class="rounded-md bg-slate-700 p-2 text-slate-300 transition hover:bg-slate-600 md:hidden"
+        type="button"
+        aria-expanded={menuOpen}
+        aria-label="Toggle navigation"
+        on:click={toggleMenu}
+      >
+        {#if menuOpen}
+          <X class="h-5 w-5" />
+        {:else}
+          <Menu class="h-5 w-5" />
+        {/if}
+      </button>
+    </div>
+  </div>
 
-  ul {
-    display: flex;
-    list-style-type: none;
-  }
-
-  li {
-    margin-right: 1rem;
-  }
-
-  a {
-    text-decoration: none;
-    color: var(--link-color, black); /* Replace 'black' with your desired link color */
-  }
-
-    /* Define the styles for the active link */
-    .active {
-    color: var(--active-color, red); /* Replace 'red' with your desired active color */
-  }
-
-  .logo {
-    width: 50px;
-    height: 50px;
-  }
-
-  .title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: black;
-  }
-
-</style>
+  {#if menuOpen}
+    <div class="border-t border-slate-700 bg-slate-800 px-4 py-4 md:hidden">
+      <nav class="flex flex-col gap-2" aria-label="Mobile navigation">
+        {#each links as link}
+          <a
+            href={link.href}
+            class={`rounded-md px-3 py-2 text-sm font-medium transition ${
+              $activePath === link.href
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-300 hover:bg-slate-700 hover:text-slate-100'
+            }`}
+            aria-current={$activePath === link.href ? 'page' : undefined}
+            on:click={closeMenu}
+          >
+            {link.label}
+          </a>
+        {/each}
+        <a
+          class="flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white mt-2"
+          href="/session"
+          on:click={closeMenu}
+        >
+          <Sparkles class="h-4 w-4" />
+          Start Workshop
+        </a>
+      </nav>
+    </div>
+  {/if}
+</header>
