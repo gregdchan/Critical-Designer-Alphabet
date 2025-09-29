@@ -6,7 +6,7 @@
   output = "designeralphabet/.svelte-kit/output"
 
 [deploy]
-  start = "cd designeralphabet && npm run preview"
+  start = "cd designeralphabet && npm start"
 
 # Environment variables shared across services
 [variables]

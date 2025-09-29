@@ -4,7 +4,7 @@
   command = "npm install && npm run build"
 
 [deploy]
-  start = "npm run start"
+  start = "npm start"
 
 # Environment variables for Sanity CMS
 [variables]
