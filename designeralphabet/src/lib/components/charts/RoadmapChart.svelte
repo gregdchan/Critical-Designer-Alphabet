@@ -1,287 +1,438 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import * as d3 from 'd3';
 
-  export let responses: any[] = [];
-  export let width = 900;
-  export let height = 600;
-
-  let svg: SVGElement;
-  let mounted = false;
-
-  interface RoadmapItem {
-    id: string;
-    text: string;
-    lane: number;
-    phase: number;
-    priority: 'high' | 'medium' | 'low';
-    votes: number;
-    lens: string;
-    type: string;
-    participantName: string;
-    effort: number;
-    impact: number;
-  }
-
-  const phases = ['Now', 'Next', 'Later', 'Future'];
-  const lanes = ['Infrastructure', 'Features', 'Research', 'Community'];
-
-  const priorityColors = {
-    high: '#ff2aad',
-    medium: '#00fff7',
-    low: '#aaff00'
+  export type RoadmapResponse = {
+    text?: string;
+    votes?: number;
+    lens?: string;
+    participantName?: string;
+    cards?: string[] | null;
   };
 
-  function processData(responses: any[]): RoadmapItem[] {
-    return responses.map((response, index) => {
-      const votes = response.votes || 0;
-      const effort = Math.random();
-      const impact = Math.random();
+  export let responses: RoadmapResponse[] = [];
+  export let width = 920;
+  export let height = 560;
 
-      let priority: 'high' | 'medium' | 'low';
-      if (votes >= 5) priority = 'high';
-      else if (votes >= 2) priority = 'medium';
-      else priority = 'low';
+  let svg: SVGSVGElement;
+  let tooltipEl: HTMLDivElement;
+  let mounted = false;
 
-      let phase = 0;
-      if (effort < 0.3) phase = 0; // Now
-      else if (effort < 0.6) phase = 1; // Next
-      else if (effort < 0.8) phase = 2; // Later
-      else phase = 3; // Future
+  const phases = ['Now', 'Next', 'Later', 'Signal'] as const;
+  const laneFallbacks = ['Infrastructure', 'Practice', 'Policy', 'Community'];
 
-      const lane = Math.floor(Math.random() * lanes.length);
+  const lensColor: Record<string, string> = {
+    Risk: '#f97316',
+    Work: '#38bdf8',
+    Sustainability: '#22d3ee',
+    Ethics: '#a855f7',
+    Community: '#bef264',
+    Justice: '#f472b6',
+    Agency: '#22c55e'
+  };
+
+  type RoadmapCard = {
+    id: string;
+    text: string;
+    votes: number;
+    lens: string;
+    participant: string;
+    cards: number;
+    color: string;
+    phase: typeof phases[number];
+    lane: string;
+    priority: 'High' | 'Medium' | 'Watch';
+  };
+
+  function normaliseLens(raw?: string) {
+    if (!raw) return 'Community';
+    const match = Object.keys(lensColor).find((key) => key.toLowerCase() === raw.toLowerCase());
+    return match ?? raw;
+  }
+
+  function derivePhase(votes: number) {
+    if (votes >= 6) return 'Now';
+    if (votes >= 3) return 'Next';
+    if (votes >= 1) return 'Later';
+    return 'Signal';
+  }
+
+  function derivePriority(votes: number) {
+    if (votes >= 6) return 'High';
+    if (votes >= 3) return 'Medium';
+    return 'Watch';
+  }
+
+  function buildCards(data: RoadmapResponse[]): RoadmapCard[] {
+    return data.map((response, index) => {
+      const votes = Math.max(0, response.votes ?? 0);
+      const lens = normaliseLens(response.lens);
+      const color = lensColor[lens] ?? '#38bdf8';
+      const text = response.text?.trim() ?? 'Idea pending detail';
 
       return {
-        id: `item-${response.id || index}`,
-        text: response.text?.substring(0, 60) + (response.text?.length > 60 ? '...' : '') || 'No content',
-        lane,
-        phase,
-        priority,
+        id: `roadmap-${index}`,
+        text: text.length > 140 ? `${text.slice(0, 140)}…` : text,
         votes,
-        lens: response.lens || 'Unknown',
-        type: response.type || 'Idea',
-        participantName: response.participantName || 'Anonymous',
-        effort,
-        impact
-      };
+        lens,
+        participant: response.participantName ?? 'Anonymous',
+        cards: Array.isArray(response.cards) ? response.cards.length : 0,
+        color,
+        phase: derivePhase(votes),
+        lane: lens,
+        priority: derivePriority(votes)
+      } satisfies RoadmapCard;
     });
   }
 
   function renderChart() {
-    if (!svg || !mounted) return;
+    if (!mounted || !svg || !tooltipEl) return;
 
-    const data = processData(responses);
-    const margin = { top: 60, right: 40, bottom: 60, left: 120 };
+    const cards = buildCards(responses);
+    const uniqueLanes = Array.from(new Set(cards.map((card) => card.lane)));
+    const lanes = uniqueLanes.length ? uniqueLanes : laneFallbacks;
+
+    const margin = { top: 80, right: 56, bottom: 80, left: 160 };
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
-
-    const phaseWidth = chartWidth / phases.length;
+    const columnWidth = chartWidth / phases.length;
     const laneHeight = chartHeight / lanes.length;
 
-    d3.select(svg).selectAll('*').remove();
+    const root = d3.select(svg);
+    root.selectAll('*').remove();
+    root.attr('viewBox', `0 0 ${width} ${height}`);
 
-    const container = d3.select(svg)
-      .attr('width', width)
-      .attr('height', height);
+    const defs = root.append('defs');
 
-    container.append('rect')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('fill', 'rgba(13, 13, 13, 0.8)')
-      .attr('rx', 12);
+    const bgGradient = defs
+      .append('linearGradient')
+      .attr('id', 'roadmap-background')
+      .attr('x1', '0%')
+      .attr('x2', '100%')
+      .attr('y1', '0%')
+      .attr('y2', '100%');
 
-    const chart = container.append('g')
-      .attr('transform', `translate(${margin.left}, ${margin.top})`);
+    bgGradient.append('stop').attr('offset', '0%').attr('stop-color', 'rgba(8, 47, 73, 0.95)');
+    bgGradient.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(6, 12, 24, 0.98)');
 
-    chart.append('text')
-      .attr('x', chartWidth / 2)
-      .attr('y', -30)
-      .attr('text-anchor', 'middle')
-      .attr('fill', '#aaff00')
-      .attr('font-size', '18px')
-      .attr('font-family', 'Orbitron, sans-serif')
-      .attr('font-weight', '600')
-      .text('ROADMAP SWIMLANES');
+    const glow = defs
+      .append('filter')
+      .attr('id', 'roadmap-glow')
+      .attr('x', '-35%')
+      .attr('y', '-35%')
+      .attr('width', '170%')
+      .attr('height', '170%');
 
-    for (let i = 0; i <= phases.length; i++) {
-      chart.append('line')
-        .attr('x1', i * phaseWidth)
-        .attr('y1', 0)
-        .attr('x2', i * phaseWidth)
-        .attr('y2', chartHeight)
-        .attr('stroke', 'rgba(255, 255, 255, 0.2)')
-        .attr('stroke-width', i === 0 || i === phases.length ? 2 : 1);
-    }
+    glow.append('feGaussianBlur').attr('stdDeviation', 8).attr('result', 'coloredBlur');
+    const glowMerge = glow.append('feMerge');
+    glowMerge.append('feMergeNode').attr('in', 'coloredBlur');
+    glowMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
-    for (let i = 0; i <= lanes.length; i++) {
-      chart.append('line')
-        .attr('x1', 0)
-        .attr('y1', i * laneHeight)
-        .attr('x2', chartWidth)
-        .attr('y2', i * laneHeight)
-        .attr('stroke', 'rgba(255, 255, 255, 0.2)')
-        .attr('stroke-width', i === 0 || i === lanes.length ? 2 : 1);
-    }
+    const container = root.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    phases.forEach((phase, i) => {
-      chart.append('text')
-        .attr('x', i * phaseWidth + phaseWidth / 2)
-        .attr('y', -10)
+    container
+      .append('rect')
+      .attr('width', chartWidth)
+      .attr('height', chartHeight)
+      .attr('rx', 28)
+      .attr('fill', 'url(#roadmap-background)')
+      .attr('stroke', 'rgba(59, 130, 246, 0.25)')
+      .attr('stroke-width', 1.4)
+      .style('filter', 'url(#roadmap-glow)');
+
+    const tooltip = d3.select(tooltipEl).style('opacity', 0).style('pointer-events', 'none');
+
+    // Phase dividers
+    const dividerGroup = container.append('g').attr('class', 'phase-dividers');
+
+    phases.forEach((phase, index) => {
+      const x = index * columnWidth;
+      dividerGroup
+        .append('line')
+        .attr('x1', x)
+        .attr('x2', x)
+        .attr('y1', 16)
+        .attr('y2', chartHeight - 16)
+        .attr('stroke', 'rgba(148, 163, 184, 0.18)')
+        .attr('stroke-width', index === 0 ? 0 : 1.2)
+        .attr('stroke-dasharray', '6 12');
+
+      dividerGroup
+        .append('text')
+        .attr('x', x + columnWidth / 2)
+        .attr('y', -28)
         .attr('text-anchor', 'middle')
-        .attr('fill', '#00fff7')
-        .attr('font-size', '14px')
+        .attr('fill', '#38bdf8')
         .attr('font-family', 'Orbitron, sans-serif')
-        .attr('font-weight', '600')
-        .text(phase);
+        .attr('font-size', 14)
+        .attr('letter-spacing', 2)
+        .attr('font-weight', 600)
+        .text(phase.toUpperCase());
     });
 
-    lanes.forEach((lane, i) => {
-      chart.append('text')
-        .attr('x', -10)
-        .attr('y', i * laneHeight + laneHeight / 2)
+    // Lane labels
+    lanes.forEach((lane, index) => {
+      const y = index * laneHeight + laneHeight / 2;
+      container
+        .append('text')
+        .attr('x', -24)
+        .attr('y', y)
         .attr('dy', '0.35em')
         .attr('text-anchor', 'end')
-        .attr('fill', '#ffffff')
-        .attr('font-size', '12px')
+        .attr('fill', (lensColor[lane] ?? '#94a3b8'))
         .attr('font-family', 'Orbitron, sans-serif')
-        .attr('font-weight', '600')
-        .text(lane);
+        .attr('font-weight', 600)
+        .attr('font-size', 12)
+        .text(lane.toUpperCase());
+
+      container
+        .append('line')
+        .attr('x1', 10)
+        .attr('y1', y)
+        .attr('x2', chartWidth - 10)
+        .attr('y2', y)
+        .attr('stroke', 'rgba(148, 163, 184, 0.12)')
+        .attr('stroke-dasharray', '4 10');
     });
 
-    const tooltip = d3.select('body').append('div')
-      .attr('class', 'roadmap-tooltip')
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('background', 'rgba(5, 5, 5, 0.95)')
-      .style('color', '#fff')
-      .style('border', '1px solid rgba(170, 255, 0, 0.5)')
-      .style('border-radius', '8px')
-      .style('padding', '12px')
-      .style('font-family', 'Orbitron, sans-serif')
-      .style('font-size', '12px')
-      .style('max-width', '280px')
-      .style('z-index', '1000');
+    container
+      .append('text')
+      .attr('x', chartWidth / 2)
+      .attr('y', -48)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'rgba(224, 231, 255, 0.92)')
+      .attr('font-family', 'Orbitron, sans-serif')
+      .attr('font-size', 18)
+      .attr('font-weight', 600)
+      .text('Roadmap Swimlanes — Momentum Tracker');
 
-    const groupedData = d3.group(data, d => `${d.lane}-${d.phase}`);
+    container
+      .append('text')
+      .attr('x', chartWidth / 2)
+      .attr('y', -26)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'rgba(148, 163, 184, 0.75)')
+      .attr('font-family', 'Orbitron, sans-serif')
+      .attr('font-size', 12)
+      .text('Votes move cards forward; lens color telegraphs stewardship.');
 
-    groupedData.forEach((items, key) => {
-      const [lane, phase] = key.split('-').map(Number);
-      const x = phase * phaseWidth + 10;
-      const y = lane * laneHeight + 10;
-      const availableWidth = phaseWidth - 20;
-      const availableHeight = laneHeight - 20;
+    const grouped = d3.group(cards, (card) => `${card.lane}::${card.phase}`);
 
-      const itemsPerRow = Math.max(1, Math.floor(Math.sqrt(items.length)));
-      const itemWidth = Math.min(120, (availableWidth - 10 * (itemsPerRow - 1)) / itemsPerRow);
-      const itemHeight = Math.min(40, (availableHeight - 10 * (Math.ceil(items.length / itemsPerRow) - 1)) / Math.ceil(items.length / itemsPerRow));
+    const cellGroup = container.append('g').attr('class', 'lane-phase-cells');
 
-      items.forEach((item, index) => {
-        const row = Math.floor(index / itemsPerRow);
-        const col = index % itemsPerRow;
-        const itemX = x + col * (itemWidth + 10);
-        const itemY = y + row * (itemHeight + 10);
+    grouped.forEach((items, key) => {
+      const [lane, phase] = key.split('::');
+      const laneIndex = lanes.indexOf(lane);
+      const phaseIndex = phases.indexOf(phase as typeof phases[number]);
+      const cellX = phaseIndex * columnWidth;
+      const cellY = laneIndex * laneHeight;
 
-        const itemGroup = chart.append('g')
-          .attr('class', 'roadmap-item')
-          .attr('transform', `translate(${itemX}, ${itemY})`);
+      const cellPadding = 18;
+      const cellWidth = columnWidth - cellPadding * 2;
+      const cellHeight = laneHeight - cellPadding * 2;
 
-        itemGroup.append('rect')
-          .attr('width', itemWidth)
-          .attr('height', itemHeight)
-          .attr('fill', priorityColors[item.priority])
-          .attr('fill-opacity', 0.2)
-          .attr('stroke', priorityColors[item.priority])
-          .attr('stroke-width', 2)
-          .attr('rx', 6)
-          .style('cursor', 'pointer')
-          .style('filter', `drop-shadow(0 0 6px ${priorityColors[item.priority]}40)`)
-          .on('mouseover', function(event) {
+      const columnCount = Math.max(1, Math.floor(cellWidth / 180));
+      const cardWidth = Math.min(180, (cellWidth - (columnCount - 1) * 16) / columnCount);
+      const cardHeightBase = 86;
+
+      items.forEach((card, index) => {
+        const col = index % columnCount;
+        const row = Math.floor(index / columnCount);
+        const xPos = cellX + cellPadding + col * (cardWidth + 16);
+        const yPos = cellY + cellPadding + row * (cardHeightBase + 18);
+
+        const cardGroup = cellGroup
+          .append('g')
+          .attr('class', 'roadmap-card')
+          .attr('transform', `translate(${xPos}, ${yPos})`);
+
+        cardGroup
+          .append('rect')
+          .attr('width', cardWidth)
+          .attr('height', cardHeightBase)
+          .attr('rx', 14)
+          .attr('fill', 'rgba(15, 23, 42, 0.82)')
+          .attr('stroke', `${card.color}80`)
+          .attr('stroke-width', 1.5)
+          .style('filter', 'drop-shadow(0 14px 24px rgba(8, 145, 178, 0.25))');
+
+        cardGroup
+          .append('rect')
+          .attr('width', cardWidth)
+          .attr('height', 4)
+          .attr('rx', 2)
+          .attr('fill', card.color)
+          .attr('y', -6);
+
+        cardGroup
+          .append('text')
+          .attr('x', 12)
+          .attr('y', 18)
+          .attr('fill', '#f8fafc')
+          .attr('font-family', 'Orbitron, sans-serif')
+          .attr('font-size', 11)
+          .attr('font-weight', 600)
+          .text(card.lens.toUpperCase());
+
+        cardGroup
+          .append('text')
+          .attr('x', 12)
+          .attr('y', 36)
+          .attr('fill', 'rgba(226, 232, 240, 0.88)')
+          .attr('font-family', 'Orbitron, sans-serif')
+          .attr('font-size', 10)
+          .attr('letter-spacing', 0.4)
+          .text(`${card.priority} • ${card.votes} vote${card.votes === 1 ? '' : 's'}`);
+
+        const body = cardGroup
+          .append('text')
+          .attr('x', 12)
+          .attr('y', 52)
+          .attr('fill', 'rgba(203, 213, 225, 0.9)')
+          .attr('font-family', 'Orbitron, sans-serif')
+          .attr('font-size', 9)
+          .attr('opacity', 0.95);
+
+        const wrapped = wrapText(card.text, Math.max(18, cardWidth - 24));
+        wrapped.forEach((line, i) => {
+          body
+            .append('tspan')
+            .attr('x', 12)
+            .attr('dy', i === 0 ? 0 : 12)
+            .text(line);
+        });
+
+        cardGroup
+          .append('text')
+          .attr('x', 12)
+          .attr('y', cardHeightBase - 12)
+          .attr('fill', 'rgba(148, 163, 184, 0.9)')
+          .attr('font-family', 'Orbitron, sans-serif')
+          .attr('font-size', 8.5)
+          .text(card.participant);
+
+        cardGroup
+          .on('pointerenter', function (event) {
             d3.select(this)
+              .select('rect')
               .transition()
               .duration(200)
-              .attr('fill-opacity', 0.4)
-              .attr('stroke-width', 3);
+              .attr('stroke-width', 2.4)
+              .attr('stroke', `${card.color}`);
 
-            tooltip.style('visibility', 'visible')
-              .html(`<strong>${item.text}</strong><br/>
-                     <span style="color: ${priorityColors[item.priority]}">${item.priority.toUpperCase()} Priority</span><br/>
-                     ${item.lens} • ${item.type}<br/>
-                     By: ${item.participantName}<br/>
-                     Votes: ${item.votes}<br/>
-                     Lane: ${lanes[item.lane]}<br/>
-                     Phase: ${phases[item.phase]}`)
-              .style('left', (event.pageX + 10) + 'px')
-              .style('top', (event.pageY - 10) + 'px');
+            const bounds = (svg.parentNode as HTMLElement).getBoundingClientRect();
+            tooltip
+              .style('opacity', 0.98)
+              .html(`
+                <div class="tooltip-heading" style="color:${card.color}">${card.lens} → ${card.phase}</div>
+                <div class="tooltip-body">${card.text}</div>
+                <div class="tooltip-meta">${card.participant}</div>
+              `)
+              .style('transform', `translate(${event.clientX - bounds.left + 16}px, ${event.clientY - bounds.top - 20}px)`);
           })
-          .on('mousemove', function(event) {
-            tooltip.style('left', (event.pageX + 10) + 'px')
-              .style('top', (event.pageY - 10) + 'px');
+          .on('pointermove', function (event) {
+            const bounds = (svg.parentNode as HTMLElement).getBoundingClientRect();
+            tooltip.style('transform', `translate(${event.clientX - bounds.left + 16}px, ${event.clientY - bounds.top - 20}px)`);
           })
-          .on('mouseout', function() {
+          .on('pointerleave', function () {
             d3.select(this)
+              .select('rect')
               .transition()
-              .duration(200)
-              .attr('fill-opacity', 0.2)
-              .attr('stroke-width', 2);
+              .duration(160)
+              .attr('stroke-width', 1.5)
+              .attr('stroke', `${card.color}80`);
 
-            tooltip.style('visibility', 'hidden');
+            tooltip.style('opacity', 0);
           });
-
-        if (itemHeight > 25) {
-          itemGroup.append('text')
-            .attr('x', itemWidth / 2)
-            .attr('y', itemHeight / 2)
-            .attr('dy', '0.35em')
-            .attr('text-anchor', 'middle')
-            .attr('fill', '#fff')
-            .attr('font-size', '9px')
-            .attr('font-family', 'Orbitron, sans-serif')
-            .attr('font-weight', '600')
-            .style('pointer-events', 'none')
-            .text(item.votes.toString());
-        }
-
-        itemGroup.append('circle')
-          .attr('cx', itemWidth - 8)
-          .attr('cy', 8)
-          .attr('r', 4)
-          .attr('fill', priorityColors[item.priority])
-          .style('pointer-events', 'none');
       });
     });
 
-    const legend = chart.append('g')
-      .attr('class', 'legend')
-      .attr('transform', `translate(${chartWidth - 150}, 20)`);
+    const legend = container
+      .append('g')
+      .attr('transform', `translate(${chartWidth - 210}, ${chartHeight + 44})`);
 
-    legend.append('text')
+    const legendItems: Array<{ label: string; caption: string; color: string }> = [
+      { label: 'High', caption: 'Ready to activate', color: '#f97316' },
+      { label: 'Medium', caption: 'Staging next', color: '#38bdf8' },
+      { label: 'Watch', caption: 'Signals to nurture', color: '#a855f7' }
+    ];
+
+    legend
+      .append('text')
       .attr('x', 0)
-      .attr('y', 0)
-      .attr('fill', '#ffffff')
-      .attr('font-size', '12px')
+      .attr('y', -12)
+      .attr('fill', 'rgba(148, 163, 184, 0.85)')
       .attr('font-family', 'Orbitron, sans-serif')
-      .attr('font-weight', '600')
-      .text('Priority:');
+      .attr('font-size', 10)
+      .text('Priority legend');
 
-    Object.entries(priorityColors).forEach(([priority, color], index) => {
-      const legendItem = legend.append('g')
-        .attr('transform', `translate(0, ${20 + index * 20})`);
+    const legendGroup = legend
+      .selectAll('g')
+      .data(legendItems)
+      .enter()
+      .append('g')
+      .attr('transform', (_, index) => `translate(0, ${index * 22})`);
 
-      legendItem.append('circle')
-        .attr('cx', 6)
-        .attr('cy', 0)
-        .attr('r', 4)
-        .attr('fill', color);
+    legendGroup
+      .append('circle')
+      .attr('r', 6)
+      .attr('fill', (d) => d.color);
 
-      legendItem.append('text')
-        .attr('x', 15)
-        .attr('y', 0)
-        .attr('dy', '0.35em')
-        .attr('fill', '#ffffff')
-        .attr('font-size', '10px')
+    legendGroup
+      .append('text')
+      .attr('x', 12)
+      .attr('y', 0)
+      .attr('dy', '0.35em')
+      .attr('fill', 'rgba(226, 232, 240, 0.9)')
+      .attr('font-family', 'Orbitron, sans-serif')
+      .attr('font-size', 11)
+      .text((d) => d.label);
+
+    legendGroup
+      .append('text')
+      .attr('x', 60)
+      .attr('y', 0)
+      .attr('dy', '0.35em')
+      .attr('fill', 'rgba(148, 163, 184, 0.8)')
+      .attr('font-family', 'Orbitron, sans-serif')
+      .attr('font-size', 9)
+      .text((d) => d.caption);
+
+    if (cards.length === 0) {
+      container
+        .append('text')
+        .attr('x', chartWidth / 2)
+        .attr('y', chartHeight / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'rgba(226, 232, 240, 0.82)')
         .attr('font-family', 'Orbitron, sans-serif')
-        .text(priority.toUpperCase());
+        .attr('font-size', 14)
+        .text('Add responses to populate the roadmap.');
+    }
+  }
+
+  function wrapText(text: string, width: number) {
+    const words = text.split(/\s+/);
+    const lines: string[] = [];
+    let currentLine = '';
+
+    words.forEach((word) => {
+      const tentative = currentLine ? `${currentLine} ${word}` : word;
+      if (tentative.length * 6.2 > width) {
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        currentLine = word;
+      } else {
+        currentLine = tentative;
+      }
     });
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    return lines.slice(0, 3);
   }
 
   onMount(() => {
@@ -290,26 +441,72 @@
   });
 
   onDestroy(() => {
-    d3.selectAll('.roadmap-tooltip').remove();
+    mounted = false;
   });
 
-  $: if (mounted && responses) {
+  $: if (mounted) {
     renderChart();
   }
 </script>
 
-<div class="roadmap-container">
-  <svg bind:this={svg}></svg>
+<div class="roadmap-wrapper">
+  <svg bind:this={svg} role="img" aria-label="Roadmap swimlanes"></svg>
+  <div bind:this={tooltipEl} class="chart-tooltip"></div>
 </div>
 
 <style>
-  .roadmap-container {
+  .roadmap-wrapper {
+    position: relative;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    background: rgb(30, 41, 59);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    border: 1px solid rgb(71, 85, 105);
+    padding: 1.8rem;
+    border-radius: 1.5rem;
+    background:
+      radial-gradient(circle at 15% 25%, rgba(16, 185, 129, 0.18), transparent 55%),
+      radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.18), transparent 60%),
+      radial-gradient(circle at 50% 80%, rgba(251, 191, 36, 0.18), transparent 70%),
+      rgba(4, 7, 18, 0.94);
+    border: 1px solid rgba(59, 130, 246, 0.24);
+    box-shadow: 0 34px 72px rgba(15, 118, 110, 0.38);
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .chart-tooltip {
+    position: absolute;
+    min-width: 240px;
+    max-width: 320px;
+    padding: 1rem 1.1rem 1.2rem;
+    border-radius: 1rem;
+    background: rgba(4, 7, 14, 0.98);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    color: #f8fafc;
+    font-family: 'Orbitron', system-ui, sans-serif;
+    font-size: 0.68rem;
+    line-height: 1.4;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    box-shadow: 0 20px 40px rgba(14, 165, 233, 0.28);
+  }
+
+  .chart-tooltip .tooltip-heading {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+  }
+
+  .chart-tooltip .tooltip-body {
+    font-size: 0.7rem;
+    opacity: 0.85;
+    margin-bottom: 0.6rem;
+  }
+
+  .chart-tooltip .tooltip-meta {
+    font-size: 0.64rem;
+    opacity: 0.7;
+    letter-spacing: 0.08em;
   }
 </style>

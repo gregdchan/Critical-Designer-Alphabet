@@ -3,28 +3,76 @@
   import { goto } from '$app/navigation';
   import sanityClient from '$lib/sanity';
   import { browser } from '$app/environment';
-  import { storeParticipantProfile } from '$lib/realtime';
+  import { currentUser } from '$lib/stores/user';
   import { IconPlayerPlay as Play, IconSettings as Settings, IconUsers as Users } from '@tabler/icons-svelte';
+
+  type TemplateRound = {
+    key?: string;
+    name?: string;
+    minutes?: number;
+    questions?: string[];
+  };
 
   interface WorkshopTemplate {
     _id: string;
     title: string;
-    description: string;
-    lenses: string[];
-    steps: Array<{
-      key: string;
-      name: string;
-      minutes: number;
-      instructions: string;
-    }>;
-    scoring: {
-      idea: number;
-      vote: number;
-      reflection: number;
-      fairnessThreshold: number;
+    slug?: { current?: string } | string;
+    description?: string;
+    lenses?: string[];
+    sections?: {
+      onboarding?: {
+        title?: string;
+        introCopy?: string;
+        whatToBring?: string[];
+        rules?: string[];
+        quickStart?: string[];
+      };
+      breakout?: {
+        rounds?: TemplateRound[];
+      };
+      synthesis?: {
+        methods?: string[];
+        instructions?: string;
+      };
+      commitments?: {
+        instructions?: string;
+        exportFields?: string[];
+      };
     };
-    charts: string[];
-    theme: any;
+    facilitation?: {
+      roles?: string[];
+      fairnessThreshold?: number;
+      scoring?: {
+        idea?: number;
+        vote?: number;
+        linkCards?: number;
+        reflection?: number;
+        justice?: number;
+      };
+      badges?: string[];
+    };
+    visuals?: {
+      charts?: string[];
+      theme?: {
+        _id?: string;
+        name?: string;
+        palette?: Record<string, string>;
+        fonts?: Record<string, string>;
+        cardStyle?: Record<string, unknown>;
+      };
+    };
+    aiAssist?: {
+      enabled?: boolean;
+      maxAlternates?: number;
+      guidance?: string;
+    };
+    resources?: Array<{ title?: string; url?: string }>;
+    steps?: Array<{
+      key?: string;
+      name?: string;
+      minutes?: number;
+      instructions?: string;
+    }>;
   }
 
   let facilitatorName = '';
@@ -35,28 +83,65 @@
   let loading = false;
   let loadingTemplates = true;
 
-  onMount(async () => {
-    try {
-      const query = `*[_type == "workshopTemplate"]{
+  const templateQuery = `*[_type == "workshopTemplate"]{
+    _id,
+    title,
+    slug,
+    description,
+    lenses,
+    sections,
+    facilitation,
+    visuals{
+      charts,
+      theme->{
         _id,
-        title,
-        description,
-        lenses,
-        steps,
-        scoring,
-        charts,
-        theme->{name, palette, fonts, cardStyle}
-      }`;
-      templates = await sanityClient.fetch(query);
+        name,
+        palette,
+        fonts,
+        cardStyle
+      }
+    },
+    aiAssist,
+    resources
+  }` as const;
+
+  async function fetchTemplates() {
+    try {
+      templates = await sanityClient.fetch(templateQuery);
     } catch (error) {
       console.error('Error loading templates:', error);
     } finally {
       loadingTemplates = false;
     }
-  });
+  }
 
   function generateSessionCode() {
     sessionCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  async function seedQuestions(code: string, rounds: TemplateRound[] = []) {
+    if (!rounds.length) return;
+    const payloads = rounds
+      .flatMap((round) =>
+        (round?.questions ?? []).map((text) => ({
+          code,
+          section: round?.name ?? round?.key ?? 'Breakout',
+          text: text.trim()
+        }))
+      )
+      .filter((entry) => entry.text.length);
+
+    await Promise.all(
+      payloads.map((payload) =>
+        fetch('/api/questions/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch((error) => {
+          console.error('Failed to seed question', error);
+        })
+      )
+    );
   }
 
   async function createSession() {
@@ -67,14 +152,18 @@
 
     loading = true;
     try {
-      // Create session
+      const templateSlug =
+        typeof selectedTemplate.slug === 'string'
+          ? selectedTemplate.slug
+          : selectedTemplate.slug?.current;
+
       const sessionResponse = await fetch('/api/session/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code: sessionCode,
           title: sessionTitle,
-          templateId: selectedTemplate._id
+          templateSlug
         })
       });
 
@@ -83,7 +172,9 @@
         throw new Error(sessionData.error);
       }
 
-      // Join as facilitator
+      const facilitatorColor =
+        selectedTemplate.visuals?.theme?.palette?.neonPink ?? '#ff00ff';
+
       const participantResponse = await fetch('/api/participants/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,7 +182,7 @@
           code: sessionCode,
           name: facilitatorName,
           role: 'facilitator',
-          color: '#ff00ff' // Neon pink for facilitator
+          color: facilitatorColor
         })
       });
 
@@ -100,17 +191,25 @@
         throw new Error(participantData.error);
       }
 
+      await seedQuestions(
+        sessionCode,
+        selectedTemplate.sections?.breakout?.rounds ?? []
+      );
+
       if (browser && participantData.participant) {
         const profile = {
-          id: participantData.participant.id,
+          participantId: participantData.participant.id as string,
+          sessionCode,
           name: facilitatorName,
           role: 'facilitator' as const,
-          color: '#ff00ff'
+          color: facilitatorColor
         };
-        storeParticipantProfile(sessionCode, profile);
-        const record = JSON.stringify({ code: sessionCode, ...profile });
-        sessionStorage.setItem('critical-alphabet:session', record);
-        document.cookie = `critical-alphabet:session=${encodeURIComponent(record)}; path=/; SameSite=Lax`;
+        currentUser.set(profile);
+        const serialized = JSON.stringify(profile);
+        document.cookie = `cda-session=${encodeURIComponent(
+          serialized
+        )}; path=/; SameSite=Lax`;
+        sessionStorage.setItem('cda-session', serialized);
       }
 
       if (browser) {
@@ -126,7 +225,20 @@
     }
   }
 
-  $: if (!sessionCode) generateSessionCode();
+  onMount(async () => {
+    generateSessionCode();
+    await fetchTemplates();
+  });
+
+  $: if (!sessionTitle && selectedTemplate) {
+    sessionTitle = `${selectedTemplate.title} — ${new Date()
+      .toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      .toUpperCase()}`;
+  }
+
+  $: if (!selectedTemplate && templates.length) {
+    selectedTemplate = templates[0];
+  }
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 p-6">

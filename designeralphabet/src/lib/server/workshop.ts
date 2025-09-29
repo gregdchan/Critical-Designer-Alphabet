@@ -1,4 +1,5 @@
-import { query } from '$lib/database';
+import type { PostgrestSingleResponse } from '@supabase/supabase-js';
+import { supabaseAdmin } from './supabase';
 import { broadcast } from './realtime';
 
 export type SessionStatus = 'planned' | 'live' | 'done';
@@ -6,24 +7,24 @@ export type SessionStatus = 'planned' | 'live' | 'done';
 export interface Session {
   code: string;
   title: string | null;
-  template_id: string | null;
+  template_slug: string | null;
   status: SessionStatus;
   created_at: string;
 }
 
 export interface Participant {
-  id: number;
+  id: string;
   room_code: string;
   name: string;
   role: 'facilitator' | 'participant';
   color: string;
   points: number;
-  badges: any;
+  badges: string[];
   created_at: string;
 }
 
 export interface Question {
-  id: number;
+  id: string;
   room_code: string;
   section: string;
   text: string;
@@ -31,10 +32,10 @@ export interface Question {
 }
 
 export interface ResponseRow {
-  id: number;
+  id: string;
   room_code: string;
-  question_id: number;
-  participant_id: number | null;
+  question_id: string;
+  participant_id: string | null;
   text: string;
   cards: string[];
   votes: number;
@@ -42,7 +43,7 @@ export interface ResponseRow {
 }
 
 export interface TimelineItem {
-  id: number;
+  id: string;
   room_code: string;
   label: 'Now' | 'Next' | 'Later';
   item_text: string;
@@ -53,40 +54,111 @@ export interface TimelineItem {
 }
 
 export interface ChatMessage {
-  id: number;
+  id: string;
   room_code: string;
-  participant_id: number | null;
+  participant_id: string | null;
   message: string;
   created_at: string;
 }
 
-function parseJson<T>(value: any, fallback: T): T {
-  if (!value) return fallback;
-  if (Array.isArray(value) || typeof value === 'object') return value as T;
-  try {
-    return JSON.parse(value) as T;
-  } catch (error) {
-    return fallback;
+function ensure<T>(response: PostgrestSingleResponse<T>, context: string): T {
+  const { data, error } = response;
+  if (error || !data) {
+    throw new Error(error?.message ?? `Supabase query failed: ${context}`);
   }
+  return data;
 }
 
-export async function createSession({ code, title, templateId }: { code: string; title: string; templateId?: string }) {
-  await query(
-    'INSERT INTO sessions (code, title, template_id) VALUES (?, ?, ?)',
-    [code, title ?? null, templateId ?? null]
-  );
-  return getSession(code);
+function ensureArray<T>(response: { data: T[] | null; error: any }, context: string): T[] {
+  const { data, error } = response;
+  if (error || !data) {
+    throw new Error(error?.message ?? `Supabase query failed: ${context}`);
+  }
+  return data;
+}
+
+function normalizeBadges(value: unknown): string[] {
+  if (Array.isArray(value)) return value as string[];
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? (parsed as string[]) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+  return [];
+}
+
+function asParticipant(row: any): Participant {
+  return {
+    ...row,
+    points: Number(row.points ?? 0),
+    badges: normalizeBadges(row.badges)
+  } as Participant;
+}
+
+function asResponse(row: any): ResponseRow {
+  return {
+    ...row,
+    votes: Number(row.votes ?? 0),
+    cards: Array.isArray(row.cards)
+      ? (row.cards as string[])
+      : typeof row.cards === 'string'
+        ? (() => {
+            try {
+              const parsed = JSON.parse(row.cards);
+              return Array.isArray(parsed) ? (parsed as string[]) : [];
+            } catch (error) {
+              return [];
+            }
+          })()
+        : []
+  } as ResponseRow;
+}
+
+export async function createSession({
+  code,
+  title,
+  templateSlug
+}: {
+  code: string;
+  title: string;
+  templateSlug?: string;
+}) {
+  const response = await supabaseAdmin
+    .from('sessions')
+    .insert({ code, title, template_slug: templateSlug ?? null })
+    .select()
+    .single();
+
+  const session = ensure(response, 'createSession');
+  return session as Session;
 }
 
 export async function updateSessionStatus(code: string, status: SessionStatus) {
-  await query('UPDATE sessions SET status = ? WHERE code = ?', [status, code]);
+  const response = await supabaseAdmin
+    .from('sessions')
+    .update({ status })
+    .eq('code', code)
+    .select()
+    .single();
+
+  const session = ensure(response, 'updateSessionStatus');
   broadcast(code, { type: 'STEP_CHANGE', status });
-  return getSession(code);
+  return session as Session;
 }
 
 export async function getSession(code: string) {
-  const rows = (await query('SELECT * FROM sessions WHERE code = ?', [code])) as any[];
-  return rows[0] as Session | undefined;
+  const response = await supabaseAdmin
+    .from('sessions')
+    .select('*')
+    .eq('code', code)
+    .maybeSingle();
+
+  const { data, error } = response;
+  if (error) throw new Error(error.message);
+  return (data ?? undefined) as Session | undefined;
 }
 
 export async function addParticipant({
@@ -100,22 +172,26 @@ export async function addParticipant({
   role: 'facilitator' | 'participant';
   color: string;
 }) {
-  const result: any = await query(
-    'INSERT INTO participants (room_code, name, role, color) VALUES (?, ?, ?, ?)',
-    [code, name, role, color]
-  );
-  const participantId = Number(result.insertId);
+  const response = await supabaseAdmin
+    .from('participants')
+    .insert({ room_code: code, name, role, color })
+    .select()
+    .single();
+
+  const participant = asParticipant(ensure(response, 'addParticipant'));
   const participants = await getParticipants(code);
   broadcast(code, { type: 'PRESENCE', participants });
-  return participants.find((p) => p.id === participantId);
+  return participants.find((p) => p.id === participant.id);
 }
 
 export async function getParticipants(code: string): Promise<Participant[]> {
-  const rows = (await query('SELECT * FROM participants WHERE room_code = ? ORDER BY created_at', [code])) as any[];
-  return rows.map((row) => ({
-    ...row,
-    badges: parseJson(row.badges, [])
-  }));
+  const response = await supabaseAdmin
+    .from('participants')
+    .select('*')
+    .eq('room_code', code)
+    .order('created_at', { ascending: true });
+
+  return ensureArray(response, 'getParticipants').map(asParticipant);
 }
 
 export async function addQuestion({
@@ -127,35 +203,25 @@ export async function addQuestion({
   section: string;
   text: string;
 }) {
-  const result: any = await query(
-    'INSERT INTO questions (room_code, section, text) VALUES (?, ?, ?)',
-    [code, section, text]
-  );
-  const question = await getQuestionById(result.insertId);
-  if (question) {
-    broadcast(code, { type: 'QUESTION_ADDED', question });
-  }
+  const response = await supabaseAdmin
+    .from('questions')
+    .insert({ room_code: code, section, text })
+    .select()
+    .single();
+
+  const question = ensure(response, 'addQuestion') as Question;
+  broadcast(code, { type: 'QUESTION_ADDED', question });
   return question;
 }
 
-async function getQuestionById(id: number): Promise<Question | undefined> {
-  const rows = (await query('SELECT * FROM questions WHERE id = ?', [id])) as any[];
-  return rows[0];
-}
-
-async function getResponseById(id: number): Promise<ResponseRow | undefined> {
-  const rows = (await query('SELECT * FROM responses WHERE id = ?', [id])) as any[];
-  const response = rows[0];
-  if (!response) return undefined;
-  return {
-    ...response,
-    cards: parseJson<string[]>(response.cards, [])
-  } as ResponseRow;
-}
-
 export async function getQuestions(code: string): Promise<Question[]> {
-  const rows = (await query('SELECT * FROM questions WHERE room_code = ? ORDER BY created_at', [code])) as any[];
-  return rows as Question[];
+  const response = await supabaseAdmin
+    .from('questions')
+    .select('*')
+    .eq('room_code', code)
+    .order('created_at', { ascending: true });
+
+  return ensureArray(response, 'getQuestions') as Question[];
 }
 
 export async function addResponse({
@@ -166,41 +232,65 @@ export async function addResponse({
   cards
 }: {
   code: string;
-  questionId: number;
-  participantId: number | null;
+  questionId: string;
+  participantId: string | null;
   text: string;
   cards: string[];
 }) {
-  const result: any = await query(
-    'INSERT INTO responses (room_code, question_id, participant_id, text, cards) VALUES (?, ?, ?, ?, ?)',
-    [code, questionId, participantId, text, JSON.stringify(cards ?? [])]
-  );
-  const response = await getResponseById(result.insertId);
-  if (response) {
-    broadcast(code, { type: 'RESPONSE_ADDED', response });
-  }
-  return response;
-}
+  const response = await supabaseAdmin
+    .from('responses')
+    .insert({
+      room_code: code,
+      question_id: questionId,
+      participant_id: participantId,
+      text,
+      cards
+    })
+    .select()
+    .single();
 
-export async function voteResponse({ responseId, delta }: { responseId: number; delta: number }) {
-  const row = (await query('SELECT room_code, votes FROM responses WHERE id = ?', [responseId])) as any[];
-  if (!row.length) return undefined;
-  const response = row[0];
-  const newVotes = Math.max(0, Number(response.votes) + delta);
-  await query('UPDATE responses SET votes = ? WHERE id = ?', [newVotes, responseId]);
-  broadcast(response.room_code, { type: 'VOTE_UPDATED', responseId, votes: newVotes });
-  return { responseId, votes: newVotes };
+  const result = asResponse(ensure(response, 'addResponse'));
+  broadcast(code, { type: 'RESPONSE_ADDED', response: result });
+  return result;
 }
 
 export async function getResponses(code: string): Promise<ResponseRow[]> {
-  const rows = (await query(
-    'SELECT * FROM responses WHERE room_code = ? ORDER BY created_at',
-    [code]
-  )) as any[];
-  return rows.map((row) => ({
-    ...row,
-    cards: parseJson<string[]>(row.cards, [])
-  }));
+  const response = await supabaseAdmin
+    .from('responses')
+    .select('*')
+    .eq('room_code', code)
+    .order('created_at', { ascending: true });
+
+  return ensureArray(response, 'getResponses').map(asResponse);
+}
+
+export async function voteResponse({ responseId, delta }: { responseId: string; delta: number }) {
+  const existing = await supabaseAdmin
+    .from('responses')
+    .select('room_code, votes')
+    .eq('id', responseId)
+    .maybeSingle();
+
+  if (existing.error) throw new Error(existing.error.message);
+  if (!existing.data) return undefined;
+
+  const currentVotes = Number(existing.data.votes ?? 0);
+  const votes = Math.max(0, currentVotes + delta);
+
+  const updated = await supabaseAdmin
+    .from('responses')
+    .update({ votes })
+    .eq('id', responseId)
+    .select('id, votes, room_code')
+    .single();
+
+  const record = ensure(updated, 'voteResponse');
+  broadcast(record.room_code as string, {
+    type: 'VOTE_UPDATED',
+    responseId,
+    votes: Number(record.votes ?? votes)
+  });
+  return { responseId, votes: Number(record.votes ?? votes) };
 }
 
 export async function addTimelineItem({
@@ -218,24 +308,32 @@ export async function addTimelineItem({
   metric?: string;
   riskNote?: string;
 }) {
-  const result: any = await query(
-    'INSERT INTO timeline (room_code, label, item_text, owner, metric, risk_note) VALUES (?, ?, ?, ?, ?, ?)',
-    [code, label, itemText, owner ?? null, metric ?? null, riskNote ?? null]
-  );
-  const rows = (await query('SELECT * FROM timeline WHERE id = ?', [result.insertId])) as any[];
-  const timelineItem = rows[0] as TimelineItem | undefined;
-  if (timelineItem) {
-    broadcast(code, { type: 'TIMELINE_ADDED', item: timelineItem });
-  }
-  return timelineItem;
+  const response = await supabaseAdmin
+    .from('timeline')
+    .insert({
+      room_code: code,
+      label,
+      item_text: itemText,
+      owner: owner ?? null,
+      metric: metric ?? null,
+      risk_note: riskNote ?? null
+    })
+    .select()
+    .single();
+
+  const item = ensure(response, 'addTimelineItem') as TimelineItem;
+  broadcast(code, { type: 'TIMELINE_ADDED', item });
+  return item;
 }
 
 export async function getTimeline(code: string): Promise<TimelineItem[]> {
-  const rows = (await query(
-    'SELECT * FROM timeline WHERE room_code = ? ORDER BY created_at',
-    [code]
-  )) as any[];
-  return rows as TimelineItem[];
+  const response = await supabaseAdmin
+    .from('timeline')
+    .select('*')
+    .eq('room_code', code)
+    .order('created_at', { ascending: true });
+
+  return ensureArray(response, 'getTimeline') as TimelineItem[];
 }
 
 export async function updateScore({
@@ -243,25 +341,43 @@ export async function updateScore({
   delta,
   badge
 }: {
-  participantId: number;
+  participantId: string;
   delta: number;
   badge?: string;
 }) {
-  const rows = (await query('SELECT room_code, points, badges FROM participants WHERE id = ?', [participantId])) as any[];
-  if (!rows.length) return undefined;
-  const participant = rows[0];
-  const newPoints = Number(participant.points ?? 0) + delta;
-  const badges = parseJson<string[]>(participant.badges, []);
-  if (badge && !badges.includes(badge)) {
-    badges.push(badge);
-  }
-  await query('UPDATE participants SET points = ?, badges = ? WHERE id = ?', [newPoints, JSON.stringify(badges), participantId]);
-  broadcast(participant.room_code, {
+  const existing = await supabaseAdmin
+    .from('participants')
+    .select('room_code, points, badges')
+    .eq('id', participantId)
+    .maybeSingle();
+
+  if (existing.error) throw new Error(existing.error.message);
+  if (!existing.data) return undefined;
+
+  const roomCode = existing.data.room_code as string;
+  const currentPoints = Number(existing.data.points ?? 0);
+  const badges = normalizeBadges(existing.data.badges);
+
+  if (badge && !badges.includes(badge)) badges.push(badge);
+
+  const newPoints = currentPoints + delta;
+
+  const updated = await supabaseAdmin
+    .from('participants')
+    .update({ points: newPoints, badges })
+    .eq('id', participantId)
+    .select('points, badges')
+    .single();
+
+  ensure(updated, 'updateScore');
+
+  broadcast(roomCode, {
     type: 'SCORE_UPDATED',
     participantId,
     points: newPoints,
     badges
   });
+
   return { participantId, points: newPoints, badges };
 }
 
@@ -271,24 +387,28 @@ export async function addChatMessage({
   message
 }: {
   code: string;
-  participantId: number | null;
+  participantId: string | null;
   message: string;
 }) {
-  const result: any = await query(
-    'INSERT INTO chat (room_code, participant_id, message) VALUES (?, ?, ?)',
-    [code, participantId, message]
-  );
-  const rows = (await query('SELECT * FROM chat WHERE id = ?', [result.insertId])) as any[];
-  const chatMessage = rows[0] as ChatMessage | undefined;
-  if (chatMessage) {
-    broadcast(code, { type: 'CHAT_MESSAGE', message: chatMessage });
-  }
+  const response = await supabaseAdmin
+    .from('chat')
+    .insert({ room_code: code, participant_id: participantId, message })
+    .select()
+    .single();
+
+  const chatMessage = ensure(response, 'addChatMessage') as ChatMessage;
+  broadcast(code, { type: 'CHAT_MESSAGE', message: chatMessage });
   return chatMessage;
 }
 
 export async function getChat(code: string): Promise<ChatMessage[]> {
-  const rows = (await query('SELECT * FROM chat WHERE room_code = ? ORDER BY created_at', [code])) as any[];
-  return rows as ChatMessage[];
+  const response = await supabaseAdmin
+    .from('chat')
+    .select('*')
+    .eq('room_code', code)
+    .order('created_at', { ascending: true });
+
+  return ensureArray(response, 'getChat') as ChatMessage[];
 }
 
 export async function buildSessionExport(code: string) {
@@ -312,7 +432,9 @@ export async function buildSessionExport(code: string) {
 
   lines.push('## Participants');
   participants.forEach((p) => {
-    lines.push(`- ${p.name} (${p.role}) — ${p.points} pts ${p.badges?.length ? `· Badges: ${p.badges.join(', ')}` : ''}`);
+    lines.push(
+      `- ${p.name} (${p.role}) — ${p.points} pts ${p.badges?.length ? `· Badges: ${p.badges.join(', ')}` : ''}`
+    );
   });
   lines.push('');
 
@@ -331,7 +453,9 @@ export async function buildSessionExport(code: string) {
 
   lines.push('## Timeline');
   timeline.forEach((item) => {
-    lines.push(`- **${item.label}** · ${item.item_text}${item.owner ? ` (owner: ${item.owner})` : ''}${item.metric ? ` · metric: ${item.metric}` : ''}`);
+    lines.push(
+      `- **${item.label}** · ${item.item_text}${item.owner ? ` (owner: ${item.owner})` : ''}${item.metric ? ` · metric: ${item.metric}` : ''}`
+    );
   });
   lines.push('');
 

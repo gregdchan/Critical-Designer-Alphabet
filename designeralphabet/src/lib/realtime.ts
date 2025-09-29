@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { derived, writable } from 'svelte/store';
+import { supabase } from './supabase';
 
 export type SessionBundle = {
   session: any;
@@ -53,12 +54,20 @@ export function stopRealtimeSession() {
   }
 }
 
-export async function addResponse(code: string, payload: { questionId: number; participantId: number | null; text: string; cards?: string[] }) {
+export async function addResponse(
+  code: string,
+  payload: { questionId: string; participantId: string | null; text: string; cards?: string[] }
+) {
   try {
     const res = await fetch('/api/responses/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, ...payload })
+      body: JSON.stringify({
+        code,
+        ...payload,
+        questionId: payload.questionId,
+        participantId: payload.participantId
+      })
     });
     const data = await res.json();
     if (data.success) {
@@ -71,7 +80,7 @@ export async function addResponse(code: string, payload: { questionId: number; p
   }
 }
 
-export async function voteResponse(responseId: number, delta = 1) {
+export async function voteResponse(responseId: string, delta = 1) {
   try {
     const res = await fetch('/api/responses/vote', {
       method: 'POST',
@@ -85,7 +94,10 @@ export async function voteResponse(responseId: number, delta = 1) {
   }
 }
 
-export async function addTimelineEntry(code: string, payload: { label: 'Now' | 'Next' | 'Later'; itemText: string; owner?: string; metric?: string; riskNote?: string }) {
+export async function addTimelineEntry(
+  code: string,
+  payload: { label: 'Now' | 'Next' | 'Later'; itemText: string; owner?: string; metric?: string; riskNote?: string }
+) {
   try {
     const res = await fetch('/api/timeline/add', {
       method: 'POST',
@@ -103,7 +115,10 @@ export async function addTimelineEntry(code: string, payload: { label: 'Now' | '
   }
 }
 
-export async function sendChatMessage(code: string, payload: { participantId: number | null; message: string }) {
+export async function sendChatMessage(
+  code: string,
+  payload: { participantId: string | null; message: string }
+) {
   try {
     const res = await fetch('/api/chat/send', {
       method: 'POST',
@@ -124,6 +139,12 @@ export async function sendChatMessage(code: string, payload: { participantId: nu
 export const leaderboard = derived([participants], ([$participants]) =>
   [...$participants].sort((a, b) => (b.points ?? 0) - (a.points ?? 0))
 );
+
+export function channelFor(code: string) {
+  return supabase.channel(`workshop:${code}`, {
+    config: { broadcast: { ack: true }, presence: { key: crypto.randomUUID() } }
+  });
+}
 
 export function getParticipantProfile(code: string) {
   if (!browser) return null;

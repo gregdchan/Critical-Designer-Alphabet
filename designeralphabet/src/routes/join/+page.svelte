@@ -3,7 +3,7 @@
   import { browser } from '$app/environment';
   import { onMount } from 'svelte';
   import { IconUserPlus as UserPlus, IconPalette as Palette } from '@tabler/icons-svelte';
-  import { storeParticipantProfile } from '$lib/realtime';
+  import { currentUser } from '$lib/stores/user';
 
   export let url: URL;
 
@@ -55,17 +55,18 @@
       const data = await response.json();
       if (data.success) {
         if (browser && data.participant) {
-          const record = {
-            id: data.participant.id,
+          const code = sessionCode.toUpperCase();
+          const profile = {
+            participantId: data.participant.id as string,
+            sessionCode: code,
             name: participantName,
             role: 'participant' as const,
             color: selectedColor
           };
-          const code = sessionCode.toUpperCase();
-          storeParticipantProfile(code, record);
-          const sessionRecord = JSON.stringify({ code, ...record });
-          sessionStorage.setItem('critical-alphabet:session', sessionRecord);
-          document.cookie = `critical-alphabet:session=${encodeURIComponent(sessionRecord)}; path=/; SameSite=Lax`;
+          currentUser.set(profile);
+          const serialized = JSON.stringify(profile);
+          document.cookie = `cda-session=${encodeURIComponent(serialized)}; path=/; SameSite=Lax`;
+          sessionStorage.setItem('cda-session', serialized);
         }
 
         goto(`/session/${sessionCode.toUpperCase()}`);

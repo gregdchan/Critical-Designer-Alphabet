@@ -9,7 +9,11 @@ export const POST: RequestHandler = async ({ request }) => {
       return json({ success: false, error: 'code and message are required' }, { status: 400 });
     }
 
-    const chatMessage = await addChatMessage({ code, participantId: participantId ?? null, message });
+    const chatMessage = await addChatMessage({
+      code,
+      participantId: participantId ? String(participantId) : null,
+      message
+    });
     return json({ success: true, message: chatMessage });
   } catch (error: any) {
     console.error('Failed to send chat message', error);

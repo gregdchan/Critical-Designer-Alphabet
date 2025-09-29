@@ -1,262 +1,355 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import * as d3 from 'd3';
 
-  export let responses: any[] = [];
-  export let width = 800;
-  export let height = 500;
+  export type Response = {
+    lens?: string;
+    text?: string;
+    votes?: number;
+  };
 
-  let svg: SVGElement;
+  export let responses: Response[] = [];
+  export let width = 880;
+  export let height = 520;
+
+  let svg: SVGSVGElement;
+  let tooltipEl: HTMLDivElement;
   let mounted = false;
 
-  interface HeatmapData {
-    row: number;
-    col: number;
-    value: number;
-    color: string;
+  const maturityLevels = ['Emerging', 'Developing', 'Established', 'Advanced', 'Leading'] as const;
+  const lensOrder = ['Risk', 'Work', 'Sustainability', 'Ethics', 'Community', 'Justice', 'Agency'] as const;
+
+  type HeatmapCell = {
     lens: string;
     maturity: string;
     count: number;
-    responses: any[];
-  }
-
-  const maturityLevels = [
-    'Emerging', 'Developing', 'Established', 'Advanced', 'Leading'
-  ];
-
-  const lenses = [
-    'Justice', 'Ethics', 'Community', 'Agency', 'Sustainability'
-  ];
-
-  const colorScale = d3.scaleSequential(d3.interpolateViridis)
-    .domain([0, 10]);
-
-  const neonColors: { [key: string]: string } = {
-    'Justice': '#00fff7',
-    'Ethics': '#ff2aad',
-    'Community': '#aaff00',
-    'Agency': '#6c00ff',
-    'Sustainability': '#ffa500'
+    responses: Response[];
   };
 
-  function processData(responses: any[]): HeatmapData[] {
-    const data: HeatmapData[] = [];
+  const lensPalette: Record<string, string> = {
+    Risk: '#f97316',
+    Work: '#38bdf8',
+    Sustainability: '#22d3ee',
+    Ethics: '#a855f7',
+    Community: '#bef264',
+    Justice: '#f472b6',
+    Agency: '#22c55e'
+  };
 
-    for (let row = 0; row < lenses.length; row++) {
-      for (let col = 0; col < maturityLevels.length; col++) {
-        const lens = lenses[row];
-        const maturity = maturityLevels[col];
-
-        const matchingResponses = responses.filter(r =>
-          r.lens === lens && getMaturityLevel(r) === maturity
-        );
-
-        data.push({
-          row,
-          col,
-          value: matchingResponses.length,
-          color: neonColors[lens] || '#ffffff',
-          lens,
-          maturity,
-          count: matchingResponses.length,
-          responses: matchingResponses
-        });
-      }
-    }
-
-    return data;
-  }
-
-  function getMaturityLevel(response: any): string {
-    if (!response.text) return 'Emerging';
-
-    const text = response.text.toLowerCase();
-    const votes = response.votes || 0;
-
-    if (votes >= 8) return 'Leading';
-    if (votes >= 6) return 'Advanced';
-    if (votes >= 4) return 'Established';
-    if (votes >= 2) return 'Developing';
+  function getMaturityBucket(votes: number | undefined) {
+    const safeVotes = votes ?? 0;
+    if (safeVotes >= 8) return 'Leading';
+    if (safeVotes >= 6) return 'Advanced';
+    if (safeVotes >= 4) return 'Established';
+    if (safeVotes >= 2) return 'Developing';
     return 'Emerging';
   }
 
-  function renderChart() {
-    if (!svg || !mounted) return;
+  function prepareData(source: Response[]): HeatmapCell[] {
+    const grouped = d3.rollups(
+      source,
+      (rows) => rows,
+      (row) => (row.lens ? normaliseLens(row.lens) : 'Other'),
+      (row) => getMaturityBucket(row.votes)
+    );
 
-    const data = processData(responses);
-    const margin = { top: 60, right: 40, bottom: 80, left: 120 };
+    const dataset: HeatmapCell[] = [];
+
+    const allLenses = Array.from(new Set([...lensOrder, ...grouped.map(([lens]) => lens)]));
+
+    allLenses.forEach((lens) => {
+      maturityLevels.forEach((maturity) => {
+        const lensEntry = grouped.find(([key]) => key === lens);
+        const responsesForCell = lensEntry
+          ? lensEntry[1].find(([bucket]) => bucket === maturity)?.[1] ?? []
+          : [];
+        dataset.push({
+          lens,
+          maturity,
+          count: responsesForCell.length,
+          responses: responsesForCell
+        });
+      });
+    });
+
+    return dataset;
+  }
+
+  function normaliseLens(raw: string) {
+    const match = Object.keys(lensPalette).find((key) => key.toLowerCase() === raw.toLowerCase());
+    return match ?? raw;
+  }
+
+  function renderChart() {
+    if (!mounted || !svg || !tooltipEl) return;
+
+    const data = prepareData(responses);
+    const chartLenses = Array.from(new Set(data.map((d) => d.lens)));
+
+    const margin = { top: 72, right: 48, bottom: 96, left: 132 };
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
 
-    const cellWidth = chartWidth / maturityLevels.length;
-    const cellHeight = chartHeight / lenses.length;
+    const xScale = d3.scaleBand<string>().domain(maturityLevels as unknown as string[]).range([0, chartWidth]).padding(0.12);
+    const yScale = d3.scaleBand<string>().domain(chartLenses).range([0, chartHeight]).padding(0.18);
 
-    d3.select(svg).selectAll('*').remove();
+    const maxCount = d3.max(data, (d) => d.count) ?? 1;
 
-    const container = d3.select(svg)
-      .attr('width', width)
-      .attr('height', height);
+    const fillScale = d3
+      .scaleSequential(d3.interpolateTurbo)
+      .domain([0, Math.max(4, maxCount)]);
 
-    container.append('rect')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('fill', 'rgba(13, 13, 13, 0.8)')
-      .attr('rx', 12);
+    const root = d3.select(svg);
+    root.selectAll('*').remove();
+    root.attr('viewBox', `0 0 ${width} ${height}`);
 
-    const chart = container.append('g')
-      .attr('transform', `translate(${margin.left}, ${margin.top})`);
+    const defs = root.append('defs');
+    const backgroundGradient = defs
+      .append('linearGradient')
+      .attr('id', 'heatmap-background')
+      .attr('x1', '0%')
+      .attr('x2', '100%')
+      .attr('y1', '0%')
+      .attr('y2', '100%');
 
-    chart.append('text')
-      .attr('x', chartWidth / 2)
-      .attr('y', -30)
-      .attr('text-anchor', 'middle')
-      .attr('fill', '#00fff7')
-      .attr('font-size', '18px')
-      .attr('font-family', 'Orbitron, sans-serif')
-      .attr('font-weight', '600')
-      .text('MATURITY HEATMAP');
+    backgroundGradient
+      .append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', 'rgba(15, 23, 42, 0.95)');
 
-    const xScale = d3.scaleBand()
-      .domain(maturityLevels)
-      .range([0, chartWidth])
-      .padding(0.05);
+    backgroundGradient
+      .append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', 'rgba(8, 15, 32, 0.98)');
 
-    const yScale = d3.scaleBand()
-      .domain(lenses)
-      .range([0, chartHeight])
-      .padding(0.05);
+    const glow = defs
+      .append('filter')
+      .attr('id', 'heatmap-glow')
+      .attr('x', '-50%')
+      .attr('y', '-50%')
+      .attr('width', '200%')
+      .attr('height', '200%');
 
-    const maxCount = d3.max(data, d => d.count) || 1;
+    glow.append('feGaussianBlur').attr('stdDeviation', 6).attr('result', 'coloredBlur');
+    const glowMerge = glow.append('feMerge');
+    glowMerge.append('feMergeNode').attr('in', 'coloredBlur');
+    glowMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
-    const tooltip = d3.select('body').append('div')
-      .attr('class', 'heatmap-tooltip')
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('background', 'rgba(5, 5, 5, 0.95)')
-      .style('color', '#fff')
-      .style('border', '1px solid rgba(0, 255, 247, 0.5)')
-      .style('border-radius', '8px')
-      .style('padding', '12px')
-      .style('font-family', 'Orbitron, sans-serif')
-      .style('font-size', '12px')
-      .style('max-width', '250px')
-      .style('z-index', '1000');
+    const container = root.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    const cells = chart.selectAll<SVGGElement, HeatmapData>('.cell')
-      .data<HeatmapData>(data)
+    container
+      .append('rect')
+      .attr('width', chartWidth)
+      .attr('height', chartHeight)
+      .attr('rx', 24)
+      .attr('fill', 'url(#heatmap-background)')
+      .attr('stroke', 'rgba(148, 163, 184, 0.35)')
+      .attr('stroke-width', 1.2)
+      .style('filter', 'url(#heatmap-glow)');
+
+    const tooltip = d3.select(tooltipEl).style('opacity', 0).style('pointer-events', 'none');
+
+    const grid = container.append('g').attr('class', 'heatmap-grid');
+    xScale.domain().forEach((tick) => {
+      grid
+        .append('line')
+        .attr('x1', (xScale(tick) ?? 0) + xScale.bandwidth() / 2)
+        .attr('x2', (xScale(tick) ?? 0) + xScale.bandwidth() / 2)
+        .attr('y1', 12)
+        .attr('y2', chartHeight - 12)
+        .attr('stroke', 'rgba(148, 163, 184, 0.12)')
+        .attr('stroke-dasharray', '4 10');
+    });
+
+    yScale.domain().forEach((tick) => {
+      grid
+        .append('line')
+        .attr('y1', (yScale(tick) ?? 0) + yScale.bandwidth() / 2)
+        .attr('y2', (yScale(tick) ?? 0) + yScale.bandwidth() / 2)
+        .attr('x1', 12)
+        .attr('x2', chartWidth - 12)
+        .attr('stroke', 'rgba(148, 163, 184, 0.12)')
+        .attr('stroke-dasharray', '4 10');
+    });
+
+    const cells = container
+      .append('g')
+      .attr('class', 'cells')
+      .selectAll('g.cell')
+      .data(data)
       .enter()
       .append('g')
       .attr('class', 'cell')
-      .attr('transform', d => `translate(${xScale(d.maturity)}, ${yScale(d.lens)})`);
+      .attr('transform', (d) => `translate(${xScale(d.maturity) ?? 0}, ${yScale(d.lens) ?? 0})`);
 
-    cells.append('rect')
+    cells
+      .append('rect')
       .attr('width', xScale.bandwidth())
       .attr('height', yScale.bandwidth())
-      .attr('fill', (d: HeatmapData) => d.count === 0 ? 'rgba(255, 255, 255, 0.1)' : d.color)
-      .attr('fill-opacity', (d: HeatmapData) => (d.count === 0 ? 0.1 : Math.max(0.3, d.count / maxCount)))
-      .attr('stroke', (d: HeatmapData) => d.color)
-      .attr('stroke-width', 1)
-      .attr('rx', 4)
+      .attr('rx', 10)
+      .attr('fill', (d) => (d.count === 0 ? 'rgba(140, 148, 190, 0.12)' : fillScale(d.count)))
+      .attr('fill-opacity', (d) => (d.count === 0 ? 0.18 : 0.88))
+      .attr('stroke', (d) => (d.count === 0 ? 'rgba(148, 163, 184, 0.25)' : 'rgba(255,255,255,0.15)'))
+      .attr('stroke-width', 1.2)
       .style('cursor', 'pointer')
-      .style('filter', (d: HeatmapData) => d.count > 0 ? `drop-shadow(0 0 8px ${d.color}40)` : 'none')
-      .on('mouseover', function(this: SVGRectElement, event: MouseEvent, d: HeatmapData) {
-        d3.select(this)
+      .on('pointerenter', function (event, d) {
+        const rect = d3.select(this);
+        rect
           .transition()
           .duration(200)
-          .attr('stroke-width', 2)
-          .attr('fill-opacity', Math.max(0.5, d.count / maxCount));
+          .attr('stroke', 'rgba(255,255,255,0.65)')
+          .attr('stroke-width', 2);
 
-        const responseList = d.responses
-          .map(r => `• ${r.text?.substring(0, 40)}${r.text?.length > 40 ? '...' : ''}`)
+        cells.classed('dimmed', (cell) => cell.lens !== d.lens && cell.maturity !== d.maturity);
+        cells
+          .filter((cell) => cell.lens === d.lens || cell.maturity === d.maturity)
+          .classed('highlighted', true);
+
+        const bounds = (svg.parentNode as HTMLElement).getBoundingClientRect();
+        const previewList = d.responses
+          .slice(0, 4)
+          .map((entry) => `• ${entry.text?.slice(0, 80) ?? 'Untitled response'}${entry.text && entry.text.length > 80 ? '…' : ''}`)
           .join('<br/>');
 
-        tooltip.style('visibility', 'visible')
-          .html(`<strong>${d.lens} × ${d.maturity}</strong><br/>
-                 Count: ${d.count}<br/><br/>
-                 ${responseList || 'No responses'}`)
-          .style('left', (event.pageX + 10) + 'px')
-          .style('top', (event.pageY - 10) + 'px');
+        tooltip
+          .style('opacity', 0.98)
+          .html(`
+            <div class="tooltip-heading">${d.lens} × ${d.maturity}</div>
+            <div class="tooltip-count">${d.count} insight${d.count === 1 ? '' : 's'}</div>
+            <div class="tooltip-list">${previewList || 'No entries yet'}</div>
+          `)
+          .style('transform', `translate(${event.clientX - bounds.left + 18}px, ${event.clientY - bounds.top - 24}px)`);
       })
-      .on('mousemove', function(this: SVGRectElement, event: MouseEvent) {
-        tooltip.style('left', (event.pageX + 10) + 'px')
-          .style('top', (event.pageY - 10) + 'px');
+      .on('pointermove', function (event) {
+        const bounds = (svg.parentNode as HTMLElement).getBoundingClientRect();
+        tooltip.style('transform', `translate(${event.clientX - bounds.left + 18}px, ${event.clientY - bounds.top - 24}px)`);
       })
-      .on('mouseout', function(this: SVGRectElement, event: MouseEvent, d: HeatmapData) {
-        const targetOpacity = d.count === 0 ? 0.1 : Math.max(0.3, d.count / maxCount);
+      .on('pointerleave', function () {
         d3.select(this)
           .transition()
-          .duration(200)
-          .attr('stroke-width', 1)
-          .attr('fill-opacity', targetOpacity);
+          .duration(180)
+          .attr('stroke', 'rgba(255,255,255,0.15)')
+          .attr('stroke-width', 1.2);
 
-        tooltip.style('visibility', 'hidden');
+        cells.classed('dimmed', false).classed('highlighted', false);
+        tooltip.style('opacity', 0);
       });
 
-    cells.append('text')
+    cells
+      .append('text')
       .attr('x', xScale.bandwidth() / 2)
-      .attr('y', yScale.bandwidth() / 2)
-      .attr('dy', '0.35em')
+      .attr('y', yScale.bandwidth() / 2 - 2)
       .attr('text-anchor', 'middle')
-      .attr('fill', (d: HeatmapData) => (d.count > 0 ? '#000' : '#666'))
-      .attr('font-size', '14px')
+      .attr('fill', 'rgba(248, 250, 252, 0.94)')
       .attr('font-family', 'Orbitron, sans-serif')
-      .attr('font-weight', '600')
-      .style('pointer-events', 'none')
-      .text((d: HeatmapData) => d.count || '');
+      .attr('font-weight', 600)
+      .attr('font-size', 14)
+      .text((d) => (d.count > 0 ? d.count.toString() : ''));
 
-    const xAxis = chart.append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(0, ${chartHeight})`);
+    cells
+      .append('text')
+      .attr('x', xScale.bandwidth() / 2)
+      .attr('y', yScale.bandwidth() / 2 + 16)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'rgba(226, 232, 240, 0.75)')
+      .attr('font-family', 'Orbitron, sans-serif')
+      .attr('font-size', 9)
+      .text((d) => (d.count > 1 ? 'voices' : d.count === 1 ? 'voice' : ''));
 
-    xAxis.selectAll('.x-label')
+    const xAxis = container.append('g').attr('transform', `translate(0, ${chartHeight})`);
+    xAxis
+      .selectAll('text')
       .data(maturityLevels)
       .enter()
       .append('text')
-      .attr('class', 'x-label')
-      .attr('x', d => (xScale(d) || 0) + xScale.bandwidth() / 2)
-      .attr('y', 20)
+      .attr('x', (d) => (xScale(d) ?? 0) + xScale.bandwidth() / 2)
+      .attr('y', 32)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#00fff7')
-      .attr('font-size', '12px')
+      .attr('fill', '#38bdf8')
       .attr('font-family', 'Orbitron, sans-serif')
-      .text(d => d);
+      .attr('font-size', 12)
+      .text((d) => d.toUpperCase());
 
-    const yAxis = chart.append('g')
-      .attr('class', 'y-axis');
-
-    yAxis.selectAll('.y-label')
-      .data(lenses)
+    const yAxis = container.append('g');
+    yAxis
+      .selectAll('text')
+      .data(chartLenses)
       .enter()
       .append('text')
-      .attr('class', 'y-label')
-      .attr('x', -10)
-      .attr('y', d => (yScale(d) || 0) + yScale.bandwidth() / 2)
+      .attr('x', -28)
+      .attr('y', (d) => (yScale(d) ?? 0) + yScale.bandwidth() / 2)
       .attr('dy', '0.35em')
       .attr('text-anchor', 'end')
-      .attr('fill', d => neonColors[d] || '#ffffff')
-      .attr('font-size', '12px')
+      .attr('fill', (d) => lensPalette[d] ?? '#94a3b8')
       .attr('font-family', 'Orbitron, sans-serif')
-      .attr('font-weight', '600')
-      .text(d => d);
+      .attr('font-weight', 600)
+      .attr('font-size', 12)
+      .text((d) => d.toUpperCase());
 
-    chart.append('text')
+    container
+      .append('text')
       .attr('x', chartWidth / 2)
-      .attr('y', chartHeight + 50)
+      .attr('y', -28)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#ffffff')
-      .attr('font-size', '14px')
+      .attr('fill', 'rgba(224, 231, 255, 0.92)')
       .attr('font-family', 'Orbitron, sans-serif')
-      .text('Maturity Level');
+      .attr('font-size', 18)
+      .attr('font-weight', 600)
+      .text('Maturity Heatmap — Justice-Centered Readiness');
 
-    chart.append('text')
-      .attr('x', -60)
-      .attr('y', chartHeight / 2)
+    container
+      .append('text')
+      .attr('x', chartWidth / 2)
+      .attr('y', -8)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#ffffff')
-      .attr('font-size', '14px')
+      .attr('fill', 'rgba(148, 163, 184, 0.75)')
       .attr('font-family', 'Orbitron, sans-serif')
-      .attr('transform', `rotate(-90, -60, ${chartHeight / 2})`)
-      .text('Design Lens');
+      .attr('font-size', 12)
+      .text('Votes steer maturity; hover for representative voices.');
+
+    const legend = container
+      .append('g')
+      .attr('transform', `translate(${chartWidth - 220}, ${chartHeight + 56})`);
+
+    const legendGradient = defs
+      .append('linearGradient')
+      .attr('id', 'heatmap-legend-gradient')
+      .attr('x1', '0%')
+      .attr('x2', '100%');
+
+    legendGradient.append('stop').attr('offset', '0%').attr('stop-color', fillScale(0));
+    legendGradient.append('stop').attr('offset', '100%').attr('stop-color', fillScale(maxCount));
+
+    legend
+      .append('rect')
+      .attr('width', 160)
+      .attr('height', 12)
+      .attr('rx', 6)
+      .attr('fill', 'url(#heatmap-legend-gradient)');
+
+    const legendScale = d3.scaleLinear().domain([0, maxCount]).range([0, 160]);
+    const legendAxis = d3.axisBottom(legendScale).ticks(4).tickFormat((value) => `${value}`);
+
+    legend
+      .append('g')
+      .attr('transform', 'translate(0, 12)')
+      .call(legendAxis)
+      .selectAll('text')
+      .attr('fill', 'rgba(226, 232, 240, 0.8)')
+      .attr('font-family', 'Orbitron, sans-serif')
+      .attr('font-size', 10);
+
+    legend.selectAll('path,line').attr('stroke', 'rgba(94, 234, 212, 0.4)');
+    legend.select('g').select('.domain').attr('stroke-width', 0);
+
+    legend
+      .append('text')
+      .attr('x', 0)
+      .attr('y', -8)
+      .attr('fill', 'rgba(148, 163, 184, 0.85)')
+      .attr('font-size', 10)
+      .attr('font-family', 'Orbitron, sans-serif')
+      .text('Response density');
   }
 
   onMount(() => {
@@ -265,26 +358,81 @@
   });
 
   onDestroy(() => {
-    d3.selectAll('.heatmap-tooltip').remove();
+    mounted = false;
   });
 
-  $: if (mounted && responses) {
+  $: if (mounted) {
     renderChart();
   }
 </script>
 
-<div class="heatmap-container">
-  <svg bind:this={svg}></svg>
+<div class="heatmap-wrapper">
+  <svg bind:this={svg} role="img" aria-label="Responses maturity heatmap"></svg>
+  <div bind:this={tooltipEl} class="chart-tooltip"></div>
 </div>
 
 <style>
-  .heatmap-container {
+  .heatmap-wrapper {
+    position: relative;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    background: rgb(30, 41, 59);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    border: 1px solid rgb(71, 85, 105);
+    padding: 1.75rem;
+    border-radius: 1.5rem;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(59, 130, 246, 0.18), transparent 60%),
+      radial-gradient(circle at 78% 18%, rgba(236, 72, 153, 0.14), transparent 55%),
+      radial-gradient(circle at 50% 80%, rgba(45, 212, 191, 0.2), transparent 70%),
+      rgba(5, 8, 18, 0.94);
+    border: 1px solid rgba(94, 234, 212, 0.2);
+    box-shadow: 0 30px 60px rgba(7, 89, 133, 0.35);
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .chart-tooltip {
+    position: absolute;
+    min-width: 220px;
+    max-width: 320px;
+    padding: 1rem 1.1rem 1.1rem;
+    border-radius: 0.9rem;
+    background: rgba(4, 7, 14, 0.95);
+    border: 1px solid rgba(94, 234, 212, 0.35);
+    color: #f8fafc;
+    font-family: 'Orbitron', system-ui, sans-serif;
+    font-size: 0.7rem;
+    line-height: 1.45;
+    pointer-events: none;
+    box-shadow: 0 18px 38px rgba(45, 212, 191, 0.28);
+    mix-blend-mode: screen;
+  }
+
+  .chart-tooltip .tooltip-heading {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+
+  .chart-tooltip .tooltip-count {
+    font-size: 0.68rem;
+    opacity: 0.8;
+    margin-bottom: 0.6rem;
+  }
+
+  .chart-tooltip .tooltip-list {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.68rem;
+    opacity: 0.8;
+  }
+
+  g.cell.dimmed {
+    opacity: 0.25;
+  }
+
+  g.cell.highlighted {
+    opacity: 1;
   }
 </style>

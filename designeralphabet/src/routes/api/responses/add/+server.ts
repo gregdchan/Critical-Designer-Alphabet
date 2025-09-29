@@ -11,8 +11,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
     const response = await addResponse({
       code,
-      questionId: Number(questionId),
-      participantId: participantId ?? null,
+      questionId: String(questionId),
+      participantId: participantId ? String(participantId) : null,
       text,
       cards: Array.isArray(cards) ? cards : []
     });

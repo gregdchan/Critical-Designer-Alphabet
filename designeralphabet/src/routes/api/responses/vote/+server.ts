@@ -9,7 +9,7 @@ export const POST: RequestHandler = async ({ request }) => {
       return json({ success: false, error: 'responseId is required' }, { status: 400 });
     }
 
-    const result = await voteResponse({ responseId: Number(responseId), delta: Number(delta ?? 0) });
+    const result = await voteResponse({ responseId: String(responseId), delta: Number(delta ?? 0) });
     if (!result) {
       return json({ success: false, error: 'Response not found' }, { status: 404 });
     }

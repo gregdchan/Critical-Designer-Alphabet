@@ -44,7 +44,7 @@
 
   let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'timeline' | 'chat' = 'overview';
   let responseModalOpen = false;
-  let selectedQuestionId: number | null = null;
+  let selectedQuestionId: string | null = null;
   let responseText = '';
   let linkedCardsText = '';
 
@@ -124,7 +124,7 @@
     selectedQuestionId = null;
   }
 
-  async function toggleVote(responseId: number) {
+  async function toggleVote(responseId: string) {
     await apiVoteResponse(responseId, 1);
   }
 
@@ -154,7 +154,7 @@
     chatMessage = '';
   }
 
-  function openResponseModal(questionId: number | null) {
+  function openResponseModal(questionId: string | null) {
     selectedQuestionId = questionId;
     responseModalOpen = true;
   }

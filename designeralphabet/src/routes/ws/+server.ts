@@ -62,8 +62,8 @@ export const GET: RequestHandler = async ({ request }) => {
           const code = ensureRoom(data.code ?? roomCode);
           await addResponse({
             code,
-            questionId: Number(data.questionId),
-            participantId: data.participantId ?? null,
+            questionId: String(data.questionId),
+            participantId: data.participantId ? String(data.participantId) : null,
             text: data.text,
             cards: Array.isArray(data.cards) ? data.cards : []
           });
@@ -71,7 +71,7 @@ export const GET: RequestHandler = async ({ request }) => {
         }
         case 'CAST_VOTE': {
           await voteResponse({
-            responseId: Number(data.responseId),
+            responseId: String(data.responseId),
             delta: Number(data.delta ?? 0)
           });
           break;
@@ -118,7 +118,7 @@ export const GET: RequestHandler = async ({ request }) => {
         }
         case 'SCORE_UPDATE': {
           await updateScore({
-            participantId: Number(data.participantId),
+            participantId: String(data.participantId),
             delta: Number(data.delta ?? 0),
             badge: data.badge
           });
