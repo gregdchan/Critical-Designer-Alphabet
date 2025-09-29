@@ -2,6 +2,7 @@
   import Header from './header.svelte';
   import Footer from './Footer.svelte';
   import '../app.css';
+
 </script>
 
 <a href="#main-content" class="skip-link">Skip to main content</a>

@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import sanityClient from '$lib/sanity';
+  import { browser } from '$app/environment';
+  import { storeParticipantProfile } from '$lib/realtime';
   import { IconPlayerPlay as Play, IconSettings as Settings, IconUsers as Users } from '@tabler/icons-svelte';
 
   interface WorkshopTemplate {
@@ -98,7 +100,23 @@
         throw new Error(participantData.error);
       }
 
-      // Navigate to session
+      if (browser && participantData.participant) {
+        const profile = {
+          id: participantData.participant.id,
+          name: facilitatorName,
+          role: 'facilitator' as const,
+          color: '#ff00ff'
+        };
+        storeParticipantProfile(sessionCode, profile);
+        const record = JSON.stringify({ code: sessionCode, ...profile });
+        sessionStorage.setItem('critical-alphabet:session', record);
+        document.cookie = `critical-alphabet:session=${encodeURIComponent(record)}; path=/; SameSite=Lax`;
+      }
+
+      if (browser) {
+        window.open(`/presentation?code=${sessionCode}`, '_blank');
+      }
+
       goto(`/session/${sessionCode}?role=facilitator`);
     } catch (error) {
       console.error('Error creating session:', error);

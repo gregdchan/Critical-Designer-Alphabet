@@ -1,153 +1,148 @@
 import { browser } from '$app/environment';
-import { writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 
-export interface WorkshopData {
+export type SessionBundle = {
+  session: any;
   participants: any[];
+  questions: any[];
   responses: any[];
   timeline: any[];
-  session: any;
-}
+  chat: any[];
+};
 
-// Real-time data stores
+const POLL_INTERVAL = 5000;
+
+export const sessionDetails = writable<any | null>(null);
 export const participants = writable<any[]>([]);
+export const questions = writable<any[]>([]);
 export const responses = writable<any[]>([]);
 export const timeline = writable<any[]>([]);
-export const session = writable<any>({});
+export const chat = writable<any[]>([]);
 
-// Polling intervals
-const POLL_INTERVAL = 5000; // 5 seconds
-let pollingIntervals: NodeJS.Timeout[] = [];
+let pollHandle: ReturnType<typeof setInterval> | null = null;
+let activeCode: string | null = null;
 
-export function startRealTimePolling(sessionCode: string) {
-  if (!browser) return;
-
-  stopRealTimePolling();
-
-  // Poll participants
-  const participantsInterval = setInterval(async () => {
-    try {
-      const response = await fetch(`/api/participants/${sessionCode}`);
-      const data = await response.json();
-      if (data.success) {
-        participants.set(data.participants);
-      }
-    } catch (error) {
-      console.error('Error polling participants:', error);
-    }
-  }, POLL_INTERVAL);
-
-  // Poll responses
-  const responsesInterval = setInterval(async () => {
-    try {
-      const response = await fetch(`/api/responses/${sessionCode}`);
-      const data = await response.json();
-      if (data.success) {
-        responses.set(data.responses);
-      }
-    } catch (error) {
-      console.error('Error polling responses:', error);
-    }
-  }, POLL_INTERVAL);
-
-  // Poll timeline
-  const timelineInterval = setInterval(async () => {
-    try {
-      const response = await fetch(`/api/timeline/${sessionCode}`);
-      const data = await response.json();
-      if (data.success) {
-        timeline.set(data.timeline);
-      }
-    } catch (error) {
-      console.error('Error polling timeline:', error);
-    }
-  }, POLL_INTERVAL);
-
-  pollingIntervals = [participantsInterval, responsesInterval, timelineInterval];
-
-  // Initial load
-  loadInitialData(sessionCode);
-}
-
-export function stopRealTimePolling() {
-  pollingIntervals.forEach(interval => clearInterval(interval));
-  pollingIntervals = [];
-}
-
-async function loadInitialData(sessionCode: string) {
+async function fetchBundle(code: string) {
   try {
-    const [participantsRes, responsesRes, timelineRes] = await Promise.all([
-      fetch(`/api/participants/${sessionCode}`),
-      fetch(`/api/responses/${sessionCode}`),
-      fetch(`/api/timeline/${sessionCode}`)
-    ]);
-
-    const [participantsData, responsesData, timelineData] = await Promise.all([
-      participantsRes.json(),
-      responsesRes.json(),
-      timelineRes.json()
-    ]);
-
-    if (participantsData.success) participants.set(participantsData.participants);
-    if (responsesData.success) responses.set(responsesData.responses);
-    if (timelineData.success) timeline.set(timelineData.timeline);
+    const res = await fetch(`/api/session/${code}`);
+    const data = await res.json();
+    if (!data.success) return;
+    sessionDetails.set(data.session);
+    participants.set(data.participants ?? []);
+    questions.set(data.questions ?? []);
+    responses.set(data.responses ?? []);
+    timeline.set(data.timeline ?? []);
+    chat.set(data.chat ?? []);
   } catch (error) {
-    console.error('Error loading initial data:', error);
+    console.error('Failed to load session bundle', error);
   }
 }
 
-// Helper functions for API calls
-export async function addResponse(sessionCode: string, response: any) {
+export async function startRealtimeSession(code: string) {
+  if (!browser) return;
+  activeCode = code;
+  stopRealtimeSession();
+  await fetchBundle(code);
+  pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL);
+}
+
+export function stopRealtimeSession() {
+  if (pollHandle) {
+    clearInterval(pollHandle);
+    pollHandle = null;
+  }
+}
+
+export async function addResponse(code: string, payload: { questionId: number; participantId: number | null; text: string; cards?: string[] }) {
   try {
     const res = await fetch('/api/responses/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: sessionCode, ...response })
+      body: JSON.stringify({ code, ...payload })
     });
-    return await res.json();
+    const data = await res.json();
+    if (data.success) {
+      await fetchBundle(code);
+    }
+    return data;
   } catch (error) {
-    console.error('Error adding response:', error);
+    console.error('Error adding response', error);
     return { success: false, error: 'Failed to add response' };
   }
 }
 
-export async function voteResponse(responseId: number) {
+export async function voteResponse(responseId: number, delta = 1) {
   try {
     const res = await fetch('/api/responses/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ responseId })
+      body: JSON.stringify({ responseId, delta })
     });
     return await res.json();
   } catch (error) {
-    console.error('Error voting response:', error);
+    console.error('Error voting response', error);
     return { success: false, error: 'Failed to vote' };
   }
 }
 
-export async function addTimelineItem(sessionCode: string, item: any) {
+export async function addTimelineEntry(code: string, payload: { label: 'Now' | 'Next' | 'Later'; itemText: string; owner?: string; metric?: string; riskNote?: string }) {
   try {
     const res = await fetch('/api/timeline/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: sessionCode, ...item })
+      body: JSON.stringify({ code, ...payload })
     });
-    return await res.json();
+    const data = await res.json();
+    if (data.success) {
+      await fetchBundle(code);
+    }
+    return data;
   } catch (error) {
-    console.error('Error adding timeline item:', error);
+    console.error('Error adding timeline item', error);
     return { success: false, error: 'Failed to add timeline item' };
   }
 }
 
-export async function joinSession(sessionCode: string, participant: any) {
+export async function sendChatMessage(code: string, payload: { participantId: number | null; message: string }) {
   try {
-    const res = await fetch('/api/participants/join', {
+    const res = await fetch('/api/chat/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: sessionCode, ...participant })
+      body: JSON.stringify({ code, ...payload })
     });
-    return await res.json();
+    const data = await res.json();
+    if (data.success) {
+      await fetchBundle(code);
+    }
+    return data;
   } catch (error) {
-    console.error('Error joining session:', error);
-    return { success: false, error: 'Failed to join session' };
+    console.error('Error sending chat message', error);
+    return { success: false, error: 'Failed to send chat message' };
   }
+}
+
+export const leaderboard = derived([participants], ([$participants]) =>
+  [...$participants].sort((a, b) => (b.points ?? 0) - (a.points ?? 0))
+);
+
+export function getParticipantProfile(code: string) {
+  if (!browser) return null;
+  const raw = localStorage.getItem(`cda:participant:${code}`);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.warn('Invalid participant profile in storage');
+    return null;
+  }
+}
+
+export function storeParticipantProfile(code: string, profile: any) {
+  if (!browser) return;
+  localStorage.setItem(`cda:participant:${code}`, JSON.stringify(profile));
+}
+
+export function clearParticipantProfile(code: string) {
+  if (!browser) return;
+  localStorage.removeItem(`cda:participant:${code}`);
 }

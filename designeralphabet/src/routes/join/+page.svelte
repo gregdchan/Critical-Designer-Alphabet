@@ -1,6 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
+  import { onMount } from 'svelte';
   import { IconUserPlus as UserPlus, IconPalette as Palette } from '@tabler/icons-svelte';
+  import { storeParticipantProfile } from '$lib/realtime';
+
+  export let url: URL;
 
   let participantName = '';
   let sessionCode = '';
@@ -19,6 +24,14 @@
     { name: 'Gold', value: '#ffd700' },
     { name: 'Spring Green', value: '#00ff7f' }
   ];
+
+  onMount(() => {
+    if (!browser) return;
+    const codeParam = url.searchParams.get('code');
+    if (codeParam) {
+      sessionCode = codeParam.toUpperCase();
+    }
+  });
 
   async function joinSession() {
     if (!participantName || !sessionCode) {
@@ -41,6 +54,20 @@
 
       const data = await response.json();
       if (data.success) {
+        if (browser && data.participant) {
+          const record = {
+            id: data.participant.id,
+            name: participantName,
+            role: 'participant' as const,
+            color: selectedColor
+          };
+          const code = sessionCode.toUpperCase();
+          storeParticipantProfile(code, record);
+          const sessionRecord = JSON.stringify({ code, ...record });
+          sessionStorage.setItem('critical-alphabet:session', sessionRecord);
+          document.cookie = `critical-alphabet:session=${encodeURIComponent(sessionRecord)}; path=/; SameSite=Lax`;
+        }
+
         goto(`/session/${sessionCode.toUpperCase()}`);
       } else {
         alert(data.error || 'Failed to join session');
