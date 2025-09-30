@@ -1,8 +1,11 @@
 <script lang="ts">
   import { derived } from 'svelte/store';
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
   import logo from '$lib/logo.png';
-  import { IconStar as Sparkles, IconMenu2 as Menu, IconX as X } from '@tabler/icons-svelte';
+  import { IconStar as Sparkles, IconMenu2 as Menu, IconX as X, IconHome as Home } from '@tabler/icons-svelte';
+  import { currentUser } from '$lib/stores/user';
 
   const links = [
     { href: '/', label: 'Home' },
@@ -22,6 +25,19 @@
   function closeMenu() {
     menuOpen = false;
   }
+
+  function emergencyExit() {
+    if (confirm('Leave session and return to home?')) {
+      if (browser) {
+        sessionStorage.removeItem('cda-session');
+        document.cookie = 'cda-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        currentUser.set(null);
+      }
+      goto('/');
+    }
+  }
+
+  $: isInSession = $activePath.includes('/session/');
 </script>
 
 <header class="sticky top-0 z-40 border-b border-slate-700 bg-slate-800/95 backdrop-blur-sm">
@@ -58,13 +74,24 @@
     </nav>
 
     <div class="flex items-center gap-3">
-      <a
-        class="hidden items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 sm:flex"
-        href="/session"
-      >
-        <Sparkles class="h-4 w-4" />
-        Start Workshop
-      </a>
+      {#if isInSession}
+        <button
+          class="flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+          on:click={emergencyExit}
+          title="Emergency exit from session"
+        >
+          <Home class="h-4 w-4" />
+          <span class="hidden sm:inline">Exit Session</span>
+        </button>
+      {:else}
+        <a
+          class="hidden items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 sm:flex"
+          href="/session"
+        >
+          <Sparkles class="h-4 w-4" />
+          Start Workshop
+        </a>
+      {/if}
       <button
         class="rounded-md bg-slate-700 p-2 text-slate-300 transition hover:bg-slate-600 md:hidden"
         type="button"
@@ -98,14 +125,24 @@
             {link.label}
           </a>
         {/each}
-        <a
-          class="flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white mt-2"
-          href="/session"
-          on:click={closeMenu}
-        >
-          <Sparkles class="h-4 w-4" />
-          Start Workshop
-        </a>
+        {#if isInSession}
+          <button
+            class="flex items-center gap-2 rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white mt-2"
+            on:click={() => { closeMenu(); emergencyExit(); }}
+          >
+            <Home class="h-4 w-4" />
+            Exit Session
+          </button>
+        {:else}
+          <a
+            class="flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white mt-2"
+            href="/session"
+            on:click={closeMenu}
+          >
+            <Sparkles class="h-4 w-4" />
+            Start Workshop
+          </a>
+        {/if}
       </nav>
     </div>
   {/if}

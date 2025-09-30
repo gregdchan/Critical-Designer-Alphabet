@@ -100,6 +100,20 @@
         sessionStorage.setItem('critical-alphabet:session', record);
         document.cookie = `critical-alphabet:session=${encodeURIComponent(record)}; path=/; SameSite=Lax`;
       }
+
+      // Add keyboard shortcut for emergency exit (Ctrl/Cmd + Shift + E)
+      function handleKeydown(event: KeyboardEvent) {
+        if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'E') {
+          event.preventDefault();
+          leaveSession();
+        }
+      }
+
+      document.addEventListener('keydown', handleKeydown);
+
+      return () => {
+        document.removeEventListener('keydown', handleKeydown);
+      };
     }
   });
 
@@ -162,6 +176,19 @@
   function exportSession() {
     window.open(`/api/export/${sessionCode}`, '_blank');
   }
+
+  function leaveSession() {
+    if (confirm('Are you sure you want to leave this session?')) {
+      // Clear session data
+      if (browser) {
+        sessionStorage.removeItem('cda-session');
+        document.cookie = 'cda-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        currentUser.set(null);
+      }
+      stopRealtimeSession();
+      goto('/');
+    }
+  }
 </script>
 
 {#if sessionInfo}
@@ -189,27 +216,35 @@
             <IconUsers class="h-5 w-5" />
             <span>{participantsList.length} joined</span>
           </div>
-          <div class="hidden sm:flex items-center gap-3">
+          <div class="flex items-center gap-3">
             <button
-              class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-cyan-400/60 hover:text-cyan-200 transition-colors"
+              class="hidden sm:flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-cyan-400/60 hover:text-cyan-200 transition-colors"
               on:click={() => goto('/facilitator')}
             >
-              <IconHome class="mr-2 inline h-4 w-4" />Facilitator Console
+              <IconHome class="h-4 w-4" />Facilitator Console
             </button>
             <button
-              class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-cyan-400/60 hover:text-cyan-200 transition-colors"
+              class="hidden sm:flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-cyan-400/60 hover:text-cyan-200 transition-colors"
               on:click={() => window.open(`/presentation?code=${sessionCode}`, '_blank')}
             >
-              <IconChartBubble class="mr-2 inline h-4 w-4" />Presentation View
+              <IconChartBubble class="h-4 w-4" />Presentation View
             </button>
             {#if isFacilitator()}
               <button
-                class="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium hover:bg-purple-500 transition-colors"
+                class="hidden sm:flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium hover:bg-purple-500 transition-colors"
                 on:click={exportSession}
               >
                 <IconDownload class="h-4 w-4" /> Export
               </button>
             {/if}
+            <button
+              class="flex items-center gap-2 rounded-lg bg-red-600/80 px-4 py-2 text-sm font-medium hover:bg-red-500 transition-colors"
+              on:click={leaveSession}
+              title="Leave session and return to home (Ctrl+Shift+E)"
+            >
+              <IconHome class="h-4 w-4" />
+              <span class="hidden sm:inline">Leave Session</span>
+            </button>
           </div>
         </div>
       </div>

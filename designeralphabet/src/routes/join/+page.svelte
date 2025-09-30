@@ -2,10 +2,10 @@
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import { onMount } from 'svelte';
-  import { IconUserPlus as UserPlus, IconPalette as Palette } from '@tabler/icons-svelte';
+  import { IconUserPlus as UserPlus, IconPalette as Palette, IconArrowLeft as ArrowLeft } from '@tabler/icons-svelte';
   import { currentUser } from '$lib/stores/user';
 
-  export let url: URL;
+  export let data: { code: string };
 
   let participantName = '';
   let sessionCode = '';
@@ -26,12 +26,14 @@
   ];
 
   onMount(() => {
-    if (!browser) return;
-    const codeParam = url.searchParams.get('code');
-    if (codeParam) {
-      sessionCode = codeParam.toUpperCase();
+    if (data.code) {
+      sessionCode = data.code.toUpperCase();
     }
   });
+
+  function goHome() {
+    goto('/');
+  }
 
   async function joinSession() {
     if (!participantName || !sessionCode) {
@@ -84,6 +86,15 @@
 
 <div class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 flex items-center justify-center p-6">
   <div class="w-full max-w-md">
+    <!-- Back Navigation -->
+    <button
+      on:click={goHome}
+      class="mb-4 flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
+    >
+      <ArrowLeft class="w-4 h-4" />
+      Back to Home
+    </button>
+
     <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-cyan-400/20 shadow-2xl">
       <header class="text-center mb-8">
         <div class="w-16 h-16 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-4">
