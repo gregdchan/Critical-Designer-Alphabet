@@ -64,6 +64,9 @@
 
 	let chatMessage = '';
 
+	let customLabel = '';
+	let customMinutes = 0;
+
 	type SessionStatus = 'planned' | 'live' | 'done';
 
 	const sessionStatuses: SessionStatus[] = ['planned', 'live', 'done'];
@@ -373,6 +376,29 @@
 			goto('/');
 		}
 	}
+
+	// Custom timer functions (placeholder implementations)
+	function startCustomRound() {
+		// TODO: Implement custom round functionality
+		console.log('Starting custom round:', customLabel, customMinutes);
+	}
+
+	function clearActiveRound() {
+		// TODO: Implement clear active round functionality
+		console.log('Clearing active round');
+	}
+
+	function startTemplateRound(round: any) {
+		// TODO: Implement template round functionality
+		console.log('Starting template round:', round);
+	}
+
+	// Placeholder variables for template rounds
+	let templateLoading = false;
+	let templateError = '';
+	let templateRounds: any[] = [];
+	let roundUpdating = false;
+	let roundCountdownLabel = '';
 </script>
 
 {#if sessionInfo}
@@ -399,7 +425,14 @@
 						</p>
 					{/if}
 					<p class="mt-1 text-sm text-slate-300">
-						{#if isFacilitator()}
+						{currentParticipant?.name ?? 'Anonymous'} · {currentParticipant?.role ?? activeRole}
+					</p>
+				</div>
+			</div>
+		</header>
+
+		<main class="mx-auto max-w-7xl space-y-8 px-6 py-8">
+			{#if isFacilitator()}
 				<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-6 space-y-6">
 					<div class="flex flex-wrap items-center justify-between gap-4">
 						<div>
@@ -519,29 +552,6 @@
 								</article>
 							{/each}
 						{/if}
-				</section>
-			{/if}
-
-			<section class="grid gap-6 md:grid-cols-3">
-							{#each sessionStatuses as status}
-								<button
-									class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-slate-900 shadow' : 'border border-cyan-400/40 text-cyan-200 hover:border-cyan-300'}`}
-									on:click={() => changeStatus(status)}
-									disabled={statusUpdating || sessionInfo?.status === status}
-								>
-									{statusLabels[status]}
-								</button>
-							{/each}
-							<button
-								class="rounded-lg bg-red-600/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 transition"
-								on:click={() => changeStatus('done')}
-								disabled={statusUpdating || sessionInfo?.status === 'done'}
-							>
-								End Session
-							</button>
-						</div>
-					</div>
-
 					<div class="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
 						<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4 space-y-4">
 							<div class="flex items-center justify-between">
