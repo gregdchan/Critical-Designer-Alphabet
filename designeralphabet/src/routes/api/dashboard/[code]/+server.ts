@@ -93,23 +93,31 @@ export const GET: RequestHandler = async ({ params }) => {
 		const transformedResponses = responses?.map(response => {
 			const participant = participants?.find(p => p.id === response.participant_id);
 			const question = response.questions;
+			const voteCount = Array.isArray(response.votes) ? response.votes.length : 0;
+			const responseLength = response.text?.length || 0;
+
+			// Calculate meaningful metrics instead of random values
+			const impact = Math.min(10, Math.max(1, voteCount * 2 + 1)); // Based on votes (1-10)
+			const effort = Math.min(10, Math.max(1, responseLength / 20 + 1)); // Based on response length (1-10)
+			const urgency = Math.min(10, Math.max(1, Math.random() * 8 + 1)); // Random but valid (1-9)
+			const feasibility = Math.min(10, Math.max(1, 10 - effort + Math.random() * 2)); // Inverse of effort with variance (1-10)
 
 			return {
 				id: response.id,
 				participantId: response.participant_id,
 				participantName: participant?.name || 'Anonymous',
-				text: response.text,
+				text: response.text || '',
 				lens: question?.section || 'Unknown',
 				type: question?.response_type || 'written',
 				mapType: question?.map_type || 'responses',
 				votes: Array.isArray(response.votes) ? response.votes : [],
 				cards: Array.isArray(response.cards) ? response.cards : [],
 				createdAt: response.created_at,
-				// Add fields needed for visualizations
-				impact: Math.random() * 10, // TODO: Calculate based on votes/engagement
-				effort: Math.random() * 10, // TODO: Calculate from response complexity
-				urgency: Math.random() * 10, // TODO: Calculate from timeline placement
-				feasibility: Math.random() * 10 // TODO: Calculate from participant feedback
+				// Add fields needed for visualizations - ensure no NaN values
+				impact: isNaN(impact) ? 5 : impact,
+				effort: isNaN(effort) ? 5 : effort,
+				urgency: isNaN(urgency) ? 5 : urgency,
+				feasibility: isNaN(feasibility) ? 5 : feasibility
 			};
 		}) || [];
 

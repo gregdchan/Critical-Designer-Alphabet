@@ -138,21 +138,19 @@
 				Gamified Justice Loop
 			</h2>
 			<p class="max-w-xl text-sm text-white/70">
-				Every session weaves inclusive design prompts with celebratory motion. Earn neon points for
-				equitable moves, unlock collaborative badges, and let Motion One drive micro-animations that
-				keep energy high without sacrificing accessibility.
+				Every session combines thoughtful design prompts with engaging interactions. Earn points for
+				inclusive participation, unlock achievement badges, and enjoy smooth animations that
+				keep everyone engaged and accessible.
 			</p>
 			<ul class="space-y-4 text-xs uppercase tracking-[0.25em] text-white/60">
 				<li class="flex items-center gap-3 text-neonPink">
-					<span class="h-2 w-8 rounded-full bg-neonPink" /> Generative positionality prompts &amp; remixable
-					steps
+					<span class="h-2 w-8 rounded-full bg-neonPink" /> Interactive prompts that adapt to your team's needs
 				</li>
 				<li class="flex items-center gap-3 text-neonCyan">
-					<span class="h-2 w-8 rounded-full bg-neonCyan" /> Dynamic timer grid with pulse, shake, and
-					team sync
+					<span class="h-2 w-8 rounded-full bg-neonCyan" /> Live timers that keep everyone synchronized
 				</li>
 				<li class="flex items-center gap-3 text-neonLime">
-					<span class="h-2 w-8 rounded-full bg-neonLime" /> Retro badges plus justice-centered mini-challenges
+					<span class="h-2 w-8 rounded-full bg-neonLime" /> Achievement system with inclusive design challenges
 				</li>
 			</ul>
 		</div>
@@ -178,8 +176,8 @@
 			<div
 				class="rounded-[1.75rem] border border-neonPink/30 bg-neonPink/10 px-6 py-5 text-xs uppercase tracking-[0.25em] text-neonPink shadow-neon-pink"
 			>
-				Motion icons, Supabase presence pulses, and Sanity-powered multilingual prompts keep—or
-				bit-crush—the status quo.
+				Real-time collaboration, multilingual support, and engaging interactions help teams
+				break through traditional barriers.
 			</div>
 		</div>
 	</div>
@@ -192,29 +190,29 @@
 				Inclusive Arcade Checklist
 			</h2>
 			<p class="text-sm text-white/70">
-				WCAG 2.2 AA contrast, keyboard-only controls, reduced motion toggles, and translation-ready
-				content make every neon flourish purposeful.
+				High contrast design, keyboard navigation, motion controls, and multilingual support
+				ensure everyone can participate fully in collaborative sessions.
 			</p>
 			<ul class="space-y-3 text-xs uppercase tracking-[0.3em] text-white/70">
-				<li>Sanity i18n fields for prompts + descriptions</li>
-				<li>RTL-friendly layout utilities &amp; logical spacing</li>
-				<li>Focus-visible neon rings &amp; skip navigation</li>
-				<li>Supabase RLS policies for safe collaboration</li>
+				<li>Multilingual prompts and descriptions</li>
+				<li>Right-to-left language support</li>
+				<li>Clear focus indicators and easy navigation</li>
+				<li>Secure team collaboration features</li>
 			</ul>
 		</div>
 		<div
 			class="rounded-[2rem] border border-white/10 bg-black/70 p-6 shadow-[0_0_35px_rgba(255,42,173,0.12)]"
 		>
-			<h3 class="font-techno text-sm uppercase tracking-[0.3em] text-neonPink">Retro Ops</h3>
+			<h3 class="font-techno text-sm uppercase tracking-[0.3em] text-neonPink">Platform Features</h3>
 			<div class="mt-4 space-y-4 text-xs text-white/65">
 				<p>
-					<strong>Supabase Realtime:</strong> presence, broadcast, neon avatars, synchronized prompts.
+					<strong>Live Collaboration:</strong> See teammates join, chat in real-time, and work through prompts together.
 				</p>
 				<p>
-					<strong>Sanity Studio:</strong> retro themes, achievements, and localized card prompts.
+					<strong>Customizable Content:</strong> Themed sessions, achievement badges, and localized prompts.
 				</p>
 				<p>
-					<strong>Export:</strong> neon PDF + markdown summaries for session retros and sharing.
+					<strong>Easy Sharing:</strong> Export session summaries and insights for follow-up discussions.
 				</p>
 			</div>
 		</div>
