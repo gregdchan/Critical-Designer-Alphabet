@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+.svelte-kit
+.env
+.env.local
+.env.*.local
+dist
+build
+coverage
+.nyc_output
+.cache
+.parcel-cache
+.DS_Store
+*.log
