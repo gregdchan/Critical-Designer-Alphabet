@@ -8,7 +8,8 @@ ARG VITE_SANITY_PROJECT_ID="pctfp1xq"
 ARG VITE_SANITY_DATASET="production"
 ARG VITE_SANITY_API_VERSION="2024-09-01"
 
-ENV VITE_SUPABASE_URL=${VITE_SUPABASE_URL} \
+ENV NODE_OPTIONS=--max-old-space-size=4096 \
+    VITE_SUPABASE_URL=${VITE_SUPABASE_URL} \
     VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY} \
     VITE_SANITY_PROJECT_ID=${VITE_SANITY_PROJECT_ID} \
     VITE_SANITY_DATASET=${VITE_SANITY_DATASET} \
@@ -37,8 +38,9 @@ ARG VITE_SANITY_API_VERSION="2024-09-01"
 
 # Ensure the server listens on all interfaces when running in Docker
 ENV NODE_ENV=production \
+    NODE_OPTIONS=--max-old-space-size=4096 \
     HOST=0.0.0.0 \
-    PORT=3000 \
+    PORT=5173 \
     VITE_SUPABASE_URL=${VITE_SUPABASE_URL} \
     VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY} \
     VITE_SANITY_PROJECT_ID=${VITE_SANITY_PROJECT_ID} \
@@ -52,6 +54,6 @@ RUN npm ci --omit=dev
 # Copy the build artifacts from the builder stage
 COPY --from=builder /app/build ./build
 
-EXPOSE 3000
+EXPOSE 5173
 
 CMD ["node", "build"]
