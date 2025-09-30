@@ -107,6 +107,32 @@ docker-compose up backend --build
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3333
 
+### Creating Live Design Sessions
+
+After Docker services are running:
+
+1. **Web Interface** (Recommended):
+   ```bash
+   # Navigate to facilitator page
+   open http://localhost:3000/facilitator
+   ```
+
+2. **API Direct** (For testing):
+   ```bash
+   curl -X POST http://localhost:3000/api/session/create \
+     -H 'Content-Type: application/json' \
+     -d '{"code":"TEST123","title":"Test Session","templateSlug":"default"}'
+   ```
+
+3. **Session Troubleshooting**:
+   ```bash
+   # Use the helper script
+   ./create-session.sh
+
+   # Check container logs
+   docker-compose logs web
+   ```
+
 ## 🛠️ Troubleshooting
 
 ### Common Issues

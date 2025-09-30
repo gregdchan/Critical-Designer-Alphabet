@@ -11,9 +11,9 @@ services:
     environment:
       - NODE_ENV=production
       - HOST=0.0.0.0
-      - PORT=3000
+      - PORT=5173
     ports:
-      - '3000:3000'
+      - '3000:5173'
     restart: unless-stopped
 
   studio:
