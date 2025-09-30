@@ -18,38 +18,45 @@
 		questions?: string[];
 	};
 
-	interface WorkshopTemplate {
-		_id: string;
-		title: string;
-		slug?: { current?: string } | string;
-		description?: string;
-		challenge?: string;
-		lenses?: string[];
-		sections?: {
-			onboarding?: {
-				title?: string;
-				introCopy?: string;
-				whatToBring?: string[];
-				rules?: string[];
-				quickStart?: string[];
-			};
-			breakout?: {
-				rounds?: TemplateRound[];
-			};
-			synthesis?: {
-				methods?: string[];
-				instructions?: string;
-			};
-			commitments?: {
-				instructions?: string;
-				exportFields?: string[];
-			};
-		};
-		facilitation?: {
-			roles?: string[];
-			fairnessThreshold?: number;
-			scoring?: {
-				idea?: number;
+  interface WorkshopTemplate {
+    _id: string;
+    title: string;
+    slug?: { current?: string } | string;
+    description?: string;
+    challenge?: string;
+    lenses?: string[];
+    sections?: {
+      onboarding?: {
+        title?: string;
+        introCopy?: string;
+        whatToBring?: string[];
+        rules?: string[];
+        quickStart?: string[];
+      };
+      breakout?: {
+        rounds?: TemplateRound[];
+      };
+      synthesis?: {
+        methods?: string[];
+        instructions?: string;
+      };
+      commitments?: {
+        instructions?: string;
+        exportFields?: string[];
+      };
+    };
+    phases?: Array<{
+      key?: string;
+      title?: string;
+      description?: string;
+      durationMinutes?: number | null;
+      dashboards?: string[] | null;
+    }>;
+    facilitation?: {
+      roles?: string[];
+      fairnessThreshold?: number;
+      scoring?: {
+        idea?: number;
 				vote?: number;
 				linkCards?: number;
 				reflection?: number;
@@ -92,7 +99,7 @@
 	let sessionChallenge = '';
 	let lastTemplateId: string | null = null;
 
-	const templateQuery = `*[_type == "workshopTemplate"]{
+  const templateQuery = `*[_type == "workshopTemplate"]{
     _id,
     title,
     slug,
@@ -100,6 +107,7 @@
     challenge,
     lenses,
     sections,
+    phases,
     facilitation,
     visuals{
       charts,
@@ -181,17 +189,18 @@
 					? selectedTemplate.slug
 					: selectedTemplate.slug?.current;
 
-			const sessionResponse = await fetch('/api/session/create', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					code: sessionCode,
-					title: sessionTitle,
-					templateSlug,
-					challenge: sessionChallenge.trim() || selectedTemplate.challenge || null,
-					facilitatorEmail: facilitatorEmail.trim().toLowerCase()
-				})
-			});
+      const sessionResponse = await fetch('/api/session/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: sessionCode,
+          title: sessionTitle,
+          templateSlug,
+          challenge: sessionChallenge.trim() || selectedTemplate.challenge || null,
+          facilitatorEmail: facilitatorEmail.trim().toLowerCase(),
+          phases: selectedTemplate.phases ?? []
+        })
+      });
 
 			const sessionData = await sessionResponse.json();
 			if (!sessionData.success) {

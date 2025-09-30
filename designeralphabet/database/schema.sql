@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   template_id VARCHAR(64),
   facilitator_email VARCHAR(255),
   challenge TEXT,
+  active_phase_key VARCHAR(64),
   active_round VARCHAR(128),
   round_expires_at TIMESTAMP NULL,
   status ENUM('planned','live','done') DEFAULT 'planned',

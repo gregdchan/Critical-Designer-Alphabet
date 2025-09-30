@@ -13,6 +13,7 @@ export type SessionBundle = {
 	responses: any[];
 	timeline: any[];
 	chat: any[];
+	phases: any[];
 };
 
 const POLL_INTERVAL = 5000;
@@ -23,6 +24,7 @@ export const questions = writable<any[]>([]);
 export const responses = writable<any[]>([]);
 export const timeline = writable<any[]>([]);
 export const chat = writable<any[]>([]);
+export const phases = writable<any[]>([]);
 
 let pollHandle: ReturnType<typeof setInterval> | null = null;
 let activeCode: string | null = null;
@@ -38,6 +40,7 @@ async function fetchBundle(code: string) {
 		responses.set(data.responses ?? []);
 		timeline.set(data.timeline ?? []);
 		chat.set(data.chat ?? []);
+		phases.set(data.phases ?? []);
 	} catch (error) {
 		console.error('Failed to load session bundle', error);
 	}
@@ -154,6 +157,42 @@ export async function sendChatMessage(
 export const leaderboard = derived([participants], ([$participants]) =>
 	[...$participants].sort((a, b) => (b.points ?? 0) - (a.points ?? 0))
 );
+
+export async function startPhase(code: string, phaseKey: string) {
+	try {
+		const res = await fetch('/api/session/phase', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ code, phaseKey, action: 'start' })
+		});
+		const data = await res.json();
+		if (data.success) {
+			await fetchBundle(code);
+		}
+		return data;
+	} catch (error) {
+		console.error('Failed to start phase', error);
+		return { success: false, error: 'Failed to start phase' };
+	}
+}
+
+export async function completePhase(code: string, phaseKey: string) {
+	try {
+		const res = await fetch('/api/session/phase', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ code, phaseKey, action: 'complete' })
+		});
+		const data = await res.json();
+		if (data.success) {
+			await fetchBundle(code);
+		}
+		return data;
+	} catch (error) {
+		console.error('Failed to complete phase', error);
+		return { success: false, error: 'Failed to complete phase' };
+	}
+}
 
 export function channelFor(code: string) {
 	return supabase.channel(`workshop:${code}`, {

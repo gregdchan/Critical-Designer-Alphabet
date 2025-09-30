@@ -4,7 +4,7 @@ import { createSession } from '$lib/server/workshop';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { code, title, templateSlug, challenge, facilitatorEmail } = await request.json();
+		const { code, title, templateSlug, challenge, facilitatorEmail, phases } = await request.json();
 		if (!code || !title) {
 			return json({ success: false, error: 'code and title are required' }, { status: 400 });
 		}
@@ -15,7 +15,8 @@ export const POST: RequestHandler = async ({ request }) => {
 				title,
 				templateSlug,
 				challenge,
-				facilitatorEmail
+				facilitatorEmail,
+				phases
 			});
 			return json({ success: true, session });
 		} catch (error: any) {

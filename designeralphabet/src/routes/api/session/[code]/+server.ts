@@ -6,7 +6,8 @@ import {
 	getQuestions,
 	getResponses,
 	getTimeline,
-	getChat
+	getChat,
+	getSessionPhases
 } from '$lib/server/workshop';
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -16,12 +17,13 @@ export const GET: RequestHandler = async ({ params }) => {
 			return json({ success: false, error: 'Session not found' }, { status: 404 });
 		}
 
-		const [participants, questions, responses, timeline, chat] = await Promise.all([
+		const [participants, questions, responses, timeline, chat, phases] = await Promise.all([
 			getParticipants(params.code),
 			getQuestions(params.code),
 			getResponses(params.code),
 			getTimeline(params.code),
-			getChat(params.code)
+			getChat(params.code),
+			getSessionPhases(params.code)
 		]);
 
 		return json({
@@ -31,7 +33,8 @@ export const GET: RequestHandler = async ({ params }) => {
 			questions,
 			responses,
 			timeline,
-			chat
+			chat,
+			phases
 		});
 	} catch (error: any) {
 		console.error('Failed to load session', error);

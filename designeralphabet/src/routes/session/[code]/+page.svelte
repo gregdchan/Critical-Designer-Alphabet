@@ -19,9 +19,11 @@
 		getParticipantProfile,
 		storeParticipantProfile,
 		clearParticipantProfile,
-		refreshSession
+		refreshSession,
+		phases as phasesStore,
+		startPhase as startPhaseRequest,
+		completePhase as completePhaseRequest
 	} from '$lib/realtime';
-	import sanityClient from '$lib/sanity';
 	import { currentUser } from '$lib/stores/user';
 	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
@@ -62,13 +64,6 @@
 
 	let chatMessage = '';
 
-	type TemplateRound = {
-		key?: string;
-		name?: string;
-		minutes?: number;
-		questions?: string[];
-	};
-
 	type SessionStatus = 'planned' | 'live' | 'done';
 
 	const sessionStatuses: SessionStatus[] = ['planned', 'live', 'done'];
@@ -77,19 +72,25 @@
 		live: 'In Session',
 		done: 'Completed'
 	};
+	const phaseStatusLabels: Record<'pending' | 'active' | 'completed', string> = {
+		pending: 'Pending',
+		active: 'In Progress',
+		completed: 'Completed'
+	};
+	const dashboardLabels: Record<string, string> = {
+		responses: 'Responses Board',
+		heatmap: 'Heatmap',
+		roadmap: 'Roadmap',
+		timeline: 'Timeline',
+		leaderboard: 'Leaderboard',
+		chat: 'Chat Feed'
+	};
 
-	let templateRounds: TemplateRound[] = [];
-	let templateLoading = false;
-	let templateError = '';
-	let templateTitle = '';
 	let statusUpdating = false;
-	let roundUpdating = false;
-	let customMinutes = 10;
-	let customLabel = 'Custom Breakout';
-	let countdownTimer: ReturnType<typeof setInterval> | null = null;
-	let roundCountdownLabel = '';
-	let roundRemainingMs = 0;
-	let lastTemplateSlug: string | null = null;
+	let phaseUpdating = false;
+	let phaseCountdownLabel = '';
+	let phaseRemainingMs = 0;
+	let phaseTimer: ReturnType<typeof setInterval> | null = null;
 
 	$: sessionInfo = $sessionDetails;
 	$: participantsList = $participants ?? [];
@@ -109,25 +110,47 @@
 		};
 	});
 
-	$: if (browser) {
-		const slug = sessionInfo?.template_slug ?? null;
-		if (slug && slug !== lastTemplateSlug) {
-			lastTemplateSlug = slug;
-			loadTemplateBlueprint(slug);
+	$: phasesList = $phasesStore ?? [];
+	$: activePhase = (() => {
+		const keyed = sessionInfo?.active_phase_key
+			? phasesList.find((phase) => phase.phase_key === sessionInfo.active_phase_key)
+			: null;
+		return keyed ?? phasesList.find((phase) => phase.status === 'active');
+	})();
+	$: recommendedDashboards = Array.isArray(activePhase?.dashboards) && activePhase.dashboards?.length
+		? activePhase.dashboards
+		: ['responses', 'heatmap', 'roadmap', 'timeline', 'chat'];
+
+	function updatePhaseCountdown() {
+		if (!browser) return;
+		if (!activePhase || !activePhase.started_at || !activePhase.duration_minutes) {
+			phaseCountdownLabel = '';
+			phaseRemainingMs = 0;
+			return;
+		}
+		const end = new Date(activePhase.started_at).getTime() + activePhase.duration_minutes * 60000;
+		const diff = end - Date.now();
+		phaseRemainingMs = Math.max(0, diff);
+		const minutes = Math.floor(phaseRemainingMs / 60000);
+		const seconds = Math.floor((phaseRemainingMs % 60000) / 1000);
+		phaseCountdownLabel = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+		if (phaseRemainingMs <= 0 && phaseTimer) {
+			clearInterval(phaseTimer);
+			phaseTimer = null;
 		}
 	}
 
-	$: if (sessionInfo?.round_expires_at) {
-		updateRoundCountdown();
-		if (!countdownTimer) {
-			countdownTimer = setInterval(updateRoundCountdown, 1000);
+	$: if (browser) {
+		if (phaseTimer) {
+			clearInterval(phaseTimer);
+			phaseTimer = null;
 		}
-	} else {
-		roundCountdownLabel = '';
-		roundRemainingMs = 0;
-		if (countdownTimer) {
-			clearInterval(countdownTimer);
-			countdownTimer = null;
+		if (activePhase && activePhase.started_at && activePhase.duration_minutes) {
+			updatePhaseCountdown();
+			phaseTimer = setInterval(updatePhaseCountdown, 1000);
+		} else {
+			phaseCountdownLabel = '';
+			phaseRemainingMs = 0;
 		}
 	}
 
@@ -147,54 +170,6 @@
 		};
 		currentUser.set(currentParticipant);
 		storeParticipantProfile(sessionCode, currentParticipant);
-	}
-
-	const templateQuery = `*[_type == "workshopTemplate" && slug.current == $slug][0]{
-    title,
-    sections{
-      breakout{
-        rounds[]{
-          key,
-          name,
-          minutes,
-          questions
-        }
-      }
-    }
-  }` as const;
-
-	async function loadTemplateBlueprint(slug: string) {
-		if (!browser || !slug) return;
-		templateLoading = true;
-		templateError = '';
-		try {
-			const blueprint = await sanityClient.fetch(templateQuery, { slug });
-			templateRounds = blueprint?.sections?.breakout?.rounds ?? [];
-			templateTitle = blueprint?.title ?? '';
-		} catch (error) {
-			console.error('Failed to load template', error);
-			templateError = 'Unable to load template details right now.';
-			templateRounds = [];
-		} finally {
-			templateLoading = false;
-		}
-	}
-
-	function updateRoundCountdown() {
-		if (!browser || !sessionInfo?.round_expires_at) {
-			roundCountdownLabel = '';
-			roundRemainingMs = 0;
-			return;
-		}
-		const diff = new Date(sessionInfo.round_expires_at).getTime() - Date.now();
-		roundRemainingMs = Math.max(0, diff);
-		const minutes = Math.floor(roundRemainingMs / 60000);
-		const seconds = Math.floor((roundRemainingMs % 60000) / 1000);
-		roundCountdownLabel = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-		if (roundRemainingMs <= 0 && countdownTimer) {
-			clearInterval(countdownTimer);
-			countdownTimer = null;
-		}
 	}
 
 	async function changeStatus(nextStatus: SessionStatus) {
@@ -219,73 +194,38 @@
 		}
 	}
 
-	async function startRoundTimer(roundName: string, minutes: number | null) {
-		if (!sessionCode) return;
-		roundUpdating = true;
+	async function activatePhase(phase: any) {
+		if (!phase?.phase_key || phaseUpdating) return;
+		phaseUpdating = true;
 		try {
-			const body: Record<string, unknown> = {
-				code: sessionCode,
-				action: 'start',
-				roundName
-			};
-			const duration = minutes && minutes > 0 ? Math.round(minutes) : null;
-			if (duration) {
-				body.durationMinutes = duration;
-			}
-			const res = await fetch('/api/session/round', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body)
-			});
-			const payload = await res.json();
-			if (!payload.success) {
-				throw new Error(payload.error ?? 'Unable to start breakout round.');
+			const result = await startPhaseRequest(sessionCode, phase.phase_key);
+			if (!result.success) {
+				throw new Error(result.error ?? 'Unable to start phase');
 			}
 			await refreshSession(sessionCode);
 		} catch (error) {
-			console.error('Failed to start breakout round', error);
-			alert((error as Error).message ?? 'Failed to start breakout round.');
+			console.error('Failed to start phase', error);
+			alert((error as Error).message ?? 'Failed to start phase.');
 		} finally {
-			roundUpdating = false;
+			phaseUpdating = false;
 		}
 	}
 
-	async function clearActiveRound() {
-		if (!sessionCode) return;
-		roundUpdating = true;
+	async function finishPhase(phase: any) {
+		if (!phase?.phase_key || phaseUpdating) return;
+		phaseUpdating = true;
 		try {
-			const res = await fetch('/api/session/round', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ code: sessionCode, action: 'clear' })
-			});
-			const payload = await res.json();
-			if (!payload.success) {
-				throw new Error(payload.error ?? 'Unable to end the current round.');
+			const result = await completePhaseRequest(sessionCode, phase.phase_key);
+			if (!result.success) {
+				throw new Error(result.error ?? 'Unable to complete phase');
 			}
 			await refreshSession(sessionCode);
 		} catch (error) {
-			console.error('Failed to end breakout round', error);
-			alert((error as Error).message ?? 'Failed to end the current round.');
+			console.error('Failed to complete phase', error);
+			alert((error as Error).message ?? 'Failed to complete phase.');
 		} finally {
-			roundUpdating = false;
+			phaseUpdating = false;
 		}
-	}
-
-	async function startTemplateRound(round: TemplateRound) {
-		const label = round.name ?? round.key ?? 'Breakout';
-		const minutes = round.minutes ?? null;
-		await startRoundTimer(label, minutes);
-	}
-
-	async function startCustomRound() {
-		const minutes = Number(customMinutes);
-		if (!minutes || minutes <= 0) {
-			alert('Enter a duration in minutes greater than zero.');
-			return;
-		}
-		const label = customLabel.trim() || 'Custom Breakout';
-		await startRoundTimer(label, minutes);
 	}
 
 	let qrSrc = '';
@@ -421,63 +361,127 @@
 					{/if}
 					<p class="mt-1 text-sm text-slate-300">
 						{#if isFacilitator()}
-							Facilitator console · Sequence activities, capture insights, and steward alignment.
-						{:else}
-							Participant area · Share perspectives, upvote priorities, and follow the session flow.
-						{/if}
-					</p>
-				</div>
-				<div class="flex items-center gap-6">
-					<div class="flex items-center gap-2 text-sm text-slate-300">
-						<IconUsers class="h-5 w-5" />
-						<span>{participantsList.length} joined</span>
-					</div>
-					<div class="flex items-center gap-3">
-						<button
-							class="hidden sm:flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-cyan-400/60 hover:text-cyan-200 transition-colors"
-							on:click={() => goto('/facilitator')}
-						>
-							<IconHome class="h-4 w-4" />Facilitator Console
-						</button>
-						<button
-							class="hidden sm:flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-cyan-400/60 hover:text-cyan-200 transition-colors"
-							on:click={() => window.open(`/presentation?code=${sessionCode}`, '_blank')}
-						>
-							<IconChartBubble class="h-4 w-4" />Presentation View
-						</button>
-						{#if isFacilitator()}
-							<button
-								class="hidden sm:flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium hover:bg-purple-500 transition-colors"
-								on:click={exportSession}
-							>
-								<IconDownload class="h-4 w-4" /> Export
-							</button>
-						{/if}
-						<button
-							class="flex items-center gap-2 rounded-lg bg-red-600/80 px-4 py-2 text-sm font-medium hover:bg-red-500 transition-colors"
-							on:click={leaveSession}
-							title="Leave session and return to home (Ctrl+Shift+E)"
-						>
-							<IconHome class="h-4 w-4" />
-							<span class="hidden sm:inline">Leave Session</span>
-						</button>
-					</div>
-				</div>
-			</div>
-		</header>
-
-		<main class="mx-auto max-w-7xl px-6 py-8 space-y-10">
-			{#if isFacilitator()}
 				<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-6 space-y-6">
 					<div class="flex flex-wrap items-center justify-between gap-4">
 						<div>
-							<h2 class="text-lg font-semibold text-white">Session Controls</h2>
-							<p class="text-sm text-slate-400">
-								Manage session flow, breakout timers, and wrap-up state.
-							</p>
-							{#if templateTitle}
-								<p class="mt-1 text-xs text-slate-500">Template: {templateTitle}</p>
-							{/if}
+							<h2 class="text-lg font-semibold text-white">Session Progress</h2>
+							<p class="text-sm text-slate-400">Activate phases, manage timers, and advance the agenda.</p>
+						</div>
+						<div class="flex flex-wrap items-center gap-2">
+							{#each sessionStatuses as status}
+								<button
+									class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-slate-900 shadow' : 'border border-cyan-400/40 text-cyan-200 hover:border-cyan-300'}`}
+									on:click={() => changeStatus(status)}
+									disabled={statusUpdating || sessionInfo?.status === status}
+								>
+									{statusLabels[status]}
+								</button>
+							{/each}
+							<button
+								class="rounded-lg bg-red-600/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 transition"
+								on:click={() => changeStatus('done')}
+								disabled={statusUpdating || sessionInfo?.status === 'done'}
+							>
+								End Session
+							</button>
+						</div>
+					</div>
+
+					<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4">
+						{#if activePhase}
+							<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+								<div class="space-y-1">
+									<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Current Phase</p>
+									<h3 class="text-base font-semibold text-white">{activePhase.title ?? activePhase.phase_key ?? 'Phase'}</h3>
+									{#if activePhase.description}
+										<p class="text-sm text-slate-300 leading-relaxed">{activePhase.description}</p>
+									{/if}
+								</div>
+								<div class="text-right space-y-1">
+									{#if phaseCountdownLabel}
+										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Time Remaining</p>
+										<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
+									{:else if activePhase.duration_minutes}
+										<p class="text-xs text-slate-400">Duration: {activePhase.duration_minutes} min</p>
+									{/if}
+									<p class="text-xs text-slate-500">{phaseStatusLabels[activePhase.status]}{#if activePhase.started_at} • Started {new Date(activePhase.started_at).toLocaleTimeString()}{/if}</p>
+								</div>
+							</div>
+						{:else}
+							<p class="text-sm text-slate-400">No active phase. Start the first phase to begin the journey.</p>
+						{/if}
+					</div>
+
+					<div class="grid gap-4 lg:grid-cols-2">
+						{#if phasesList.length === 0}
+							<p class="text-sm text-slate-400">This session was created without phases. Update the Sanity template to design a structured flow.</p>
+						{:else}
+							{#each phasesList as phase}
+								<article
+									class={`rounded-xl border px-4 py-4 transition ${
+									phase.status === 'completed'
+										? 'border-emerald-400/30 bg-emerald-500/10'
+									: phase.status === 'active'
+										? 'border-cyan-400/40 bg-cyan-500/10'
+										: 'border-slate-700 bg-slate-900/70 hover:border-cyan-400/30'
+								}`}
+								>
+									<div class="flex items-center justify-between gap-3">
+										<div>
+											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">{phaseStatusLabels[phase.status] ?? 'Pending'}</p>
+											<h3 class="mt-1 text-sm font-semibold text-white">{phase.title ?? phase.phase_key ?? 'Phase'}</h3>
+										</div>
+										{#if phase.duration_minutes}
+											<span class="text-xs font-medium text-cyan-200">{phase.duration_minutes} min</span>
+										{/if}
+									</div>
+									{#if phase.description}
+										<p class="mt-3 text-sm text-slate-300 leading-relaxed">{phase.description}</p>
+									{/if}
+									{#if Array.isArray(phase.dashboards) && phase.dashboards.length}
+										<div class="mt-3">
+											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Recommended dashboards</p>
+											<div class="mt-2 flex flex-wrap gap-2">
+												{#each phase.dashboards as dashboard}
+													<span class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200">{dashboardLabels[dashboard] ?? dashboard}</span>
+												{/each}
+											</div>
+										</div>
+									{/if}
+									{#if isFacilitator()}
+										<div class="mt-4 flex flex-wrap items-center gap-2">
+											{#if phase.status === 'pending'}
+												<button
+													class="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-cyan-400 transition disabled:opacity-50"
+													on:click={() => activatePhase(phase)}
+														disabled={phaseUpdating}
+												>
+														Start Phase
+													</button>
+												{:else if phase.status === 'active'}
+													<button
+														class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-400 transition disabled:opacity-50"
+														on:click={() => finishPhase(phase)}
+														disabled={phaseUpdating}
+													>
+														Complete Phase
+													</button>
+												{:else}
+													<button
+														class="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:border-cyan-400/40 transition"
+														on:click={() => activatePhase(phase)}
+														disabled={phaseUpdating}
+													>
+														Revisit
+													</button>
+												{/if}
+										</div>
+									{/if}
+								</article>
+							{/each}
+						{/if}
+				</section>
+			{/if}
 						</div>
 						<div class="flex flex-wrap items-center gap-2">
 							{#each sessionStatuses as status}
