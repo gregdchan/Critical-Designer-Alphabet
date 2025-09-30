@@ -365,8 +365,10 @@ export async function completeSessionPhase(code: string, phaseKey: string, { aut
 
     if (!next.error && next.data?.phase_key) {
       nextPhaseKey = next.data.phase_key;
-      await startSessionPhase(code, nextPhaseKey);
-      return;
+      if (nextPhaseKey) {
+        await startSessionPhase(code, nextPhaseKey);
+        return;
+      }
     }
   }
 

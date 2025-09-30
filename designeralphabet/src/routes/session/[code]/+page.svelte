@@ -64,6 +64,13 @@
 
 	let chatMessage = '';
 
+	// Round management variables
+	let countdownTimer: ReturnType<typeof setInterval> | null = null;
+	let roundUpdating = false;
+	let roundCountdownLabel = '';
+	let templateLoading = false;
+	let templateError = '';
+	let templateRounds: any[] = [];
 	let customLabel = '';
 	let customMinutes = 0;
 
@@ -199,6 +206,10 @@
 	const isFacilitator = () =>
 		currentParticipant?.role === 'facilitator' || activeRole === 'facilitator';
 
+	const getPhaseStatusLabel = (status: string) => {
+		return phaseStatusLabels[status as keyof typeof phaseStatusLabels] || status;
+	};
+
 	function ensureProfile() {
 		if (!browser) return;
 		const stored = getParticipantProfile(sessionCode);
@@ -272,9 +283,9 @@
 
 	let qrSrc = '';
 
-	onMount(async () => {
+	onMount(() => {
 		ensureProfile();
-		await startRealtimeSession(sessionCode);
+		startRealtimeSession(sessionCode);
 		if (browser) {
 			const base = window.location.origin;
 			qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${base}/join?code=${sessionCode}`)}`;
@@ -303,6 +314,10 @@
 
 	onDestroy(() => {
 		stopRealtimeSession();
+		if (phaseTimer) {
+			clearInterval(phaseTimer);
+			phaseTimer = null;
+		}
 		if (countdownTimer) {
 			clearInterval(countdownTimer);
 			countdownTimer = null;
@@ -365,6 +380,61 @@
 		window.open(`/api/export/${sessionCode}`, '_blank');
 	}
 
+	async function clearActiveRound() {
+		if (!sessionCode || roundUpdating) return;
+		roundUpdating = true;
+		try {
+			const res = await fetch('/api/session/round', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ code: sessionCode })
+			});
+			const payload = await res.json();
+			if (!payload.success) {
+				throw new Error(payload.error ?? 'Unable to clear active round.');
+			}
+			await refreshSession(sessionCode);
+		} catch (error) {
+			console.error('Failed to clear active round', error);
+			alert((error as Error).message ?? 'Failed to clear active round.');
+		} finally {
+			roundUpdating = false;
+		}
+	}
+
+	async function startTemplateRound(round: any) {
+		// Placeholder function for template rounds
+		console.log('Starting template round:', round);
+	}
+
+	async function startCustomRound() {
+		if (!customLabel.trim() || customMinutes <= 0 || roundUpdating) return;
+		roundUpdating = true;
+		try {
+			const res = await fetch('/api/session/round', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					code: sessionCode,
+					label: customLabel.trim(),
+					minutes: customMinutes
+				})
+			});
+			const payload = await res.json();
+			if (!payload.success) {
+				throw new Error(payload.error ?? 'Unable to start custom round.');
+			}
+			await refreshSession(sessionCode);
+			customLabel = '';
+			customMinutes = 0;
+		} catch (error) {
+			console.error('Failed to start custom round', error);
+			alert((error as Error).message ?? 'Failed to start custom round.');
+		} finally {
+			roundUpdating = false;
+		}
+	}
+
 	function leaveSession() {
 		if (confirm('Are you sure you want to leave this session?')) {
 			// Clear session data
@@ -376,29 +446,6 @@
 			goto('/');
 		}
 	}
-
-	// Custom timer functions (placeholder implementations)
-	function startCustomRound() {
-		// TODO: Implement custom round functionality
-		console.log('Starting custom round:', customLabel, customMinutes);
-	}
-
-	function clearActiveRound() {
-		// TODO: Implement clear active round functionality
-		console.log('Clearing active round');
-	}
-
-	function startTemplateRound(round: any) {
-		// TODO: Implement template round functionality
-		console.log('Starting template round:', round);
-	}
-
-	// Placeholder variables for template rounds
-	let templateLoading = false;
-	let templateError = '';
-	let templateRounds: any[] = [];
-	let roundUpdating = false;
-	let roundCountdownLabel = '';
 </script>
 
 {#if sessionInfo}
@@ -476,7 +523,7 @@
 									{:else if activePhase.duration_minutes}
 										<p class="text-xs text-slate-400">Duration: {activePhase.duration_minutes} min</p>
 									{/if}
-									<p class="text-xs text-slate-500">{phaseStatusLabels[activePhase.status]}{#if activePhase.started_at} • Started {new Date(activePhase.started_at).toLocaleTimeString()}{/if}</p>
+									<p class="text-xs text-slate-500">{getPhaseStatusLabel(activePhase.status)}{#if activePhase.started_at} • Started {new Date(activePhase.started_at).toLocaleTimeString()}{/if}</p>
 								</div>
 							</div>
 						{:else}
@@ -500,7 +547,7 @@
 								>
 									<div class="flex items-center justify-between gap-3">
 										<div>
-											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">{phaseStatusLabels[phase.status] ?? 'Pending'}</p>
+											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">{getPhaseStatusLabel(phase.status)}</p>
 											<h3 class="mt-1 text-sm font-semibold text-white">{phase.title ?? phase.phase_key ?? 'Phase'}</h3>
 										</div>
 										{#if phase.duration_minutes}
@@ -552,6 +599,8 @@
 								</article>
 							{/each}
 						{/if}
+					</div>
+
 					<div class="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
 						<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4 space-y-4">
 							<div class="flex items-center justify-between">
