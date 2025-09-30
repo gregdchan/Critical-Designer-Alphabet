@@ -3,28 +3,29 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Install build dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy source code
+# Copy source code and build
 COPY . .
-
-# Build the application
 RUN npm run build
 
-# Production stage
-FROM node:18-alpine
+FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Copy package files for production dependencies
+# Ensure the server listens on all interfaces when running in Docker
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=3000
+
+# Install only production dependencies
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy built application
+# Copy the build artifacts from the builder stage
 COPY --from=builder /app/build ./build
-COPY --from=builder /app/package.json ./
 
 EXPOSE 3000
 

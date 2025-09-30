@@ -1,30 +1,31 @@
-version: '3.8'
+version: '3.9'
 
 services:
-  frontend:
+  web:
     build:
       context: ./designeralphabet
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+    image: critical-designer-alphabet-web
+    env_file:
+      - designeralphabet/.env
     environment:
       - NODE_ENV=production
-    depends_on:
-      - backend
-    networks:
-      - app-network
+      - HOST=0.0.0.0
+      - PORT=3000
+    ports:
+      - '3000:3000'
+    restart: unless-stopped
 
-  backend:
+  studio:
     build:
       context: ./content
       dockerfile: Dockerfile
-    ports:
-      - "3333:3333"
+    image: critical-designer-alphabet-studio
+    env_file:
+      - content/.env
     environment:
       - NODE_ENV=production
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+      - PORT=3333
+    ports:
+      - '3333:3333'
+    restart: unless-stopped

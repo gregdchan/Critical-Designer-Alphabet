@@ -1,18 +1,29 @@
-# Backend Dockerfile (Sanity CMS)
-FROM node:18-alpine
+# Sanity Studio Dockerfile
+FROM node:18-alpine AS builder
 
-WORKDIR /app
+WORKDIR /studio
 
-# Copy package files
+# Install build dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy source code
+# Copy source code and build the static studio assets
 COPY . .
-
-# Build the application
 RUN npm run build
+
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production \
+    PORT=3333
+
+# `serve` provides a lightweight HTTP server with history fallback support
+RUN npm install --global serve@14
+
+# Copy the built Sanity studio assets
+COPY --from=builder /studio/dist ./dist
 
 EXPOSE 3333
 
-CMD ["npm", "start"]
+CMD ["serve", "-s", "dist", "-l", "3333"]
