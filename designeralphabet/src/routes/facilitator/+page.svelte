@@ -322,11 +322,8 @@
 	}
 
 	function chooseActiveSession(session: (typeof activeSessions)[0]) {
-		sessionCode = session.code;
-		sessionTitle = session.title || `Session ${session.code}`;
-		if (session.facilitator_email) {
-			facilitatorEmail = session.facilitator_email;
-		}
+		// Navigate directly to the session as facilitator
+		goto(`/session/${session.code}?role=facilitator`);
 	}
 
 	onMount(async () => {

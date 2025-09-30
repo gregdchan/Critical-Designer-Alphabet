@@ -17,13 +17,17 @@
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 
-	// Mock data - in real implementation, this would come from API
+	// Real data from API
 	let sessions: any[] = [];
 	let selectedSession: any = null;
 	let participants: any[] = [];
 	let responses: any[] = [];
 	let timeline: any[] = [];
+	let questions: any[] = [];
+	let chat: any[] = [];
 	let loading = true;
+	let loadingSession = false;
+	let error = '';
 
 	// Dashboard metrics
 	let dashboardMetrics = {
@@ -37,195 +41,67 @@
 	let leaderboard: any[] = [];
 
 	onMount(async () => {
-		// Simulate loading data
 		await loadDashboardData();
 		loading = false;
 	});
 
 	async function loadDashboardData() {
-		// In real implementation, these would be API calls
-		sessions = [
-			{
-				id: '1',
-				code: 'DESIGN2024',
-				name: 'AI Ethics Sprint',
-				status: 'active',
-				createdAt: '2024-01-15T10:00:00Z',
-				participantCount: 12,
-				responseCount: 45,
-				template: 'AI Policy Design',
-				facilitator: 'Dr. Sarah Chen'
-			},
-			{
-				id: '2',
-				code: 'POLICY23',
-				name: 'Urban Planning Session',
-				status: 'completed',
-				createdAt: '2024-01-10T14:00:00Z',
-				participantCount: 8,
-				responseCount: 32,
-				template: 'Community Design',
-				facilitator: 'Marcus Rodriguez'
-			},
-			{
-				id: '3',
-				code: 'FUTURE24',
-				name: 'Sustainable Design Thinking',
-				status: 'completed',
-				createdAt: '2024-01-08T09:00:00Z',
-				participantCount: 15,
-				responseCount: 67,
-				template: 'Environmental Policy',
-				facilitator: 'Dr. Lisa Park'
+		try {
+			const response = await fetch('/api/dashboard');
+			const data = await response.json();
+
+			if (!data.success) {
+				throw new Error(data.error || 'Failed to load dashboard data');
 			}
-		];
 
-		// Calculate dashboard metrics
-		dashboardMetrics = {
-			totalSessions: sessions.length,
-			totalParticipants: sessions.reduce((sum, s) => sum + s.participantCount, 0),
-			totalIdeas: sessions.reduce((sum, s) => sum + s.responseCount, 0),
-			avgEngagement:
-				sessions.length > 0
-					? Math.round(
-							(sessions.reduce((sum, s) => sum + s.responseCount / s.participantCount, 0) /
-								sessions.length) *
-								10
-						) / 10
-					: 0,
-			activeSessions: sessions.filter((s) => s.status === 'active').length
-		};
+			sessions = data.sessions;
+			dashboardMetrics = data.metrics;
 
-		// Load first session details
-		if (sessions.length > 0) {
-			await loadSessionDetails(sessions[0]);
+			// Load first session details if available
+			if (sessions.length > 0) {
+				await loadSessionDetails(sessions[0]);
+			}
+		} catch (err: any) {
+			console.error('Failed to load dashboard data:', err);
+			error = err.message || 'Failed to load dashboard data';
 		}
 	}
 
 	async function loadSessionDetails(session: any) {
 		selectedSession = session;
+		loadingSession = true;
 
-		// Mock participant data
-		participants = [
-			{
-				id: '1',
-				name: 'Alice Johnson',
-				role: 'participant',
-				joinedAt: '2024-01-15T10:05:00Z',
-				avatarColor: 'bg-blue-500'
-			},
-			{
-				id: '2',
-				name: 'Bob Smith',
-				role: 'participant',
-				joinedAt: '2024-01-15T10:07:00Z',
-				avatarColor: 'bg-green-500'
-			},
-			{
-				id: '3',
-				name: 'Carol Davis',
-				role: 'participant',
-				joinedAt: '2024-01-15T10:12:00Z',
-				avatarColor: 'bg-purple-500'
-			},
-			{
-				id: '4',
-				name: 'David Wilson',
-				role: 'participant',
-				joinedAt: '2024-01-15T10:15:00Z',
-				avatarColor: 'bg-pink-500'
-			},
-			{
-				id: '5',
-				name: 'Emma Thompson',
-				role: 'participant',
-				joinedAt: '2024-01-15T10:18:00Z',
-				avatarColor: 'bg-yellow-500'
+		try {
+			const response = await fetch(`/api/dashboard/${session.code}`);
+			const data = await response.json();
+
+			if (!data.success) {
+				throw new Error(data.error || 'Failed to load session details');
 			}
-		];
 
-		// Mock response data
-		responses = [
-			{
-				id: '1',
-				participantId: '1',
-				text: 'AI bias in hiring processes needs transparent algorithms',
-				lens: 'Justice',
-				type: 'concern',
-				votes: ['2', '3', '4'],
-				createdAt: '2024-01-15T10:20:00Z'
-			},
-			{
-				id: '2',
-				participantId: '2',
-				text: 'Automated decision-making should include human oversight',
-				lens: 'Ethics',
-				type: 'goal',
-				votes: ['1', '3', '5'],
-				createdAt: '2024-01-15T10:25:00Z'
-			},
-			{
-				id: '3',
-				participantId: '3',
-				text: 'Community input essential for AI policy development',
-				lens: 'Community',
-				type: 'usecase',
-				votes: ['1', '2', '4', '5'],
-				createdAt: '2024-01-15T10:30:00Z'
-			},
-			{
-				id: '4',
-				participantId: '1',
-				text: 'Regular audits of AI systems for fairness metrics',
-				lens: 'Agency',
-				type: 'metric',
-				votes: ['2', '5'],
-				createdAt: '2024-01-15T10:35:00Z'
-			},
-			{
-				id: '5',
-				participantId: '4',
-				text: 'Environmental impact assessment for large AI models',
-				lens: 'Sustainability',
-				type: 'concern',
-				votes: ['1', '3'],
-				createdAt: '2024-01-15T10:40:00Z'
-			}
-		];
+			participants = data.participants || [];
+			responses = data.responses || [];
+			timeline = data.timeline || [];
+			questions = data.questions || [];
+			chat = data.chat || [];
 
-		// Mock timeline data
-		timeline = [
-			{
-				id: '1',
-				type: 'session_started',
-				timestamp: '2024-01-15T10:00:00Z',
-				description: 'Session started'
-			},
-			{
-				id: '2',
-				type: 'participant_joined',
-				timestamp: '2024-01-15T10:05:00Z',
-				description: 'Alice Johnson joined'
-			},
-			{
-				id: '3',
-				type: 'first_response',
-				timestamp: '2024-01-15T10:20:00Z',
-				description: 'First response submitted'
-			}
-		];
-
-		// Calculate leaderboard
-		leaderboard = getLeaderboard(participants, responses, timeline);
+			// Use participants array directly as leaderboard since it's already calculated and sorted
+			leaderboard = participants;
+		} catch (err: any) {
+			console.error('Failed to load session details:', err);
+			error = err.message || 'Failed to load session details';
+		} finally {
+			loadingSession = false;
+		}
 	}
 
 	function getStatusColor(status: string): string {
 		switch (status) {
-			case 'active':
+			case 'live':
 				return 'text-green-400 bg-green-400/10';
-			case 'completed':
+			case 'done':
 				return 'text-blue-400 bg-blue-400/10';
-			case 'paused':
+			case 'planned':
 				return 'text-yellow-400 bg-yellow-400/10';
 			default:
 				return 'text-slate-400 bg-slate-400/10';
@@ -241,9 +117,13 @@
 		});
 	}
 
-	async function exportSessionData(sessionId: string) {
-		// Implementation for exporting session data
-		console.log(`Exporting data for session ${sessionId}`);
+	async function exportSessionData(sessionCode: string) {
+		try {
+			window.open(`/api/export/${sessionCode}`, '_blank');
+		} catch (err) {
+			console.error('Failed to export session data:', err);
+			alert('Failed to export session data');
+		}
 	}
 </script>
 
@@ -271,7 +151,20 @@
 		</button>
 	</div>
 
-	{#if loading}
+	{#if error}
+		<div class="flex items-center justify-center py-12">
+			<div class="text-center">
+				<div class="text-red-400 mb-2">⚠️ Error loading dashboard</div>
+				<div class="text-slate-400 text-sm">{error}</div>
+				<button
+					class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+					on:click={() => { error = ''; loading = true; loadDashboardData().finally(() => loading = false); }}
+				>
+					Retry
+				</button>
+			</div>
+		</div>
+	{:else if loading}
 		<div class="flex items-center justify-center py-12">
 			<div class="text-slate-400">Loading dashboard data...</div>
 		</div>
@@ -361,11 +254,12 @@
 						{#each sessions as session}
 							<button
 								type="button"
-								class="w-full text-left p-4 rounded-lg border border-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 {selectedSession?.id ===
-								session.id
+								class="w-full text-left p-4 rounded-lg border border-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 {selectedSession?.code ===
+								session.code
 									? 'bg-blue-600/20 border-blue-500/50'
 									: 'hover:bg-slate-700'}"
 								on:click={() => loadSessionDetails(session)}
+								disabled={loadingSession}
 							>
 								<div class="flex items-center justify-between mb-2">
 									<h3 class="font-medium text-slate-100">{session.name}</h3>
@@ -391,7 +285,11 @@
 
 			<!-- Session Details -->
 			<div class="lg:col-span-2">
-				{#if selectedSession}
+				{#if loadingSession}
+					<div class="bg-slate-800 rounded-lg border border-slate-600 p-12 text-center">
+						<div class="text-slate-400">Loading session details...</div>
+					</div>
+				{:else if selectedSession}
 					<div class="space-y-6">
 						<!-- Session Header -->
 						<div class="bg-slate-800 rounded-lg border border-slate-600 p-6">
@@ -410,7 +308,7 @@
 									</button>
 									<button
 										class="inline-flex items-center gap-2 rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-600 transition-colors"
-										on:click={() => exportSessionData(selectedSession.id)}
+										on:click={() => exportSessionData(selectedSession.code)}
 									>
 										<Download class="h-4 w-4" />
 										Export
@@ -461,7 +359,8 @@
 												>#{index + 1}</span
 											>
 											<div
-												class="w-8 h-8 rounded-full {participant.avatarColor} flex items-center justify-center text-white text-sm font-medium"
+												class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
+												style="background-color: {participant.avatarColor || '#6b7280'}"
 											>
 												{participant.name.charAt(0)}
 											</div>
@@ -473,16 +372,18 @@
 											</div>
 										</div>
 										<div class="ml-auto flex items-center gap-2">
-											<div class="flex -space-x-1">
-												{#each participant.badges.slice(0, 3) as badge}
-													<span class="inline-block text-sm" title={badge.name}>{badge.icon}</span>
-												{/each}
-												{#if participant.badges.length > 3}
-													<span class="text-xs text-slate-400"
-														>+{participant.badges.length - 3}</span
-													>
-												{/if}
-											</div>
+											{#if participant.badges && participant.badges.length > 0}
+												<div class="flex -space-x-1">
+													{#each participant.badges.slice(0, 3) as badge}
+														<span class="inline-block text-sm" title={badge.name || badge}>{badge.icon || badge}</span>
+													{/each}
+													{#if participant.badges.length > 3}
+														<span class="text-xs text-slate-400"
+															>+{participant.badges.length - 3}</span
+														>
+													{/if}
+												</div>
+											{/if}
 											<span class="text-lg font-semibold text-blue-400">{participant.score}</span>
 										</div>
 									</div>

@@ -19,6 +19,10 @@ export const POST: RequestHandler = async ({ request }) => {
 			case 'complete':
 				await completeSessionPhase(code, phaseKey);
 				break;
+			case 'restart':
+				// Restart the timer by updating the started_at timestamp
+				await startSessionPhase(code, phaseKey);
+				break;
 			default:
 				return json({ success: false, error: `Unknown action ${action}` }, { status: 400 });
 		}

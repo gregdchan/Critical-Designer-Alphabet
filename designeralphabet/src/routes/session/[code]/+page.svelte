@@ -292,6 +292,29 @@
 		}
 	}
 
+	async function resetPhaseTimer(phase: any) {
+		if (!phase?.phase_key) return;
+		try {
+			const res = await fetch('/api/session/phase', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					code: sessionCode,
+					phaseKey: phase.phase_key,
+					action: 'restart'
+				})
+			});
+			const payload = await res.json();
+			if (!payload.success) {
+				throw new Error(payload.error ?? 'Unable to reset timer');
+			}
+			await refreshSession(sessionCode);
+		} catch (error) {
+			console.error('Failed to reset phase timer', error);
+			alert((error as Error).message ?? 'Failed to reset phase timer.');
+		}
+	}
+
 	let qrSrc = '';
 
 	onMount(() => {
@@ -337,6 +360,13 @@
 
 	async function submitResponse() {
 		if (!selectedQuestionId || !responseText.trim()) return;
+
+		// Check if we're in an active phase with remaining time
+		if (activePhase && !phaseRemainingMs) {
+			alert('Time is up for this phase. Responses are no longer accepted.');
+			return;
+		}
+
 		await apiAddResponse(sessionCode, {
 			questionId: selectedQuestionId,
 			participantId: currentParticipant?.id ?? null,
@@ -553,7 +583,7 @@
 						{/if}
 					</div>
 
-					<div class="grid gap-4 lg:grid-cols-2">
+					<div class="space-y-4">
 						{#if phasesList.length === 0}
 							<p class="text-sm text-slate-400">
 								This session was created without phases. Update the Sanity template to design a
@@ -562,7 +592,7 @@
 						{:else}
 							{#each phasesList as phase}
 								<article
-									class={`rounded-xl border px-4 py-4 transition ${
+									class={`rounded-xl border px-6 py-6 transition ${
 										phase.status === 'completed'
 											? 'border-emerald-400/30 bg-emerald-500/10'
 											: phase.status === 'active'
@@ -570,39 +600,47 @@
 												: 'border-slate-700 bg-slate-900/70 hover:border-cyan-400/30'
 									}`}
 								>
-									<div class="flex items-center justify-between gap-3">
-										<div>
-											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
-												{getPhaseStatusLabel(phase.status)}
-											</p>
-											<h3 class="mt-1 text-sm font-semibold text-white">
+									<!-- Phase Header -->
+									<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+										<div class="flex-1">
+											<div class="flex items-center gap-3 mb-2">
+												<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+													{getPhaseStatusLabel(phase.status)}
+												</p>
+												{#if phase.duration_minutes}
+													<span class="text-xs font-medium text-cyan-200"
+														>{phase.duration_minutes} min</span
+													>
+												{/if}
+											</div>
+											<h3 class="text-lg font-semibold text-white mb-2">
 												{phase.title ?? phase.phase_key ?? 'Phase'}
 											</h3>
+											{#if phase.description}
+												<p class="text-sm text-slate-300 leading-relaxed">{phase.description}</p>
+											{/if}
 										</div>
-										{#if phase.duration_minutes}
-											<span class="text-xs font-medium text-cyan-200"
-												>{phase.duration_minutes} min</span
-											>
+
+										<!-- Timer Controls -->
+										{#if phase.status === 'active' && isFacilitator()}
+											<div class="flex items-center gap-2">
+												{#if phaseCountdownLabel}
+													<div class="text-right">
+														<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Time Remaining</p>
+														<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
+													</div>
+												{/if}
+												<button
+													class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-amber-400 transition"
+													on:click={() => resetPhaseTimer(phase)}
+												>
+													Reset Timer
+												</button>
+											</div>
 										{/if}
 									</div>
-									{#if phase.description}
-										<p class="mt-3 text-sm text-slate-300 leading-relaxed">{phase.description}</p>
-									{/if}
-									{#if Array.isArray(phase.dashboards) && phase.dashboards.length}
-										<div class="mt-3">
-											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
-												Recommended dashboards
-											</p>
-											<div class="mt-2 flex flex-wrap gap-2">
-												{#each phase.dashboards as dashboard}
-													<span
-														class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200"
-														>{dashboardLabels[dashboard] ?? dashboard}</span
-													>
-												{/each}
-											</div>
-										</div>
-									{/if}
+
+									<!-- Phase Controls for Facilitators -->
 									{#if isFacilitator()}
 										<div class="mt-4 flex flex-wrap items-center gap-2">
 											{#if phase.status === 'pending'}
@@ -630,6 +668,143 @@
 													Revisit
 												</button>
 											{/if}
+										</div>
+									{/if}
+
+									<!-- Phase Cards (if associated with this phase) -->
+									{#if phase.cards?.length}
+										<div class="mt-6">
+											<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-3">Phase Cards</p>
+											<div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+												{#each phase.cards as card}
+													<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
+														<h4 class="text-sm font-semibold text-cyan-200">{card.title}</h4>
+														<p class="text-xs text-slate-300 mt-1">{card.description}</p>
+													</div>
+												{/each}
+											</div>
+										</div>
+									{/if}
+
+									<!-- Phase Questions -->
+									{#if questionsList.filter(q => q.phase_key === phase.phase_key || (phase.status === 'active' && !q.phase_key)).length > 0}
+										{@const phaseQuestions = questionsList.filter(q => q.phase_key === phase.phase_key || (phase.status === 'active' && !q.phase_key))}
+										<div class="mt-6">
+											<div class="flex items-center justify-between mb-4">
+												<h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
+													Phase Questions
+												</h4>
+												{#if phase.status === 'active' && !isFacilitator()}
+													<button
+														class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:from-cyan-400 hover:to-purple-500 transition-colors"
+														on:click={() => openResponseModal(null)}
+														disabled={!phaseRemainingMs}
+													>
+														<IconPlus class="h-3 w-3" /> Respond
+													</button>
+												{/if}
+											</div>
+
+											<div class="space-y-4">
+												{#each phaseQuestions as question}
+													<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4 space-y-3">
+														<div class="flex items-start justify-between gap-3">
+															<div class="flex-1">
+																<div class="flex items-center gap-2 mb-2">
+																	<span class="text-xs uppercase tracking-[0.3em] text-cyan-200">
+																		{question.section}
+																	</span>
+																	{#if question.response_type && question.response_type !== 'written'}
+																		<span class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs">
+																			{question.response_type}
+																		</span>
+																	{/if}
+																</div>
+																<h5 class="text-sm font-semibold text-white">{question.text}</h5>
+															</div>
+															{#if phase.status === 'active' && !isFacilitator()}
+																<button
+																	class="rounded-lg border border-cyan-400/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"
+																	on:click={() => openResponseModal(question.id)}
+																	disabled={!phaseRemainingMs}
+																>
+																	{phaseRemainingMs ? 'Respond' : 'Time up'}
+																</button>
+															{/if}
+														</div>
+
+														<!-- Question Responses -->
+														{#if responsesList.filter(r => r.question_id === question.id).length > 0}
+															{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
+															{@const totalVotes = questionResponses.reduce((sum, r) => sum + (r.votes || 0), 0)}
+															{@const sortedByVotes = questionResponses.sort((a, b) => (b.votes || 0) - (a.votes || 0))}
+
+															<!-- Vote Summary -->
+															{#if totalVotes > 0}
+																<div class="mb-3 p-2 rounded bg-cyan-400/10 border border-cyan-400/30">
+																	<p class="text-xs font-medium text-cyan-200 mb-2">Community Insights (Total votes: {totalVotes})</p>
+																	<div class="space-y-1">
+																		{#each sortedByVotes.slice(0, 3) as topResponse}
+																			{#if topResponse.votes && topResponse.votes > 0}
+																				<div class="flex items-center justify-between text-xs">
+																					<span class="text-slate-300 flex-1 pr-2">{topResponse.text.slice(0, 50)}...</span>
+																					<div class="flex items-center gap-1 text-cyan-200">
+																						<IconThumbUp class="h-3 w-3" />
+																						<span class="font-medium">{topResponse.votes}</span>
+																					</div>
+																				</div>
+																			{/if}
+																		{/each}
+																	</div>
+																</div>
+															{/if}
+
+															<!-- Individual Responses -->
+															<div class="space-y-2 max-h-40 overflow-y-auto">
+																{#each sortedByVotes as response}
+																	<div class="rounded border border-slate-800 bg-slate-900/70 p-2 text-xs">
+																		<div class="flex items-center justify-between text-slate-400 mb-1">
+																			<span>{participantsList.find(p => p.id === response.participant_id)?.name ?? 'Anonymous'}</span>
+																			<button
+																				class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
+																				on:click={() => toggleVote(response.id)}
+																				disabled={activePhase && !phaseRemainingMs}
+																			>
+																				<IconThumbUp class="h-3 w-3" />
+																				{response.votes ?? 0}
+																			</button>
+																		</div>
+																		<p class="text-slate-200">{response.text}</p>
+																		{#if response.cards?.length}
+																			<div class="mt-1 flex flex-wrap gap-1">
+																				{#each response.cards as card}
+																					<span class="px-1 py-0.5 text-xs rounded bg-cyan-400/20 text-cyan-300">{card}</span>
+																				{/each}
+																			</div>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
+														{/if}
+													</div>
+												{/each}
+											</div>
+										</div>
+									{/if}
+
+									{#if Array.isArray(phase.dashboards) && phase.dashboards.length}
+										<div class="mt-6">
+											<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-2">
+												Recommended dashboards
+											</p>
+											<div class="flex flex-wrap gap-2">
+												{#each phase.dashboards as dashboard}
+													<span
+														class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200"
+														>{dashboardLabels[dashboard] ?? dashboard}</span
+													>
+												{/each}
+											</div>
 										</div>
 									{/if}
 								</article>
@@ -1024,150 +1199,50 @@
 				</div>
 			</section>
 
-			<section class="grid gap-6 lg:grid-cols-[3fr_2fr]">
-				<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6 space-y-4">
-					<div class="flex items-center justify-between">
-						<div>
-							<h2 class="text-lg font-semibold text-white">Questions & Responses</h2>
-							<p class="text-sm text-slate-400">Select a prompt and share your perspective.</p>
-						</div>
-						<button
-							class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-cyan-400 hover:to-purple-500 transition-colors"
-							on:click={() => openResponseModal(null)}
-						>
-							<IconPlus class="h-4 w-4" /> Respond
-						</button>
-					</div>
-
-					<div class="space-y-6">
-						{#each questionsList as question}
-							<article class="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-3">
-								<header class="flex items-center justify-between">
-									<div class="flex-1">
-										<div class="flex items-center gap-3 mb-2">
-											<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">
-												{question.section}
-											</p>
-											{#if question.lens}
-												<span class="px-2 py-1 bg-purple-400/20 text-purple-300 rounded text-xs">
-													{question.lens}
-												</span>
-											{/if}
-											{#if question.response_type && question.response_type !== 'written'}
-												<span class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs">
-													{question.response_type}
-												</span>
-											{/if}
-											{#if question.map_type && question.map_type !== 'responses'}
-												<span class="px-2 py-1 bg-green-400/20 text-green-300 rounded text-xs">
-													📊 {question.map_type}
-												</span>
-											{/if}
-										</div>
-										<h3 class="text-sm font-semibold text-white">{question.text}</h3>
-										{#if question.recommended_dashboards?.length}
-											<div class="mt-2 flex flex-wrap gap-1">
-												{#each question.recommended_dashboards.slice(0, 3) as dashboard}
-													<span class="px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs">
-														{dashboard}
-													</span>
-												{/each}
-												{#if question.recommended_dashboards.length > 3}
-													<span class="text-xs text-slate-400"
-														>+{question.recommended_dashboards.length - 3} more</span
-													>
-												{/if}
-											</div>
-										{/if}
-									</div>
-									<button
-										class="rounded-lg border border-cyan-400/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"
-										on:click={() => openResponseModal(question.id)}
+			<!-- Leaderboard and QR Code Section -->
+			<section class="grid gap-6 lg:grid-cols-2">
+				<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+					<h2 class="text-lg font-semibold text-white">Leaderboard</h2>
+					<p class="text-sm text-slate-400">
+						Points reflect contributions, votes earned, and justice prompts.
+					</p>
+					<ul class="mt-4 space-y-3">
+						{#each leaderboardList as player, index}
+							<li
+								class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2"
+							>
+								<div class="flex items-center gap-3">
+									<span class="text-xs text-slate-400">#{index + 1}</span>
+									<span
+										class="h-8 w-8 rounded-full border border-slate-600 flex items-center justify-center font-semibold"
+										style={`background:${player.color}`}
+										>{player.name?.charAt(0)?.toUpperCase() ?? '?'}</span
 									>
-										Share response
-									</button>
-								</header>
-								<div class="space-y-3">
-									{#each responsesList.filter((r) => r.question_id === question.id) as response}
-										<div class="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
-											<div class="flex items-center justify-between text-xs text-slate-400">
-												<span
-													>{participantsList.find((p) => p.id === response.participant_id)?.name ??
-														'Anonymous'}</span
-												>
-												<span>{response.created_at}</span>
-											</div>
-											<p class="mt-2 text-sm text-slate-200">{response.text}</p>
-											{#if response.cards?.length}
-												<div class="mt-2 flex flex-wrap gap-2 text-xs text-cyan-200">
-													{#each response.cards as card}
-														<span class="rounded-full border border-cyan-400/40 px-2 py-1"
-															>{card}</span
-														>
-													{/each}
-												</div>
-											{/if}
-											<div class="mt-3 flex items-center gap-3 text-xs text-slate-400">
-												<button
-													class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-2 py-1 text-cyan-200 hover:border-cyan-300 transition-colors"
-													on:click={() => toggleVote(response.id)}
-												>
-													<IconThumbUp class="h-4 w-4" />
-													{response.votes ?? 0}
-												</button>
-											</div>
-										</div>
-									{/each}
+									<div>
+										<p class="text-sm text-white">{player.name}</p>
+										<p class="text-xs text-slate-400">{player.badges?.length ?? 0} badges</p>
+									</div>
 								</div>
-							</article>
+								<span class="font-mono text-cyan-200">{player.points ?? 0} pts</span>
+							</li>
 						{/each}
-					</div>
+					</ul>
 				</div>
 
-				<aside class="space-y-6">
-					<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-						<h2 class="text-lg font-semibold text-white">Leaderboard</h2>
-						<p class="text-sm text-slate-400">
-							Points reflect contributions, votes earned, and justice prompts.
-						</p>
-						<ul class="mt-4 space-y-3">
-							{#each leaderboardList as player, index}
-								<li
-									class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2"
-								>
-									<div class="flex items-center gap-3">
-										<span class="text-xs text-slate-400">#{index + 1}</span>
-										<span
-											class="h-8 w-8 rounded-full border border-slate-600 flex items-center justify-center font-semibold"
-											style={`background:${player.color}`}
-											>{player.name?.charAt(0)?.toUpperCase() ?? '?'}</span
-										>
-										<div>
-											<p class="text-sm text-white">{player.name}</p>
-											<p class="text-xs text-slate-400">{player.badges?.length ?? 0} badges</p>
-										</div>
-									</div>
-									<span class="font-mono text-cyan-200">{player.points ?? 0} pts</span>
-								</li>
-							{/each}
-						</ul>
+				<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+					<h2 class="text-lg font-semibold text-white">QR Code</h2>
+					<p class="text-sm text-slate-400">New participants can scan to join instantly.</p>
+					<div class="mt-4 flex justify-center">
+						{#if qrSrc}
+							<img
+								class="h-40 w-40 rounded-lg border border-slate-700 bg-white p-2"
+								alt="Join session QR code"
+								src={qrSrc}
+							/>
+						{/if}
 					</div>
-
-					<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-						<h2 class="text-lg font-semibold text-white">QR Code</h2>
-						<p class="text-sm text-slate-400">New participants can scan to join instantly.</p>
-						<div class="mt-4 flex justify-center">
-							{#if qrSrc}
-								<img
-									class="h-40 w-40 rounded-lg border border-slate-700 bg-white p-2"
-									alt="Join session QR code"
-									src={qrSrc}
-								/>
-							{/if}
-						</div>
-						<p class="mt-3 text-center text-xs text-slate-500">/join?code={sessionCode}</p>
-					</div>
-				</aside>
+					<p class="mt-3 text-center text-xs text-slate-500">/join?code={sessionCode}</p>
+				</div>
 			</section>
 		</main>
 	</div>
@@ -1224,10 +1299,11 @@
 					Cancel
 				</button>
 				<button
-					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-400"
+					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
 					on:click={submitResponse}
+					disabled={activePhase && !phaseRemainingMs}
 				>
-					Share idea
+					{activePhase && !phaseRemainingMs ? 'Time Up' : 'Share idea'}
 				</button>
 			</div>
 		</div>
