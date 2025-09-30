@@ -5,40 +5,40 @@ import { broadcast } from './realtime';
 export type SessionStatus = 'planned' | 'live' | 'done';
 
 export interface Session {
-  code: string;
-  title: string | null;
-  template_slug: string | null;
-  challenge: string | null;
-  facilitator_email: string | null;
-  active_phase_key: string | null;
-  active_round: string | null;
-  round_expires_at: string | null;
-  status: SessionStatus;
-  created_at: string;
+	code: string;
+	title: string | null;
+	template_slug: string | null;
+	challenge: string | null;
+	facilitator_email: string | null;
+	active_phase_key: string | null;
+	active_round: string | null;
+	round_expires_at: string | null;
+	status: SessionStatus;
+	created_at: string;
 }
 
 export interface SessionPhase {
-  id: string;
-  session_code: string;
-  phase_key: string | null;
-  title: string | null;
-  description: string | null;
-  order_index: number | null;
-  duration_minutes: number | null;
-  dashboards: string[];
-  status: 'pending' | 'active' | 'completed';
-  started_at: string | null;
-  completed_at: string | null;
-  created_at: string | null;
-  updated_at: string | null;
+	id: string;
+	session_code: string;
+	phase_key: string | null;
+	title: string | null;
+	description: string | null;
+	order_index: number | null;
+	duration_minutes: number | null;
+	dashboards: string[];
+	status: 'pending' | 'active' | 'completed';
+	started_at: string | null;
+	completed_at: string | null;
+	created_at: string | null;
+	updated_at: string | null;
 }
 
 export interface TemplatePhase {
-  key?: string;
-  title?: string;
-  description?: string;
-  durationMinutes?: number | null;
-  dashboards?: string[] | null;
+	key?: string;
+	title?: string;
+	description?: string;
+	durationMinutes?: number | null;
+	dashboards?: string[] | null;
 }
 
 export interface Participant {
@@ -154,24 +154,24 @@ function asResponse(row: any): ResponseRow {
 }
 
 export async function createSession({
-  code,
-  title,
-  templateSlug,
-  challenge,
-  facilitatorEmail,
-  phases
+	code,
+	title,
+	templateSlug,
+	challenge,
+	facilitatorEmail,
+	phases
 }: {
-  code: string;
-  title: string;
-  templateSlug?: string;
-  challenge?: string;
-  facilitatorEmail?: string;
-  phases?: TemplatePhase[];
+	code: string;
+	title: string;
+	templateSlug?: string;
+	challenge?: string;
+	facilitatorEmail?: string;
+	phases?: TemplatePhase[];
 }) {
-  const response = await supabaseAdmin
-    .from('sessions')
-    .insert({
-      code,
+	const response = await supabaseAdmin
+		.from('sessions')
+		.insert({
+			code,
 			title,
 			template_slug: templateSlug ?? null,
 			challenge: challenge ?? null,
@@ -182,27 +182,27 @@ export async function createSession({
 		.select()
 		.single();
 
-  const session = ensure(response, 'createSession');
+	const session = ensure(response, 'createSession');
 
-  if (phases?.length) {
-    const rows = phases.map((phase, index) => ({
-      session_code: code,
-      phase_key: phase.key ?? `phase-${index + 1}`,
-      title: phase.title ?? phase.key ?? `Phase ${index + 1}`,
-      description: phase.description ?? null,
-      order_index: index,
-      duration_minutes: phase.durationMinutes ?? null,
-      dashboards: Array.isArray(phase.dashboards) ? phase.dashboards : [],
-      status: 'pending'
-    }));
+	if (phases?.length) {
+		const rows = phases.map((phase, index) => ({
+			session_code: code,
+			phase_key: phase.key ?? `phase-${index + 1}`,
+			title: phase.title ?? phase.key ?? `Phase ${index + 1}`,
+			description: phase.description ?? null,
+			order_index: index,
+			duration_minutes: phase.durationMinutes ?? null,
+			dashboards: Array.isArray(phase.dashboards) ? phase.dashboards : [],
+			status: 'pending'
+		}));
 
-    const { error } = await supabaseAdmin.from('session_phases').insert(rows);
-    if (error) {
-      throw new Error(error.message);
-    }
-  }
+		const { error } = await supabaseAdmin.from('session_phases').insert(rows);
+		if (error) {
+			throw new Error(error.message);
+		}
+	}
 
-  return session as Session;
+	return session as Session;
 }
 
 export async function updateSessionStatus(code: string, status: SessionStatus) {
@@ -268,117 +268,118 @@ export async function listSessions({
 }
 
 export async function getSessionPhases(code: string): Promise<SessionPhase[]> {
-  const response = await supabaseAdmin
-    .from('session_phases')
-    .select('*')
-    .eq('session_code', code)
-    .order('order_index', { ascending: true });
+	const response = await supabaseAdmin
+		.from('session_phases')
+		.select('*')
+		.eq('session_code', code)
+		.order('order_index', { ascending: true });
 
-  return ensureArray(response, 'getSessionPhases').map((row: any) => ({
-    ...row,
-    dashboards: Array.isArray(row.dashboards) ? (row.dashboards as string[]) : []
-  })) as SessionPhase[];
+	return ensureArray(response, 'getSessionPhases').map((row: any) => ({
+		...row,
+		dashboards: Array.isArray(row.dashboards) ? (row.dashboards as string[]) : []
+	})) as SessionPhase[];
 }
 
 export async function startSessionPhase(code: string, phaseKey: string) {
-  const now = new Date().toISOString();
+	const now = new Date().toISOString();
 
-  const phaseRecord = await supabaseAdmin
-    .from('session_phases')
-    .select('id, order_index')
-    .eq('session_code', code)
-    .eq('phase_key', phaseKey)
-    .maybeSingle();
+	const phaseRecord = await supabaseAdmin
+		.from('session_phases')
+		.select('id, order_index')
+		.eq('session_code', code)
+		.eq('phase_key', phaseKey)
+		.maybeSingle();
 
-  if (phaseRecord.error) throw new Error(phaseRecord.error.message);
-  if (!phaseRecord.data) throw new Error('Phase not found');
+	if (phaseRecord.error) throw new Error(phaseRecord.error.message);
+	if (!phaseRecord.data) throw new Error('Phase not found');
 
-  const orderIndex = phaseRecord.data.order_index ?? 0;
+	const orderIndex = phaseRecord.data.order_index ?? 0;
 
-  await supabaseAdmin
-    .from('session_phases')
-    .update({ status: 'completed', completed_at: now })
-    .eq('session_code', code)
-    .lt('order_index', orderIndex)
-    .not('status', 'eq', 'completed');
+	await supabaseAdmin
+		.from('session_phases')
+		.update({ status: 'completed', completed_at: now })
+		.eq('session_code', code)
+		.lt('order_index', orderIndex)
+		.not('status', 'eq', 'completed');
 
-  await supabaseAdmin
-    .from('session_phases')
-    .update({ status: 'pending', started_at: null, completed_at: null })
-    .eq('session_code', code)
-    .gt('order_index', orderIndex)
-    .not('status', 'eq', 'pending');
+	await supabaseAdmin
+		.from('session_phases')
+		.update({ status: 'pending', started_at: null, completed_at: null })
+		.eq('session_code', code)
+		.gt('order_index', orderIndex)
+		.not('status', 'eq', 'pending');
 
-  const target = await supabaseAdmin
-    .from('session_phases')
-    .update({ status: 'active', started_at: now, completed_at: null })
-    .eq('id', phaseRecord.data.id)
-    .select()
-    .single();
+	const target = await supabaseAdmin
+		.from('session_phases')
+		.update({ status: 'active', started_at: now, completed_at: null })
+		.eq('id', phaseRecord.data.id)
+		.select()
+		.single();
 
-  const updated = ensure(target, 'startSessionPhase') as SessionPhase;
+	const updated = ensure(target, 'startSessionPhase') as SessionPhase;
 
-  await supabaseAdmin
-    .from('sessions')
-    .update({ active_phase_key: phaseKey, status: 'live' })
-    .eq('code', code);
+	await supabaseAdmin
+		.from('sessions')
+		.update({ active_phase_key: phaseKey, status: 'live' })
+		.eq('code', code);
 
-  const phases = await getSessionPhases(code);
-  broadcast(code, { type: 'PHASE_UPDATE', phases, activePhaseKey: phaseKey });
-  return updated;
+	const phases = await getSessionPhases(code);
+	broadcast(code, { type: 'PHASE_UPDATE', phases, activePhaseKey: phaseKey });
+	return updated;
 }
 
-export async function completeSessionPhase(code: string, phaseKey: string, { autoAdvance = true } = {}) {
-  const now = new Date().toISOString();
+export async function completeSessionPhase(
+	code: string,
+	phaseKey: string,
+	{ autoAdvance = true } = {}
+) {
+	const now = new Date().toISOString();
 
-  const phaseRecord = await supabaseAdmin
-    .from('session_phases')
-    .select('id, order_index')
-    .eq('session_code', code)
-    .eq('phase_key', phaseKey)
-    .maybeSingle();
+	const phaseRecord = await supabaseAdmin
+		.from('session_phases')
+		.select('id, order_index')
+		.eq('session_code', code)
+		.eq('phase_key', phaseKey)
+		.maybeSingle();
 
-  if (phaseRecord.error) throw new Error(phaseRecord.error.message);
-  if (!phaseRecord.data) throw new Error('Phase not found');
+	if (phaseRecord.error) throw new Error(phaseRecord.error.message);
+	if (!phaseRecord.data) throw new Error('Phase not found');
 
-  const updated = await supabaseAdmin
-    .from('session_phases')
-    .update({ status: 'completed', completed_at: now })
-    .eq('id', phaseRecord.data.id)
-    .select()
-    .single();
+	const updated = await supabaseAdmin
+		.from('session_phases')
+		.update({ status: 'completed', completed_at: now })
+		.eq('id', phaseRecord.data.id)
+		.select()
+		.single();
 
-  ensure(updated, 'completeSessionPhase');
+	ensure(updated, 'completeSessionPhase');
 
-  let nextPhaseKey: string | null = null;
+	let nextPhaseKey: string | null = null;
 
-  if (autoAdvance) {
-    const next = await supabaseAdmin
-      .from('session_phases')
-      .select('phase_key')
-      .eq('session_code', code)
-      .gt('order_index', phaseRecord.data.order_index ?? 0)
-      .order('order_index', { ascending: true })
-      .eq('status', 'pending')
-      .limit(1)
-      .maybeSingle();
+	if (autoAdvance) {
+		const next = await supabaseAdmin
+			.from('session_phases')
+			.select('phase_key')
+			.eq('session_code', code)
+			.gt('order_index', phaseRecord.data.order_index ?? 0)
+			.order('order_index', { ascending: true })
+			.eq('status', 'pending')
+			.limit(1)
+			.maybeSingle();
 
-    if (!next.error && next.data?.phase_key) {
-      nextPhaseKey = next.data.phase_key;
-      if (nextPhaseKey) {
-        await startSessionPhase(code, nextPhaseKey);
-        return;
-      }
-    }
-  }
+		if (!next.error && next.data?.phase_key) {
+			nextPhaseKey = next.data.phase_key;
+			if (nextPhaseKey) {
+				await startSessionPhase(code, nextPhaseKey);
+				return;
+			}
+		}
+	}
 
-  await supabaseAdmin
-    .from('sessions')
-    .update({ active_phase_key: nextPhaseKey })
-    .eq('code', code);
+	await supabaseAdmin.from('sessions').update({ active_phase_key: nextPhaseKey }).eq('code', code);
 
-  const phases = await getSessionPhases(code);
-  broadcast(code, { type: 'PHASE_UPDATE', phases, activePhaseKey: nextPhaseKey });
+	const phases = await getSessionPhases(code);
+	broadcast(code, { type: 'PHASE_UPDATE', phases, activePhaseKey: nextPhaseKey });
 }
 
 export async function addParticipant({

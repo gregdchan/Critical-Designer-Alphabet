@@ -527,7 +527,9 @@
 			</div>
 			{#if activeLoading}
 				<div class="flex items-center justify-center py-6">
-					<div class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+					<div
+						class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"
+					></div>
 					<span class="ml-3 text-slate-300">Loading sessions...</span>
 				</div>
 			{:else if activeError}
@@ -541,7 +543,9 @@
 					</button>
 				</div>
 			{:else if activeSessions.length === 0}
-				<p class="mt-4 text-sm text-slate-400 text-center py-4">No active sessions right now. Check back soon!</p>
+				<p class="mt-4 text-sm text-slate-400 text-center py-4">
+					No active sessions right now. Check back soon!
+				</p>
 			{:else}
 				<div class="mt-4 grid gap-3">
 					{#each activeSessions as session}
@@ -555,7 +559,11 @@
 									<span class="text-sm font-semibold text-white">
 										{session.title ?? 'Untitled Session'}
 									</span>
-									<span class="px-2 py-1 text-xs rounded-full {session.status === 'live' ? 'bg-green-400/20 text-green-300' : 'bg-yellow-400/20 text-yellow-300'}">
+									<span
+										class="px-2 py-1 text-xs rounded-full {session.status === 'live'
+											? 'bg-green-400/20 text-green-300'
+											: 'bg-yellow-400/20 text-yellow-300'}"
+									>
 										{session.status}
 									</span>
 								</div>
@@ -564,9 +572,7 @@
 									<span>{new Date(session.created_at).toLocaleDateString()}</span>
 								</div>
 							</div>
-							<div class="text-cyan-400 text-sm">
-								Join →
-							</div>
+							<div class="text-cyan-400 text-sm">Join →</div>
 						</button>
 					{/each}
 				</div>

@@ -49,7 +49,8 @@
 	let currentParticipant: any = null;
 	const activeRole = data.role ?? 'participant';
 
-	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'timeline' | 'chat' | 'participants' = 'overview';
+	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'timeline' | 'chat' | 'participants' =
+		'overview';
 	let responseModalOpen = false;
 	let selectedQuestionId: string | null = null;
 	let responseText = '';
@@ -120,44 +121,47 @@
 		};
 	});
 
-	$: participantActivity = participantsList.map((participant) => {
-		const participantResponses = responsesList.filter(r => r.participant_id === participant.id);
-		const totalVotes = participantResponses.reduce((sum, r) => sum + (r.votes || 0), 0);
-		const participantChats = chatList.filter(c => c.participant_id === participant.id);
-		const participantTimeline = timelineList.filter(t => t.owner === participant.name);
+	$: participantActivity = participantsList
+		.map((participant) => {
+			const participantResponses = responsesList.filter((r) => r.participant_id === participant.id);
+			const totalVotes = participantResponses.reduce((sum, r) => sum + (r.votes || 0), 0);
+			const participantChats = chatList.filter((c) => c.participant_id === participant.id);
+			const participantTimeline = timelineList.filter((t) => t.owner === participant.name);
 
-		// Calculate activity score based on various actions
-		const activityScore = (participantResponses.length * 10) +
-			(totalVotes * 2) +
-			(participantChats.length * 5) +
-			(participantTimeline.length * 15) +
-			(participant.points || 0);
+			// Calculate activity score based on various actions
+			const activityScore =
+				participantResponses.length * 10 +
+				totalVotes * 2 +
+				participantChats.length * 5 +
+				participantTimeline.length * 15 +
+				(participant.points || 0);
 
-		// Determine last activity
-		const allActivities = [
-			...participantResponses.map(r => ({ type: 'response', time: r.created_at })),
-			...participantChats.map(c => ({ type: 'chat', time: c.created_at })),
-			...participantTimeline.map(t => ({ type: 'timeline', time: t.created_at }))
-		].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+			// Determine last activity
+			const allActivities = [
+				...participantResponses.map((r) => ({ type: 'response', time: r.created_at })),
+				...participantChats.map((c) => ({ type: 'chat', time: c.created_at })),
+				...participantTimeline.map((t) => ({ type: 'timeline', time: t.created_at }))
+			].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-		const lastActivity = allActivities[0];
-		const timeSinceLastActivity = lastActivity ?
-			Date.now() - new Date(lastActivity.time).getTime() :
-			Date.now() - new Date(participant.created_at).getTime();
+			const lastActivity = allActivities[0];
+			const timeSinceLastActivity = lastActivity
+				? Date.now() - new Date(lastActivity.time).getTime()
+				: Date.now() - new Date(participant.created_at).getTime();
 
-		return {
-			...participant,
-			responseCount: participantResponses.length,
-			totalVotes,
-			chatCount: participantChats.length,
-			timelineCount: participantTimeline.length,
-			activityScore,
-			lastActivity: lastActivity?.type || 'joined',
-			lastActivityTime: lastActivity?.time || participant.created_at,
-			minutesSinceActivity: Math.floor(timeSinceLastActivity / 60000),
-			isRecent: timeSinceLastActivity < 300000 // 5 minutes
-		};
-	}).sort((a, b) => b.activityScore - a.activityScore);
+			return {
+				...participant,
+				responseCount: participantResponses.length,
+				totalVotes,
+				chatCount: participantChats.length,
+				timelineCount: participantTimeline.length,
+				activityScore,
+				lastActivity: lastActivity?.type || 'joined',
+				lastActivityTime: lastActivity?.time || participant.created_at,
+				minutesSinceActivity: Math.floor(timeSinceLastActivity / 60000),
+				isRecent: timeSinceLastActivity < 300000 // 5 minutes
+			};
+		})
+		.sort((a, b) => b.activityScore - a.activityScore);
 
 	$: phasesList = $phasesStore ?? [];
 	$: activePhase = (() => {
@@ -166,9 +170,10 @@
 			: null;
 		return keyed ?? phasesList.find((phase) => phase.status === 'active');
 	})();
-	$: recommendedDashboards = Array.isArray(activePhase?.dashboards) && activePhase.dashboards?.length
-		? activePhase.dashboards
-		: ['responses', 'heatmap', 'roadmap', 'timeline', 'chat'];
+	$: recommendedDashboards =
+		Array.isArray(activePhase?.dashboards) && activePhase.dashboards?.length
+			? activePhase.dashboards
+			: ['responses', 'heatmap', 'roadmap', 'timeline', 'chat'];
 
 	function updatePhaseCountdown() {
 		if (!browser) return;
@@ -212,6 +217,12 @@
 
 	function ensureProfile() {
 		if (!browser) return;
+
+		// Facilitators don't need a participant profile
+		if (activeRole === 'facilitator') {
+			return;
+		}
+
 		const stored = getParticipantProfile(sessionCode);
 		if (!stored) {
 			goto(`/join?code=${sessionCode}`);
@@ -484,7 +495,9 @@
 					<div class="flex flex-wrap items-center justify-between gap-4">
 						<div>
 							<h2 class="text-lg font-semibold text-white">Session Progress</h2>
-							<p class="text-sm text-slate-400">Activate phases, manage timers, and advance the agenda.</p>
+							<p class="text-sm text-slate-400">
+								Activate phases, manage timers, and advance the agenda.
+							</p>
 						</div>
 						<div class="flex flex-wrap items-center gap-2">
 							{#each sessionStatuses as status}
@@ -511,7 +524,9 @@
 							<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 								<div class="space-y-1">
 									<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Current Phase</p>
-									<h3 class="text-base font-semibold text-white">{activePhase.title ?? activePhase.phase_key ?? 'Phase'}</h3>
+									<h3 class="text-base font-semibold text-white">
+										{activePhase.title ?? activePhase.phase_key ?? 'Phase'}
+									</h3>
 									{#if activePhase.description}
 										<p class="text-sm text-slate-300 leading-relaxed">{activePhase.description}</p>
 									{/if}
@@ -521,37 +536,53 @@
 										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Time Remaining</p>
 										<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
 									{:else if activePhase.duration_minutes}
-										<p class="text-xs text-slate-400">Duration: {activePhase.duration_minutes} min</p>
+										<p class="text-xs text-slate-400">
+											Duration: {activePhase.duration_minutes} min
+										</p>
 									{/if}
-									<p class="text-xs text-slate-500">{getPhaseStatusLabel(activePhase.status)}{#if activePhase.started_at} • Started {new Date(activePhase.started_at).toLocaleTimeString()}{/if}</p>
+									<p class="text-xs text-slate-500">
+										{getPhaseStatusLabel(activePhase.status)}{#if activePhase.started_at}
+											• Started {new Date(activePhase.started_at).toLocaleTimeString()}{/if}
+									</p>
 								</div>
 							</div>
 						{:else}
-							<p class="text-sm text-slate-400">No active phase. Start the first phase to begin the journey.</p>
+							<p class="text-sm text-slate-400">
+								No active phase. Start the first phase to begin the journey.
+							</p>
 						{/if}
 					</div>
 
 					<div class="grid gap-4 lg:grid-cols-2">
 						{#if phasesList.length === 0}
-							<p class="text-sm text-slate-400">This session was created without phases. Update the Sanity template to design a structured flow.</p>
+							<p class="text-sm text-slate-400">
+								This session was created without phases. Update the Sanity template to design a
+								structured flow.
+							</p>
 						{:else}
 							{#each phasesList as phase}
 								<article
 									class={`rounded-xl border px-4 py-4 transition ${
-									phase.status === 'completed'
-										? 'border-emerald-400/30 bg-emerald-500/10'
-									: phase.status === 'active'
-										? 'border-cyan-400/40 bg-cyan-500/10'
-										: 'border-slate-700 bg-slate-900/70 hover:border-cyan-400/30'
-								}`}
+										phase.status === 'completed'
+											? 'border-emerald-400/30 bg-emerald-500/10'
+											: phase.status === 'active'
+												? 'border-cyan-400/40 bg-cyan-500/10'
+												: 'border-slate-700 bg-slate-900/70 hover:border-cyan-400/30'
+									}`}
 								>
 									<div class="flex items-center justify-between gap-3">
 										<div>
-											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">{getPhaseStatusLabel(phase.status)}</p>
-											<h3 class="mt-1 text-sm font-semibold text-white">{phase.title ?? phase.phase_key ?? 'Phase'}</h3>
+											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+												{getPhaseStatusLabel(phase.status)}
+											</p>
+											<h3 class="mt-1 text-sm font-semibold text-white">
+												{phase.title ?? phase.phase_key ?? 'Phase'}
+											</h3>
 										</div>
 										{#if phase.duration_minutes}
-											<span class="text-xs font-medium text-cyan-200">{phase.duration_minutes} min</span>
+											<span class="text-xs font-medium text-cyan-200"
+												>{phase.duration_minutes} min</span
+											>
 										{/if}
 									</div>
 									{#if phase.description}
@@ -559,10 +590,15 @@
 									{/if}
 									{#if Array.isArray(phase.dashboards) && phase.dashboards.length}
 										<div class="mt-3">
-											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Recommended dashboards</p>
+											<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+												Recommended dashboards
+											</p>
 											<div class="mt-2 flex flex-wrap gap-2">
 												{#each phase.dashboards as dashboard}
-													<span class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200">{dashboardLabels[dashboard] ?? dashboard}</span>
+													<span
+														class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200"
+														>{dashboardLabels[dashboard] ?? dashboard}</span
+													>
 												{/each}
 											</div>
 										</div>
@@ -573,27 +609,27 @@
 												<button
 													class="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-cyan-400 transition disabled:opacity-50"
 													on:click={() => activatePhase(phase)}
-														disabled={phaseUpdating}
+													disabled={phaseUpdating}
 												>
-														Start Phase
-													</button>
-												{:else if phase.status === 'active'}
-													<button
-														class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-400 transition disabled:opacity-50"
-														on:click={() => finishPhase(phase)}
-														disabled={phaseUpdating}
-													>
-														Complete Phase
-													</button>
-												{:else}
-													<button
-														class="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:border-cyan-400/40 transition"
-														on:click={() => activatePhase(phase)}
-														disabled={phaseUpdating}
-													>
-														Revisit
-													</button>
-												{/if}
+													Start Phase
+												</button>
+											{:else if phase.status === 'active'}
+												<button
+													class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-400 transition disabled:opacity-50"
+													on:click={() => finishPhase(phase)}
+													disabled={phaseUpdating}
+												>
+													Complete Phase
+												</button>
+											{:else}
+												<button
+													class="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:border-cyan-400/40 transition"
+													on:click={() => activatePhase(phase)}
+													disabled={phaseUpdating}
+												>
+													Revisit
+												</button>
+											{/if}
 										</div>
 									{/if}
 								</article>
@@ -866,7 +902,8 @@
 						<div class="space-y-4">
 							<div class="flex items-center justify-between">
 								<h3 class="text-lg font-semibold text-white">Participant Activity Dashboard</h3>
-								<span class="text-sm text-slate-400">{participantActivity.length} participants</span>
+								<span class="text-sm text-slate-400">{participantActivity.length} participants</span
+								>
 							</div>
 
 							<!-- Activity Summary -->
@@ -874,7 +911,7 @@
 								<div class="rounded-lg border border-green-400/30 bg-green-400/10 p-3">
 									<p class="text-xs uppercase tracking-wide text-green-200">Recently Active</p>
 									<p class="text-xl font-semibold text-white">
-										{participantActivity.filter(p => p.isRecent).length}
+										{participantActivity.filter((p) => p.isRecent).length}
 									</p>
 									<p class="text-xs text-green-100/80">Last 5 minutes</p>
 								</div>
@@ -916,11 +953,16 @@
 												<div>
 													<div class="flex items-center gap-2">
 														<span class="font-medium text-white">{participant.name}</span>
-														<span class="px-2 py-1 text-xs rounded-full bg-slate-700 text-slate-300">
+														<span
+															class="px-2 py-1 text-xs rounded-full bg-slate-700 text-slate-300"
+														>
 															{participant.role}
 														</span>
 														{#if participant.isRecent}
-															<span class="w-2 h-2 bg-green-400 rounded-full" title="Active recently"></span>
+															<span
+																class="w-2 h-2 bg-green-400 rounded-full"
+																title="Active recently"
+															></span>
 														{/if}
 													</div>
 													<div class="flex items-center gap-4 text-xs text-slate-400 mt-1">
@@ -930,7 +972,8 @@
 														{:else if participant.minutesSinceActivity < 1440}
 															<span>{Math.floor(participant.minutesSinceActivity / 60)}h ago</span>
 														{:else}
-															<span>{Math.floor(participant.minutesSinceActivity / 1440)}d ago</span>
+															<span>{Math.floor(participant.minutesSinceActivity / 1440)}d ago</span
+															>
 														{/if}
 													</div>
 												</div>
@@ -965,7 +1008,9 @@
 										{#if participant.badges && participant.badges.length > 0}
 											<div class="mt-3 flex flex-wrap gap-2">
 												{#each participant.badges as badge}
-													<span class="px-2 py-1 text-xs rounded-full bg-yellow-400/20 text-yellow-300">
+													<span
+														class="px-2 py-1 text-xs rounded-full bg-yellow-400/20 text-yellow-300"
+													>
 														{badge}
 													</span>
 												{/each}
@@ -1028,7 +1073,9 @@
 													</span>
 												{/each}
 												{#if question.recommended_dashboards.length > 3}
-													<span class="text-xs text-slate-400">+{question.recommended_dashboards.length - 3} more</span>
+													<span class="text-xs text-slate-400"
+														>+{question.recommended_dashboards.length - 3} more</span
+													>
 												{/if}
 											</div>
 										{/if}
