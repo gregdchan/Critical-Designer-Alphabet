@@ -196,18 +196,23 @@
     <header class="sticky top-0 z-40 border-b border-cyan-400/20 bg-slate-900/70 backdrop-blur">
       <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <div>
-          <p class="text-xs uppercase tracking-[0.35em] text-cyan-300">Workshop Session</p>
+          <p class="text-xs uppercase tracking-[0.35em] text-cyan-300">Inclusive Planning Session</p>
           <h1 class="text-2xl font-semibold text-white">
             {sessionInfo.title ?? 'Untitled Session'}
             <span class="ml-2 rounded-full border border-cyan-400/30 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200">
               {sessionCode}
             </span>
           </h1>
+          {#if sessionInfo.challenge}
+            <p class="mt-2 text-sm text-cyan-200 max-w-2xl">
+              Focus: {sessionInfo.challenge}
+            </p>
+          {/if}
           <p class="mt-1 text-sm text-slate-300">
             {#if isFacilitator()}
-              Facilitator dashboard · Manage steps, review responses, and curate the roadmap.
+              Facilitator console · Sequence activities, capture insights, and steward alignment.
             {:else}
-              Participant area · Share perspectives, cast votes, and follow the workshop flow.
+              Participant area · Share perspectives, upvote priorities, and follow the session flow.
             {/if}
           </p>
         </div>
@@ -252,20 +257,31 @@
 
     <main class="mx-auto max-w-7xl px-6 py-8 space-y-10">
       <section class="grid gap-6 md:grid-cols-3">
+        {#if sessionInfo.challenge}
+          <div class="md:col-span-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4">
+            <p class="text-xs uppercase tracking-[0.3em] text-cyan-100">Challenge Focus</p>
+            <p class="mt-2 text-base font-semibold text-slate-100">
+              {sessionInfo.challenge}
+            </p>
+            <p class="mt-1 text-xs text-cyan-100/80">
+              Ground your ideas in this shared challenge as you move through the session.
+            </p>
+          </div>
+        {/if}
         <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
           <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Current Step</p>
           <p class="mt-2 text-lg font-semibold text-white">{sessionInfo.status ?? 'planned'}</p>
-          <p class="text-sm text-slate-400 mt-1">The facilitator will guide you through reflective prompts and mini-games.</p>
+          <p class="text-sm text-slate-400 mt-1">The facilitator will cue the next collaborative activity for the group.</p>
         </div>
         <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
           <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Active Questions</p>
           <p class="mt-2 text-lg font-semibold text-white">{questionsList.length}</p>
-          <p class="text-sm text-slate-400 mt-1">Across justice, power, sustainability, and community lenses.</p>
+          <p class="text-sm text-slate-400 mt-1">Reflect across the lenses defined in your session blueprint.</p>
         </div>
         <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
           <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Ideas Shared</p>
           <p class="mt-2 text-lg font-semibold text-white">{responsesList.length}</p>
-          <p class="text-sm text-slate-400 mt-1">Vote on responses that spark equitable insights.</p>
+          <p class="text-sm text-slate-400 mt-1">Vote on responses that advance equity-centered planning.</p>
         </div>
       </section>
 

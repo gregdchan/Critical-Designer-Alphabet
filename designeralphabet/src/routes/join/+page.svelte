@@ -2,8 +2,14 @@
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import { onMount } from 'svelte';
-  import { IconUserPlus as UserPlus, IconPalette as Palette, IconArrowLeft as ArrowLeft } from '@tabler/icons-svelte';
+  import {
+    IconUserPlus as UserPlus,
+    IconPalette as Palette,
+    IconArrowLeft as ArrowLeft,
+    IconInfoCircle as InfoCircle
+  } from '@tabler/icons-svelte';
   import { currentUser } from '$lib/stores/user';
+  import sanityClient from '$lib/sanity';
 
   export let data: { code: string };
 
@@ -11,6 +17,12 @@
   let sessionCode = '';
   let selectedColor = '#00ffff'; // Default to neon cyan
   let loading = false;
+  let previewLoading = false;
+  let previewError = '';
+  let sessionPreview: { title?: string | null; challenge?: string | null; template_slug?: string | null } | null = null;
+  let templateBlueprint: { title?: string; description?: string; challenge?: string; lenses?: string[] } | null = null;
+  let lastPreviewCode = '';
+  let previewRequestId = 0;
 
   const avatarColors = [
     { name: 'Neon Cyan', value: '#00ffff' },
@@ -33,6 +45,77 @@
 
   function goHome() {
     goto('/');
+  }
+
+  $: if (browser) {
+    const normalized = sessionCode.trim().toUpperCase();
+    if (normalized.length === 6 && normalized !== lastPreviewCode) {
+      lastPreviewCode = normalized;
+      loadPreview(normalized);
+    } else if (normalized.length !== 6 && lastPreviewCode) {
+      lastPreviewCode = '';
+      previewRequestId += 1;
+      sessionPreview = null;
+      templateBlueprint = null;
+      previewError = '';
+      previewLoading = false;
+    }
+  }
+
+  async function loadPreview(code: string) {
+    if (!browser) return;
+
+    previewRequestId += 1;
+    const requestKey = previewRequestId;
+    previewLoading = true;
+    previewError = '';
+    sessionPreview = null;
+    templateBlueprint = null;
+
+    try {
+      const response = await fetch(`/api/session/${code}`);
+      const payload = await response.json();
+
+      if (requestKey !== previewRequestId) {
+        return;
+      }
+
+      if (!payload.success) {
+        previewError = payload.error ?? 'Session not found. Check the code and try again.';
+        return;
+      }
+
+      sessionPreview = payload.session ?? null;
+
+      const slug = payload.session?.template_slug;
+      if (slug) {
+        try {
+          const blueprint = await sanityClient.fetch(
+            `*[_type == "workshopTemplate" && slug.current == $slug][0]{
+              title,
+              description,
+              challenge,
+              lenses
+            }`,
+            { slug }
+          );
+          if (requestKey === previewRequestId) {
+            templateBlueprint = blueprint ?? null;
+          }
+        } catch (error) {
+          console.error('Failed to load template blueprint', error);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load session preview', error);
+      if (requestKey === previewRequestId) {
+        previewError = 'Unable to load session preview. Check the code and try again.';
+      }
+    } finally {
+      if (requestKey === previewRequestId) {
+        previewLoading = false;
+      }
+    }
   }
 
   async function joinSession() {
@@ -101,7 +184,7 @@
           <UserPlus class="w-8 h-8 text-white" />
         </div>
         <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
-          Join Workshop
+          Join Session
         </h1>
         <p class="text-slate-300">
           Enter your details to join the session
@@ -182,9 +265,66 @@
         </div>
       </form>
 
+      <div class="mt-6 rounded-xl border border-slate-700 bg-slate-900/60 p-4">
+        {#if previewLoading}
+          <div class="flex items-center gap-3 text-slate-300 text-sm">
+            <InfoCircle class="w-5 h-5 text-cyan-300 animate-pulse" />
+            Loading session blueprint…
+          </div>
+        {:else if previewError}
+          <div class="flex items-start gap-3 text-sm text-rose-300">
+            <InfoCircle class="w-5 h-5 flex-shrink-0" />
+            <span>{previewError}</span>
+          </div>
+        {:else if sessionPreview}
+          <div class="space-y-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Session Blueprint</p>
+              <h2 class="mt-2 text-lg font-semibold text-white">
+                {sessionPreview.title ?? 'Untitled Session'}
+              </h2>
+              <p class="text-xs text-slate-400">Code: {sessionCode.toUpperCase()}</p>
+            </div>
+
+            {#if sessionPreview.challenge || templateBlueprint?.challenge}
+              <div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
+                <p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Challenge Focus</p>
+                <p class="mt-2 text-sm text-slate-100">
+                  {sessionPreview.challenge ?? templateBlueprint?.challenge}
+                </p>
+              </div>
+            {/if}
+
+            {#if templateBlueprint?.description}
+              <p class="text-sm text-slate-300 leading-relaxed">
+                {templateBlueprint.description}
+              </p>
+            {/if}
+
+            {#if templateBlueprint?.lenses?.length}
+              <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Lenses</p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  {#each templateBlueprint.lenses as lens}
+                    <span class="px-3 py-1 rounded-full border border-purple-400/40 bg-purple-400/10 text-xs text-purple-200">
+                      {lens}
+                    </span>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+          </div>
+        {:else}
+          <p class="flex items-start gap-3 text-sm text-slate-300">
+            <InfoCircle class="w-5 h-5 text-slate-400" />
+            Enter a 6-character session code to preview the focus and lenses before joining.
+          </p>
+        {/if}
+      </div>
+
       <div class="mt-8 pt-6 border-t border-slate-700">
         <p class="text-xs text-slate-400 text-center">
-          Don't have a session code? Contact your workshop facilitator.
+          Don't have a session code? Contact your session lead.
         </p>
       </div>
     </div>

@@ -48,7 +48,7 @@
       {
         id: '1',
         code: 'DESIGN2024',
-        name: 'AI Ethics Workshop',
+        name: 'AI Ethics Sprint',
         status: 'active',
         createdAt: '2024-01-15T10:00:00Z',
         participantCount: 12,

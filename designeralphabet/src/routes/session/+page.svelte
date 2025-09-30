@@ -84,11 +84,11 @@
   <div class="max-w-4xl w-full space-y-10 text-center">
     <div class="space-y-4">
       <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-        Live Workshop Arcade
+        Live Session Arcade
       </h1>
       <p class="text-lg text-slate-300">
         Choose how you want to join the Critical Designer Alphabet experience. Facilitators launch sessions,
-        participants jump straight into collaborative play, and the presentation view keeps the whole room in sync.
+        participants dive into collaborative play, and the presentation view keeps the whole room in sync.
       </p>
     </div>
 
@@ -100,7 +100,7 @@
         <IconSparkles class="h-10 w-10 text-cyan-300" />
         <h2 class="text-lg font-semibold">Facilitator Console</h2>
         <p class="text-sm text-slate-400 group-hover:text-slate-200">
-          Create a session, pick templates, and drive the justice-centered agenda.
+          Create a session, pick templates, and guide inclusive planning.
         </p>
       </button>
 

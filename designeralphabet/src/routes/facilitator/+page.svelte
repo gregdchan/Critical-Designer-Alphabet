@@ -18,6 +18,7 @@
     title: string;
     slug?: { current?: string } | string;
     description?: string;
+    challenge?: string;
     lenses?: string[];
     sections?: {
       onboarding?: {
@@ -82,12 +83,15 @@
   let templates: WorkshopTemplate[] = [];
   let loading = false;
   let loadingTemplates = true;
+  let sessionChallenge = '';
+  let lastTemplateId: string | null = null;
 
   const templateQuery = `*[_type == "workshopTemplate"]{
     _id,
     title,
     slug,
     description,
+    challenge,
     lenses,
     sections,
     facilitation,
@@ -112,6 +116,14 @@
       console.error('Error loading templates:', error);
     } finally {
       loadingTemplates = false;
+    }
+  }
+
+  $: {
+    const nextTemplateId = selectedTemplate?._id ?? null;
+    if (nextTemplateId !== lastTemplateId) {
+      sessionChallenge = selectedTemplate?.challenge ?? '';
+      lastTemplateId = nextTemplateId;
     }
   }
 
@@ -163,7 +175,8 @@
         body: JSON.stringify({
           code: sessionCode,
           title: sessionTitle,
-          templateSlug
+          templateSlug,
+          challenge: sessionChallenge.trim() || selectedTemplate.challenge || null
         })
       });
 
@@ -245,10 +258,10 @@
   <div class="max-w-4xl mx-auto">
     <header class="text-center mb-12">
       <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-4">
-        Workshop Facilitator Console
+        Design Session Console
       </h1>
       <p class="text-slate-300 text-lg">
-        Create and manage your AI confidence workshop session
+        Plan inclusive design sprints for AI roadmaps, policy pilots, or any iterative challenge.
       </p>
     </header>
 
@@ -277,16 +290,32 @@
 
           <div>
             <label for="sessionTitle" class="block text-sm font-medium text-slate-300 mb-2">
-              Workshop Title
+              Session Title
             </label>
             <input
               id="sessionTitle"
               type="text"
               bind:value={sessionTitle}
-              placeholder="e.g., AI Confidence Workshop - Team Alpha"
+              placeholder="e.g., Inclusive Roadmap Session — Product Team"
               class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
               required
             />
+          </div>
+
+          <div>
+            <label for="sessionChallenge" class="block text-sm font-medium text-slate-300 mb-2">
+              Challenge Focus
+            </label>
+            <textarea
+              id="sessionChallenge"
+              rows="3"
+              bind:value={sessionChallenge}
+              placeholder="e.g., Align our cross-functional team on equitable AI guardrails for the next release."
+              class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent resize-none"
+            ></textarea>
+            <p class="mt-2 text-xs text-slate-400">
+              Pulled from the template by default—edit to match the specific opportunity you're tackling today.
+            </p>
           </div>
 
           <div>
@@ -321,7 +350,7 @@
               Creating Session...
             {:else}
               <Play class="w-5 h-5" />
-              Launch Workshop
+              Launch Session
             {/if}
           </button>
         </form>
@@ -331,7 +360,7 @@
       <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-purple-400/20">
         <h2 class="text-2xl font-semibold text-white mb-6 flex items-center gap-2">
           <Users class="w-6 h-6 text-purple-400" />
-          Workshop Template
+          Template Preview
         </h2>
 
         {#if loadingTemplates}
@@ -340,7 +369,7 @@
           </div>
         {:else if templates.length === 0}
           <p class="text-slate-400 text-center py-8">
-            No templates found. Add workshop templates in Sanity Studio.
+            No templates found. Add planning templates in Sanity Studio.
           </p>
         {:else}
           <div class="space-y-4">
@@ -354,6 +383,12 @@
               >
                 <h3 class="font-semibold text-white mb-2">{template.title}</h3>
                 <p class="text-sm text-slate-300 mb-3">{template.description || 'No description available'}</p>
+                {#if template.challenge}
+                  <div class="mb-3 rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
+                    <p class="text-xs uppercase tracking-[0.3em] text-purple-200">Challenge Focus</p>
+                    <p class="mt-2 text-sm text-slate-100">{template.challenge}</p>
+                  </div>
+                {/if}
 
                 <div class="space-y-3 text-xs">
                   <!-- Lenses -->
@@ -366,7 +401,7 @@
                     </div>
                   </div>
 
-                  <!-- Workshop Details -->
+                  <!-- Session Details -->
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <span class="text-slate-400">Breakout Rounds:</span>

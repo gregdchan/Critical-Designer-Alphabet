@@ -33,6 +33,14 @@ export const WorkshopTemplate = defineType({
       group: 'overview'
     }),
     defineField({
+      name: 'challenge',
+      title: 'Challenge Statement',
+      type: 'text',
+      rows: 4,
+      description: 'Describe the core challenge or opportunity this template addresses.',
+      group: 'overview'
+    }),
+    defineField({
       name: 'lenses',
       type: 'array',
       of: [{ type: 'string' }],

@@ -138,7 +138,7 @@
     {
       name: 'Primary',
       className: 'inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700',
-      usage: 'Start Workshop, main CTAs'
+      usage: 'Start Session, main CTAs'
     },
     {
       name: 'Secondary',
@@ -165,7 +165,7 @@
         <h1 class="text-3xl font-semibold text-slate-100 sm:text-4xl">Critical Designer Alphabet UI Kit</h1>
         <p class="max-w-2xl text-base leading-relaxed text-slate-300">
           This page mirrors the production experience—Inter-first typography, slate gradients, accessible blues, and
-          workshop-focused interactions. Use it to snapshot current tokens, components, and layout patterns as we continue
+          session-focused interactions. Use it to snapshot current tokens, components, and layout patterns as we continue
           evolving the MariaDB-powered collaboration suite.
         </p>
         <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.25em] text-slate-400">
@@ -237,11 +237,11 @@
       <h2 class="text-lg font-semibold text-slate-100">Hero + Stat Composition</h2>
       <div class="rounded-lg border border-slate-700 bg-slate-800 p-6">
         <span class="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-600/10 px-3 py-1 text-xs font-medium text-blue-300">
-          Design Workshop Platform
+          Inclusive Planning Platform
         </span>
         <h3 class="mt-4 text-2xl font-semibold text-slate-100">Critical Designer Alphabet</h3>
         <p class="mt-3 text-sm text-slate-300 leading-relaxed">
-          A collaborative workshop platform for inclusive design thinking. Create real-time sessions, explore design cards, and visualize inclusive data.
+          A collaborative planning platform for inclusive design thinking. Create real-time sessions, explore design cards, and visualize inclusive data.
         </p>
         <div class="mt-5 grid gap-3 sm:grid-cols-3">
           {#each statTiles as tile}

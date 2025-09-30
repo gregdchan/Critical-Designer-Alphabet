@@ -65,21 +65,21 @@
       <div class="space-y-6">
         <span class="inline-flex items-center gap-2 rounded-md bg-blue-600/10 border border-blue-500/20 px-3 py-1.5 text-sm text-blue-400">
           <Sparkles class="h-4 w-4" />
-          Design Workshop Platform
+          Inclusive Planning Platform
         </span>
         <h1 class="text-3xl font-bold leading-tight text-slate-100 sm:text-4xl">
           Critical Designer Alphabet
         </h1>
         <p class="max-w-2xl text-lg text-slate-300 leading-relaxed">
-          A collaborative workshop platform for inclusive design thinking. Create real-time sessions, explore design cards,
-          and visualize insights through interactive data analysis tools.
+          A collaborative planning platform for inclusive design thinking. Create live sessions, explore design cards,
+          and visualize insights through interactive data storytelling.
         </p>
         <div class="flex flex-wrap items-center gap-4">
           <a
             class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
             href="/session"
           >
-            Start Workshop
+            Start Session
           </a>
           <a
             class="inline-flex items-center gap-2 rounded-md border border-slate-600 px-6 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-700 hover:text-slate-100"
@@ -101,7 +101,7 @@
     </div>
 
     <div class="rounded-lg border border-slate-600 bg-slate-800 p-6">
-      <h2 class="text-lg font-semibold text-slate-100 mb-6">Workshop Features</h2>
+      <h2 class="text-lg font-semibold text-slate-100 mb-6">Session Features</h2>
       <div class="space-y-4">
         {#each playModes as mode}
           <div class="flex gap-4 rounded-lg border border-slate-600 bg-slate-700 p-4">

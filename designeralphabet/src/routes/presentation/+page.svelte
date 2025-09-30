@@ -75,7 +75,7 @@
   <header class="border-b border-cyan-400/30 bg-slate-950/90 px-10 py-6">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
-        <p class="text-xs uppercase tracking-[0.4em] text-cyan-300">Workshop Broadcast</p>
+        <p class="text-xs uppercase tracking-[0.4em] text-cyan-300">Session Broadcast</p>
         <h1 class="mt-2 text-3xl font-semibold text-white">
           {sessionInfo?.title ?? 'Presentation Dashboard'}
           {#if activeCode}

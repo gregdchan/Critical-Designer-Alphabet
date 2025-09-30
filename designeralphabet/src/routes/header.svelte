@@ -53,7 +53,7 @@
       </span>
       <div class="flex flex-col text-left">
         <span class="text-sm font-semibold">Critical Alphabet</span>
-        <span class="text-xs text-slate-400">Design Workshops</span>
+        <span class="text-xs text-slate-400">Inclusive Planning</span>
       </div>
     </a>
 
@@ -89,7 +89,7 @@
           href="/session"
         >
           <Sparkles class="h-4 w-4" />
-          Start Workshop
+          Start Session
         </a>
       {/if}
       <button
@@ -134,13 +134,13 @@
             Exit Session
           </button>
         {:else}
-          <a
+         <a
             class="flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white mt-2"
             href="/session"
             on:click={closeMenu}
           >
             <Sparkles class="h-4 w-4" />
-            Start Workshop
+            Start Session
           </a>
         {/if}
       </nav>

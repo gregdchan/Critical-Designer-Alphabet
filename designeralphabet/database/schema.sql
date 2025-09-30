@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   code VARCHAR(16) PRIMARY KEY,
   title VARCHAR(255),
   template_id VARCHAR(64),
+  challenge TEXT,
   status ENUM('planned','live','done') DEFAULT 'planned',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

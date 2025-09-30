@@ -8,6 +8,7 @@ export interface Session {
   code: string;
   title: string | null;
   template_slug: string | null;
+  challenge: string | null;
   status: SessionStatus;
   created_at: string;
 }
@@ -120,15 +121,17 @@ function asResponse(row: any): ResponseRow {
 export async function createSession({
   code,
   title,
-  templateSlug
+  templateSlug,
+  challenge
 }: {
   code: string;
   title: string;
   templateSlug?: string;
+  challenge?: string;
 }) {
   const response = await supabaseAdmin
     .from('sessions')
-    .insert({ code, title, template_slug: templateSlug ?? null })
+    .insert({ code, title, template_slug: templateSlug ?? null, challenge: challenge ?? null })
     .select()
     .single();
 
@@ -424,7 +427,7 @@ export async function buildSessionExport(code: string) {
   ]);
 
   const lines: string[] = [];
-  lines.push(`# Workshop Summary — ${session.title ?? 'Untitled Session'} (${code})`);
+  lines.push(`# Session Summary — ${session.title ?? 'Untitled Session'} (${code})`);
   lines.push('');
   lines.push(`Status: **${session.status.toUpperCase()}**`);
   lines.push(`Created: ${session.created_at}`);
