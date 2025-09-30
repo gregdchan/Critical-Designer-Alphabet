@@ -1,14 +1,11 @@
-# Railway Railpack TOML for SvelteKit + Sanity CMS + Supabase
-# This configures the primary SvelteKit frontend service
+# Railway Railpack TOML for the SvelteKit frontend
 
 [build]
-  command = "cd designeralphabet && npm ci && npm run build"
-  output = "designeralphabet/.svelte-kit/output"
+  command = "npm ci && npm run build"
 
 [deploy]
-  start = "cd designeralphabet && PORT=${PORT:-4173} npm run preview -- --host 0.0.0.0 --port $PORT"
+  start = "npm run preview -- --host 0.0.0.0 --port ${PORT:-4173}"
 
-# Environment variables shared across services
 [variables]
 VITE_SANITY_PROJECT_ID = "pctfp1xq"
 VITE_SANITY_DATASET = "production"
@@ -23,4 +20,4 @@ VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 SUPABASE_SERVICE_ROLE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnZHFic2FsdWZlcHB4Ym9wc2Z1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjMyMzc1NCwiZXhwIjoyMDcxODk5NzU0fQ.l0lY_DAjy45V1d4VSMrajUO-kYNEHl6MbHkkvSsagRU"
 
 [static]
-  directory = "designeralphabet/static"
+  directory = "static"
