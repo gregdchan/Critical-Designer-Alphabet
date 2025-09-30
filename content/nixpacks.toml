@@ -1,0 +1,13 @@
+[phases.build]
+cmds = ["echo 'Using existing Dockerfile for build'"]
+
+[phases.start]
+cmd = "npm start"
+
+[variables]
+NODE_ENV = "production"
+PORT = "3333"
+
+# Use the existing Dockerfile
+[build]
+dockerfile = "Dockerfile"

@@ -83,17 +83,29 @@ npm run build
 npm start
 ```
 
-## 📱 Railway Deployment
+## 🐳 Docker Deployment
 
-### Main Service (SvelteKit)
-- Uses: `/railway.toml`
-- Builds from: `designeralphabet/` directory
-- Deploy via Railway root directory
+### Full Stack Deployment
+```bash
+# Build and run both services
+docker-compose up --build
 
-### Sanity Service
-- Uses: `/content/railway.toml`
-- Builds from: `content/` directory
-- Deploy via Railway with root directory set to `content/`
+# Run in detached mode
+docker-compose up -d --build
+```
+
+### Individual Services
+```bash
+# Frontend only
+docker-compose up frontend --build
+
+# Backend only
+docker-compose up backend --build
+```
+
+**Access Points:**
+- Frontend: http://localhost:3000
+- Backend: http://localhost:3333
 
 ## 🛠️ Troubleshooting
 
