@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { derived } from 'svelte/store';
+  import { derived, get } from 'svelte/store';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import logo from '$lib/logo.png';
   import { IconStar as Sparkles, IconMenu2 as Menu, IconX as X, IconHome as Home } from '@tabler/icons-svelte';
   import { currentUser } from '$lib/stores/user';
+  import { clearParticipantProfile } from '$lib/realtime';
 
   const links = [
     { href: '/', label: 'Home' },
@@ -29,8 +30,12 @@
   function emergencyExit() {
     if (confirm('Leave session and return to home?')) {
       if (browser) {
-        sessionStorage.removeItem('cda-session');
-        document.cookie = 'cda-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        const active = get(currentUser);
+        if (active?.sessionCode) {
+          clearParticipantProfile(active.sessionCode);
+        } else {
+          clearParticipantProfile('');
+        }
         currentUser.set(null);
       }
       goto('/');

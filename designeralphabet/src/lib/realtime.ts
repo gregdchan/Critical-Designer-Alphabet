@@ -196,7 +196,9 @@ export function storeParticipantProfile(code: string, profile: any) {
 
 export function clearParticipantProfile(code: string) {
   if (!browser) return;
-  localStorage.removeItem(`${PARTICIPANT_KEY_PREFIX}${code}`);
+  if (code) {
+    localStorage.removeItem(`${PARTICIPANT_KEY_PREFIX}${code}`);
+  }
   sessionStorage.removeItem(SESSION_STORAGE_KEY);
   document.cookie = `${SESSION_COOKIE}=; Max-Age=0; path=/`;
 }
