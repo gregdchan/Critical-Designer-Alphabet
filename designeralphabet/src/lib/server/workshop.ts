@@ -9,6 +9,7 @@ export interface Session {
   title: string | null;
   template_slug: string | null;
   challenge: string | null;
+  facilitator_email: string | null;
   active_round: string | null;
   round_expires_at: string | null;
   status: SessionStatus;
@@ -124,12 +125,14 @@ export async function createSession({
   code,
   title,
   templateSlug,
-  challenge
+  challenge,
+  facilitatorEmail
 }: {
   code: string;
   title: string;
   templateSlug?: string;
   challenge?: string;
+  facilitatorEmail?: string;
 }) {
   const response = await supabaseAdmin
     .from('sessions')
@@ -138,6 +141,7 @@ export async function createSession({
       title,
       template_slug: templateSlug ?? null,
       challenge: challenge ?? null,
+      facilitator_email: facilitatorEmail ?? null,
       active_round: null,
       round_expires_at: null
     })
@@ -188,6 +192,24 @@ export async function getSession(code: string) {
   const { data, error } = response;
   if (error) throw new Error(error.message);
   return (data ?? undefined) as Session | undefined;
+}
+
+export async function listSessions({
+  statuses
+}: {
+  statuses?: SessionStatus[];
+} = {}) {
+  let query = supabaseAdmin
+    .from('sessions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (statuses?.length) {
+    query = query.in('status', statuses);
+  }
+
+  const response = await query;
+  return ensureArray(response, 'listSessions') as Session[];
 }
 
 export async function addParticipant({

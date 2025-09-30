@@ -78,6 +78,7 @@
   }
 
   let facilitatorName = '';
+  let facilitatorEmail = '';
   let sessionCode = '';
   let sessionTitle = '';
   let selectedTemplate: WorkshopTemplate | null = null;
@@ -158,7 +159,7 @@
   }
 
   async function createSession() {
-    if (!facilitatorName || !sessionCode || !sessionTitle || !selectedTemplate) {
+    if (!facilitatorName || !facilitatorEmail || !sessionCode || !sessionTitle || !selectedTemplate) {
       alert('Please fill in all fields and select a template');
       return;
     }
@@ -177,7 +178,8 @@
           code: sessionCode,
           title: sessionTitle,
           templateSlug,
-          challenge: sessionChallenge.trim() || selectedTemplate.challenge || null
+          challenge: sessionChallenge.trim() || selectedTemplate.challenge || null,
+          facilitatorEmail: facilitatorEmail.trim().toLowerCase()
         })
       });
 
@@ -215,6 +217,7 @@
           participantId: participantData.participant.id as string,
           sessionCode,
           name: facilitatorName,
+          email: facilitatorEmail.trim().toLowerCase(),
           role: 'facilitator' as const,
           color: facilitatorColor
         };
@@ -280,6 +283,20 @@
               type="text"
               bind:value={facilitatorName}
               placeholder="Enter your name"
+              class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label for="facilitatorEmail" class="block text-sm font-medium text-slate-300 mb-2">
+              Email
+            </label>
+            <input
+              id="facilitatorEmail"
+              type="email"
+              bind:value={facilitatorEmail}
+              placeholder="you@example.org"
               class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
               required
             />

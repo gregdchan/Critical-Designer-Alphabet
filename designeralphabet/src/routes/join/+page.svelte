@@ -24,6 +24,11 @@
   let templateBlueprint: { title?: string; description?: string; challenge?: string; lenses?: string[] } | null = null;
   let lastPreviewCode = '';
   let previewRequestId = 0;
+  let activeSessions: Array<{ code: string; title: string | null; status: string; created_at: string }> = [];
+  let activeLoading = true;
+  let activeError = '';
+  let joinAsFacilitator = false;
+  let facilitatorEmail = '';
 
   const avatarColors = [
     { name: 'Neon Cyan', value: '#00ffff' },
@@ -39,6 +44,7 @@
   ];
 
   onMount(() => {
+    loadActiveSessions();
     if (data.code) {
       sessionCode = data.code.toUpperCase();
     }
@@ -119,47 +125,112 @@
     }
   }
 
+  async function loadActiveSessions() {
+    activeLoading = true;
+    activeError = '';
+    try {
+      const response = await fetch('/api/session/list');
+      const payload = await response.json();
+      if (!payload.success) {
+        throw new Error(payload.error ?? 'Unable to load active sessions');
+      }
+      activeSessions = payload.sessions ?? [];
+    } catch (error) {
+      console.error('Failed to load active sessions', error);
+      activeError = (error as Error).message ?? 'Unable to load active sessions';
+    } finally {
+      activeLoading = false;
+    }
+  }
+
+  function chooseSession(code: string) {
+    sessionCode = code.toUpperCase();
+    loadPreview(sessionCode);
+  }
+
   async function joinSession() {
-    if (!participantName || !sessionCode) {
-      alert('Please enter your name and session code');
+    if (!sessionCode) {
+      alert('Please enter a session code');
+      return;
+    }
+
+    if (!joinAsFacilitator && !participantName) {
+      alert('Please enter your name');
+      return;
+    }
+
+    if (joinAsFacilitator && !facilitatorEmail) {
+      alert('Facilitator email is required');
       return;
     }
 
     loading = true;
     try {
-      const response = await fetch('/api/participants/join', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code: sessionCode.toUpperCase(),
-          name: participantName,
-          role: 'participant',
-          color: selectedColor
-        })
-      });
+      const uppercaseCode = sessionCode.toUpperCase();
 
-      const data = await response.json();
-      if (data.success) {
+      if (joinAsFacilitator) {
+        const response = await fetch('/api/session/facilitator', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: uppercaseCode,
+            email: facilitatorEmail.trim().toLowerCase(),
+            name: participantName || facilitatorEmail,
+            color: selectedColor
+          })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || 'Unable to authenticate facilitator');
+        }
+
         if (browser && data.participant) {
-          const code = sessionCode.toUpperCase();
           const profile = {
             participantId: data.participant.id as string,
-            sessionCode: code,
+            sessionCode: uppercaseCode,
+            name: participantName || facilitatorEmail,
+            email: facilitatorEmail.trim().toLowerCase(),
+            role: 'facilitator' as const,
+            color: selectedColor
+          };
+          currentUser.set(profile);
+          storeParticipantProfile(uppercaseCode, profile);
+        }
+      } else {
+        const response = await fetch('/api/participants/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: uppercaseCode,
+            name: participantName,
+            role: 'participant',
+            color: selectedColor
+          })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to join session');
+        }
+
+        if (browser && data.participant) {
+          const profile = {
+            participantId: data.participant.id as string,
+            sessionCode: uppercaseCode,
             name: participantName,
             role: 'participant' as const,
             color: selectedColor
           };
           currentUser.set(profile);
-          storeParticipantProfile(code, profile);
+          storeParticipantProfile(uppercaseCode, profile);
         }
-
-        goto(`/session/${sessionCode.toUpperCase()}`);
-      } else {
-        alert(data.error || 'Failed to join session');
       }
+
+      goto(`/session/${uppercaseCode}${joinAsFacilitator ? '?role=facilitator' : ''}`);
     } catch (error) {
       console.error('Error joining session:', error);
-      alert('Failed to join session. Please try again.');
+      alert((error as Error).message ?? 'Failed to join session. Please try again.');
     } finally {
       loading = false;
     }
@@ -193,7 +264,7 @@
       <form on:submit|preventDefault={joinSession} class="space-y-6">
         <div>
           <label for="participantName" class="block text-sm font-medium text-slate-300 mb-2">
-            Your Name
+            {joinAsFacilitator ? 'Facilitator Display Name (optional)' : 'Your Name'}
           </label>
           <input
             id="participantName"
@@ -201,7 +272,7 @@
             bind:value={participantName}
             placeholder="Enter your name"
             class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
-            required
+            required={!joinAsFacilitator}
           />
         </div>
 
@@ -219,6 +290,41 @@
             required
           />
         </div>
+
+        <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800/60 px-4 py-3">
+          <label class="flex items-center gap-2 text-sm text-slate-200">
+            <input type="checkbox" bind:checked={joinAsFacilitator} />
+            I'm joining as the session facilitator
+          </label>
+          {#if joinAsFacilitator}
+            <button
+              type="button"
+              class="text-xs text-cyan-300 hover:text-cyan-100"
+              on:click={() => activeSessions.length === 0 && loadActiveSessions()}
+            >
+              Refresh sessions
+            </button>
+          {/if}
+        </div>
+
+        {#if joinAsFacilitator}
+          <div>
+            <label for="facilitatorEmail" class="block text-sm font-medium text-slate-300 mb-2">
+              Facilitator Email
+            </label>
+            <input
+              id="facilitatorEmail"
+              type="email"
+              bind:value={facilitatorEmail}
+              placeholder="you@example.org"
+              class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+              required
+            />
+            <p class="mt-2 text-xs text-slate-400">
+              Use the same email you provided when launching the session to regain facilitator access.
+            </p>
+          </div>
+        {/if}
 
         <div role="group" aria-labelledby="avatar-color-label">
           <p id="avatar-color-label" class="mb-3 flex items-center gap-2 text-sm font-medium text-slate-300">
@@ -326,6 +432,42 @@
           Don't have a session code? Contact your session lead.
         </p>
       </div>
+    </div>
+
+    <div class="mt-6 rounded-2xl border border-slate-700 bg-slate-800/50 p-6 shadow-lg">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-white">Active Sessions</h2>
+        <button
+          class="text-xs uppercase tracking-[0.2em] text-cyan-300 hover:text-cyan-100"
+          type="button"
+          on:click={loadActiveSessions}
+        >
+          Refresh
+        </button>
+      </div>
+      {#if activeLoading}
+        <p class="mt-4 text-sm text-slate-400">Loading active sessions…</p>
+      {:else if activeError}
+        <p class="mt-4 text-sm text-rose-300">{activeError}</p>
+      {:else if activeSessions.length === 0}
+        <p class="mt-4 text-sm text-slate-400">No active sessions right now. Check back soon!</p>
+      {:else}
+        <div class="mt-4 grid gap-3">
+          {#each activeSessions as session}
+            <button
+              type="button"
+              class="flex flex-col rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-left transition hover:border-cyan-400/40 hover:text-cyan-100"
+              on:click={() => chooseSession(session.code)}
+            >
+              <span class="text-sm font-semibold text-white">
+                {session.title ?? 'Untitled Session'}
+              </span>
+              <span class="text-xs text-slate-400 font-mono">{session.code}</span>
+              <span class="mt-1 text-xs text-slate-500">Status: {session.status}</span>
+            </button>
+          {/each}
+        </div>
+      {/if}
     </div>
 
     <!-- Preview Avatar -->

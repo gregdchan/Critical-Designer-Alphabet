@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   code VARCHAR(16) PRIMARY KEY,
   title VARCHAR(255),
   template_id VARCHAR(64),
+  facilitator_email VARCHAR(255),
   challenge TEXT,
   active_round VARCHAR(128),
   round_expires_at TIMESTAMP NULL,

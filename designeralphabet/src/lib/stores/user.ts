@@ -9,6 +9,7 @@ export type CurrentUser = {
   name: string;
   role: UserRole;
   color: string;
+  email?: string;
 };
 
 const STORAGE_KEY = 'cda:current-user';
