@@ -49,7 +49,7 @@
 	let currentParticipant: any = null;
 	const activeRole = data.role ?? 'participant';
 
-	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'timeline' | 'chat' = 'overview';
+	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'timeline' | 'chat' | 'participants' = 'overview';
 	let responseModalOpen = false;
 	let selectedQuestionId: string | null = null;
 	let responseText = '';
@@ -109,6 +109,45 @@
 			participantName: author?.name ?? 'Anonymous'
 		};
 	});
+
+	$: participantActivity = participantsList.map((participant) => {
+		const participantResponses = responsesList.filter(r => r.participant_id === participant.id);
+		const totalVotes = participantResponses.reduce((sum, r) => sum + (r.votes || 0), 0);
+		const participantChats = chatList.filter(c => c.participant_id === participant.id);
+		const participantTimeline = timelineList.filter(t => t.owner === participant.name);
+
+		// Calculate activity score based on various actions
+		const activityScore = (participantResponses.length * 10) +
+			(totalVotes * 2) +
+			(participantChats.length * 5) +
+			(participantTimeline.length * 15) +
+			(participant.points || 0);
+
+		// Determine last activity
+		const allActivities = [
+			...participantResponses.map(r => ({ type: 'response', time: r.created_at })),
+			...participantChats.map(c => ({ type: 'chat', time: c.created_at })),
+			...participantTimeline.map(t => ({ type: 'timeline', time: t.created_at }))
+		].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+		const lastActivity = allActivities[0];
+		const timeSinceLastActivity = lastActivity ?
+			Date.now() - new Date(lastActivity.time).getTime() :
+			Date.now() - new Date(participant.created_at).getTime();
+
+		return {
+			...participant,
+			responseCount: participantResponses.length,
+			totalVotes,
+			chatCount: participantChats.length,
+			timelineCount: participantTimeline.length,
+			activityScore,
+			lastActivity: lastActivity?.type || 'joined',
+			lastActivityTime: lastActivity?.time || participant.created_at,
+			minutesSinceActivity: Math.floor(timeSinceLastActivity / 60000),
+			isRecent: timeSinceLastActivity < 300000 // 5 minutes
+		};
+	}).sort((a, b) => b.activityScore - a.activityScore);
 
 	$: phasesList = $phasesStore ?? [];
 	$: activePhase = (() => {
@@ -482,8 +521,8 @@
 						{/if}
 				</section>
 			{/if}
-						</div>
-						<div class="flex flex-wrap items-center gap-2">
+
+			<section class="grid gap-6 md:grid-cols-3">
 							{#each sessionStatuses as status}
 								<button
 									class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-slate-900 shadow' : 'border border-cyan-400/40 text-cyan-200 hover:border-cyan-300'}`}
@@ -686,6 +725,15 @@
 						<IconMessage class="h-4 w-4" />
 						Arcade Chat
 					</button>
+					{#if isFacilitator()}
+						<button
+							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'participants' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							on:click={() => (activeTab = 'participants')}
+						>
+							<IconUsers class="h-4 w-4" />
+							Participant Activity
+						</button>
+					{/if}
 				</nav>
 
 				<div class="mt-6 rounded-xl border border-slate-700 bg-slate-900/80 p-4">
@@ -754,6 +802,119 @@
 									Send
 								</button>
 							</form>
+						</div>
+					{:else if activeTab === 'participants'}
+						<div class="space-y-4">
+							<div class="flex items-center justify-between">
+								<h3 class="text-lg font-semibold text-white">Participant Activity Dashboard</h3>
+								<span class="text-sm text-slate-400">{participantActivity.length} participants</span>
+							</div>
+
+							<!-- Activity Summary -->
+							<div class="grid gap-4 lg:grid-cols-4">
+								<div class="rounded-lg border border-green-400/30 bg-green-400/10 p-3">
+									<p class="text-xs uppercase tracking-wide text-green-200">Recently Active</p>
+									<p class="text-xl font-semibold text-white">
+										{participantActivity.filter(p => p.isRecent).length}
+									</p>
+									<p class="text-xs text-green-100/80">Last 5 minutes</p>
+								</div>
+								<div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
+									<p class="text-xs uppercase tracking-wide text-cyan-200">Total Responses</p>
+									<p class="text-xl font-semibold text-white">
+										{participantActivity.reduce((sum, p) => sum + p.responseCount, 0)}
+									</p>
+									<p class="text-xs text-cyan-100/80">Ideas shared</p>
+								</div>
+								<div class="rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
+									<p class="text-xs uppercase tracking-wide text-purple-200">Total Votes</p>
+									<p class="text-xl font-semibold text-white">
+										{participantActivity.reduce((sum, p) => sum + p.totalVotes, 0)}
+									</p>
+									<p class="text-xs text-purple-100/80">Votes cast</p>
+								</div>
+								<div class="rounded-lg border border-yellow-400/30 bg-yellow-400/10 p-3">
+									<p class="text-xs uppercase tracking-wide text-yellow-200">Chat Messages</p>
+									<p class="text-xl font-semibold text-white">
+										{participantActivity.reduce((sum, p) => sum + p.chatCount, 0)}
+									</p>
+									<p class="text-xs text-yellow-100/80">Messages sent</p>
+								</div>
+							</div>
+
+							<!-- Participant List -->
+							<div class="space-y-3">
+								{#each participantActivity as participant}
+									<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
+										<div class="flex items-center justify-between">
+											<div class="flex items-center gap-3">
+												<div
+													class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
+													style="background-color: {participant.color}"
+												>
+													{participant.name.charAt(0).toUpperCase()}
+												</div>
+												<div>
+													<div class="flex items-center gap-2">
+														<span class="font-medium text-white">{participant.name}</span>
+														<span class="px-2 py-1 text-xs rounded-full bg-slate-700 text-slate-300">
+															{participant.role}
+														</span>
+														{#if participant.isRecent}
+															<span class="w-2 h-2 bg-green-400 rounded-full" title="Active recently"></span>
+														{/if}
+													</div>
+													<div class="flex items-center gap-4 text-xs text-slate-400 mt-1">
+														<span>Last: {participant.lastActivity}</span>
+														{#if participant.minutesSinceActivity < 60}
+															<span>{participant.minutesSinceActivity}m ago</span>
+														{:else if participant.minutesSinceActivity < 1440}
+															<span>{Math.floor(participant.minutesSinceActivity / 60)}h ago</span>
+														{:else}
+															<span>{Math.floor(participant.minutesSinceActivity / 1440)}d ago</span>
+														{/if}
+													</div>
+												</div>
+											</div>
+											<div class="text-right">
+												<div class="text-lg font-semibold text-cyan-200">
+													{participant.activityScore}
+												</div>
+												<div class="text-xs text-slate-400">activity score</div>
+											</div>
+										</div>
+
+										<div class="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+											<div class="text-center p-2 rounded bg-slate-800/60">
+												<div class="font-medium text-white">{participant.responseCount}</div>
+												<div class="text-xs text-slate-400">responses</div>
+											</div>
+											<div class="text-center p-2 rounded bg-slate-800/60">
+												<div class="font-medium text-white">{participant.totalVotes}</div>
+												<div class="text-xs text-slate-400">votes</div>
+											</div>
+											<div class="text-center p-2 rounded bg-slate-800/60">
+												<div class="font-medium text-white">{participant.chatCount}</div>
+												<div class="text-xs text-slate-400">chats</div>
+											</div>
+											<div class="text-center p-2 rounded bg-slate-800/60">
+												<div class="font-medium text-white">{participant.points}</div>
+												<div class="text-xs text-slate-400">points</div>
+											</div>
+										</div>
+
+										{#if participant.badges && participant.badges.length > 0}
+											<div class="mt-3 flex flex-wrap gap-2">
+												{#each participant.badges as badge}
+													<span class="px-2 py-1 text-xs rounded-full bg-yellow-400/20 text-yellow-300">
+														{badge}
+													</span>
+												{/each}
+											</div>
+										{/if}
+									</div>
+								{/each}
+							</div>
 						</div>
 					{/if}
 				</div>

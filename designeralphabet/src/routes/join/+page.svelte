@@ -516,7 +516,7 @@
 
 		<div class="mt-6 rounded-2xl border border-slate-700 bg-slate-800/50 p-6 shadow-lg">
 			<div class="flex items-center justify-between">
-				<h2 class="text-lg font-semibold text-white">Active Sessions</h2>
+				<h2 class="text-lg font-semibold text-white">Recent Active Sessions</h2>
 				<button
 					class="text-xs uppercase tracking-[0.2em] text-cyan-300 hover:text-cyan-100"
 					type="button"
@@ -526,24 +526,47 @@
 				</button>
 			</div>
 			{#if activeLoading}
-				<p class="mt-4 text-sm text-slate-400">Loading active sessions…</p>
+				<div class="flex items-center justify-center py-6">
+					<div class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+					<span class="ml-3 text-slate-300">Loading sessions...</span>
+				</div>
 			{:else if activeError}
-				<p class="mt-4 text-sm text-rose-300">{activeError}</p>
+				<div class="text-center py-6">
+					<p class="text-rose-300 mb-3">{activeError}</p>
+					<button
+						class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm"
+						on:click={loadActiveSessions}
+					>
+						Try Again
+					</button>
+				</div>
 			{:else if activeSessions.length === 0}
-				<p class="mt-4 text-sm text-slate-400">No active sessions right now. Check back soon!</p>
+				<p class="mt-4 text-sm text-slate-400 text-center py-4">No active sessions right now. Check back soon!</p>
 			{:else}
 				<div class="mt-4 grid gap-3">
 					{#each activeSessions as session}
 						<button
 							type="button"
-							class="flex flex-col rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-left transition hover:border-cyan-400/40 hover:text-cyan-100"
+							class="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-left transition hover:border-cyan-400/40 hover:bg-slate-900/90"
 							on:click={() => chooseSession(session.code)}
 						>
-							<span class="text-sm font-semibold text-white">
-								{session.title ?? 'Untitled Session'}
-							</span>
-							<span class="text-xs text-slate-400 font-mono">{session.code}</span>
-							<span class="mt-1 text-xs text-slate-500">Status: {session.status}</span>
+							<div class="flex-1">
+								<div class="flex items-center gap-2 mb-1">
+									<span class="text-sm font-semibold text-white">
+										{session.title ?? 'Untitled Session'}
+									</span>
+									<span class="px-2 py-1 text-xs rounded-full {session.status === 'live' ? 'bg-green-400/20 text-green-300' : 'bg-yellow-400/20 text-yellow-300'}">
+										{session.status}
+									</span>
+								</div>
+								<div class="flex items-center gap-3 text-xs text-slate-400">
+									<span class="font-mono">{session.code}</span>
+									<span>{new Date(session.created_at).toLocaleDateString()}</span>
+								</div>
+							</div>
+							<div class="text-cyan-400 text-sm">
+								Join →
+							</div>
 						</button>
 					{/each}
 				</div>

@@ -109,6 +109,15 @@
 		dashboardTypes: [] as string[]
 	};
 	let selectedPhaseIndex = 0;
+	let activeSessions: Array<{
+		code: string;
+		title: string | null;
+		status: string;
+		created_at: string;
+		facilitator_email: string | null;
+	}> = [];
+	let activeLoading = true;
+	let activeError = '';
 
   const templateQuery = `*[_type == "workshopTemplate"]{
     _id,
@@ -294,9 +303,35 @@
 		}
 	}
 
+	async function loadActiveSessions() {
+		activeLoading = true;
+		activeError = '';
+		try {
+			const response = await fetch('/api/session/list?status=planned,live');
+			const payload = await response.json();
+			if (!payload.success) {
+				throw new Error(payload.error ?? 'Unable to load active sessions');
+			}
+			activeSessions = payload.sessions ?? [];
+		} catch (error) {
+			console.error('Failed to load active sessions', error);
+			activeError = (error as Error).message ?? 'Unable to load active sessions';
+		} finally {
+			activeLoading = false;
+		}
+	}
+
+	function chooseActiveSession(session: typeof activeSessions[0]) {
+		sessionCode = session.code;
+		sessionTitle = session.title || `Session ${session.code}`;
+		if (session.facilitator_email) {
+			facilitatorEmail = session.facilitator_email;
+		}
+	}
+
 	onMount(async () => {
 		generateSessionCode();
-		await fetchTemplates();
+		await Promise.all([fetchTemplates(), loadActiveSessions()]);
 	});
 
 	$: if (!sessionTitle && selectedTemplate) {
@@ -599,6 +634,70 @@
 					</div>
 				{/if}
 			</div>
+		</div>
+
+		<!-- Active Sessions Section -->
+		<div class="mt-8 bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-600">
+			<div class="flex items-center justify-between mb-4">
+				<h2 class="text-xl font-semibold text-white">Recent Active Sessions</h2>
+				<button
+					class="text-sm text-cyan-300 hover:text-cyan-100 transition-colors"
+					type="button"
+					on:click={loadActiveSessions}
+				>
+					Refresh
+				</button>
+			</div>
+
+			{#if activeLoading}
+				<div class="flex items-center justify-center py-8">
+					<div class="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+					<span class="ml-3 text-slate-300">Loading active sessions...</span>
+				</div>
+			{:else if activeError}
+				<div class="text-center py-8">
+					<p class="text-rose-300 mb-4">{activeError}</p>
+					<button
+						class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+						on:click={loadActiveSessions}
+					>
+						Try Again
+					</button>
+				</div>
+			{:else if activeSessions.length === 0}
+				<p class="text-slate-400 text-center py-8">No recent active sessions found.</p>
+			{:else}
+				<div class="grid gap-3">
+					{#each activeSessions as session}
+						<button
+							type="button"
+							class="flex items-center justify-between p-4 rounded-lg border border-slate-600 hover:border-cyan-400/50 bg-slate-700/50 hover:bg-slate-700/70 transition-all text-left"
+							on:click={() => chooseActiveSession(session)}
+						>
+							<div class="flex-1">
+								<div class="flex items-center gap-3 mb-2">
+									<span class="text-sm font-semibold text-white">
+										{session.title || 'Untitled Session'}
+									</span>
+									<span class="px-2 py-1 text-xs rounded-full {session.status === 'live' ? 'bg-green-400/20 text-green-300' : 'bg-yellow-400/20 text-yellow-300'}">
+										{session.status}
+									</span>
+								</div>
+								<div class="flex items-center gap-4 text-xs text-slate-400">
+									<span class="font-mono">{session.code}</span>
+									{#if session.facilitator_email}
+										<span>{session.facilitator_email}</span>
+									{/if}
+									<span>{new Date(session.created_at).toLocaleDateString()}</span>
+								</div>
+							</div>
+							<div class="text-cyan-400 text-sm">
+								Enter →
+							</div>
+						</button>
+					{/each}
+				</div>
+			{/if}
 		</div>
 
 		{#if selectedTemplate}
