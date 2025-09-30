@@ -158,15 +158,40 @@
 
 	async function seedQuestions(code: string, rounds: TemplateRound[] = []) {
 		if (!rounds.length) return;
-		const payloads = rounds
-			.flatMap((round) =>
-				(round?.questions ?? []).map((text) => ({
-					code,
-					section: round?.name ?? round?.key ?? 'Breakout',
-					text: text.trim()
-				}))
-			)
-			.filter((entry) => entry.text.length);
+		const payloads: any[] = [];
+
+		rounds.forEach((round, roundIndex) => {
+			(round?.questions ?? []).forEach((question: any, questionIndex) => {
+				// Handle both string questions (legacy) and structured question objects
+				if (typeof question === 'string') {
+					payloads.push({
+						code,
+						section: round?.name ?? round?.key ?? 'Breakout',
+						text: question.trim(),
+						lens: null,
+						responseType: 'written',
+						mapType: 'responses',
+						config: {},
+						orderIndex: roundIndex * 100 + questionIndex,
+						recommendedDashboards: []
+					});
+				} else {
+					payloads.push({
+						code,
+						section: round?.name ?? round?.key ?? 'Breakout',
+						text: question.prompt || question.text || 'Question',
+						lens: question.lens || null,
+						responseType: question.responseType || 'written',
+						mapType: question.mapType || 'responses',
+						config: question.scale || question.landscape || question.options || {},
+						orderIndex: roundIndex * 100 + questionIndex,
+						recommendedDashboards: question.recommendedDashboards || []
+					});
+				}
+			});
+		});
+
+		if (!payloads.length) return;
 
 		await Promise.all(
 			payloads.map((payload) =>
@@ -298,8 +323,8 @@
 			...phase,
 			index,
 			status: index === 0 ? 'ready' : 'pending',
-			questions: rounds.flatMap(r => r.questions ?? []).filter(q =>
-				q.recommendedDashboards?.some(d => phase.dashboards?.includes(d))
+			questions: rounds.flatMap(r => r.questions ?? []).filter((q: any) =>
+				q.recommendedDashboards?.some((d: string) => phase.dashboards?.includes(d))
 			)
 		}));
 
@@ -759,5 +784,182 @@
 				{/if}
 			</div>
 		{/if}
+
+		{#if currentView === 'orchestration'}
+			<!-- Session Orchestration Interface -->
+			<div class="space-y-8">
+				<!-- Session Overview -->
+				<div class="grid lg:grid-cols-3 gap-6">
+					<div class="lg:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-cyan-400/20">
+						<h3 class="text-xl font-semibold text-white mb-4">Session Overview</h3>
+						<div class="grid md:grid-cols-2 gap-4 mb-6">
+							<div class="space-y-2">
+								<p class="text-sm text-slate-400">Session Title</p>
+								<p class="text-white font-medium">{sessionTitle}</p>
+							</div>
+							<div class="space-y-2">
+								<p class="text-sm text-slate-400">Access Code</p>
+								<p class="text-cyan-400 font-mono text-lg">{sessionCode}</p>
+							</div>
+							<div class="space-y-2">
+								<p class="text-sm text-slate-400">Facilitator</p>
+								<p class="text-white">{facilitatorName}</p>
+							</div>
+							<div class="space-y-2">
+								<p class="text-sm text-slate-400">Template</p>
+								<p class="text-white">{selectedTemplate?.title}</p>
+							</div>
+						</div>
+						{#if sessionChallenge}
+							<div class="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4 mb-6">
+								<p class="text-xs uppercase tracking-wide text-cyan-200 mb-2">Challenge Focus</p>
+								<p class="text-slate-100">{sessionChallenge}</p>
+							</div>
+						{/if}
+					</div>
+
+					<div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-purple-400/20">
+						<h3 class="text-xl font-semibold text-white mb-4">Session Stats</h3>
+						<div class="space-y-4">
+							<div class="flex justify-between items-center">
+								<span class="text-slate-400">Total Phases</span>
+								<span class="text-white font-semibold">{sessionPreview.phases.length}</span>
+							</div>
+							<div class="flex justify-between items-center">
+								<span class="text-slate-400">Est. Duration</span>
+								<span class="text-white font-semibold">{sessionPreview.totalDuration} min</span>
+							</div>
+							<div class="flex justify-between items-center">
+								<span class="text-slate-400">Questions</span>
+								<span class="text-white font-semibold">{sessionPreview.questionCount}</span>
+							</div>
+							<div class="flex justify-between items-center">
+								<span class="text-slate-400">Dashboard Types</span>
+								<span class="text-white font-semibold">{sessionPreview.dashboardTypes.length}</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Phase Timeline -->
+				<div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-cyan-400/20">
+					<h3 class="text-xl font-semibold text-white mb-6">Phase Timeline & Controls</h3>
+					<div class="grid lg:grid-cols-[2fr_1fr] gap-8">
+						<!-- Phase List -->
+						<div class="space-y-3">
+							{#each sessionPreview.phases as phase, index}
+								<button
+									class="group w-full text-left border rounded-lg p-4 transition-all {index === selectedPhaseIndex
+										? 'border-cyan-400 bg-cyan-400/10'
+										: 'border-slate-600 hover:border-cyan-400/50'}"
+									on:click={() => previewPhase(index)}
+								>
+									<div class="flex items-center justify-between mb-2">
+										<div class="flex items-center gap-3">
+											<span class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-400 to-purple-400 text-slate-900 flex items-center justify-center text-sm font-bold">
+												{index + 1}
+											</span>
+											<div>
+												<h4 class="font-medium text-white">{phase.title}</h4>
+												<p class="text-xs text-slate-400">{phase.key}</p>
+											</div>
+										</div>
+										<div class="text-right">
+											{#if phase.durationMinutes}
+												<span class="text-sm font-medium text-cyan-200">{phase.durationMinutes} min</span>
+											{/if}
+											<p class="text-xs text-slate-500">{phase.status}</p>
+										</div>
+									</div>
+									{#if phase.description}
+										<p class="text-sm text-slate-300 mb-3">{phase.description}</p>
+									{/if}
+									{#if phase.dashboards?.length}
+										<div class="flex flex-wrap gap-2">
+											{#each phase.dashboards.slice(0, 3) as dashboard}
+												<span class="px-2 py-1 bg-purple-400/20 text-purple-300 rounded text-xs">{dashboard}</span>
+											{/each}
+											{#if phase.dashboards.length > 3}
+												<span class="px-2 py-1 bg-slate-600 text-slate-300 rounded text-xs">+{phase.dashboards.length - 3} more</span>
+											{/if}
+										</div>
+									{/if}
+								</button>
+							{/each}
+						</div>
+
+						<!-- Phase Preview -->
+						<div class="bg-slate-900/50 rounded-lg p-4">
+							{#if sessionPreview.phases[selectedPhaseIndex]}
+								{@const phase = sessionPreview.phases[selectedPhaseIndex]}
+								<h4 class="font-semibold text-white mb-3">Phase {selectedPhaseIndex + 1}: {phase.title}</h4>
+								{#if phase.description}
+									<p class="text-sm text-slate-300 mb-4">{phase.description}</p>
+								{/if}
+								<div class="space-y-3">
+									{#if phase.durationMinutes}
+										<div class="flex justify-between text-sm">
+											<span class="text-slate-400">Duration:</span>
+											<span class="text-cyan-200">{phase.durationMinutes} minutes</span>
+										</div>
+									{/if}
+									{#if phase.dashboards?.length}
+										<div class="space-y-2">
+											<p class="text-sm text-slate-400">Active Dashboards:</p>
+											<div class="space-y-1">
+												{#each phase.dashboards as dashboard}
+													<div class="text-xs px-2 py-1 bg-purple-400/20 text-purple-200 rounded">{dashboard}</div>
+												{/each}
+											</div>
+										</div>
+									{/if}
+									{#if phase.questions?.length}
+										<div class="space-y-2">
+											<p class="text-sm text-slate-400">Questions ({phase.questions.length}):</p>
+											<div class="space-y-1 max-h-32 overflow-y-auto">
+												{#each phase.questions.slice(0, 3) as question}
+													<div class="text-xs p-2 bg-slate-800 rounded text-slate-300">
+														{question.prompt || question.text || 'Question'}
+													</div>
+												{/each}
+												{#if phase.questions.length > 3}
+													<div class="text-xs text-slate-400 p-2">+{phase.questions.length - 3} more...</div>
+												{/if}
+											</div>
+										</div>
+									{/if}
+								</div>
+							{:else}
+								<p class="text-slate-400 text-center py-8">Select a phase to preview</p>
+							{/if}
+						</div>
+					</div>
+				</div>
+
+				<!-- Launch Controls -->
+				<div class="bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm rounded-xl p-6 border border-cyan-400/20">
+					<div class="flex items-center justify-between">
+						<div>
+							<h3 class="text-xl font-semibold text-white mb-2">Ready to Launch?</h3>
+							<p class="text-slate-300">This will create the session and open your facilitator dashboard with full phase controls, timers, and real-time data.</p>
+						</div>
+						<button
+							class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-semibold rounded-xl transition-all duration-200 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+							on:click={createSession}
+							disabled={loading}
+						>
+							{#if loading}
+								<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+								Launching...
+							{:else}
+								<Play class="w-6 h-6" />
+								Launch Session
+							{/if}
+						</button>
+					</div>
+				</div>
+			</div>
+		{/if}
 	</div>
+{/if}
 </div>

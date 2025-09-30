@@ -778,11 +778,40 @@
 						{#each questionsList as question}
 							<article class="rounded-xl border border-slate-700 bg-slate-900/60 p-4 space-y-3">
 								<header class="flex items-center justify-between">
-									<div>
-										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">
-											{question.section}
-										</p>
-										<h3 class="text-sm font-semibold text-white mt-1">{question.text}</h3>
+									<div class="flex-1">
+										<div class="flex items-center gap-3 mb-2">
+											<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">
+												{question.section}
+											</p>
+											{#if question.lens}
+												<span class="px-2 py-1 bg-purple-400/20 text-purple-300 rounded text-xs">
+													{question.lens}
+												</span>
+											{/if}
+											{#if question.response_type && question.response_type !== 'written'}
+												<span class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs">
+													{question.response_type}
+												</span>
+											{/if}
+											{#if question.map_type && question.map_type !== 'responses'}
+												<span class="px-2 py-1 bg-green-400/20 text-green-300 rounded text-xs">
+													📊 {question.map_type}
+												</span>
+											{/if}
+										</div>
+										<h3 class="text-sm font-semibold text-white">{question.text}</h3>
+										{#if question.recommended_dashboards?.length}
+											<div class="mt-2 flex flex-wrap gap-1">
+												{#each question.recommended_dashboards.slice(0, 3) as dashboard}
+													<span class="px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs">
+														{dashboard}
+													</span>
+												{/each}
+												{#if question.recommended_dashboards.length > 3}
+													<span class="text-xs text-slate-400">+{question.recommended_dashboards.length - 3} more</span>
+												{/if}
+											</div>
+										{/if}
 									</div>
 									<button
 										class="rounded-lg border border-cyan-400/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"

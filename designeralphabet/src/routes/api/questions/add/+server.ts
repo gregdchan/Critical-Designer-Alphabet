@@ -4,7 +4,18 @@ import { addQuestion } from '$lib/server/workshop';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { code, section, text } = await request.json();
+		const {
+			code,
+			section,
+			text,
+			lens,
+			responseType,
+			mapType,
+			config,
+			orderIndex,
+			recommendedDashboards
+		} = await request.json();
+
 		if (!code || !section || !text) {
 			return json(
 				{ success: false, error: 'code, section, and text are required' },
@@ -12,7 +23,17 @@ export const POST: RequestHandler = async ({ request }) => {
 			);
 		}
 
-		const question = await addQuestion({ code, section, text });
+		const question = await addQuestion({
+			code,
+			section,
+			text,
+			lens,
+			responseType,
+			mapType,
+			config,
+			orderIndex,
+			recommendedDashboards
+		});
 		return json({ success: true, question });
 	} catch (error: any) {
 		console.error('Failed to add question', error);
