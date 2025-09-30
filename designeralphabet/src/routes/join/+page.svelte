@@ -43,6 +43,15 @@
 	let activeError = '';
 	let joinAsFacilitator = false;
 	let facilitatorEmail = '';
+	let facilitatorSessions: Array<{
+		code: string;
+		title: string | null;
+		status: string;
+		created_at: string;
+	}> = [];
+	let facilitatorLoading = false;
+	let facilitatorError = '';
+	let lastFacilitatorEmail = '';
 
 	const avatarColors = [
 		{ name: 'Neon Cyan', value: '#00ffff' },
@@ -80,6 +89,24 @@
 			templateBlueprint = null;
 			previewError = '';
 			previewLoading = false;
+		}
+	}
+
+	$: if (browser) {
+		if (joinAsFacilitator) {
+			const normalizedEmail = facilitatorEmail.trim().toLowerCase();
+			if (normalizedEmail && normalizedEmail !== lastFacilitatorEmail) {
+				lastFacilitatorEmail = normalizedEmail;
+				loadFacilitatorSessions(normalizedEmail);
+			} else if (!normalizedEmail) {
+				lastFacilitatorEmail = '';
+				facilitatorSessions = [];
+				facilitatorError = '';
+			}
+		} else {
+			lastFacilitatorEmail = '';
+			facilitatorSessions = [];
+			facilitatorError = '';
 		}
 	}
 
@@ -154,6 +181,26 @@
 			activeError = (error as Error).message ?? 'Unable to load active sessions';
 		} finally {
 			activeLoading = false;
+		}
+	}
+
+	async function loadFacilitatorSessions(email: string) {
+		facilitatorLoading = true;
+		facilitatorError = '';
+		try {
+			const params = new URLSearchParams({ facilitatorEmail: email, status: 'planned,live,done' });
+			const response = await fetch(`/api/session/list?${params.toString()}`);
+			const payload = await response.json();
+			if (!payload.success) {
+				throw new Error(payload.error ?? 'Unable to load facilitator sessions');
+			}
+			facilitatorSessions = payload.sessions ?? [];
+		} catch (error) {
+			console.error('Failed to load facilitator sessions', error);
+			facilitatorError = (error as Error).message ?? 'Unable to load facilitator sessions';
+			facilitatorSessions = [];
+		} finally {
+			facilitatorLoading = false;
 		}
 	}
 

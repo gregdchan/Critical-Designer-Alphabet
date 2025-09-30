@@ -5,6 +5,7 @@ import { listSessions, type SessionStatus } from '$lib/server/workshop';
 export const GET: RequestHandler = async ({ url }) => {
 	try {
 		const statusParam = url.searchParams.get('status');
+		const facilitatorEmail = url.searchParams.get('facilitatorEmail') ?? undefined;
 		const allowed = new Set<SessionStatus>(['planned', 'live', 'done']);
 		const statuses = (
 			statusParam
@@ -15,7 +16,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				: ['planned', 'live']
 		) as SessionStatus[];
 
-		const sessions = await listSessions({ statuses });
+		const sessions = await listSessions({ statuses, facilitatorEmail });
 		return json({
 			success: true,
 			sessions

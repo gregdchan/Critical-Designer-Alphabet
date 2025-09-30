@@ -57,6 +57,12 @@ export interface Question {
 	room_code: string;
 	section: string;
 	text: string;
+	lens: string | null;
+	response_type: string | null;
+	map_type: string | null;
+	config: Record<string, unknown> | null;
+	order_index: number | null;
+	recommended_dashboards: string[];
 	created_at: string;
 }
 
@@ -66,6 +72,7 @@ export interface ResponseRow {
 	question_id: string;
 	participant_id: string | null;
 	text: string;
+	metadata: Record<string, unknown> | null;
 	cards: string[];
 	votes: number;
 	created_at: string;
@@ -240,14 +247,20 @@ export async function getSession(code: string) {
 }
 
 export async function listSessions({
-  statuses
+	statuses,
+	facilitatorEmail
 }: {
-  statuses?: SessionStatus[];
+	statuses?: SessionStatus[];
+	facilitatorEmail?: string;
 } = {}) {
 	let query = supabaseAdmin.from('sessions').select('*').order('created_at', { ascending: false });
 
 	if (statuses?.length) {
 		query = query.in('status', statuses);
+	}
+
+	if (facilitatorEmail) {
+		query = query.ilike('facilitator_email', facilitatorEmail.trim().toLowerCase());
 	}
 
 	const response = await query;
@@ -402,19 +415,48 @@ export async function getParticipants(code: string): Promise<Participant[]> {
 export async function addQuestion({
 	code,
 	section,
-	text
+	text,
+	lens,
+	responseType,
+	mapType,
+	config,
+	orderIndex,
+	recommendedDashboards
 }: {
 	code: string;
 	section: string;
 	text: string;
+	lens?: string | null;
+	responseType?: string | null;
+	mapType?: string | null;
+	config?: Record<string, unknown> | null;
+	orderIndex?: number | null;
+	recommendedDashboards?: string[];
 }) {
 	const response = await supabaseAdmin
 		.from('questions')
-		.insert({ room_code: code, section, text })
+		.insert({
+			room_code: code,
+			section,
+			text,
+			lens: lens ?? null,
+			response_type: responseType ?? 'written',
+			map_type: mapType ?? 'responses',
+			config: config ?? {},
+			order_index: typeof orderIndex === 'number' ? orderIndex : null,
+			recommended_dashboards: recommendedDashboards ?? []
+		})
 		.select()
 		.single();
 
-	const question = ensure(response, 'addQuestion') as Question;
+	const questionRow = ensure(response, 'addQuestion') as Question;
+	const question: Question = {
+		...questionRow,
+		config: (questionRow.config ?? {}) as Record<string, unknown>,
+		recommended_dashboards: Array.isArray(questionRow.recommended_dashboards)
+			? (questionRow.recommended_dashboards as string[])
+			: []
+	};
 	broadcast(code, { type: 'QUESTION_ADDED', question });
 	return question;
 }

@@ -86,7 +86,8 @@ export const WorkshopTemplate = defineType({
                     defineField({
                       name: 'questions',
                       type: 'array',
-                      of: [{ type: 'text' }]
+                      of: [{ type: 'sessionQuestion' }],
+                      description: 'Associate prompts with response types and dashboards for this breakout round.'
                     })
                   ],
                   preview: {

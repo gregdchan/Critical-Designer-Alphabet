@@ -99,6 +99,17 @@
 	let sessionChallenge = '';
 	let lastTemplateId: string | null = null;
 
+	// Session orchestration state
+	let currentView: 'setup' | 'orchestration' | 'launching' = 'setup';
+	let previewPhases: any[] = [];
+	let sessionPreview = {
+		phases: [] as any[],
+		totalDuration: 0,
+		questionCount: 0,
+		dashboardTypes: [] as string[]
+	};
+	let selectedPhaseIndex = 0;
+
   const templateQuery = `*[_type == "workshopTemplate"]{
     _id,
     title,
@@ -244,7 +255,12 @@
 				window.open(`/presentation?code=${sessionCode}`, '_blank');
 			}
 
+			currentView = 'launching';
+
+		// Small delay to show the transition, then navigate
+		setTimeout(() => {
 			goto(`/session/${sessionCode}?role=facilitator`);
+		}, 1500);
 		} catch (error) {
 			console.error('Error creating session:', error);
 			alert('Failed to create session. Please try again.');
@@ -267,20 +283,86 @@
 	$: if (!selectedTemplate && templates.length) {
 		selectedTemplate = templates[0];
 	}
+
+	$: if (selectedTemplate) {
+		updateSessionPreview();
+	}
+
+	function updateSessionPreview() {
+		if (!selectedTemplate) return;
+
+		const phases = selectedTemplate.phases ?? [];
+		const rounds = selectedTemplate.sections?.breakout?.rounds ?? [];
+
+		previewPhases = phases.map((phase, index) => ({
+			...phase,
+			index,
+			status: index === 0 ? 'ready' : 'pending',
+			questions: rounds.flatMap(r => r.questions ?? []).filter(q =>
+				q.recommendedDashboards?.some(d => phase.dashboards?.includes(d))
+			)
+		}));
+
+		sessionPreview = {
+			phases: previewPhases,
+			totalDuration: phases.reduce((sum, p) => sum + (p.durationMinutes ?? 0), 0),
+			questionCount: rounds.reduce((sum, r) => sum + (r.questions?.length ?? 0), 0),
+			dashboardTypes: [...new Set(phases.flatMap(p => p.dashboards ?? []))]
+		};
+	}
+
+	function proceedToOrchestration() {
+		if (!facilitatorName || !facilitatorEmail || !sessionCode || !sessionTitle || !selectedTemplate) {
+			alert('Please fill in all required fields and select a template first.');
+			return;
+		}
+		currentView = 'orchestration';
+	}
+
+	function backToSetup() {
+		currentView = 'setup';
+	}
+
+	function previewPhase(index: number) {
+		selectedPhaseIndex = index;
+	}
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 p-6">
-	<div class="max-w-4xl mx-auto">
-		<header class="text-center mb-12">
-			<h1
-				class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-4"
-			>
-				Design Session Console
-			</h1>
-			<p class="text-slate-300 text-lg">
-				Plan inclusive design sprints for AI roadmaps, policy pilots, or any iterative challenge.
-			</p>
-		</header>
+	{#if currentView === 'launching'}
+		<div class="flex items-center justify-center min-h-screen">
+			<div class="text-center">
+				<div class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+				<h2 class="text-2xl font-semibold text-white mb-2">Launching Session</h2>
+				<p class="text-slate-300">Setting up your immersive facilitation environment...</p>
+			</div>
+		</div>
+	{:else}
+		<div class="max-w-7xl mx-auto">
+			<header class="text-center mb-8">
+				<h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-4">
+					{currentView === 'setup' ? 'Design Session Console' : 'Session Orchestration'}
+				</h1>
+				<p class="text-slate-300 text-lg">
+					{currentView === 'setup'
+						? 'Plan inclusive design sprints for AI roadmaps, policy pilots, or any iterative challenge.'
+						: 'Preview phases, configure timers, and prepare your facilitation dashboard.'}
+				</p>
+
+				{#if currentView === 'orchestration'}
+					<div class="flex items-center justify-center gap-4 mt-6">
+						<button
+							class="flex items-center gap-2 px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:border-cyan-400 transition-colors"
+							on:click={backToSetup}
+						>
+							← Back to Setup
+						</button>
+						<div class="text-sm text-slate-400">
+							{sessionTitle} • {sessionCode}
+						</div>
+					</div>
+				{/if}
+			</header>
 
 		<div class="grid lg:grid-cols-2 gap-8">
 			<!-- Setup Form -->
