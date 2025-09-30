@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { building } from '$app/environment';
 
-const url = import.meta.env.VITE_SUPABASE_URL;
-const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE;
+const url = import.meta.env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE;
 
 // Only validate environment variables when not in build mode
 if (!building) {
