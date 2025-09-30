@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS sessions (
   title VARCHAR(255),
   template_id VARCHAR(64),
   challenge TEXT,
+  active_round VARCHAR(128),
+  round_expires_at TIMESTAMP NULL,
   status ENUM('planned','live','done') DEFAULT 'planned',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

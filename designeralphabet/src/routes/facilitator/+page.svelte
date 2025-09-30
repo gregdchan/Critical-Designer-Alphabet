@@ -4,6 +4,7 @@
   import sanityClient from '$lib/sanity';
   import { browser } from '$app/environment';
   import { currentUser } from '$lib/stores/user';
+  import { storeParticipantProfile } from '$lib/realtime';
   import { IconPlayerPlay as Play, IconSettings as Settings, IconUsers as Users } from '@tabler/icons-svelte';
 
   type TemplateRound = {
@@ -218,11 +219,7 @@
           color: facilitatorColor
         };
         currentUser.set(profile);
-        const serialized = JSON.stringify(profile);
-        document.cookie = `cda-session=${encodeURIComponent(
-          serialized
-        )}; path=/; SameSite=Lax`;
-        sessionStorage.setItem('cda-session', serialized);
+        storeParticipantProfile(sessionCode, profile);
       }
 
       if (browser) {

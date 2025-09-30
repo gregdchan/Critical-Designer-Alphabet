@@ -9,6 +9,8 @@ export interface Session {
   title: string | null;
   template_slug: string | null;
   challenge: string | null;
+  active_round: string | null;
+  round_expires_at: string | null;
   status: SessionStatus;
   created_at: string;
 }
@@ -131,7 +133,14 @@ export async function createSession({
 }) {
   const response = await supabaseAdmin
     .from('sessions')
-    .insert({ code, title, template_slug: templateSlug ?? null, challenge: challenge ?? null })
+    .insert({
+      code,
+      title,
+      template_slug: templateSlug ?? null,
+      challenge: challenge ?? null,
+      active_round: null,
+      round_expires_at: null
+    })
     .select()
     .single();
 
@@ -149,6 +158,23 @@ export async function updateSessionStatus(code: string, status: SessionStatus) {
 
   const session = ensure(response, 'updateSessionStatus');
   broadcast(code, { type: 'STEP_CHANGE', status });
+  return session as Session;
+}
+
+export async function setActiveRound(code: string, round: { name: string | null; endsAt: string | null }) {
+  const response = await supabaseAdmin
+    .from('sessions')
+    .update({ active_round: round.name ?? null, round_expires_at: round.endsAt ?? null })
+    .eq('code', code)
+    .select()
+    .single();
+
+  const session = ensure(response, 'setActiveRound');
+  broadcast(code, {
+    type: 'ROUND_UPDATE',
+    round: session.active_round,
+    endsAt: session.round_expires_at
+  });
   return session as Session;
 }
 

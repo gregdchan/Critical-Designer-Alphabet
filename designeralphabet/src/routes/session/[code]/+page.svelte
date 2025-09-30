@@ -16,8 +16,13 @@
     voteResponse as apiVoteResponse,
     addTimelineEntry as apiAddTimelineEntry,
     sendChatMessage as apiSendChatMessage,
-    getParticipantProfile
+    getParticipantProfile,
+    storeParticipantProfile,
+    clearParticipantProfile,
+    refreshSession
   } from '$lib/realtime';
+  import sanityClient from '$lib/sanity';
+  import { currentUser } from '$lib/stores/user';
   import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
   import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
   import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
@@ -57,6 +62,35 @@
 
   let chatMessage = '';
 
+  type TemplateRound = {
+    key?: string;
+    name?: string;
+    minutes?: number;
+    questions?: string[];
+  };
+
+  type SessionStatus = 'planned' | 'live' | 'done';
+
+  const sessionStatuses: SessionStatus[] = ['planned', 'live', 'done'];
+  const statusLabels: Record<SessionStatus, string> = {
+    planned: 'Planned',
+    live: 'In Session',
+    done: 'Completed'
+  };
+
+  let templateRounds: TemplateRound[] = [];
+  let templateLoading = false;
+  let templateError = '';
+  let templateTitle = '';
+  let statusUpdating = false;
+  let roundUpdating = false;
+  let customMinutes = 10;
+  let customLabel = 'Custom Breakout';
+  let countdownTimer: ReturnType<typeof setInterval> | null = null;
+  let roundCountdownLabel = '';
+  let roundRemainingMs = 0;
+  let lastTemplateSlug: string | null = null;
+
   $: sessionInfo = $sessionDetails;
   $: participantsList = $participants ?? [];
   $: questionsList = $questions ?? [];
@@ -75,6 +109,28 @@
     };
   });
 
+  $: if (browser) {
+    const slug = sessionInfo?.template_slug ?? null;
+    if (slug && slug !== lastTemplateSlug) {
+      lastTemplateSlug = slug;
+      loadTemplateBlueprint(slug);
+    }
+  }
+
+  $: if (sessionInfo?.round_expires_at) {
+    updateRoundCountdown();
+    if (!countdownTimer) {
+      countdownTimer = setInterval(updateRoundCountdown, 1000);
+    }
+  } else {
+    roundCountdownLabel = '';
+    roundRemainingMs = 0;
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+  }
+
   const isFacilitator = () => currentParticipant?.role === 'facilitator' || activeRole === 'facilitator';
 
   function ensureProfile() {
@@ -84,7 +140,151 @@
       goto(`/join?code=${sessionCode}`);
       return;
     }
-    currentParticipant = stored;
+    currentParticipant = {
+      ...stored,
+      sessionCode: stored.sessionCode ?? sessionCode
+    };
+    currentUser.set(currentParticipant);
+    storeParticipantProfile(sessionCode, currentParticipant);
+  }
+
+  const templateQuery = `*[_type == "workshopTemplate" && slug.current == $slug][0]{
+    title,
+    sections{
+      breakout{
+        rounds[]{
+          key,
+          name,
+          minutes,
+          questions
+        }
+      }
+    }
+  }` as const;
+
+  async function loadTemplateBlueprint(slug: string) {
+    if (!browser || !slug) return;
+    templateLoading = true;
+    templateError = '';
+    try {
+      const blueprint = await sanityClient.fetch(templateQuery, { slug });
+      templateRounds = blueprint?.sections?.breakout?.rounds ?? [];
+      templateTitle = blueprint?.title ?? '';
+    } catch (error) {
+      console.error('Failed to load template', error);
+      templateError = 'Unable to load template details right now.';
+      templateRounds = [];
+    } finally {
+      templateLoading = false;
+    }
+  }
+
+  function updateRoundCountdown() {
+    if (!browser || !sessionInfo?.round_expires_at) {
+      roundCountdownLabel = '';
+      roundRemainingMs = 0;
+      return;
+    }
+    const diff = new Date(sessionInfo.round_expires_at).getTime() - Date.now();
+    roundRemainingMs = Math.max(0, diff);
+    const minutes = Math.floor(roundRemainingMs / 60000);
+    const seconds = Math.floor((roundRemainingMs % 60000) / 1000);
+    roundCountdownLabel = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    if (roundRemainingMs <= 0 && countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+  }
+
+  async function changeStatus(nextStatus: SessionStatus) {
+    if (!sessionCode || sessionInfo?.status === nextStatus) return;
+    statusUpdating = true;
+    try {
+      const res = await fetch('/api/session/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: sessionCode, status: nextStatus })
+      });
+      const payload = await res.json();
+      if (!payload.success) {
+        throw new Error(payload.error ?? 'Unable to update session status.');
+      }
+      await refreshSession(sessionCode);
+    } catch (error) {
+      console.error('Failed to update session status', error);
+      alert((error as Error).message ?? 'Failed to update session status.');
+    } finally {
+      statusUpdating = false;
+    }
+  }
+
+  async function startRoundTimer(roundName: string, minutes: number | null) {
+    if (!sessionCode) return;
+    roundUpdating = true;
+    try {
+      const body: Record<string, unknown> = {
+        code: sessionCode,
+        action: 'start',
+        roundName
+      };
+      const duration = minutes && minutes > 0 ? Math.round(minutes) : null;
+      if (duration) {
+        body.durationMinutes = duration;
+      }
+      const res = await fetch('/api/session/round', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const payload = await res.json();
+      if (!payload.success) {
+        throw new Error(payload.error ?? 'Unable to start breakout round.');
+      }
+      await refreshSession(sessionCode);
+    } catch (error) {
+      console.error('Failed to start breakout round', error);
+      alert((error as Error).message ?? 'Failed to start breakout round.');
+    } finally {
+      roundUpdating = false;
+    }
+  }
+
+  async function clearActiveRound() {
+    if (!sessionCode) return;
+    roundUpdating = true;
+    try {
+      const res = await fetch('/api/session/round', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: sessionCode, action: 'clear' })
+      });
+      const payload = await res.json();
+      if (!payload.success) {
+        throw new Error(payload.error ?? 'Unable to end the current round.');
+      }
+      await refreshSession(sessionCode);
+    } catch (error) {
+      console.error('Failed to end breakout round', error);
+      alert((error as Error).message ?? 'Failed to end the current round.');
+    } finally {
+      roundUpdating = false;
+    }
+  }
+
+  async function startTemplateRound(round: TemplateRound) {
+    const label = round.name ?? round.key ?? 'Breakout';
+    const minutes = round.minutes ?? null;
+    await startRoundTimer(label, minutes);
+  }
+
+  async function startCustomRound() {
+    const minutes = Number(customMinutes);
+    if (!minutes || minutes <= 0) {
+      alert('Enter a duration in minutes greater than zero.');
+      return;
+    }
+    const label = customLabel.trim() || 'Custom Breakout';
+    await startRoundTimer(label, minutes);
   }
 
   let qrSrc = '';
@@ -96,9 +296,10 @@
       const base = window.location.origin;
       qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${base}/join?code=${sessionCode}`)}`;
       if (currentParticipant) {
-        const record = JSON.stringify({ code: sessionCode, ...currentParticipant });
-        sessionStorage.setItem('critical-alphabet:session', record);
-        document.cookie = `critical-alphabet:session=${encodeURIComponent(record)}; path=/; SameSite=Lax`;
+        storeParticipantProfile(sessionCode, {
+          ...currentParticipant,
+          sessionCode
+        });
       }
 
       // Add keyboard shortcut for emergency exit (Ctrl/Cmd + Shift + E)
@@ -119,6 +320,10 @@
 
   onDestroy(() => {
     stopRealtimeSession();
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
   });
 
   async function submitResponse() {
@@ -181,8 +386,7 @@
     if (confirm('Are you sure you want to leave this session?')) {
       // Clear session data
       if (browser) {
-        sessionStorage.removeItem('cda-session');
-        document.cookie = 'cda-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        clearParticipantProfile(sessionCode);
         currentUser.set(null);
       }
       stopRealtimeSession();
@@ -256,6 +460,116 @@
     </header>
 
     <main class="mx-auto max-w-7xl px-6 py-8 space-y-10">
+      {#if isFacilitator()}
+        <section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-6 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-semibold text-white">Session Controls</h2>
+              <p class="text-sm text-slate-400">Manage session flow, breakout timers, and wrap-up state.</p>
+              {#if templateTitle}
+                <p class="mt-1 text-xs text-slate-500">Template: {templateTitle}</p>
+              {/if}
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              {#each sessionStatuses as status}
+                <button
+                  class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-slate-900 shadow' : 'border border-cyan-400/40 text-cyan-200 hover:border-cyan-300'}`}
+                  on:click={() => changeStatus(status)}
+                  disabled={statusUpdating || sessionInfo?.status === status}
+                >
+                  {statusLabels[status]}
+                </button>
+              {/each}
+              <button
+                class="rounded-lg bg-red-600/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 transition"
+                on:click={() => changeStatus('done')}
+                disabled={statusUpdating || sessionInfo?.status === 'done'}
+              >
+                End Session
+              </button>
+            </div>
+          </div>
+
+          <div class="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+            <div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4 space-y-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">Breakout Rounds</h3>
+                {#if sessionInfo?.active_round}
+                  <button
+                    class="text-xs rounded-lg border border-cyan-400/40 px-3 py-1 text-cyan-200 hover:border-cyan-300 transition"
+                    on:click={clearActiveRound}
+                    disabled={roundUpdating}
+                  >
+                    End current round
+                  </button>
+                {/if}
+              </div>
+              {#if sessionInfo?.active_round}
+                <div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
+                  <p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Active Round</p>
+                  <p class="mt-2 text-sm font-semibold text-slate-100">{sessionInfo.active_round}</p>
+                  {#if roundCountdownLabel}
+                    <p class="mt-1 text-xs text-cyan-100/80">Time remaining: {roundCountdownLabel}</p>
+                  {/if}
+                </div>
+              {:else}
+                <p class="text-sm text-slate-400">No active breakout round.</p>
+              {/if}
+              <div class="max-h-48 space-y-2 overflow-y-auto pr-1">
+                {#if templateLoading}
+                  <p class="text-sm text-slate-400">Loading template rounds…</p>
+                {:else if templateError}
+                  <p class="text-sm text-rose-300">{templateError}</p>
+                {:else if templateRounds.length}
+                  {#each templateRounds as round}
+                    <button
+                      class="w-full rounded-lg border border-cyan-400/30 px-3 py-2 text-left text-sm text-cyan-100 hover:border-cyan-300 transition"
+                      on:click={() => startTemplateRound(round)}
+                      disabled={roundUpdating || sessionInfo?.active_round === (round.name ?? round.key)}
+                    >
+                      <span class="font-semibold text-slate-100">{round.name ?? round.key ?? 'Round'}</span>
+                      <span class="ml-2 text-xs text-cyan-200">{round.minutes ?? '?'} min</span>
+                    </button>
+                  {/each}
+                {:else}
+                  <p class="text-sm text-slate-400">This template does not define breakout rounds.</p>
+                {/if}
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-purple-400/20 bg-slate-900/60 p-4 space-y-3">
+              <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-purple-200">Custom Timer</h3>
+              <label class="flex flex-col gap-2 text-xs text-slate-300">
+                Label
+                <input
+                  class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-purple-400 focus:outline-none"
+                  placeholder="e.g., Reflection Sprint"
+                  bind:value={customLabel}
+                />
+              </label>
+              <label class="flex flex-col gap-2 text-xs text-slate-300">
+                Minutes
+                <input
+                  class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-purple-400 focus:outline-none"
+                  type="number"
+                  min="1"
+                  step="1"
+                  bind:value={customMinutes}
+                  on:input={(event) => (customMinutes = Number(event.currentTarget.value) || 0)}
+                />
+              </label>
+              <button
+                class="w-full rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:from-purple-400 hover:to-cyan-400 transition"
+                on:click={startCustomRound}
+                disabled={roundUpdating}
+              >
+                Start Custom Timer
+              </button>
+            </div>
+          </div>
+        </section>
+      {/if}
+
       <section class="grid gap-6 md:grid-cols-3">
         {#if sessionInfo.challenge}
           <div class="md:col-span-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4">
@@ -266,6 +580,20 @@
             <p class="mt-1 text-xs text-cyan-100/80">
               Ground your ideas in this shared challenge as you move through the session.
             </p>
+          </div>
+        {/if}
+        {#if sessionInfo.active_round}
+          <div class="md:col-span-3 rounded-xl border border-purple-400/30 bg-purple-500/10 p-4">
+            <p class="text-xs uppercase tracking-[0.3em] text-purple-200">Active Round</p>
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+              <span class="text-sm font-semibold text-white">{sessionInfo.active_round}</span>
+              {#if roundCountdownLabel}
+                <span class="rounded-full border border-purple-300/40 px-3 py-1 text-xs text-purple-100">
+                  Time remaining: {roundCountdownLabel}
+                </span>
+              {/if}
+            </div>
+            <p class="mt-1 text-xs text-purple-100/80">Stay with the prompt until the facilitator advances the agenda.</p>
           </div>
         {/if}
         <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">

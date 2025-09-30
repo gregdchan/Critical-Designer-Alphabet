@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { get, writable } from 'svelte/store';
   import { IconUsers, IconPresentationAnalytics, IconSparkles } from '@tabler/icons-svelte';
+  import { clearParticipantProfile } from '$lib/realtime';
 
   // Store for session info
   const sessionInfo = writable<{ code: string } | null>(null);
@@ -11,10 +12,10 @@
   onMount(() => {
     let sessionData: string | null = null;
     if (typeof sessionStorage !== 'undefined') {
-      sessionData = sessionStorage.getItem('critical-alphabet:session');
+      sessionData = sessionStorage.getItem('cda-session');
     }
     if (!sessionData && typeof document !== 'undefined') {
-      const match = document.cookie.match(/critical-alphabet:session=([^;]+)/);
+      const match = document.cookie.match(/cda-session=([^;]+)/);
       if (match) sessionData = decodeURIComponent(match[1]);
     }
     if (sessionData) {
@@ -37,13 +38,16 @@
 
   function leaveSession() {
     if (typeof sessionStorage !== 'undefined') {
-      sessionStorage.removeItem('critical-alphabet:session');
+      sessionStorage.removeItem('cda-session');
     }
     if (typeof document !== 'undefined') {
-      document.cookie = 'critical-alphabet:session=; Max-Age=0; path=/';
+      document.cookie = 'cda-session=; Max-Age=0; path=/';
+    }
+    const active = get(sessionInfo);
+    if (active?.code) {
+      clearParticipantProfile(active.code);
     }
     sessionInfo.set(null);
-    // Optionally, reload or redirect to clear state
     goto('/session');
   }
 

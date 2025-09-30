@@ -10,6 +10,7 @@
   } from '@tabler/icons-svelte';
   import { currentUser } from '$lib/stores/user';
   import sanityClient from '$lib/sanity';
+  import { storeParticipantProfile } from '$lib/realtime';
 
   export let data: { code: string };
 
@@ -149,9 +150,7 @@
             color: selectedColor
           };
           currentUser.set(profile);
-          const serialized = JSON.stringify(profile);
-          document.cookie = `cda-session=${encodeURIComponent(serialized)}; path=/; SameSite=Lax`;
-          sessionStorage.setItem('cda-session', serialized);
+          storeParticipantProfile(code, profile);
         }
 
         goto(`/session/${sessionCode.toUpperCase()}`);

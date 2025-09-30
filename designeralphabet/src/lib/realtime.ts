@@ -2,6 +2,10 @@ import { browser } from '$app/environment';
 import { derived, writable } from 'svelte/store';
 import { supabase } from './supabase';
 
+const SESSION_COOKIE = 'cda-session';
+const SESSION_STORAGE_KEY = 'cda-session';
+const PARTICIPANT_KEY_PREFIX = 'cda:participant:';
+
 export type SessionBundle = {
   session: any;
   participants: any[];
@@ -45,6 +49,11 @@ export async function startRealtimeSession(code: string) {
   stopRealtimeSession();
   await fetchBundle(code);
   pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL);
+}
+
+export async function refreshSession(code: string) {
+  if (!browser) return;
+  await fetchBundle(code);
 }
 
 export function stopRealtimeSession() {
@@ -148,22 +157,46 @@ export function channelFor(code: string) {
 
 export function getParticipantProfile(code: string) {
   if (!browser) return null;
-  const raw = localStorage.getItem(`cda:participant:${code}`);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    console.warn('Invalid participant profile in storage');
-    return null;
+  const keysToCheck = [
+    localStorage.getItem(`${PARTICIPANT_KEY_PREFIX}${code}`),
+    sessionStorage.getItem(SESSION_STORAGE_KEY),
+    (() => {
+      const match = document.cookie.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`));
+      return match ? decodeURIComponent(match[1]) : null;
+    })()
+  ];
+
+  for (const raw of keysToCheck) {
+    if (!raw) continue;
+    try {
+      const parsed = JSON.parse(raw);
+      if (!parsed) continue;
+      if (!parsed.sessionCode || parsed.sessionCode === code) {
+        return parsed;
+      }
+    } catch (error) {
+      console.warn('Invalid participant profile encountered');
+    }
   }
+
+  return null;
 }
 
 export function storeParticipantProfile(code: string, profile: any) {
   if (!browser) return;
-  localStorage.setItem(`cda:participant:${code}`, JSON.stringify(profile));
+  try {
+    const serialized = JSON.stringify(profile);
+    localStorage.setItem(`${PARTICIPANT_KEY_PREFIX}${code}`, serialized);
+    sessionStorage.setItem(SESSION_STORAGE_KEY, serialized);
+    document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(serialized)}; path=/; SameSite=Lax`;
+  } catch (error) {
+    console.error('Failed to persist participant profile', error);
+  }
 }
 
 export function clearParticipantProfile(code: string) {
   if (!browser) return;
-  localStorage.removeItem(`cda:participant:${code}`);
+  localStorage.removeItem(`${PARTICIPANT_KEY_PREFIX}${code}`);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  document.cookie = `${SESSION_COOKIE}=; Max-Age=0; path=/`;
 }
