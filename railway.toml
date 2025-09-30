@@ -2,11 +2,11 @@
 # This configures the primary SvelteKit frontend service
 
 [build]
-  command = "cd designeralphabet && npm install && SUPABASE_SERVICE_ROLE=$SUPABASE_SERVICE_ROLE npm run build"
+  command = "cd designeralphabet && npm ci && npm run build"
   output = "designeralphabet/.svelte-kit/output"
 
 [deploy]
-  start = "cd designeralphabet && npm start"
+  start = "cd designeralphabet && PORT=${PORT:-4173} npm run preview -- --host 0.0.0.0 --port $PORT"
 
 # Environment variables shared across services
 [variables]

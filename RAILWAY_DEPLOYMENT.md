@@ -41,8 +41,8 @@ This guide will help you deploy both services separately on Railway.
    ```
 
 4. **Deploy**
-   - Railway will build: `cd designeralphabet && npm install && npm run build`
-   - Railway will start: `cd designeralphabet && npm run preview`
+   - Railway will build: `cd designeralphabet && npm ci && npm run build`
+   - Railway will start: `cd designeralphabet && PORT=${PORT:-4173} npm run preview -- --host 0.0.0.0 --port $PORT`
 
 ### Service 2: Sanity CMS
 
@@ -65,8 +65,8 @@ This guide will help you deploy both services separately on Railway.
    ```
 
 4. **Deploy**
-   - Railway will build: `npm install && npm run build`
-   - Railway will start: `npm run start`
+   - Railway will build: `npm ci && npm run build`
+   - Railway will start: `PORT=${PORT:-3333} npm run start -- --host 0.0.0.0 --port $PORT`
 
 ## 🔧 Railway CLI Method (Alternative)
 
