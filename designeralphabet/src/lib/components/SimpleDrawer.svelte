@@ -1,35 +1,37 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
-  export let open = false;
+	export let open = false;
 
-  const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher();
 
-  function handleBackdropClick() {
-    dispatch('backdrop');
-  }
+	function handleBackdropClick() {
+		dispatch('backdrop');
+	}
 
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape') {
-      dispatch('backdrop');
-    }
-  }
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			dispatch('backdrop');
+		}
+	}
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
 
 {#if open}
-  <!-- Backdrop -->
-  <div
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-    on:click={handleBackdropClick}
-    role="button"
-    tabindex="-1"
-    on:keydown
-  ></div>
+	<!-- Backdrop -->
+	<div
+		class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+		on:click={handleBackdropClick}
+		role="button"
+		tabindex="-1"
+		on:keydown
+	></div>
 
-  <!-- Drawer -->
-  <div class="fixed top-0 right-0 h-full w-full max-w-md bg-slate-800 border-l border-cyan-400/20 shadow-2xl z-50 overflow-y-auto">
-    <slot />
-  </div>
+	<!-- Drawer -->
+	<div
+		class="fixed top-0 right-0 h-full w-full max-w-md bg-slate-800 border-l border-cyan-400/20 shadow-2xl z-50 overflow-y-auto"
+	>
+		<slot />
+	</div>
 {/if}

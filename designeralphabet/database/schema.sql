@@ -77,3 +77,21 @@ CREATE TABLE IF NOT EXISTS chat (
   FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE SET NULL,
   INDEX idx_chat_room_code (room_code)
 );
+
+CREATE TABLE IF NOT EXISTS session_phases (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_code VARCHAR(16),
+  phase_key VARCHAR(64),
+  title VARCHAR(255),
+  description TEXT,
+  order_index INT,
+  duration_minutes INT,
+  dashboards JSON,
+  status ENUM('pending','active','completed') DEFAULT 'pending',
+  started_at TIMESTAMP NULL,
+  completed_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_code) REFERENCES sessions(code) ON DELETE CASCADE,
+  INDEX idx_session_phases_session_code (session_code)
+);

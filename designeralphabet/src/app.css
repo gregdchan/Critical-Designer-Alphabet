@@ -5,50 +5,53 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  --brand: 200 80% 60%;
-  --accent-critical: 200 80% 60%;
-  --surface: 220 15% 12%;
-  --muted: 220 10% 18%;
-  --text-primary: 0 0% 95%;
-  --text-secondary: 0 0% 75%;
-  --text-muted: 0 0% 55%;
+	color-scheme: dark;
+	--brand: 200 80% 60%;
+	--accent-critical: 200 80% 60%;
+	--surface: 220 15% 12%;
+	--muted: 220 10% 18%;
+	--text-primary: 0 0% 95%;
+	--text-secondary: 0 0% 75%;
+	--text-muted: 0 0% 55%;
 }
 
 html {
-  scroll-behavior: smooth;
+	scroll-behavior: smooth;
 }
 
 body {
-  @apply min-h-screen antialiased;
-  background: hsl(220, 15%, 8%);
-  color: hsl(var(--text-primary));
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	@apply min-h-screen antialiased;
+	background: hsl(220, 15%, 8%);
+	color: hsl(var(--text-primary));
+	font-family:
+		'Inter',
+		system-ui,
+		-apple-system,
+		sans-serif;
 }
 
-
 a {
-  @apply text-blue-400 transition-colors duration-200 hover:text-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900;
+	@apply text-blue-400 transition-colors duration-200 hover:text-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900;
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.3);
-  color: #fff;
+	background: rgba(59, 130, 246, 0.3);
+	color: #fff;
 }
 
 .skip-link {
-  @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-slate-800 focus:px-4 focus:py-2 focus:text-blue-400 focus:border focus:border-slate-600;
+	@apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-slate-800 focus:px-4 focus:py-2 focus:text-blue-400 focus:border focus:border-slate-600;
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+	outline: 2px solid #3b82f6;
+	outline-offset: 2px;
 }
 
 [data-reduced-motion='true'] *,
 @media (prefers-reduced-motion: reduce) {
-  scroll-behavior: auto;
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
+	scroll-behavior: auto;
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
 }

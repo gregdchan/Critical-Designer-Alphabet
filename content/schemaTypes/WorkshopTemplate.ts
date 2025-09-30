@@ -135,6 +135,74 @@ export const WorkshopTemplate = defineType({
       ]
     }),
     defineField({
+      name: 'phases',
+      title: 'Session Phases',
+      type: 'array',
+      group: 'sections',
+      description: 'Define the flow of the session. Each phase can include guidance and default dashboards.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'phase',
+          fields: [
+            defineField({
+              name: 'key',
+              type: 'string',
+              validation: (rule) => rule.required(),
+              description: 'Unique identifier, e.g. onboarding, breakout-1.'
+            }),
+            defineField({
+              name: 'title',
+              type: 'string',
+              validation: (rule) => rule.required(),
+              description: 'Displayed name for the phase.'
+            }),
+            defineField({
+              name: 'description',
+              type: 'text',
+              rows: 3,
+              description: 'Context or guidance for hosts and participants.'
+            }),
+            defineField({
+              name: 'durationMinutes',
+              title: 'Suggested Duration (minutes)',
+              type: 'number',
+              validation: (rule) => rule.min(1),
+              description: 'Optional: used to pre-fill timers.'
+            }),
+            defineField({
+              name: 'dashboards',
+              type: 'array',
+              of: [{ type: 'string' }],
+              options: {
+                list: [
+                  { title: 'Responses Board', value: 'responses' },
+                  { title: 'Heatmap', value: 'heatmap' },
+                  { title: 'Roadmap', value: 'roadmap' },
+                  { title: 'Timeline', value: 'timeline' },
+                  { title: 'Leaderboard', value: 'leaderboard' },
+                  { title: 'Chat Feed', value: 'chat' }
+                ]
+              },
+              description: 'Controls which dashboards are highlighted during the phase.'
+            })
+          ],
+          preview: {
+            select: {
+              title: 'title',
+              subtitle: 'durationMinutes'
+            },
+            prepare({ title, subtitle }) {
+              return {
+                title: title ?? 'Untitled phase',
+                subtitle: subtitle ? `${subtitle} min` : undefined
+              };
+            }
+          }
+        })
+      ]
+    }),
+    defineField({
       name: 'facilitation',
       type: 'object',
       group: 'facilitation',

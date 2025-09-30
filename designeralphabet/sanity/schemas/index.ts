@@ -7,13 +7,13 @@ import { resourceLink } from './objects/resource-link';
 import { pageSection } from './objects/page-section';
 
 export const schemaTypes = [
-  // objects
-  i18nText,
-  resourceLink,
-  pageSection,
-  // documents
-  cards,
-  themes,
-  achievements,
-  pages
+	// objects
+	i18nText,
+	resourceLink,
+	pageSection,
+	// documents
+	cards,
+	themes,
+	achievements,
+	pages
 ];
