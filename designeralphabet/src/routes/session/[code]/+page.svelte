@@ -28,6 +28,17 @@
 	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
+	// New immersive chart components
+	import {
+		QuadBubbles,
+		MaturityDial,
+		ParticipationPulse,
+		InclusivityMeter,
+		RiskImpactMatrix,
+		loadChartComponent,
+		CHART_REGISTRY,
+		type ChartType
+	} from '$lib/charts';
 	import {
 		IconUsers,
 		IconClock,
@@ -74,6 +85,12 @@
 	let templateRounds: any[] = [];
 	let customLabel = '';
 	let customMinutes = 0;
+
+	// New immersive dashboard variables
+	let dashboardMode: 'classic' | 'immersive' = 'immersive';
+	let activeCharts: ChartType[] = ['quadBubbles', 'participationPulse', 'inclusivityMeter'];
+	let primaryChart: ChartType = 'quadBubbles';
+	let sidebarCharts: ChartType[] = ['participationPulse', 'inclusivityMeter'];
 
 	type SessionStatus = 'planned' | 'live' | 'done';
 
@@ -1042,14 +1059,109 @@
 					{/if}
 				</nav>
 
-				<div class="mt-6 rounded-xl border border-slate-700 bg-slate-900/80 p-4">
-					{#if activeTab === 'overview'}
-						<QuadBubbleChart responses={responsesForViz} width={900} height={520} />
-					{:else if activeTab === 'heatmap'}
-						<HeatmapChart responses={responsesForViz} width={900} height={520} />
-					{:else if activeTab === 'roadmap'}
-						<RoadmapChart responses={responsesForViz} width={900} height={520} />
-					{:else if activeTab === 'timeline'}
+				<div class="mt-6">
+					{#if dashboardMode === 'immersive'}
+						<!-- Immersive Dashboard Layout -->
+						<div class="grid grid-cols-12 gap-4 h-[600px]">
+							<!-- Left sidebar: Mini charts and controls -->
+							<aside class="col-span-3 space-y-4">
+								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
+									<ParticipationPulse roomCode={sessionCode} width={240} height={180} />
+								</div>
+								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
+									<InclusivityMeter roomCode={sessionCode} width={240} height={180} />
+								</div>
+								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-2">
+									<div class="text-xs uppercase tracking-wide text-cyan-200 mb-2">Active Chart</div>
+									<select
+										bind:value={primaryChart}
+										class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white"
+									>
+										{#each Object.entries(CHART_REGISTRY) as [id, config]}
+											<option value={id}>{config.title}</option>
+										{/each}
+									</select>
+								</div>
+							</aside>
+
+							<!-- Main chart area -->
+							<main class="col-span-6 bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
+								{#if primaryChart === 'quadBubbles'}
+									<QuadBubbles roomCode={sessionCode} width={600} height={520} />
+								{:else if primaryChart === 'maturityDial'}
+									<MaturityDial roomCode={sessionCode} width={600} height={520} />
+								{:else if primaryChart === 'riskImpactMatrix'}
+									<RiskImpactMatrix roomCode={sessionCode} width={600} height={520} />
+								{:else}
+									<QuadBubbleChart responses={responsesForViz} width={600} height={520} />
+								{/if}
+							</main>
+
+							<!-- Right sidebar: Leaderboard and chat -->
+							<aside class="col-span-3 space-y-4">
+								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-64 overflow-y-auto">
+									<h3 class="text-sm font-semibold text-cyan-200 mb-3">Live Leaderboard</h3>
+									{#if leaderboardList.length > 0}
+										{#each leaderboardList.slice(0, 5) as participant, index}
+											<div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+												<div class="flex items-center gap-2">
+													<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
+													<span class="text-sm text-white truncate">{participant.name}</span>
+												</div>
+												<span class="text-xs text-cyan-200">{participant.score}pts</span>
+											</div>
+										{/each}
+									{:else}
+										<p class="text-xs text-slate-400">No participants yet</p>
+									{/if}
+								</div>
+								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 flex-1">
+									<h3 class="text-sm font-semibold text-cyan-200 mb-3">Quick Chat</h3>
+									<div class="h-32 overflow-y-auto mb-3 space-y-2">
+										{#each chatList.slice(-5) as message}
+											<div class="text-xs">
+												<span class="text-cyan-300">{message.participant_name}:</span>
+												<span class="text-slate-300">{message.message}</span>
+											</div>
+										{/each}
+									</div>
+									<div class="flex gap-2">
+										<input
+											bind:value={chatMessage}
+											on:keydown={(e) => e.key === 'Enter' && submitChatMessage()}
+											placeholder="Type message..."
+											class="flex-1 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white"
+										/>
+										<button
+											on:click={submitChatMessage}
+											class="px-2 py-1 bg-cyan-600 text-white rounded text-xs hover:bg-cyan-500"
+										>
+											<IconSend class="h-3 w-3" />
+										</button>
+									</div>
+								</div>
+							</aside>
+						</div>
+
+						<!-- Dashboard mode toggle -->
+						<div class="mt-4 flex justify-center">
+							<button
+								on:click={() => dashboardMode = 'classic'}
+								class="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 text-sm"
+							>
+								Switch to Classic View
+							</button>
+						</div>
+					{:else}
+						<!-- Classic Dashboard Layout -->
+						<div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+							{#if activeTab === 'overview'}
+								<QuadBubbleChart responses={responsesForViz} width={900} height={520} />
+							{:else if activeTab === 'heatmap'}
+								<HeatmapChart responses={responsesForViz} width={900} height={520} />
+							{:else if activeTab === 'roadmap'}
+								<RoadmapChart responses={responsesForViz} width={900} height={520} />
+							{:else if activeTab === 'timeline'}
 						<div class="space-y-4">
 							{#each timelineList as item}
 								<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
@@ -1229,6 +1341,18 @@
 										{/if}
 									</div>
 								{/each}
+							</div>
+						</div>
+					{/if}
+
+							<!-- Classic view toggle back to immersive -->
+							<div class="mt-4 flex justify-center">
+								<button
+									on:click={() => dashboardMode = 'immersive'}
+									class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 text-sm"
+								>
+									Switch to Immersive Dashboard
+								</button>
 							</div>
 						</div>
 					{/if}

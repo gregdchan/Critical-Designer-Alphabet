@@ -17,17 +17,26 @@ module.exports = {
 				success: '#10b981',
 				warning: '#f59e0b',
 				error: '#ef4444',
-				// Legacy neon colors for compatibility (now more accessible)
-				neonPink: '#ec4899',
-				neonCyan: '#06b6d4',
-				neonLime: '#84cc16',
-				retroPurple: '#8b5cf6',
-				darkBg: '#0f172a',
+				// Enhanced neon colors for immersive dashboard
+				neonPink: '#ff2aad',
+				neonCyan: '#00fff7',
+				neonLime: '#aaff00',
+				neonPurple: '#6c00ff',
+				neonOrange: '#ff6b00',
+				neonBlue: '#0099ff',
+				neonYellow: '#ffff00',
+				neonMagenta: '#ff00ff',
+				retroPurple: '#8a2be2',
+				darkBg: '#0d0d0d',
+				surface: '#1a1a1a',
+				card: '#2a2a2a',
 				midnight: '#1e293b'
 			},
 			fontFamily: {
 				sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-				mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+				mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+				retro: ['"Press Start 2P"', 'cursive'],
+				techno: ['Orbitron', 'sans-serif']
 			},
 			borderRadius: {
 				xl: '1rem',

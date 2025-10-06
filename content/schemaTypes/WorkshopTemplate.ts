@@ -280,10 +280,19 @@ export const WorkshopTemplate = defineType({
           options: {
             list: [
               { title: 'Quad Bubbles', value: 'quadBubbles' },
-              { title: 'Maturity Heatmap', value: 'maturityHeatmap' },
+              { title: 'AI Maturity Dial', value: 'maturityDial' },
+              { title: 'AI Readiness Heatmap', value: 'aiReadinessHeatmap' },
+              { title: 'Risk Impact Matrix', value: 'riskImpactMatrix' },
+              { title: 'Participation Pulse', value: 'participationPulse' },
+              { title: 'Ethics Compass', value: 'ethicsCompass' },
+              { title: 'Cultural Insight Wheel', value: 'culturalInsightWheel' },
+              { title: 'Inclusivity Meter', value: 'inclusivityMeter' },
+              { title: 'Story Path Timeline', value: 'storyPath' },
+              { title: 'Word Constellation', value: 'wordConstellation' },
               { title: 'Roadmap Swimlanes', value: 'roadmapSwimlanes' }
             ]
-          }
+          },
+          initialValue: ['quadBubbles', 'participationPulse', 'inclusivityMeter']
         }),
         defineField({
           name: 'theme',
