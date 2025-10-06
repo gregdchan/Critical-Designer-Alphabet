@@ -30,15 +30,15 @@
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 	// New immersive chart components
 	import {
-		QuadBubbles,
-		MaturityDial,
-		ParticipationPulse,
-		InclusivityMeter,
-		RiskImpactMatrix,
 		loadChartComponent,
 		CHART_REGISTRY,
 		type ChartType
 	} from '$lib/charts';
+	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
+	import MaturityDial from '$lib/charts/MaturityDial.svelte';
+	import ParticipationPulse from '$lib/charts/ParticipationPulse.svelte';
+	import InclusivityMeter from '$lib/charts/InclusivityMeter.svelte';
+	import RiskImpactMatrix from '$lib/charts/RiskImpactMatrix.svelte';
 	import {
 		IconUsers,
 		IconClock,

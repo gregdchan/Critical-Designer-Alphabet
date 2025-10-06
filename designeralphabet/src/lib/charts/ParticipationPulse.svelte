@@ -4,7 +4,6 @@
 	import { line, curveCardinal } from 'd3-shape';
 	import { scaleLinear, scaleTime } from 'd3-scale';
 	import { extent, max } from 'd3-array';
-	import { timeMinute } from 'd3-time';
 	import BaseChart from './BaseChart.svelte';
 	import { useTimeline } from '$lib/hooks/useSupabaseRealtime';
 	import { NEON_COLORS } from '$lib/utils/colors';
@@ -329,8 +328,6 @@
 	ariaLabel="Real-time participation activity showing submissions per minute over the last 5 minutes"
 	on:resize={event => handleResize(event.detail)}
 	on:mounted={handleMounted}
-	let:dimensions
-	let:svgElement
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>
 		{#if loading}

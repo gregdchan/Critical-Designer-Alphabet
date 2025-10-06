@@ -4,7 +4,6 @@
 	import { arc } from 'd3-shape';
 	import { scaleLinear } from 'd3-scale';
 	import { interpolate } from 'd3-interpolate';
-	import { transition } from 'd3-transition';
 	import BaseChart from './BaseChart.svelte';
 	import { getMaturityColor, MATURITY_COLORS } from '$lib/utils/colors';
 	import type { ChartProps, MaturityData, ChartDimensions } from '$lib/types/charts';
@@ -18,6 +17,12 @@
 
 	let svgElement: SVGSVGElement;
 	let dimensions: ChartDimensions;
+
+	// Room code for future real-time integration
+	$: if (roomCode) {
+		// Future: Load real-time maturity data based on roomCode
+		console.debug('MaturityDial for room:', roomCode);
+	}
 
 	// Maturity stages
 	const stages = [
@@ -261,8 +266,6 @@
 	ariaLabel={`AI Maturity gauge showing ${currentStage.name} level ${maturityLevel} at ${Math.round(progress * 100)}% completion`}
 	on:resize={event => handleResize(event.detail)}
 	on:mounted={handleMounted}
-	let:dimensions
-	let:svgElement
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>
 		<!-- SVG content is handled in updateVisualization -->

@@ -305,8 +305,6 @@
 	ariaLabel={`Inclusivity gauge showing ${Math.round(inclusivityPercentage)}% participation with ${activeParticipants} of ${totalParticipants} participants active`}
 	on:resize={event => handleResize(event.detail)}
 	on:mounted={handleMounted}
-	let:dimensions
-	let:svgElement
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>
 		{#if loading}

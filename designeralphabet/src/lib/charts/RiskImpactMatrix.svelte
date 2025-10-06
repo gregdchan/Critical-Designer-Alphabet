@@ -389,8 +389,6 @@
 	ariaLabel="Risk impact matrix showing identified risks plotted by likelihood and impact"
 	on:resize={event => handleResize(event.detail)}
 	on:mounted={handleMounted}
-	let:dimensions
-	let:svgElement
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>
 		{#if loading}

@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { select } from 'd3-selection';
-	import { forceSimulation, forceLink, forceManyBody, forceCenter, forceX, forceY } from 'd3-force';
+	import { forceSimulation, forceManyBody, forceCenter, forceX, forceY } from 'd3-force';
 	import { scaleLinear, scaleSqrt } from 'd3-scale';
-	import { transition } from 'd3-transition';
 	import BaseChart from './BaseChart.svelte';
 	import { useResponses } from '$lib/hooks/useSupabaseRealtime';
 	import { getLensColor, NEON_COLORS } from '$lib/utils/colors';
@@ -276,8 +275,6 @@
 	ariaLabel="Bubble chart showing responses grouped by critical design lens"
 	on:resize={event => handleResize(event.detail)}
 	on:mounted={handleMounted}
-	let:dimensions
-	let:svgElement
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>
 		{#if loading}

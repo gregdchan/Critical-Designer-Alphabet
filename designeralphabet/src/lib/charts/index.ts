@@ -1,10 +1,5 @@
-// Chart component exports
+// Base chart component export (not dynamically imported)
 export { default as BaseChart } from './BaseChart.svelte';
-export { default as QuadBubbles } from './QuadBubbles.svelte';
-export { default as MaturityDial } from './MaturityDial.svelte';
-export { default as ParticipationPulse } from './ParticipationPulse.svelte';
-export { default as InclusivityMeter } from './InclusivityMeter.svelte';
-export { default as RiskImpactMatrix } from './RiskImpactMatrix.svelte';
 
 // Chart component registry for dynamic rendering
 export const CHART_COMPONENTS = {
