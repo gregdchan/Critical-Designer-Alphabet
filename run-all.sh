@@ -115,8 +115,16 @@ if [[ -f ".env" ]]; then
     export $(cat .env | grep -v '^#' | xargs) 2>/dev/null || true
 fi
 
-# Start Sanity in background
-npm run dev -- --host 0.0.0.0 --port 3333 > /tmp/sanity.log 2>&1 &
+# Fix Sanity config directory permissions if needed
+if [[ ! -w "$HOME/.config/sanity" ]] 2>/dev/null; then
+    print_status "Fixing Sanity config directory permissions..."
+    sudo rm -rf "$HOME/.config/sanity" 2>/dev/null || true
+    mkdir -p "$HOME/.config/sanity"
+    echo '{}' > "$HOME/.config/sanity/config.json"
+fi
+
+# Start Sanity in background with update check disabled
+SANITY_CLI_NO_UPDATE_NOTIFIER=1 npm run dev -- --host 0.0.0.0 --port 3333 > /tmp/sanity.log 2>&1 &
 SANITY_PID=$!
 print_success "Sanity CMS started (PID: $SANITY_PID)"
 

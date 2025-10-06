@@ -8,7 +8,10 @@
       "Bash(npm:*)",
       "Bash(npx svelte-kit sync)",
       "Bash(./run-all.sh)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git rm:*)",
+      "Read(//Users/gchan/.config/sanity/**)",
+      "Bash(SANITY_CLI_NO_UPDATE_NOTIFIER=1 npm run dev)"
     ],
     "deny": [],
     "ask": []

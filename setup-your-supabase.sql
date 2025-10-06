@@ -44,6 +44,12 @@ CREATE TABLE IF NOT EXISTS questions (
   room_code text NOT NULL REFERENCES sessions(code) ON DELETE CASCADE,
   section text,
   text text NOT NULL CHECK (length(trim(text)) > 0),
+  lens text,
+  response_type text,
+  map_type text,
+  config jsonb DEFAULT '{}'::jsonb,
+  order_index integer,
+  recommended_dashboards jsonb DEFAULT '[]'::jsonb,
   created_at timestamptz DEFAULT now()
 );
 
