@@ -36,19 +36,19 @@ export const GET: RequestHandler = async () => {
 				const { count: participantCount } = await supabaseAdmin
 					.from('participants')
 					.select('*', { count: 'exact', head: true })
-					.eq('session_code', session.code);
+					.eq('room_code', session.code);
 
 				// Get response count
 				const { count: responseCount } = await supabaseAdmin
 					.from('responses')
 					.select('*', { count: 'exact', head: true })
-					.eq('session_code', session.code);
+					.eq('room_code', session.code);
 
 				// Get question count
 				const { count: questionCount } = await supabaseAdmin
 					.from('questions')
 					.select('*', { count: 'exact', head: true })
-					.eq('session_code', session.code);
+					.eq('room_code', session.code);
 
 				totalParticipants += participantCount || 0;
 				totalResponses += responseCount || 0;

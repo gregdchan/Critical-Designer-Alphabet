@@ -29,7 +29,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const { data: participants, error: participantsError } = await supabaseAdmin
 			.from('participants')
 			.select('*')
-			.eq('session_code', code.toUpperCase())
+			.eq('room_code', code.toUpperCase())
 			.order('created_at', { ascending: true });
 
 		if (participantsError) {
@@ -40,7 +40,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const { data: questions, error: questionsError } = await supabaseAdmin
 			.from('questions')
 			.select('*')
-			.eq('session_code', code.toUpperCase())
+			.eq('room_code', code.toUpperCase())
 			.order('order_index', { ascending: true });
 
 		if (questionsError) {
@@ -62,7 +62,7 @@ export const GET: RequestHandler = async ({ params }) => {
 				questions!inner(section, text, lens, response_type, map_type)
 			`
 			)
-			.eq('session_code', code.toUpperCase())
+			.eq('room_code', code.toUpperCase())
 			.order('created_at', { ascending: true });
 
 		if (responsesError) {
@@ -73,7 +73,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const { data: timeline, error: timelineError } = await supabaseAdmin
 			.from('timeline')
 			.select('*')
-			.eq('session_code', code.toUpperCase())
+			.eq('room_code', code.toUpperCase())
 			.order('created_at', { ascending: true });
 
 		if (timelineError) {
@@ -84,7 +84,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const { data: chat, error: chatError } = await supabaseAdmin
 			.from('chat')
 			.select('*')
-			.eq('session_code', code.toUpperCase())
+			.eq('room_code', code.toUpperCase())
 			.order('created_at', { ascending: true });
 
 		if (chatError) {

@@ -65,6 +65,7 @@ export const chat = writable<ChatMessage[]>([]);
 export const phases = writable<Phase[]>([]);
 
 let pollHandle: ReturnType<typeof setInterval> | null = null;
+let activeCode: string | null = null;
 
 async function fetchBundle(code: string) {
 	try {

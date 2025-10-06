@@ -3,6 +3,9 @@ export interface Participant {
 	name?: string;
 	email?: string;
 	role?: string;
+	color?: string;
+	points?: number;
+	badges?: string[];
 }
 
 export interface Vote {
@@ -27,6 +30,10 @@ export interface TimelineEntry {
 	type: string;
 	timestamp: string;
 	sessionCode: string;
+	metric?: string;
+	risk_note?: string;
+	owner?: string;
+	label?: string;
 }
 
 export interface Badge {
