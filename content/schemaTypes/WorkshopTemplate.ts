@@ -35,8 +35,38 @@ export const WorkshopTemplate = defineType({
     defineField({
       name: 'challenge',
       title: 'Challenge Statement',
-      type: 'text',
-      rows: 4,
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'H2', value: 'h2' },
+            { title: 'H3', value: 'h3' },
+            { title: 'Quote', value: 'blockquote' }
+          ],
+          marks: {
+            decorators: [
+              { title: 'Strong', value: 'strong' },
+              { title: 'Emphasis', value: 'em' }
+            ],
+            annotations: [
+              {
+                name: 'link',
+                type: 'object',
+                title: 'URL',
+                fields: [
+                  {
+                    name: 'href',
+                    type: 'url',
+                    title: 'URL'
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
       description: 'Describe the core challenge or opportunity this template addresses.',
       group: 'overview'
     }),
@@ -92,7 +122,7 @@ export const WorkshopTemplate = defineType({
                   ],
                   preview: {
                     select: { title: 'name', subtitle: 'minutes' },
-                    prepare({ title, subtitle }) {
+                    prepare({ title, subtitle }: { title?: string; subtitle?: number }) {
                       return { title, subtitle: `${subtitle ?? ''} mins` };
                     }
                   }
@@ -193,7 +223,7 @@ export const WorkshopTemplate = defineType({
               title: 'title',
               subtitle: 'durationMinutes'
             },
-            prepare({ title, subtitle }) {
+            prepare({ title, subtitle }: { title?: string; subtitle?: number }) {
               return {
                 title: title ?? 'Untitled phase',
                 subtitle: subtitle ? `${subtitle} min` : undefined
