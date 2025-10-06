@@ -626,7 +626,9 @@
 											<div class="flex items-center gap-2">
 												{#if phaseCountdownLabel}
 													<div class="text-right">
-														<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Time Remaining</p>
+														<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">
+															Time Remaining
+														</p>
 														<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
 													</div>
 												{/if}
@@ -674,7 +676,9 @@
 									<!-- Phase Cards (if associated with this phase) -->
 									{#if phase.cards?.length}
 										<div class="mt-6">
-											<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-3">Phase Cards</p>
+											<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-3">
+												Phase Cards
+											</p>
 											<div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
 												{#each phase.cards as card}
 													<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
@@ -687,8 +691,12 @@
 									{/if}
 
 									<!-- Phase Questions -->
-									{#if questionsList.filter(q => q.phase_key === phase.phase_key || (phase.status === 'active' && !q.phase_key)).length > 0}
-										{@const phaseQuestions = questionsList.filter(q => q.phase_key === phase.phase_key || (phase.status === 'active' && !q.phase_key))}
+									{#if questionsList.filter((q) => q.phase_key === phase.phase_key || (phase.status === 'active' && !q.phase_key)).length > 0}
+										{@const phaseQuestions = questionsList.filter(
+											(q) =>
+												q.phase_key === phase.phase_key ||
+												(phase.status === 'active' && !q.phase_key)
+										)}
 										<div class="mt-6">
 											<div class="flex items-center justify-between mb-4">
 												<h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
@@ -707,7 +715,9 @@
 
 											<div class="space-y-4">
 												{#each phaseQuestions as question}
-													<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4 space-y-3">
+													<div
+														class="rounded-lg border border-slate-700 bg-slate-900/60 p-4 space-y-3"
+													>
 														<div class="flex items-start justify-between gap-3">
 															<div class="flex-1">
 																<div class="flex items-center gap-2 mb-2">
@@ -715,7 +725,9 @@
 																		{question.section}
 																	</span>
 																	{#if question.response_type && question.response_type !== 'written'}
-																		<span class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs">
+																		<span
+																			class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs"
+																		>
 																			{question.response_type}
 																		</span>
 																	{/if}
@@ -734,20 +746,33 @@
 														</div>
 
 														<!-- Question Responses -->
-														{#if responsesList.filter(r => r.question_id === question.id).length > 0}
-															{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
-															{@const totalVotes = questionResponses.reduce((sum, r) => sum + (r.votes || 0), 0)}
-															{@const sortedByVotes = questionResponses.sort((a, b) => (b.votes || 0) - (a.votes || 0))}
+														{#if responsesList.filter((r) => r.question_id === question.id).length > 0}
+															{@const questionResponses = responsesList.filter(
+																(r) => r.question_id === question.id
+															)}
+															{@const totalVotes = questionResponses.reduce(
+																(sum, r) => sum + (r.votes || 0),
+																0
+															)}
+															{@const sortedByVotes = questionResponses.sort(
+																(a, b) => (b.votes || 0) - (a.votes || 0)
+															)}
 
 															<!-- Vote Summary -->
 															{#if totalVotes > 0}
-																<div class="mb-3 p-2 rounded bg-cyan-400/10 border border-cyan-400/30">
-																	<p class="text-xs font-medium text-cyan-200 mb-2">Community Insights (Total votes: {totalVotes})</p>
+																<div
+																	class="mb-3 p-2 rounded bg-cyan-400/10 border border-cyan-400/30"
+																>
+																	<p class="text-xs font-medium text-cyan-200 mb-2">
+																		Community Insights (Total votes: {totalVotes})
+																	</p>
 																	<div class="space-y-1">
 																		{#each sortedByVotes.slice(0, 3) as topResponse}
 																			{#if topResponse.votes && topResponse.votes > 0}
 																				<div class="flex items-center justify-between text-xs">
-																					<span class="text-slate-300 flex-1 pr-2">{topResponse.text.slice(0, 50)}...</span>
+																					<span class="text-slate-300 flex-1 pr-2"
+																						>{topResponse.text.slice(0, 50)}...</span
+																					>
 																					<div class="flex items-center gap-1 text-cyan-200">
 																						<IconThumbUp class="h-3 w-3" />
 																						<span class="font-medium">{topResponse.votes}</span>
@@ -762,9 +787,17 @@
 															<!-- Individual Responses -->
 															<div class="space-y-2 max-h-40 overflow-y-auto">
 																{#each sortedByVotes as response}
-																	<div class="rounded border border-slate-800 bg-slate-900/70 p-2 text-xs">
-																		<div class="flex items-center justify-between text-slate-400 mb-1">
-																			<span>{participantsList.find(p => p.id === response.participant_id)?.name ?? 'Anonymous'}</span>
+																	<div
+																		class="rounded border border-slate-800 bg-slate-900/70 p-2 text-xs"
+																	>
+																		<div
+																			class="flex items-center justify-between text-slate-400 mb-1"
+																		>
+																			<span
+																				>{participantsList.find(
+																					(p) => p.id === response.participant_id
+																				)?.name ?? 'Anonymous'}</span
+																			>
 																			<button
 																				class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
 																				on:click={() => toggleVote(response.id)}
@@ -778,7 +811,10 @@
 																		{#if response.cards?.length}
 																			<div class="mt-1 flex flex-wrap gap-1">
 																				{#each response.cards as card}
-																					<span class="px-1 py-0.5 text-xs rounded bg-cyan-400/20 text-cyan-300">{card}</span>
+																					<span
+																						class="px-1 py-0.5 text-xs rounded bg-cyan-400/20 text-cyan-300"
+																						>{card}</span
+																					>
 																				{/each}
 																			</div>
 																		{/if}

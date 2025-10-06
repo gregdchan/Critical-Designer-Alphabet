@@ -1,33 +1,70 @@
 import { browser } from '$app/environment';
 import { derived, writable } from 'svelte/store';
 import { supabase } from './supabase';
+import type { Participant, Response, TimelineEntry } from './gamification';
 
 const SESSION_COOKIE = 'cda-session';
 const SESSION_STORAGE_KEY = 'cda-session';
 const PARTICIPANT_KEY_PREFIX = 'cda:participant:';
 
+export interface Session {
+	id: string;
+	code: string;
+	name: string;
+	description?: string;
+	status: string;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface Question {
+	id: string;
+	section: string;
+	text: string;
+	lens: string;
+	response_type: string;
+	map_type: string;
+}
+
+export interface ChatMessage {
+	id: string;
+	session_code: string;
+	participant_id: string;
+	message: string;
+	created_at: string;
+}
+
+export interface Phase {
+	id: string;
+	session_code: string;
+	name: string;
+	description?: string;
+	status: string;
+	started_at?: string;
+	ended_at?: string;
+}
+
 export type SessionBundle = {
-	session: any;
-	participants: any[];
-	questions: any[];
-	responses: any[];
-	timeline: any[];
-	chat: any[];
-	phases: any[];
+	session: Session;
+	participants: Participant[];
+	questions: Question[];
+	responses: Response[];
+	timeline: TimelineEntry[];
+	chat: ChatMessage[];
+	phases: Phase[];
 };
 
 const POLL_INTERVAL = 5000;
 
-export const sessionDetails = writable<any | null>(null);
-export const participants = writable<any[]>([]);
-export const questions = writable<any[]>([]);
-export const responses = writable<any[]>([]);
-export const timeline = writable<any[]>([]);
-export const chat = writable<any[]>([]);
-export const phases = writable<any[]>([]);
+export const sessionDetails = writable<Session | null>(null);
+export const participants = writable<Participant[]>([]);
+export const questions = writable<Question[]>([]);
+export const responses = writable<Response[]>([]);
+export const timeline = writable<TimelineEntry[]>([]);
+export const chat = writable<ChatMessage[]>([]);
+export const phases = writable<Phase[]>([]);
 
 let pollHandle: ReturnType<typeof setInterval> | null = null;
-let activeCode: string | null = null;
 
 async function fetchBundle(code: string) {
 	try {
@@ -219,7 +256,7 @@ export function getParticipantProfile(code: string) {
 			if (!parsed.sessionCode || parsed.sessionCode === code) {
 				return parsed;
 			}
-		} catch (error) {
+		} catch {
 			console.warn('Invalid participant profile encountered');
 		}
 	}
@@ -227,7 +264,7 @@ export function getParticipantProfile(code: string) {
 	return null;
 }
 
-export function storeParticipantProfile(code: string, profile: any) {
+export function storeParticipantProfile(code: string, profile: Participant) {
 	if (!browser) return;
 	try {
 		const serialized = JSON.stringify(profile);

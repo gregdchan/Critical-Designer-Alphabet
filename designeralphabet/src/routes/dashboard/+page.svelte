@@ -158,7 +158,11 @@
 				<div class="text-slate-400 text-sm">{error}</div>
 				<button
 					class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-					on:click={() => { error = ''; loading = true; loadDashboardData().finally(() => loading = false); }}
+					on:click={() => {
+						error = '';
+						loading = true;
+						loadDashboardData().finally(() => (loading = false));
+					}}
 				>
 					Retry
 				</button>
@@ -375,7 +379,9 @@
 											{#if participant.badges && participant.badges.length > 0}
 												<div class="flex -space-x-1">
 													{#each participant.badges.slice(0, 3) as badge}
-														<span class="inline-block text-sm" title={badge.name || badge}>{badge.icon || badge}</span>
+														<span class="inline-block text-sm" title={badge.name || badge}
+															>{badge.icon || badge}</span
+														>
 													{/each}
 													{#if participant.badges.length > 3}
 														<span class="text-xs text-slate-400"

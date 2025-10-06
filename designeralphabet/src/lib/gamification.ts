@@ -1,10 +1,41 @@
+export interface Participant {
+	id: string;
+	name?: string;
+	email?: string;
+	role?: string;
+}
+
+export interface Vote {
+	participantId: string;
+	timestamp?: string;
+}
+
+export interface Response {
+	id: string;
+	participantId: string;
+	text: string;
+	lens: string;
+	type: string;
+	mapType: string;
+	votes?: Vote[];
+	cards?: unknown[];
+	createdAt: string;
+}
+
+export interface TimelineEntry {
+	id: string;
+	type: string;
+	timestamp: string;
+	sessionCode: string;
+}
+
 export interface Badge {
 	id: string;
 	name: string;
 	description: string;
 	icon: string;
 	color: string;
-	requirement: (participant: any, responses: any[], timeline: any[]) => boolean;
+	requirement: (participant: Participant, responses: Response[], timeline: TimelineEntry[]) => boolean;
 	points: number;
 }
 
@@ -44,7 +75,7 @@ export const BADGES: Badge[] = [
 		icon: '🤝',
 		color: '#3b82f6',
 		requirement: (participant, responses) =>
-			responses.filter((r) => r.votes?.some((v: any) => v.participantId === participant.id))
+			responses.filter((r) => r.votes?.some((v) => v.participantId === participant.id))
 				.length >= 10,
 		points: 20
 	},
@@ -114,7 +145,7 @@ export const BADGES: Badge[] = [
 			// For now, simplified to participants who both contribute and vote heavily
 			const userResponses = responses.filter((r) => r.participantId === participant.id);
 			const votesGiven = responses.filter((r) =>
-				r.votes?.some((v: any) => v.participantId === participant.id)
+				r.votes?.some((v) => v.participantId === participant.id)
 			).length;
 			return userResponses.length >= 3 && votesGiven >= 5;
 		},
@@ -123,9 +154,9 @@ export const BADGES: Badge[] = [
 ];
 
 export function calculateParticipantScore(
-	participant: any,
-	responses: any[],
-	timeline: any[]
+	participant: Participant,
+	responses: Response[],
+	timeline: TimelineEntry[]
 ): number {
 	let totalScore = 0;
 
@@ -147,11 +178,11 @@ export function calculateParticipantScore(
 	return totalScore;
 }
 
-export function getEarnedBadges(participant: any, responses: any[], timeline: any[]): Badge[] {
+export function getEarnedBadges(participant: Participant, responses: Response[], timeline: TimelineEntry[]): Badge[] {
 	return BADGES.filter((badge) => badge.requirement(participant, responses, timeline));
 }
 
-export function getLeaderboard(participants: any[], responses: any[], timeline: any[]) {
+export function getLeaderboard(participants: Participant[], responses: Response[], timeline: TimelineEntry[]) {
 	return participants
 		.map((participant) => ({
 			...participant,
@@ -166,9 +197,9 @@ export function getLeaderboard(participants: any[], responses: any[], timeline: 
 }
 
 export function getNewlyEarnedBadges(
-	participant: any,
-	responses: any[],
-	timeline: any[],
+	participant: Participant,
+	responses: Response[],
+	timeline: TimelineEntry[],
 	previousBadgeIds: string[] = []
 ): Badge[] {
 	const currentBadges = getEarnedBadges(participant, responses, timeline);

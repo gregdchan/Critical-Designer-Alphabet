@@ -1,7 +1,13 @@
 import React from 'react'
 import { useDocumentOperation } from 'sanity'
 
-const DocumentId = ({ document }) => {
+interface DocumentIdProps {
+  document?: {
+    _id?: string
+  }
+}
+
+const DocumentId = ({ document }: DocumentIdProps) => {
   return (
     <div>
       <h3>Document ID</h3>

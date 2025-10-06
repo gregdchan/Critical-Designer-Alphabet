@@ -7,7 +7,8 @@ export const GET: RequestHandler = async () => {
 		// Get session overview data
 		const { data: sessions, error: sessionsError } = await supabaseAdmin
 			.from('sessions')
-			.select(`
+			.select(
+				`
 				code,
 				title,
 				status,
@@ -15,7 +16,8 @@ export const GET: RequestHandler = async () => {
 				facilitator_email,
 				challenge,
 				template_slug
-			`)
+			`
+			)
 			.order('created_at', { ascending: false })
 			.limit(50);
 
@@ -70,9 +72,10 @@ export const GET: RequestHandler = async () => {
 			})
 		);
 
-		const avgEngagement = sessionsWithCounts.length > 0
-			? Math.round((totalResponses / Math.max(totalParticipants, 1)) * 10) / 10
-			: 0;
+		const avgEngagement =
+			sessionsWithCounts.length > 0
+				? Math.round((totalResponses / Math.max(totalParticipants, 1)) * 10) / 10
+				: 0;
 
 		const dashboardMetrics = {
 			totalSessions: sessionsWithCounts.length,
@@ -87,7 +90,6 @@ export const GET: RequestHandler = async () => {
 			sessions: sessionsWithCounts,
 			metrics: dashboardMetrics
 		});
-
 	} catch (error: any) {
 		console.error('Failed to load dashboard data:', error);
 		return json(

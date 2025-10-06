@@ -50,7 +50,8 @@ export const GET: RequestHandler = async ({ params }) => {
 		// Get responses
 		const { data: responses, error: responsesError } = await supabaseAdmin
 			.from('responses')
-			.select(`
+			.select(
+				`
 				id,
 				participant_id,
 				question_id,
@@ -59,7 +60,8 @@ export const GET: RequestHandler = async ({ params }) => {
 				votes,
 				created_at,
 				questions!inner(section, text, lens, response_type, map_type)
-			`)
+			`
+			)
 			.eq('session_code', code.toUpperCase())
 			.order('created_at', { ascending: true });
 
@@ -90,91 +92,98 @@ export const GET: RequestHandler = async ({ params }) => {
 		}
 
 		// Transform responses for visualization
-		const transformedResponses = responses?.map(response => {
-			const participant = participants?.find(p => p.id === response.participant_id);
-			const question = response.questions;
-			const voteCount = Array.isArray(response.votes) ? response.votes.length : 0;
-			const responseLength = response.text?.length || 0;
+		const transformedResponses =
+			responses?.map((response) => {
+				const participant = participants?.find((p) => p.id === response.participant_id);
+				// Handle the joined questions data - it's an object, not an array
+				const question = Array.isArray(response.questions) ? response.questions[0] : response.questions;
+				const voteCount = Array.isArray(response.votes) ? response.votes.length : 0;
+				const responseLength = response.text?.length || 0;
 
-			// Calculate meaningful metrics instead of random values
-			const impact = Math.min(10, Math.max(1, voteCount * 2 + 1)); // Based on votes (1-10)
-			const effort = Math.min(10, Math.max(1, responseLength / 20 + 1)); // Based on response length (1-10)
-			const urgency = Math.min(10, Math.max(1, Math.random() * 8 + 1)); // Random but valid (1-9)
-			const feasibility = Math.min(10, Math.max(1, 10 - effort + Math.random() * 2)); // Inverse of effort with variance (1-10)
+				// Calculate meaningful metrics instead of random values
+				const impact = Math.min(10, Math.max(1, voteCount * 2 + 1)); // Based on votes (1-10)
+				const effort = Math.min(10, Math.max(1, responseLength / 20 + 1)); // Based on response length (1-10)
+				const urgency = Math.min(10, Math.max(1, Math.random() * 8 + 1)); // Random but valid (1-9)
+				const feasibility = Math.min(10, Math.max(1, 10 - effort + Math.random() * 2)); // Inverse of effort with variance (1-10)
 
-			return {
-				id: response.id,
-				participantId: response.participant_id,
-				participantName: participant?.name || 'Anonymous',
-				text: response.text || '',
-				lens: question?.section || 'Unknown',
-				type: question?.response_type || 'written',
-				mapType: question?.map_type || 'responses',
-				votes: Array.isArray(response.votes) ? response.votes : [],
-				cards: Array.isArray(response.cards) ? response.cards : [],
-				createdAt: response.created_at,
-				// Add fields needed for visualizations - ensure no NaN values
-				impact: isNaN(impact) ? 5 : impact,
-				effort: isNaN(effort) ? 5 : effort,
-				urgency: isNaN(urgency) ? 5 : urgency,
-				feasibility: isNaN(feasibility) ? 5 : feasibility
-			};
-		}) || [];
+				return {
+					id: response.id,
+					participantId: response.participant_id,
+					participantName: participant?.name || 'Anonymous',
+					text: response.text || '',
+					lens: question?.section || 'Unknown',
+					type: question?.response_type || 'written',
+					mapType: question?.map_type || 'responses',
+					votes: Array.isArray(response.votes) ? response.votes : [],
+					cards: Array.isArray(response.cards) ? response.cards : [],
+					createdAt: response.created_at,
+					// Add fields needed for visualizations - ensure no NaN values
+					impact: isNaN(impact) ? 5 : impact,
+					effort: isNaN(effort) ? 5 : effort,
+					urgency: isNaN(urgency) ? 5 : urgency,
+					feasibility: isNaN(feasibility) ? 5 : feasibility
+				};
+			}) || [];
 
 		// Create participant leaderboard data
-		const participantStats = participants?.map(participant => {
-			const participantResponses = responses?.filter(r => r.participant_id === participant.id) || [];
-			const totalVotes = participantResponses.reduce((sum, r) => {
-				const voteCount = Array.isArray(r.votes) ? r.votes.length : 0;
-				return sum + voteCount;
-			}, 0);
+		const participantStats =
+			participants
+				?.map((participant) => {
+					const participantResponses =
+						responses?.filter((r) => r.participant_id === participant.id) || [];
+					const totalVotes = participantResponses.reduce((sum, r) => {
+						const voteCount = Array.isArray(r.votes) ? r.votes.length : 0;
+						return sum + voteCount;
+					}, 0);
 
-			const participantTimeline = timeline?.filter(t => t.owner === participant.name) || [];
-			const participantChat = chat?.filter(c => c.participant_id === participant.id) || [];
+					const participantTimeline = timeline?.filter((t) => t.owner === participant.name) || [];
+					const participantChat = chat?.filter((c) => c.participant_id === participant.id) || [];
 
-			// Calculate engagement score
-			const responseScore = participantResponses.length * 10;
-			const voteScore = totalVotes * 2;
-			const timelineScore = participantTimeline.length * 15;
-			const chatScore = participantChat.length * 5;
-			const pointsScore = participant.points || 0;
+					// Calculate engagement score
+					const responseScore = participantResponses.length * 10;
+					const voteScore = totalVotes * 2;
+					const timelineScore = participantTimeline.length * 15;
+					const chatScore = participantChat.length * 5;
+					const pointsScore = participant.points || 0;
 
-			const totalScore = responseScore + voteScore + timelineScore + chatScore + pointsScore;
+					const totalScore = responseScore + voteScore + timelineScore + chatScore + pointsScore;
 
-			return {
-				id: participant.id,
-				name: participant.name,
-				role: participant.role,
-				avatarColor: participant.color,
-				joinedAt: participant.created_at,
-				contributionCount: participantResponses.length,
-				votesReceived: totalVotes,
-				timelineEntries: participantTimeline.length,
-				chatMessages: participantChat.length,
-				points: participant.points || 0,
-				score: totalScore,
-				badges: participant.badges || [],
-				// Calculate recent activity
-				lastActivity: Math.max(
-					...[
-						...participantResponses.map(r => new Date(r.created_at).getTime()),
-						...participantTimeline.map(t => new Date(t.created_at).getTime()),
-						...participantChat.map(c => new Date(c.created_at).getTime())
-					].filter(Boolean),
-					new Date(participant.created_at).getTime()
-				)
-			};
-		}).sort((a, b) => b.score - a.score) || [];
+					return {
+						id: participant.id,
+						name: participant.name,
+						role: participant.role,
+						avatarColor: participant.color,
+						joinedAt: participant.created_at,
+						contributionCount: participantResponses.length,
+						votesReceived: totalVotes,
+						timelineEntries: participantTimeline.length,
+						chatMessages: participantChat.length,
+						points: participant.points || 0,
+						score: totalScore,
+						badges: participant.badges || [],
+						// Calculate recent activity
+						lastActivity: Math.max(
+							...[
+								...participantResponses.map((r) => new Date(r.created_at).getTime()),
+								...participantTimeline.map((t) => new Date(t.created_at).getTime()),
+								...participantChat.map((c) => new Date(c.created_at).getTime())
+							].filter(Boolean),
+							new Date(participant.created_at).getTime()
+						)
+					};
+				})
+				.sort((a, b) => b.score - a.score) || [];
 
 		// Transform timeline for better display
-		const transformedTimeline = timeline?.map(entry => ({
-			id: entry.id,
-			type: entry.category || 'event',
-			timestamp: entry.created_at,
-			description: entry.text || entry.category || 'Timeline event',
-			owner: entry.owner || 'System',
-			label: entry.label || 'Now'
-		})) || [];
+		const transformedTimeline =
+			timeline?.map((entry) => ({
+				id: entry.id,
+				type: entry.category || 'event',
+				timestamp: entry.created_at,
+				description: entry.text || entry.category || 'Timeline event',
+				owner: entry.owner || 'System',
+				label: entry.label || 'Now'
+			})) || [];
 
 		return json({
 			success: true,
@@ -193,7 +202,6 @@ export const GET: RequestHandler = async ({ params }) => {
 			questions: questions || [],
 			chat: chat || []
 		});
-
 	} catch (error: any) {
 		console.error(`Failed to load session data for ${code}:`, error);
 		return json(
