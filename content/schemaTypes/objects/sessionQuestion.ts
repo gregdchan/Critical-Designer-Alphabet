@@ -76,9 +76,26 @@ export const sessionQuestion = defineField({
       type: 'object',
       title: 'Response Landscape Settings',
       hidden: ({ parent }) => parent?.mapType !== 'response-landscape',
+      validation: (rule) =>
+        rule.custom((value, context) => {
+          const isLandscape = context.parent?.mapType === 'response-landscape';
+          if (!isLandscape) {
+            return true;
+          }
+
+          if (!value) {
+            return 'Landscape settings are required when using the Response Landscape map.';
+          }
+
+          if (!value.xLabel || !value.yLabel) {
+            return 'Please provide both X and Y axis labels.';
+          }
+
+          return true;
+        }),
       fields: [
-        defineField({ name: 'xLabel', type: 'string', title: 'X Axis Label', validation: (rule) => rule.required() }),
-        defineField({ name: 'yLabel', type: 'string', title: 'Y Axis Label', validation: (rule) => rule.required() }),
+        defineField({ name: 'xLabel', type: 'string', title: 'X Axis Label' }),
+        defineField({ name: 'yLabel', type: 'string', title: 'Y Axis Label' }),
         defineField({ name: 'minX', type: 'number', initialValue: 0 }),
         defineField({ name: 'maxX', type: 'number', initialValue: 10 }),
         defineField({ name: 'minY', type: 'number', initialValue: 0 }),
