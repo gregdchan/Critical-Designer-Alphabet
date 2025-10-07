@@ -59,6 +59,8 @@
 	const sessionCode = data.sessionCode ?? '';
 	let currentParticipant: any = null;
 	const activeRole = data.role ?? 'participant';
+	let sessionLoading = true;
+	let sessionError = '';
 
 	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'timeline' | 'chat' | 'participants' =
 		'overview';
@@ -132,6 +134,11 @@
 	$: timelineList = $timeline ?? [];
 	$: chatList = $chat ?? [];
 	$: leaderboardList = $leaderboard ?? [];
+
+	// Turn off loading once session data arrives
+	$: if ($sessionDetails && sessionLoading) {
+		sessionLoading = false;
+	}
 
 	$: responsesForViz = responsesList.map((entry) => {
 		const question = questionsList.find((q) => q.id === entry.question_id);
@@ -237,25 +244,48 @@
 		return phaseStatusLabels[status as keyof typeof phaseStatusLabels] || status;
 	};
 
-	function ensureProfile() {
+	async function ensureProfile() {
 		if (!browser) return;
+		sessionLoading = true;
+		sessionError = '';
 
-		// Facilitators don't need a participant profile
-		if (activeRole === 'facilitator') {
-			return;
-		}
+		try {
+			// Check for stored profile first
+			const stored = getParticipantProfile(sessionCode);
 
-		const stored = getParticipantProfile(sessionCode);
-		if (!stored) {
-			goto(`/join?code=${sessionCode}`);
-			return;
+			if (stored) {
+				// Profile exists locally - use it
+				currentParticipant = {
+					...stored,
+					sessionCode: stored.sessionCode ?? sessionCode
+				};
+				currentUser.set(currentParticipant);
+				storeParticipantProfile(sessionCode, currentParticipant);
+				sessionLoading = false;
+				return;
+			}
+
+			// No local profile - check if user is already a participant in the database
+			const response = await fetch(`/api/participants/${sessionCode}`);
+			const data = await response.json();
+
+			if (data.success && data.participants && data.participants.length > 0) {
+				// User might be returning - show rejoin modal or redirect to join page
+				console.log('Found existing participants, redirecting to join page');
+				goto(`/join?code=${sessionCode}`);
+				return;
+			}
+
+			// No profile found anywhere - redirect to join
+			if (activeRole !== 'facilitator') {
+				goto(`/join?code=${sessionCode}`);
+			}
+			sessionLoading = false;
+		} catch (error) {
+			console.error('Error checking participant profile:', error);
+			sessionError = 'Failed to load session. Please try refreshing.';
+			sessionLoading = false;
 		}
-		currentParticipant = {
-			...stored,
-			sessionCode: stored.sessionCode ?? sessionCode
-		};
-		currentUser.set(currentParticipant);
-		storeParticipantProfile(sessionCode, currentParticipant);
 	}
 
 	async function changeStatus(nextStatus: SessionStatus) {
@@ -339,9 +369,14 @@
 
 	let qrSrc = '';
 
-	onMount(() => {
-		ensureProfile();
+	onMount(async () => {
+		await ensureProfile();
 		startRealtimeSession(sessionCode);
+
+		// Set loading to false once session data starts coming in
+		if ($sessionDetails) {
+			sessionLoading = false;
+		}
 		if (browser) {
 			const base = window.location.origin;
 			qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${base}/join?code=${sessionCode}`)}`;
@@ -524,7 +559,54 @@
 	}
 </script>
 
-{#if sessionInfo}
+{#if sessionLoading}
+	<div
+		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 flex items-center justify-center"
+	>
+		<div class="text-center space-y-4">
+			<div
+				class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"
+			></div>
+			<p class="text-xl text-cyan-300">Loading session...</p>
+			<p class="text-sm text-slate-400">Code: {sessionCode.toUpperCase()}</p>
+		</div>
+	</div>
+{:else if sessionError}
+	<div
+		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 flex items-center justify-center p-6"
+	>
+		<div class="max-w-md text-center space-y-6">
+			<div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
+				<svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			</div>
+			<div>
+				<h2 class="text-2xl font-bold text-white mb-2">Session Error</h2>
+				<p class="text-slate-300">{sessionError}</p>
+			</div>
+			<div class="flex gap-3 justify-center">
+				<button
+					class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition"
+					on:click={() => window.location.reload()}
+				>
+					Retry
+				</button>
+				<button
+					class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+					on:click={() => goto('/join?code=' + sessionCode)}
+				>
+					Join Session
+				</button>
+			</div>
+		</div>
+	</div>
+{:else if sessionInfo}
 	<div
 		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 text-slate-100 {isMobile
 			? ''
