@@ -42,6 +42,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@portabletext/svelte": "^2.1.12",
 		"@sanity/client": "^6.21.3",
 		"@skeletonlabs/tw-plugin": "^0.4.1",
 		"@supabase/supabase-js": "^2.58.0",

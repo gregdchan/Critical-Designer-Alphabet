@@ -10,6 +10,7 @@
 		IconSettings as Settings,
 		IconUsers as Users
 	} from '@tabler/icons-svelte';
+	import PortableText from '$lib/components/PortableText.svelte';
 
 	type TemplateRound = {
 		key?: string;
@@ -613,17 +614,14 @@
 										{template.description || 'No description available'}
 									</p>
 									{#if template.challenge}
-										{@const challengeText = getChallengeText(template.challenge)}
-										{#if challengeText}
-											<div class="mb-3 rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
-												<p class="text-xs uppercase tracking-[0.3em] text-purple-200">
-													Challenge Focus
-												</p>
-												<p class="mt-2 text-sm text-slate-100 whitespace-pre-line">
-													{challengeText}
-												</p>
+										<div class="mb-3 rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
+											<p class="text-xs uppercase tracking-[0.3em] text-purple-200">
+												Challenge Focus
+											</p>
+											<div class="mt-2 text-sm text-slate-100">
+												<PortableText value={template.challenge} styleClass="prose-sm prose-invert" />
 											</div>
-										{/if}
+										</div>
 									{/if}
 
 									<div class="space-y-3 text-xs">
@@ -971,9 +969,9 @@
 							{#if sessionChallenge}
 								<div class="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4 mb-6">
 									<p class="text-xs uppercase tracking-wide text-cyan-200 mb-2">Challenge Focus</p>
-									<p class="text-slate-100 whitespace-pre-line">
-										{sessionChallenge}
-									</p>
+									<div class="text-slate-100">
+										<PortableText value={sessionChallenge} styleClass="prose-sm prose-invert" />
+									</div>
 								</div>
 							{/if}
 						</div>

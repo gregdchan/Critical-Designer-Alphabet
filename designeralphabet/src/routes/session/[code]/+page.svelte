@@ -53,6 +53,7 @@
 	import CardPanel from '$lib/components/session/CardPanel.svelte';
 	import { createSessionCardStore } from '$lib/stores/sessionCards';
 	import type { Card } from '$lib/Cards';
+	import PortableText from '$lib/components/PortableText.svelte';
 
 	export let data: { sessionCode: string; role: string };
 
@@ -100,9 +101,20 @@
 	let isCardPanelOpen = false;
 	let isMobile = false;
 
+	// Track user votes (stored in localStorage)
+	let userVotes: Set<string> = new Set();
+
 	// Subscribe to card store
 	$: selectedCards = $cardStore.selectedCards;
 	$: isCardPanelOpen = $cardStore.isCardPanelOpen;
+
+	// Load user votes from localStorage
+	$: if (browser && sessionCode) {
+		const storedVotes = localStorage.getItem(`cda:votes:${sessionCode}`);
+		if (storedVotes) {
+			userVotes = new Set(JSON.parse(storedVotes));
+		}
+	}
 
 	type SessionStatus = 'planned' | 'live' | 'done';
 
@@ -459,7 +471,23 @@
 	}
 
 	async function toggleVote(responseId: string) {
-		await apiVoteResponse(responseId, 1);
+		const hasVoted = userVotes.has(responseId);
+		const delta = hasVoted ? -1 : 1;
+
+		await apiVoteResponse(responseId, delta);
+
+		// Update local vote tracking
+		if (hasVoted) {
+			userVotes.delete(responseId);
+		} else {
+			userVotes.add(responseId);
+		}
+		userVotes = userVotes; // Trigger reactivity
+
+		// Save to localStorage
+		if (browser) {
+			localStorage.setItem(`cda:votes:${sessionCode}`, JSON.stringify([...userVotes]));
+		}
 	}
 
 	async function submitTimelineItem() {
@@ -637,9 +665,9 @@
 									</span>
 								</h1>
 								{#if sessionInfo.challenge && !isMobile}
-									<p class="mt-2 text-sm text-cyan-200 max-w-2xl line-clamp-2">
-										Focus: {sessionInfo.challenge}
-									</p>
+									<div class="mt-2 text-sm text-cyan-200 max-w-2xl line-clamp-3">
+										<PortableText value={sessionInfo.challenge} styleClass="prose-sm prose-invert" />
+									</div>
 								{/if}
 								<p class="mt-1 text-xs md:text-sm text-slate-300 truncate">
 									{currentParticipant?.name ?? 'Anonymous'} · {currentParticipant?.role ?? activeRole}
@@ -717,16 +745,28 @@
 													.sort((a, b) => (b.votes || 0) - (a.votes || 0))}
 												<div class="space-y-2 max-h-60 overflow-y-auto">
 													{#each questionResponses as response}
+														{@const hasVoted = userVotes.has(response.id)}
+														{@const isOwnResponse = response.participant_id === currentParticipant?.id}
 														<div class="rounded border border-slate-800 bg-slate-900/70 p-3 text-xs">
 															<div class="flex items-center justify-between text-slate-400 mb-1">
-																<span
-																	>{participantsList.find((p) => p.id === response.participant_id)
-																		?.name ?? 'Anonymous'}</span
-																>
+																<div class="flex items-center gap-2">
+																	<span
+																		>{participantsList.find((p) => p.id === response.participant_id)
+																			?.name ?? 'Anonymous'}</span
+																	>
+																	{#if isOwnResponse}
+																		<span class="px-1.5 py-0.5 text-[10px] rounded bg-purple-500/20 text-purple-300">You</span>
+																	{/if}
+																</div>
 																<button
-																	class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-2 py-1 text-cyan-200 hover:border-cyan-300 transition-colors"
+																	class={`inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors ${
+																		hasVoted
+																			? 'border-cyan-400 bg-cyan-400/20 text-cyan-100'
+																			: 'border-cyan-400/40 text-cyan-200 hover:border-cyan-300'
+																	}`}
 																	on:click={() => toggleVote(response.id)}
-																	disabled={!phaseRemainingMs}
+																	disabled={!phaseRemainingMs || isOwnResponse}
+																	title={isOwnResponse ? "Can't vote on your own response" : hasVoted ? 'Remove vote' : 'Vote for this response'}
 																>
 																	<IconThumbUp class="h-3 w-3" />
 																	{response.votes ?? 0}
@@ -745,12 +785,28 @@
 														</div>
 													{/each}
 												</div>
+											{:else}
+												<p class="text-xs text-slate-500 italic mt-2">No responses yet. Be the first!</p>
 											{/if}
 										</div>
 									{/each}
 								</div>
 							</div>
+						{:else}
+							<div class="mt-6 rounded-lg border border-slate-700 bg-slate-800/50 p-6 text-center">
+								<p class="text-sm text-slate-400">
+									No questions available for this phase yet. The facilitator will add questions soon.
+								</p>
+							</div>
 						{/if}
+					</section>
+				{:else if !isFacilitator()}
+					<!-- No active phase message for participants -->
+					<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-8 text-center">
+						<h3 class="text-lg font-semibold text-white mb-2">Session Starting Soon</h3>
+						<p class="text-sm text-slate-400">
+							The facilitator hasn't started a phase yet. Please wait while they set up the session.
+						</p>
 					</section>
 				{/if}
 
@@ -1196,11 +1252,11 @@
 				<section class="grid gap-6 md:grid-cols-3">
 					{#if sessionInfo.challenge}
 						<div class="md:col-span-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4">
-							<p class="text-xs uppercase tracking-[0.3em] text-cyan-100">Challenge Focus</p>
-							<p class="mt-2 text-base font-semibold text-slate-100">
-								{sessionInfo.challenge}
-							</p>
-							<p class="mt-1 text-xs text-cyan-100/80">
+							<p class="text-xs uppercase tracking-[0.3em] text-cyan-100 mb-2">Challenge Focus</p>
+							<div class="text-base text-slate-100">
+								<PortableText value={sessionInfo.challenge} styleClass="prose prose-invert" />
+							</div>
+							<p class="mt-3 text-xs text-cyan-100/80">
 								Ground your ideas in this shared challenge as you move through the session.
 							</p>
 						</div>
@@ -1246,8 +1302,10 @@
 					</div>
 				</section>
 
-				<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 md:p-6">
-					<nav class="flex gap-2 md:gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+				<!-- Dashboard Section: Facilitator Only -->
+				{#if isFacilitator()}
+					<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 md:p-6">
+						<nav class="flex gap-2 md:gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
 						<button
 							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'overview')}
@@ -1618,10 +1676,12 @@
 							</div>
 						{/if}
 					</div>
-				</section>
+					</section>
+				{/if}
 
-				<!-- Leaderboard and QR Code Section -->
-				<section class="grid gap-6 lg:grid-cols-2">
+				<!-- Leaderboard and QR Code Section: Facilitator Only -->
+				{#if isFacilitator()}
+					<section class="grid gap-6 lg:grid-cols-2">
 					<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
 						<h2 class="text-lg font-semibold text-white">Leaderboard</h2>
 						<p class="text-sm text-slate-400">
@@ -1664,7 +1724,8 @@
 						</div>
 						<p class="mt-3 text-center text-xs text-slate-500">/join?code={sessionCode}</p>
 					</div>
-				</section>
+					</section>
+				{/if}
 			</main>
 		</div>
 		<!-- End Main Content Area -->
@@ -1736,9 +1797,25 @@
 						bind:value={selectedQuestionId}
 					>
 						<option value={null}>Select a question…</option>
-						{#each questionsList as question}
-							<option value={question.id}>{question.section}: {question.text}</option>
-						{/each}
+						{#if activePhase}
+							{@const phaseQuestions = questionsList.filter(
+								(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
+							)}
+							{#if phaseQuestions.length > 0}
+								<optgroup label="Current Phase Questions">
+									{#each phaseQuestions as question}
+										<option value={question.id}>{question.section}: {question.text}</option>
+									{/each}
+								</optgroup>
+							{/if}
+						{/if}
+						{#if questionsList.length > 0}
+							<optgroup label="All Questions">
+								{#each questionsList as question}
+									<option value={question.id}>{question.section}: {question.text}</option>
+								{/each}
+							</optgroup>
+						{/if}
 					</select>
 				</label>
 				<label class="flex flex-col gap-2 text-sm text-slate-300">
