@@ -1,54 +1,79 @@
 <script lang="ts">
-	import { PortableText as SanityPortableText } from '@portabletext/svelte';
-
 	export let value: any;
 	export let styleClass: string = '';
 
-	// Custom components for different block types
-	const components = {
-		block: {
-			normal: ({ children }: any) => `<p class="mb-3">${children}</p>`,
-			h1: ({ children }: any) => `<h1 class="text-2xl font-bold mb-4">${children}</h1>`,
-			h2: ({ children }: any) => `<h2 class="text-xl font-semibold mb-3">${children}</h2>`,
-			h3: ({ children }: any) => `<h3 class="text-lg font-semibold mb-2">${children}</h3>`,
-			h4: ({ children }: any) => `<h4 class="text-base font-semibold mb-2">${children}</h4>`,
-			blockquote: ({ children }: any) =>
-				`<blockquote class="border-l-4 border-cyan-400 pl-4 italic my-4">${children}</blockquote>`
-		},
-		marks: {
-			strong: ({ children }: any) => `<strong class="font-semibold">${children}</strong>`,
-			em: ({ children }: any) => `<em class="italic">${children}</em>`,
-			code: ({ children }: any) =>
-				`<code class="bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono">${children}</code>`,
-			link: ({ value, children }: any) =>
-				`<a href="${value.href}" class="text-cyan-400 hover:text-cyan-300 underline" target="_blank" rel="noopener noreferrer">${children}</a>`
-		},
-		list: {
-			bullet: ({ children }: any) => `<ul class="list-disc list-inside mb-3 space-y-1">${children}</ul>`,
-			number: ({ children }: any) => `<ol class="list-decimal list-inside mb-3 space-y-1">${children}</ol>`
-		},
-		listItem: {
-			bullet: ({ children }: any) => `<li class="ml-4">${children}</li>`,
-			number: ({ children }: any) => `<li class="ml-4">${children}</li>`
+	// Helper to convert portable text blocks to HTML
+	function blockToText(block: any): string {
+		if (!block) return '';
+
+		if (block._type === 'block') {
+			const children = block.children || [];
+			let text = children
+				.map((child: any) => {
+					if (child._type === 'span') {
+						let content = child.text || '';
+						// Apply marks
+						if (child.marks && child.marks.length > 0) {
+							child.marks.forEach((mark: string) => {
+								if (mark === 'strong') {
+									content = `<strong class="font-semibold">${content}</strong>`;
+								} else if (mark === 'em') {
+									content = `<em class="italic">${content}</em>`;
+								} else if (mark === 'code') {
+									content = `<code class="bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono">${content}</code>`;
+								}
+							});
+						}
+						return content;
+					}
+					return '';
+				})
+				.join('');
+
+			// Wrap in appropriate tag based on style
+			const style = block.style || 'normal';
+			switch (style) {
+				case 'h1':
+					return `<h1 class="text-2xl font-bold mb-4">${text}</h1>`;
+				case 'h2':
+					return `<h2 class="text-xl font-semibold mb-3">${text}</h2>`;
+				case 'h3':
+					return `<h3 class="text-lg font-semibold mb-2">${text}</h3>`;
+				case 'h4':
+					return `<h4 class="text-base font-semibold mb-2">${text}</h4>`;
+				case 'blockquote':
+					return `<blockquote class="border-l-4 border-cyan-400 pl-4 italic my-4">${text}</blockquote>`;
+				default:
+					return text ? `<p class="mb-3">${text}</p>` : '';
+			}
 		}
-	};
+
+		return '';
+	}
+
+	// Convert portable text array to HTML
+	function portableTextToHTML(blocks: any[]): string {
+		if (!Array.isArray(blocks)) return '';
+		return blocks.map(blockToText).filter(Boolean).join('');
+	}
 
 	// Convert to plain text if it's a string
 	$: isPlainText = typeof value === 'string';
-	$: plainText = isPlainText ? value : '';
+	$: isPortableText = Array.isArray(value) && value.length > 0;
+	$: htmlContent = isPortableText ? portableTextToHTML(value) : '';
 </script>
 
 {#if isPlainText}
 	<div class={styleClass}>
-		{plainText}
+		{value}
 	</div>
-{:else if Array.isArray(value) && value.length > 0}
+{:else if isPortableText}
 	<div class={styleClass}>
-		<SanityPortableText {value} {components} />
+		{@html htmlContent}
 	</div>
-{:else}
-	<!-- Fallback for empty or invalid content -->
+{:else if value}
+	<!-- Fallback for unexpected format -->
 	<div class={styleClass}>
-		{value ? JSON.stringify(value) : ''}
+		{typeof value === 'object' ? JSON.stringify(value) : String(value)}
 	</div>
 {/if}

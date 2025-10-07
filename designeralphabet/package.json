@@ -18,7 +18,7 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",
-		"@sveltejs/adapter-node": "^5.0.0",
+		"@sveltejs/adapter-node": "^2.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@tailwindcss/typography": "^0.5.19",
@@ -42,7 +42,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@portabletext/svelte": "^2.1.12",
 		"@sanity/client": "^6.21.3",
 		"@skeletonlabs/tw-plugin": "^0.4.1",
 		"@supabase/supabase-js": "^2.58.0",
