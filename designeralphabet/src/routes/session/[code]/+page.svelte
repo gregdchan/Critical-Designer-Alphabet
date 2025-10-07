@@ -1358,101 +1358,107 @@
 					<div class="mt-6">
 						{#if dashboardMode === 'immersive'}
 							<!-- Immersive Dashboard Layout -->
-							<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[600px]">
-								<!-- Left sidebar: Mini charts and controls -->
-								<aside class="lg:col-span-3 space-y-4">
-									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
-										<ParticipationPulse roomCode={sessionCode} width={isMobile ? 300 : 240} height={180} />
+							<div class="space-y-6">
+								<!-- Top Row: Two Smaller Charts Side by Side -->
+								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
+										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Participation Pulse</h3>
+										<ParticipationPulse roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
-										<InclusivityMeter roomCode={sessionCode} width={isMobile ? 300 : 240} height={180} />
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
+										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Inclusivity Meter</h3>
+										<InclusivityMeter roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-2">
-										<div class="text-xs uppercase tracking-wide text-cyan-200 mb-2">
-											Active Chart
+								</div>
+
+								<!-- Main Chart Area: Full Width Below -->
+								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-6">
+									{#if activeTab === 'overview'}
+										<h3 class="text-lg font-semibold text-white mb-4">Response Quadrant Analysis</h3>
+										<QuadBubbleChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									{:else if activeTab === 'heatmap'}
+										<h3 class="text-lg font-semibold text-white mb-4">Insight Heatmap</h3>
+										<HeatmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									{:else if activeTab === 'roadmap'}
+										<h3 class="text-lg font-semibold text-white mb-4">Roadmap Timeline</h3>
+										<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									{:else if activeTab === 'participants'}
+										<h3 class="text-lg font-semibold text-white mb-4">Advanced Analytics</h3>
+										<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+											<div>
+												<h4 class="text-sm font-semibold text-cyan-200 mb-3">Quad Bubbles</h4>
+												<QuadBubbles roomCode={sessionCode} width={isMobile ? 350 : 420} height={380} />
+											</div>
+											<div>
+												<h4 class="text-sm font-semibold text-cyan-200 mb-3">Maturity Dial</h4>
+												<MaturityDial roomCode={sessionCode} width={isMobile ? 350 : 420} height={380} />
+											</div>
+											<div class="lg:col-span-2">
+												<h4 class="text-sm font-semibold text-cyan-200 mb-3">Risk Impact Matrix</h4>
+												<RiskImpactMatrix roomCode={sessionCode} width={isMobile ? 350 : 900} height={480} />
+											</div>
 										</div>
-										<select
-											bind:value={primaryChart}
-											class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white"
-										>
-											{#each Object.entries(CHART_REGISTRY) as [id, config]}
-												<option value={id}>{config.title}</option>
-											{/each}
-										</select>
-									</div>
-								</aside>
-
-								<!-- Main chart area -->
-								<main class="lg:col-span-6 bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 min-h-[400px]">
-									{#if primaryChart === 'quadBubbles'}
-										<QuadBubbles roomCode={sessionCode} width={isMobile ? 350 : 600} height={isMobile ? 400 : 520} />
-									{:else if primaryChart === 'maturityDial'}
-										<MaturityDial roomCode={sessionCode} width={isMobile ? 350 : 600} height={isMobile ? 400 : 520} />
-									{:else if primaryChart === 'riskImpactMatrix'}
-										<RiskImpactMatrix roomCode={sessionCode} width={isMobile ? 350 : 600} height={isMobile ? 400 : 520} />
-									{:else}
-										<QuadBubbleChart responses={responsesForViz} width={isMobile ? 350 : 600} height={isMobile ? 400 : 520} />
 									{/if}
-								</main>
+								</div>
 
-								<!-- Right sidebar: Leaderboard and chat -->
-								<aside class="lg:col-span-3 space-y-4">
-									<div
-										class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-64 overflow-y-auto"
-									>
+								<!-- Bottom Row: Leaderboard and Chat Side by Side -->
+								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Live Leaderboard</h3>
-										{#if leaderboardList.length > 0}
-											{#each leaderboardList.slice(0, 5) as participant, index}
-												<div
-													class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0"
-												>
-													<div class="flex items-center gap-2">
-														<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
-														<span class="text-sm text-white truncate">{participant.name}</span>
+										<div class="space-y-2 max-h-64 overflow-y-auto">
+											{#if leaderboardList.length > 0}
+												{#each leaderboardList.slice(0, 8) as participant, index}
+													<div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+														<div class="flex items-center gap-2">
+															<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
+															<span class="text-sm text-white truncate">{participant.name}</span>
+														</div>
+														<span class="text-xs text-cyan-200">{participant.points}pts</span>
 													</div>
-													<span class="text-xs text-cyan-200">{participant.points}pts</span>
-												</div>
-											{/each}
-										{:else}
-											<p class="text-xs text-slate-400">No participants yet</p>
-										{/if}
+												{/each}
+											{:else}
+												<p class="text-xs text-slate-400">No participants yet</p>
+											{/if}
+										</div>
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 flex-1">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Quick Chat</h3>
-										<div class="h-32 overflow-y-auto mb-3 space-y-2">
-											{#each chatList.slice(-5) as message}
-												{@const participantName =
-													participantsList.find((p) => p.id === message.participant_id)
-														?.name ?? 'Guest'}
-												<div class="text-xs">
-													<span class="text-cyan-300">{participantName}:</span>
-													<span class="text-slate-300">{message.message}</span>
-												</div>
-											{/each}
+										<div class="h-48 overflow-y-auto mb-3 space-y-2">
+											{#if chatList.length > 0}
+												{#each chatList.slice(-8) as message}
+													{@const participantName = participantsList.find((p) => p.id === message.participant_id)?.name ?? 'Guest'}
+													<div class="text-xs">
+														<span class="text-cyan-300 font-semibold">{participantName}:</span>
+														<span class="text-slate-300">{message.message}</span>
+													</div>
+												{/each}
+											{:else}
+												<p class="text-xs text-slate-400">No messages yet</p>
+											{/if}
 										</div>
 										<div class="flex gap-2">
 											<input
 												bind:value={chatMessage}
 												on:keydown={(e) => e.key === 'Enter' && submitChatMessage()}
 												placeholder="Type message..."
-												class="flex-1 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white"
+												class="flex-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-white placeholder:text-slate-500"
 											/>
 											<button
 												on:click={submitChatMessage}
-												class="px-2 py-1 bg-cyan-600 text-white rounded text-xs hover:bg-cyan-500"
+												class="px-3 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-500 transition"
 											>
-												<IconSend class="h-3 w-3" />
+												<IconSend class="h-4 w-4" />
 											</button>
 										</div>
 									</div>
-								</aside>
+								</div>
 							</div>
 
 							<!-- Dashboard mode toggle -->
-							<div class="mt-4 flex justify-center">
+							<div class="mt-6 flex justify-center">
 								<button
 									on:click={() => (dashboardMode = 'classic')}
-									class="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 text-sm"
+									class="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 text-sm transition"
 								>
 									Switch to Classic View
 								</button>
