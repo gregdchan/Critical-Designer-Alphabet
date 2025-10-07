@@ -17,6 +17,11 @@
 	export let isOpen = false;
 	export let isMobile = false;
 
+	// Function to close the panel (for mobile)
+	function closePanel() {
+		isOpen = false;
+	}
+
 	let cards: Card[] = [];
 	let loading = true;
 	let searchTerm = '';
@@ -78,8 +83,8 @@
 		<!-- Backdrop -->
 		{#if isOpen}
 			<button
-				class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm"
-				on:click={() => (isOpen = false)}
+				class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40"
+				on:click={closePanel}
 				aria-label="Close card panel"
 			/>
 		{/if}
@@ -101,7 +106,7 @@
 						<h3 class="text-lg font-semibold text-white">Design Cards</h3>
 					</div>
 					<button
-						on:click={() => (isOpen = false)}
+						on:click={closePanel}
 						class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
 					>
 						<IconX class="h-5 w-5" />

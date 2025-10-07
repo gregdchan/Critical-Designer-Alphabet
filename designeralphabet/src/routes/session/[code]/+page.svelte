@@ -96,8 +96,13 @@
 
 	// Card integration
 	const cardStore = createSessionCardStore(sessionCode);
+	let selectedCards: Card[] = [];
+	let isCardPanelOpen = false;
 	let isMobile = false;
-	let showCardPanel = false;
+
+	// Subscribe to card store
+	$: selectedCards = $cardStore.selectedCards;
+	$: isCardPanelOpen = $cardStore.isCardPanelOpen;
 
 	type SessionStatus = 'planned' | 'live' | 'done';
 
@@ -434,7 +439,7 @@
 		}
 
 		// Combine selected cards from panel with additional cards from text input
-		const selectedCardTitles = $cardStore.selectedCards.map((card) => card.title);
+		const selectedCardTitles = selectedCards.map((card) => card.title);
 		const additionalCards = linkedCardsText
 			.split(',')
 			.map((card) => card.trim())
@@ -616,32 +621,36 @@
 		<!-- Main Content Area -->
 		<div class={isMobile ? 'w-full' : 'flex-1 overflow-auto'}>
 			<header class="sticky top-0 z-40 border-b border-cyan-400/20 bg-slate-900/70 backdrop-blur">
-				<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-					<div>
-						<p class="text-xs uppercase tracking-[0.35em] text-cyan-300">
-							Inclusive Planning Session
-						</p>
-						<h1 class="text-2xl font-semibold text-white">
-							{sessionInfo.title ?? 'Untitled Session'}
-							<span
-								class="ml-2 rounded-full border border-cyan-400/30 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
-							>
-								{sessionCode}
-							</span>
-						</h1>
-						{#if sessionInfo.challenge}
-							<p class="mt-2 text-sm text-cyan-200 max-w-2xl">
-								Focus: {sessionInfo.challenge}
-							</p>
-						{/if}
-						<p class="mt-1 text-sm text-slate-300">
-							{currentParticipant?.name ?? 'Anonymous'} · {currentParticipant?.role ?? activeRole}
-						</p>
+				<div class="mx-auto max-w-7xl px-4 md:px-6 py-3 md:py-4">
+					<div class="flex flex-col gap-2">
+						<div class="flex items-start justify-between gap-4">
+							<div class="flex-1 min-w-0">
+								<p class="text-[10px] md:text-xs uppercase tracking-[0.35em] text-cyan-300">
+									Inclusive Planning
+								</p>
+								<h1 class="text-lg md:text-2xl font-semibold text-white flex flex-wrap items-center gap-2">
+									<span class="truncate">{sessionInfo.title ?? 'Untitled Session'}</span>
+									<span
+										class="rounded-full border border-cyan-400/30 px-2 md:px-3 py-0.5 md:py-1 text-[10px] md:text-xs uppercase tracking-[0.2em] text-cyan-200 whitespace-nowrap"
+									>
+										{sessionCode}
+									</span>
+								</h1>
+								{#if sessionInfo.challenge && !isMobile}
+									<p class="mt-2 text-sm text-cyan-200 max-w-2xl line-clamp-2">
+										Focus: {sessionInfo.challenge}
+									</p>
+								{/if}
+								<p class="mt-1 text-xs md:text-sm text-slate-300 truncate">
+									{currentParticipant?.name ?? 'Anonymous'} · {currentParticipant?.role ?? activeRole}
+								</p>
+							</div>
+						</div>
 					</div>
 				</div>
 			</header>
 
-			<main class="mx-auto max-w-full space-y-8 px-6 py-8">
+			<main class="mx-auto max-w-full space-y-6 md:space-y-8 px-4 md:px-6 py-6 md:py-8">
 				{#if isFacilitator()}
 					<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-6 space-y-6">
 						<div class="flex flex-wrap items-center justify-between gap-4">
@@ -806,8 +815,21 @@
 												<div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
 													{#each phase.cards as card}
 														<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
-															<h4 class="text-sm font-semibold text-cyan-200">{card.title}</h4>
-															<p class="text-xs text-slate-300 mt-1">{card.description}</p>
+															<div class="flex items-center gap-2 mb-2">
+																{#if card.letter}
+																	<span
+																		class="flex h-6 w-6 items-center justify-center rounded border border-cyan-400/40 text-xs font-bold text-cyan-400"
+																	>
+																		{card.letter}
+																	</span>
+																{/if}
+																<h4 class="text-sm font-semibold text-cyan-200">
+																	{card.title || 'Untitled'}
+																</h4>
+															</div>
+															{#if card.description}
+																<p class="text-xs text-slate-300 mt-1">{card.description}</p>
+															{/if}
 														</div>
 													{/each}
 												</div>
@@ -1120,50 +1142,53 @@
 					</div>
 				</section>
 
-				<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-					<nav class="flex flex-wrap gap-3">
+				<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 md:p-6">
+					<nav class="flex gap-2 md:gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
 						<button
-							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'overview' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'overview')}
 						>
-							<IconChartBubble class="h-4 w-4" />
-							Quad Bubble
+							<IconChartBubble class="h-4 w-4 flex-shrink-0" />
+							<span class="hidden sm:inline">Quad Bubble</span>
+							<span class="sm:hidden">Quad</span>
 						</button>
 						<button
-							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'heatmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'heatmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'heatmap')}
 						>
-							<IconGridDots class="h-4 w-4" />
+							<IconGridDots class="h-4 w-4 flex-shrink-0" />
 							Heatmap
 						</button>
 						<button
-							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'roadmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'roadmap')}
 						>
-							<IconMap class="h-4 w-4" />
+							<IconMap class="h-4 w-4 flex-shrink-0" />
 							Roadmap
 						</button>
 						<button
-							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'timeline' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'timeline' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'timeline')}
 						>
-							<IconFlame class="h-4 w-4" />
+							<IconFlame class="h-4 w-4 flex-shrink-0" />
 							Timeline
 						</button>
 						<button
-							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'chat' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'chat' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'chat')}
 						>
-							<IconMessage class="h-4 w-4" />
-							Arcade Chat
+							<IconMessage class="h-4 w-4 flex-shrink-0" />
+							<span class="hidden sm:inline">Arcade Chat</span>
+							<span class="sm:hidden">Chat</span>
 						</button>
 						{#if isFacilitator()}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'participants' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'participants')}
 							>
-								<IconUsers class="h-4 w-4" />
-								Participant Activity
+								<IconUsers class="h-4 w-4 flex-shrink-0" />
+								<span class="hidden md:inline">Participant Activity</span>
+								<span class="md:hidden">Activity</span>
 							</button>
 						{/if}
 					</nav>
@@ -1171,14 +1196,14 @@
 					<div class="mt-6">
 						{#if dashboardMode === 'immersive'}
 							<!-- Immersive Dashboard Layout -->
-							<div class="grid grid-cols-12 gap-4 h-[600px]">
+							<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[600px]">
 								<!-- Left sidebar: Mini charts and controls -->
-								<aside class="col-span-3 space-y-4">
+								<aside class="lg:col-span-3 space-y-4">
 									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
-										<ParticipationPulse roomCode={sessionCode} width={240} height={180} />
+										<ParticipationPulse roomCode={sessionCode} width={isMobile ? 300 : 240} height={180} />
 									</div>
 									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
-										<InclusivityMeter roomCode={sessionCode} width={240} height={180} />
+										<InclusivityMeter roomCode={sessionCode} width={isMobile ? 300 : 240} height={180} />
 									</div>
 									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-2">
 										<div class="text-xs uppercase tracking-wide text-cyan-200 mb-2">
@@ -1196,20 +1221,20 @@
 								</aside>
 
 								<!-- Main chart area -->
-								<main class="col-span-6 bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
+								<main class="lg:col-span-6 bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 min-h-[400px]">
 									{#if primaryChart === 'quadBubbles'}
-										<QuadBubbles roomCode={sessionCode} width={600} height={520} />
+										<QuadBubbles roomCode={sessionCode} width={isMobile ? 350 : 600} height={isMobile ? 400 : 520} />
 									{:else if primaryChart === 'maturityDial'}
-										<MaturityDial roomCode={sessionCode} width={600} height={520} />
+										<MaturityDial roomCode={sessionCode} width={isMobile ? 350 : 600} height={isMobile ? 400 : 520} />
 									{:else if primaryChart === 'riskImpactMatrix'}
-										<RiskImpactMatrix roomCode={sessionCode} width={600} height={520} />
+										<RiskImpactMatrix roomCode={sessionCode} width={isMobile ? 350 : 600} height={isMobile ? 400 : 520} />
 									{:else}
-										<QuadBubbleChart responses={responsesForViz} width={600} height={520} />
+										<QuadBubbleChart responses={responsesForViz} width={isMobile ? 350 : 600} height={isMobile ? 400 : 520} />
 									{/if}
 								</main>
 
 								<!-- Right sidebar: Leaderboard and chat -->
-								<aside class="col-span-3 space-y-4">
+								<aside class="lg:col-span-3 space-y-4">
 									<div
 										class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-64 overflow-y-auto"
 									>
@@ -1272,13 +1297,19 @@
 							</div>
 						{:else}
 							<!-- Classic Dashboard Layout -->
-							<div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+							<div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4 overflow-x-auto">
 								{#if activeTab === 'overview'}
-									<QuadBubbleChart responses={responsesForViz} width={900} height={520} />
+									<div class="min-w-[350px]">
+										<QuadBubbleChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									</div>
 								{:else if activeTab === 'heatmap'}
-									<HeatmapChart responses={responsesForViz} width={900} height={520} />
+									<div class="min-w-[350px]">
+										<HeatmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									</div>
 								{:else if activeTab === 'roadmap'}
-									<RoadmapChart responses={responsesForViz} width={900} height={520} />
+									<div class="min-w-[350px]">
+										<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									</div>
 								{:else if activeTab === 'timeline'}
 									<div class="space-y-4">
 										{#each timelineList as item}
@@ -1542,11 +1573,11 @@
 				aria-label="Open card panel"
 			>
 				<IconCards class="h-6 w-6" />
-				{#if $cardStore.selectedCards.length > 0}
+				{#if selectedCards.length > 0}
 					<span
 						class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-xs font-bold text-white"
 					>
-						{$cardStore.selectedCards.length}
+						{selectedCards.length}
 					</span>
 				{/if}
 			</button>
@@ -1554,9 +1585,9 @@
 
 		<!-- Desktop Card Panel -->
 		{#if !isMobile}
-			<aside class="w-80 h-screen sticky top-0">
+			<aside class="w-80 h-screen sticky top-0 overflow-hidden">
 				<CardPanel
-					bind:selectedCards={$cardStore.selectedCards}
+					selectedCards={selectedCards}
 					maxSelection={5}
 					onCardToggle={(card) => cardStore.toggleCard(card)}
 					isOpen={true}
@@ -1568,10 +1599,10 @@
 		<!-- Mobile Card Panel (Bottom Drawer) -->
 		{#if isMobile}
 			<CardPanel
-				bind:selectedCards={$cardStore.selectedCards}
+				selectedCards={selectedCards}
 				maxSelection={5}
 				onCardToggle={(card) => cardStore.toggleCard(card)}
-				bind:isOpen={$cardStore.isCardPanelOpen}
+				isOpen={isCardPanelOpen}
 				isMobile={true}
 			/>
 		{/if}
@@ -1616,7 +1647,7 @@
 				</label>
 
 				<!-- Selected Cards Display -->
-				{#if $cardStore.selectedCards.length > 0}
+				{#if selectedCards.length > 0}
 					<div class="flex flex-col gap-2">
 						<div class="flex items-center justify-between">
 							<p class="text-sm text-slate-300">Your selected cards</p>
@@ -1629,7 +1660,7 @@
 							</button>
 						</div>
 						<div class="flex flex-wrap gap-2">
-							{#each $cardStore.selectedCards as card}
+							{#each selectedCards as card}
 								<div
 									class="flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3 py-1.5"
 								>
