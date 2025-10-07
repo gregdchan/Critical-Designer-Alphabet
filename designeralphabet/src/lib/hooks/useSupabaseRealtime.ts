@@ -5,6 +5,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 interface UseRealtimeOptions {
 	table: string;
 	roomCode: string;
+	roomColumn?: string;
 	filter?: Record<string, unknown>;
 	select?: string;
 }
@@ -19,25 +20,32 @@ export function useSupabaseRealtime<T>(
 	options: UseRealtimeOptions,
 	setState: (state: RealtimeState<T>) => void
 ) {
-	const { table, roomCode, filter = {}, select = '*' } = options;
+	const { table, roomCode, roomColumn = 'room_code', filter = {}, select = '*' } = options;
 	let channel: RealtimeChannel | null = null;
-
-	// Initial state
-	setState({
+	let currentState: RealtimeState<T> = {
 		data: [],
 		loading: true,
 		error: null
-	});
+	};
+
+	function updateState(patch: Partial<RealtimeState<T>>) {
+		currentState = { ...currentState, ...patch };
+		// Emit a shallow copy so consumers get a new reference each time
+		setState({ ...currentState, data: [...currentState.data] });
+	}
+
+	// Initial state
+	setState({ ...currentState, data: [...currentState.data] });
 
 	async function initializeData() {
 		try {
-			setState((state) => ({ ...state, loading: true, error: null }));
+			updateState({ loading: true, error: null });
 
 			let query = supabase.from(table).select(select);
 
 			// Apply room code filter
 			if (roomCode) {
-				query = query.eq('session_code', roomCode.toUpperCase());
+				query = query.eq(roomColumn, roomCode.toUpperCase());
 			}
 
 			// Apply additional filters
@@ -49,26 +57,21 @@ export function useSupabaseRealtime<T>(
 
 			if (error) {
 				console.error(`Error fetching ${table}:`, error);
-				setState((state) => ({
-					...state,
-					loading: false,
-					error: error.message
-				}));
+				updateState({ loading: false, error: error.message });
 				return;
 			}
 
-			setState({
-				data: data || [],
+			updateState({
+				data: (data as T[]) ?? [],
 				loading: false,
 				error: null
 			});
 		} catch (err) {
 			console.error(`Unexpected error fetching ${table}:`, err);
-			setState((state) => ({
-				...state,
+			updateState({
 				loading: false,
 				error: err instanceof Error ? err.message : 'Unknown error'
-			}));
+			});
 		}
 	}
 
@@ -84,7 +87,7 @@ export function useSupabaseRealtime<T>(
 						event: '*',
 						schema: 'public',
 						table: table,
-						filter: roomCode ? `session_code=eq.${roomCode.toUpperCase()}` : undefined
+						filter: roomCode ? `${roomColumn}=eq.${roomCode.toUpperCase()}` : undefined
 					},
 					(payload) => {
 						console.log(`Realtime update for ${table}:`, payload);
@@ -105,7 +108,7 @@ export function useSupabaseRealtime<T>(
 			let query = supabase.from(table).select(select);
 
 			if (roomCode) {
-				query = query.eq('session_code', roomCode.toUpperCase());
+				query = query.eq(roomColumn, roomCode.toUpperCase());
 			}
 
 			Object.entries(filter).forEach(([key, value]) => {
@@ -116,18 +119,14 @@ export function useSupabaseRealtime<T>(
 
 			if (error) {
 				console.error(`Error refreshing ${table}:`, error);
-				setState((state) => ({
-					...state,
-					error: error.message
-				}));
+				updateState({ error: error.message });
 				return;
 			}
 
-			setState((state) => ({
-				...state,
-				data: data || [],
+			updateState({
+				data: (data as T[]) ?? [],
 				error: null
-			}));
+			});
 		} catch (err) {
 			console.error(`Error refreshing ${table}:`, err);
 		}
