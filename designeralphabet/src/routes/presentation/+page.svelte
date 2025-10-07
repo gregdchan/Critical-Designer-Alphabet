@@ -526,7 +526,9 @@
 											{responsesList.length} responses
 										</span>
 									</header>
-									<QuadBubbleChart responses={responsesForViz} width={1200} height={600} />
+									<div class="w-full h-[600px] overflow-hidden">
+										<QuadBubbleChart responses={responsesForViz} width={1200} height={600} />
+									</div>
 								</div>
 							{:else if boardId === 'heatmap'}
 								<div
@@ -540,7 +542,9 @@
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
-									<HeatmapChart responses={responsesForViz} width={1200} height={560} />
+									<div class="w-full h-[560px] overflow-hidden">
+										<HeatmapChart responses={responsesForViz} width={1200} height={560} />
+									</div>
 								</div>
 							{:else if boardId === 'roadmap'}
 								<div
@@ -554,7 +558,9 @@
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
-									<RoadmapChart responses={responsesForViz} width={1200} height={580} />
+									<div class="w-full h-[580px] overflow-hidden">
+										<RoadmapChart responses={responsesForViz} width={1200} height={580} />
+									</div>
 								</div>
 								{:else if boardId === 'quadBubbles' || boardId === 'participationPulse' || boardId === 'riskImpactMatrix'}
 									{#if activeCode}
@@ -571,12 +577,14 @@
 												</p>
 											</header>
 											{#if component}
-												<svelte:component
-													this={component}
-													roomCode={activeCode}
-													width={dimensions.width}
-													height={dimensions.height}
-												/>
+												<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
+													<svelte:component
+														this={component}
+														roomCode={activeCode}
+														width={dimensions.width}
+														height={dimensions.height}
+													/>
+												</div>
 											{:else}
 												<p class="text-sm text-slate-400">
 													This chart is unavailable for the current session.
@@ -604,12 +612,14 @@
 												</p>
 											</header>
 											{#if component}
-												<svelte:component
-													this={component}
-													roomCode={activeCode}
-													width={dimensions.width}
-													height={dimensions.height}
-												/>
+												<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
+													<svelte:component
+														this={component}
+														roomCode={activeCode}
+														width={dimensions.width}
+														height={dimensions.height}
+													/>
+												</div>
 											{:else}
 												<p class="text-sm text-slate-400">
 													This chart is unavailable for the current session.
@@ -818,12 +828,14 @@
 												</p>
 											</header>
 											{#if component}
-												<svelte:component
-													this={component}
-													roomCode={activeCode}
-													width={dimensions.width}
-													height={dimensions.height}
-												/>
+												<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
+													<svelte:component
+														this={component}
+														roomCode={activeCode}
+														width={dimensions.width}
+														height={dimensions.height}
+													/>
+												</div>
 											{:else}
 												<p class="text-sm text-slate-400">
 													This chart is unavailable for the current session.
