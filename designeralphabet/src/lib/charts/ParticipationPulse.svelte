@@ -17,6 +17,13 @@
 	let svgElement: SVGSVGElement;
 	let dimensions: ChartDimensions;
 	let updateInterval: NodeJS.Timeout;
+	let fallbackDimensions: ChartDimensions = {
+		width,
+		height,
+		innerWidth: width,
+		innerHeight: height,
+		margins: { top: 0, right: 0, bottom: 0, left: 0 }
+	};
 
 	// Data state
 	let timelineData: any[] = [];
@@ -329,10 +336,14 @@
 
 	function handleResize(newDimensions: ChartDimensions) {
 		dimensions = newDimensions;
+		fallbackDimensions = newDimensions;
 		if (participationData.length > 0) {
 			updateVisualization();
 		}
 	}
+
+	const getCenterX = () => (dimensions ?? fallbackDimensions).innerWidth / 2;
+	const getCenterY = () => (dimensions ?? fallbackDimensions).innerHeight / 2;
 </script>
 
 <BaseChart
@@ -347,8 +358,8 @@
 	<svelte:fragment slot="default">
 		{#if loading}
 			<text
-				x={dimensions.innerWidth / 2}
-				y={dimensions.innerHeight / 2}
+				x={getCenterX()}
+				y={getCenterY()}
 				text-anchor="middle"
 				fill="currentColor"
 				class="chart-text"
@@ -357,8 +368,8 @@
 			</text>
 		{:else if error}
 			<text
-				x={dimensions.innerWidth / 2}
-				y={dimensions.innerHeight / 2}
+				x={getCenterX()}
+				y={getCenterY()}
 				text-anchor="middle"
 				fill="#ef4444"
 				class="chart-text"
@@ -367,8 +378,8 @@
 			</text>
 		{:else if participationData.length === 0}
 			<text
-				x={dimensions.innerWidth / 2}
-				y={dimensions.innerHeight / 2}
+				x={getCenterX()}
+				y={getCenterY()}
 				text-anchor="middle"
 				fill="currentColor"
 				class="chart-text"

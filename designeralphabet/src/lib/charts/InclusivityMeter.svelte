@@ -12,8 +12,15 @@
 	export let width = 300;
 	export let height = 300;
 
-	let svgElement: SVGSVGElement | undefined;
-	let dimensions: ChartDimensions | undefined;
+let svgElement: SVGSVGElement | undefined;
+let dimensions: ChartDimensions | undefined;
+let fallbackDimensions: ChartDimensions = {
+	width,
+	height,
+	innerWidth: width,
+	innerHeight: height,
+	margins: { top: 0, right: 0, bottom: 0, left: 0 }
+};
 
 	// Data state
 	let participants: any[] = [];
@@ -295,10 +302,11 @@
 		return 'Improving';
 	}
 
-	function handleResize(newDimensions: ChartDimensions) {
-		dimensions = newDimensions;
-		updateVisualization();
-	}
+function handleResize(newDimensions: ChartDimensions) {
+	dimensions = newDimensions;
+	fallbackDimensions = newDimensions;
+	updateVisualization();
+}
 
 	// Watch for changes
 	$: if (svgElement && dimensions) {
@@ -317,11 +325,11 @@
 	on:mounted={() => updateVisualization()}
 >
 	<svelte:fragment slot="default" let:svgElement={svg} let:dimensions={dims}>
-		{@const _ = svg && dims ? ((svgElement = svg), (dimensions = dims)) : null}
+		{@const _ = svg && dims ? ((svgElement = svg), (dimensions = dims), (fallbackDimensions = dims)) : null}
 		{#if loading}
 			<text
-				x={dimensions.innerWidth / 2}
-				y={dimensions.innerHeight / 2}
+				x={(dimensions ?? fallbackDimensions).innerWidth / 2}
+				y={(dimensions ?? fallbackDimensions).innerHeight / 2}
 				text-anchor="middle"
 				fill="currentColor"
 				class="chart-text"
@@ -330,8 +338,8 @@
 			</text>
 		{:else if error}
 			<text
-				x={dimensions.innerWidth / 2}
-				y={dimensions.innerHeight / 2}
+				x={(dimensions ?? fallbackDimensions).innerWidth / 2}
+				y={(dimensions ?? fallbackDimensions).innerHeight / 2}
 				text-anchor="middle"
 				fill="#ef4444"
 				class="chart-text"
