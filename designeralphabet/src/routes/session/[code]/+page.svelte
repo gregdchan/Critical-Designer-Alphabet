@@ -1361,13 +1361,17 @@
 							<div class="space-y-6">
 								<!-- Top Row: Two Smaller Charts Side by Side -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-80">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Participation Pulse</h3>
-										<ParticipationPulse roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
+										<div class="w-full h-60">
+											<ParticipationPulse roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
+										</div>
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-80">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Inclusivity Meter</h3>
-										<InclusivityMeter roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
+										<div class="w-full h-60">
+											<InclusivityMeter roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
+										</div>
 									</div>
 								</div>
 
@@ -1375,27 +1379,39 @@
 								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-6">
 									{#if activeTab === 'overview'}
 										<h3 class="text-lg font-semibold text-white mb-4">Response Quadrant Analysis</h3>
-										<QuadBubbleChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+										<div class="w-full h-[520px] overflow-hidden">
+											<QuadBubbleChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+										</div>
 									{:else if activeTab === 'heatmap'}
 										<h3 class="text-lg font-semibold text-white mb-4">Insight Heatmap</h3>
-										<HeatmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+										<div class="w-full h-[520px] overflow-hidden">
+											<HeatmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+										</div>
 									{:else if activeTab === 'roadmap'}
 										<h3 class="text-lg font-semibold text-white mb-4">Roadmap Timeline</h3>
-										<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+										<div class="w-full h-[520px] overflow-hidden">
+											<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+										</div>
 									{:else if activeTab === 'participants'}
 										<h3 class="text-lg font-semibold text-white mb-4">Advanced Analytics</h3>
 										<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-											<div>
+											<div class="h-[400px] overflow-hidden">
 												<h4 class="text-sm font-semibold text-cyan-200 mb-3">Quad Bubbles</h4>
-												<QuadBubbles roomCode={sessionCode} width={isMobile ? 350 : 420} height={380} />
+												<div class="w-full h-80">
+													<QuadBubbles roomCode={sessionCode} width={isMobile ? 350 : 420} height={320} />
+												</div>
 											</div>
-											<div>
+											<div class="h-[400px] overflow-hidden">
 												<h4 class="text-sm font-semibold text-cyan-200 mb-3">Maturity Dial</h4>
-												<MaturityDial roomCode={sessionCode} width={isMobile ? 350 : 420} height={380} />
+												<div class="w-full h-80">
+													<MaturityDial roomCode={sessionCode} width={isMobile ? 350 : 420} height={320} />
+												</div>
 											</div>
-											<div class="lg:col-span-2">
+											<div class="lg:col-span-2 h-[500px] overflow-hidden">
 												<h4 class="text-sm font-semibold text-cyan-200 mb-3">Risk Impact Matrix</h4>
-												<RiskImpactMatrix roomCode={sessionCode} width={isMobile ? 350 : 900} height={480} />
+												<div class="w-full h-[450px]">
+													<RiskImpactMatrix roomCode={sessionCode} width={isMobile ? 350 : 900} height={450} />
+												</div>
 											</div>
 										</div>
 									{/if}
