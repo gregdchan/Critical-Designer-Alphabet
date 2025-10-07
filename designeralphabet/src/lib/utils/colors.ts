@@ -30,10 +30,10 @@ export const LENS_COLORS = {
 
 // Risk matrix colors
 export const RISK_COLORS = {
-	low: '#10b981',      // Green
-	medium: '#f59e0b',   // Yellow
-	high: '#ef4444',     // Red
-	critical: '#dc2626'  // Dark red
+	low: '#10b981', // Green
+	medium: '#f59e0b', // Yellow
+	high: '#ef4444', // Red
+	critical: '#dc2626' // Dark red
 } as const;
 
 // Maturity stage colors
@@ -42,7 +42,7 @@ export const MATURITY_COLORS = [
 	'#3b82f6', // Blue - Developing
 	'#10b981', // Green - Proficient
 	'#f59e0b', // Yellow - Advanced
-	'#8b5cf6'  // Purple - Aspirational
+	'#8b5cf6' // Purple - Aspirational
 ] as const;
 
 // Color scales for heatmaps
@@ -51,7 +51,7 @@ export const HEATMAP_SCALE = [
 	'#0f766e', // Low
 	'#059669', // Medium
 	'#fbbf24', // High
-	'#f59e0b'  // Very high
+	'#f59e0b' // Very high
 ] as const;
 
 // Utility functions

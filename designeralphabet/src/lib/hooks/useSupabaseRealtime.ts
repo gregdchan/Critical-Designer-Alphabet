@@ -31,7 +31,7 @@ export function useSupabaseRealtime<T>(
 
 	async function initializeData() {
 		try {
-			setState(state => ({ ...state, loading: true, error: null }));
+			setState((state) => ({ ...state, loading: true, error: null }));
 
 			let query = supabase.from(table).select(select);
 
@@ -49,7 +49,7 @@ export function useSupabaseRealtime<T>(
 
 			if (error) {
 				console.error(`Error fetching ${table}:`, error);
-				setState(state => ({
+				setState((state) => ({
 					...state,
 					loading: false,
 					error: error.message
@@ -64,7 +64,7 @@ export function useSupabaseRealtime<T>(
 			});
 		} catch (err) {
 			console.error(`Unexpected error fetching ${table}:`, err);
-			setState(state => ({
+			setState((state) => ({
 				...state,
 				loading: false,
 				error: err instanceof Error ? err.message : 'Unknown error'
@@ -116,14 +116,14 @@ export function useSupabaseRealtime<T>(
 
 			if (error) {
 				console.error(`Error refreshing ${table}:`, error);
-				setState(state => ({
+				setState((state) => ({
 					...state,
 					error: error.message
 				}));
 				return;
 			}
 
-			setState(state => ({
+			setState((state) => ({
 				...state,
 				data: data || [],
 				error: null
@@ -155,7 +155,8 @@ export function useResponses(roomCode: string, setState: (state: RealtimeState<a
 		{
 			table: 'responses',
 			roomCode,
-			select: '*, participants!inner(name), questions!inner(section, text, lens, response_type, map_type)'
+			select:
+				'*, participants!inner(name), questions!inner(section, text, lens, response_type, map_type)'
 		},
 		setState
 	);
@@ -216,10 +217,10 @@ export function useMultipleRealtime<T extends Record<string, any>>(
 	});
 
 	onDestroy(() => {
-		cleanup.forEach(fn => fn());
+		cleanup.forEach((fn) => fn());
 	});
 
 	return {
-		refreshAll: () => cleanup.forEach(fn => fn())
+		refreshAll: () => cleanup.forEach((fn) => fn())
 	};
 }

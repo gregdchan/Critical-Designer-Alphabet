@@ -67,7 +67,9 @@
 		// Create time buckets for the last 5 minutes
 		const buckets = [];
 		for (let i = 0; i < maxDataPoints; i++) {
-			const time = new Date(now.getTime() - (maxDataPoints - 1 - i) * (5 * 60 * 1000 / maxDataPoints));
+			const time = new Date(
+				now.getTime() - (maxDataPoints - 1 - i) * ((5 * 60 * 1000) / maxDataPoints)
+			);
 			buckets.push({
 				timestamp: time,
 				submissions: 0,
@@ -76,10 +78,12 @@
 		}
 
 		// Count events in each bucket
-		timelineData.forEach(event => {
+		timelineData.forEach((event) => {
 			const eventTime = new Date(event.created_at);
 			if (eventTime >= fiveMinutesAgo && eventTime <= now) {
-				const bucketIndex = Math.floor((eventTime.getTime() - fiveMinutesAgo.getTime()) / (5 * 60 * 1000 / maxDataPoints));
+				const bucketIndex = Math.floor(
+					(eventTime.getTime() - fiveMinutesAgo.getTime()) / ((5 * 60 * 1000) / maxDataPoints)
+				);
 				if (bucketIndex >= 0 && bucketIndex < buckets.length) {
 					buckets[bucketIndex].submissions++;
 					buckets[bucketIndex].events.push(event);
@@ -88,18 +92,18 @@
 		});
 
 		// Calculate fairness multiplier (simplified)
-		const totalParticipants = new Set(timelineData.map(e => e.participant_id)).size;
+		const totalParticipants = new Set(timelineData.map((e) => e.participant_id)).size;
 		const recentParticipants = new Set(
 			timelineData
-				.filter(e => new Date(e.created_at) >= fiveMinutesAgo)
-				.map(e => e.participant_id)
+				.filter((e) => new Date(e.created_at) >= fiveMinutesAgo)
+				.map((e) => e.participant_id)
 		).size;
 
-		const fairnessMultiplier = totalParticipants > 0 ?
-			1 + (recentParticipants / totalParticipants) * 0.2 : 1;
+		const fairnessMultiplier =
+			totalParticipants > 0 ? 1 + (recentParticipants / totalParticipants) * 0.2 : 1;
 
 		// Convert to participation data
-		participationData = buckets.map(bucket => ({
+		participationData = buckets.map((bucket) => ({
 			timestamp: bucket.timestamp,
 			submissions: bucket.submissions,
 			fairnessMultiplier: fairnessMultiplier
@@ -117,17 +121,17 @@
 
 		// Scales
 		const xScale = scaleTime()
-			.domain(extent(participationData, d => d.timestamp) as [Date, Date])
+			.domain(extent(participationData, (d) => d.timestamp) as [Date, Date])
 			.range([0, innerWidth]);
 
 		const yScale = scaleLinear()
-			.domain([0, max(participationData, d => d.submissions) || 10])
+			.domain([0, max(participationData, (d) => d.submissions) || 10])
 			.range([innerHeight, 0]);
 
 		// Line generator
 		const lineGenerator = line<ParticipationPoint>()
-			.x(d => xScale(d.timestamp))
-			.y(d => yScale(d.submissions))
+			.x((d) => xScale(d.timestamp))
+			.y((d) => yScale(d.submissions))
 			.curve(curveCardinal);
 
 		const chart = select(svgElement).select('.chart-content');
@@ -138,30 +142,36 @@
 		// Add gradient definition for line
 		const defs = select(svgElement).select('defs');
 
-		const gradient = defs.append('linearGradient')
+		const gradient = defs
+			.append('linearGradient')
 			.attr('id', 'pulse-gradient')
 			.attr('gradientUnits', 'userSpaceOnUse')
-			.attr('x1', 0).attr('y1', 0)
-			.attr('x2', 0).attr('y2', innerHeight);
+			.attr('x1', 0)
+			.attr('y1', 0)
+			.attr('x2', 0)
+			.attr('y2', innerHeight);
 
-		gradient.append('stop')
+		gradient
+			.append('stop')
 			.attr('offset', '0%')
 			.attr('stop-color', NEON_COLORS.cyan)
 			.attr('stop-opacity', 0.8);
 
-		gradient.append('stop')
+		gradient
+			.append('stop')
 			.attr('offset', '100%')
 			.attr('stop-color', NEON_COLORS.cyan)
 			.attr('stop-opacity', 0.1);
 
 		// Add area under curve
 		const areaGenerator = line<ParticipationPoint>()
-			.x(d => xScale(d.timestamp))
+			.x((d) => xScale(d.timestamp))
 			.y0(innerHeight)
-			.y1(d => yScale(d.submissions))
+			.y1((d) => yScale(d.submissions))
 			.curve(curveCardinal);
 
-		chart.append('path')
+		chart
+			.append('path')
 			.datum(participationData)
 			.attr('class', 'pulse-area')
 			.attr('fill', 'url(#pulse-gradient)')
@@ -172,7 +182,8 @@
 			.attr('opacity', 1);
 
 		// Add main line
-		chart.append('path')
+		chart
+			.append('path')
 			.datum(participationData)
 			.attr('class', 'pulse-line')
 			.attr('fill', 'none')
@@ -180,10 +191,10 @@
 			.attr('stroke-width', 3)
 			.attr('filter', 'url(#neon-glow)')
 			.attr('d', lineGenerator)
-			.attr('stroke-dasharray', function() {
+			.attr('stroke-dasharray', function () {
 				return this.getTotalLength();
 			})
-			.attr('stroke-dashoffset', function() {
+			.attr('stroke-dashoffset', function () {
 				return this.getTotalLength();
 			})
 			.transition()
@@ -191,13 +202,14 @@
 			.attr('stroke-dashoffset', 0);
 
 		// Add data points
-		chart.selectAll('.pulse-dot')
+		chart
+			.selectAll('.pulse-dot')
 			.data(participationData)
 			.enter()
 			.append('circle')
 			.attr('class', 'pulse-dot')
-			.attr('cx', d => xScale(d.timestamp))
-			.attr('cy', d => yScale(d.submissions))
+			.attr('cx', (d) => xScale(d.timestamp))
+			.attr('cy', (d) => yScale(d.submissions))
 			.attr('r', 0)
 			.attr('fill', NEON_COLORS.cyan)
 			.attr('stroke', 'white')
@@ -206,7 +218,7 @@
 			.transition()
 			.duration(300)
 			.delay((d, i) => i * 50)
-			.attr('r', (d, i) => i === participationData.length - 1 ? 6 : 3);
+			.attr('r', (d, i) => (i === participationData.length - 1 ? 6 : 3));
 
 		// Add pulsing animation to latest point
 		const latestDot = chart.select('.pulse-dot:last-child');
@@ -227,15 +239,16 @@
 		setTimeout(pulseLatest, 1500);
 
 		// Add axes
-		const xAxis = chart.append('g')
+		const xAxis = chart
+			.append('g')
 			.attr('class', 'x-axis')
 			.attr('transform', `translate(0, ${innerHeight})`);
 
-		const yAxis = chart.append('g')
-			.attr('class', 'y-axis');
+		const yAxis = chart.append('g').attr('class', 'y-axis');
 
 		// Simple axis lines
-		xAxis.append('line')
+		xAxis
+			.append('line')
 			.attr('x1', 0)
 			.attr('x2', innerWidth)
 			.attr('y1', 0)
@@ -243,7 +256,8 @@
 			.attr('stroke', 'currentColor')
 			.attr('stroke-opacity', 0.3);
 
-		yAxis.append('line')
+		yAxis
+			.append('line')
 			.attr('x1', 0)
 			.attr('x2', 0)
 			.attr('y1', 0)
@@ -252,7 +266,8 @@
 			.attr('stroke-opacity', 0.3);
 
 		// Add axis labels
-		xAxis.append('text')
+		xAxis
+			.append('text')
 			.attr('x', innerWidth / 2)
 			.attr('y', 25)
 			.attr('text-anchor', 'middle')
@@ -261,7 +276,8 @@
 			.attr('font-size', '12px')
 			.text('Time (last 5 minutes)');
 
-		yAxis.append('text')
+		yAxis
+			.append('text')
 			.attr('x', -innerHeight / 2)
 			.attr('y', -25)
 			.attr('text-anchor', 'middle')
@@ -274,11 +290,13 @@
 		// Add fairness multiplier indicator
 		const latestData = participationData[participationData.length - 1];
 		if (latestData) {
-			const multiplierGroup = chart.append('g')
+			const multiplierGroup = chart
+				.append('g')
 				.attr('class', 'fairness-indicator')
 				.attr('transform', `translate(${innerWidth - 100}, 20)`);
 
-			multiplierGroup.append('rect')
+			multiplierGroup
+				.append('rect')
 				.attr('width', 90)
 				.attr('height', 40)
 				.attr('rx', 5)
@@ -286,7 +304,8 @@
 				.attr('stroke', NEON_COLORS.lime)
 				.attr('stroke-width', 1);
 
-			multiplierGroup.append('text')
+			multiplierGroup
+				.append('text')
 				.attr('x', 45)
 				.attr('y', 15)
 				.attr('text-anchor', 'middle')
@@ -295,7 +314,8 @@
 				.attr('font-size', '10px')
 				.text('Fairness');
 
-			multiplierGroup.append('text')
+			multiplierGroup
+				.append('text')
 				.attr('x', 45)
 				.attr('y', 30)
 				.attr('text-anchor', 'middle')
@@ -326,7 +346,7 @@
 	title="Participation Pulse"
 	className="participation-pulse-chart"
 	ariaLabel="Real-time participation activity showing submissions per minute over the last 5 minutes"
-	on:resize={event => handleResize(event.detail)}
+	on:resize={(event) => handleResize(event.detail)}
 	on:mounted={handleMounted}
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>

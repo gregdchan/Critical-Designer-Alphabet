@@ -11,7 +11,9 @@
       "Bash(curl:*)",
       "Bash(git rm:*)",
       "Read(//Users/gchan/.config/sanity/**)",
-      "Bash(SANITY_CLI_NO_UPDATE_NOTIFIER=1 npm run dev)"
+      "Bash(SANITY_CLI_NO_UPDATE_NOTIFIER=1 npm run dev)",
+      "Bash(npx prettier:*)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []

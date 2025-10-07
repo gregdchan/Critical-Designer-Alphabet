@@ -54,12 +54,12 @@
 		totalParticipants = participants.length;
 
 		// Count participants who have submitted responses
-		const participantIds = new Set(responses.map(r => r.participant_id));
+		const participantIds = new Set(responses.map((r) => r.participant_id));
 		activeParticipants = participantIds.size;
 
 		// Calculate inclusivity percentage
-		inclusivityPercentage = totalParticipants > 0 ?
-			(activeParticipants / totalParticipants) * 100 : 0;
+		inclusivityPercentage =
+			totalParticipants > 0 ? (activeParticipants / totalParticipants) * 100 : 0;
 
 		// Calculate fairness multiplier (boost for higher participation)
 		fairnessMultiplier = 1.0 + (inclusivityPercentage / 100) * 0.2;
@@ -85,7 +85,7 @@
 
 		// Gauge spans 180 degrees (half circle)
 		const startAngle = -Math.PI / 2 - Math.PI / 2; // Start at bottom left
-		const endAngle = -Math.PI / 2 + Math.PI / 2;   // End at bottom right
+		const endAngle = -Math.PI / 2 + Math.PI / 2; // End at bottom right
 
 		const chart = select(svgElement).select('.chart-content');
 
@@ -93,15 +93,19 @@
 		chart.selectAll('*').remove();
 
 		// Background arc
-		chart.append('path')
+		chart
+			.append('path')
 			.attr('class', 'gauge-background')
 			.attr('transform', `translate(${centerX}, ${centerY})`)
-			.attr('d', arcGenerator({
-				startAngle: startAngle,
-				endAngle: endAngle,
-				innerRadius: radius * 0.7,
-				outerRadius: radius * 0.9
-			}))
+			.attr(
+				'd',
+				arcGenerator({
+					startAngle: startAngle,
+					endAngle: endAngle,
+					innerRadius: radius * 0.7,
+					outerRadius: radius * 0.9
+				})
+			)
 			.attr('fill', 'rgba(255, 255, 255, 0.1)')
 			.attr('stroke', 'rgba(255, 255, 255, 0.2)')
 			.attr('stroke-width', 1);
@@ -109,7 +113,8 @@
 		// Progress arc
 		const progressAngle = startAngle + (endAngle - startAngle) * (inclusivityPercentage / 100);
 
-		const progressArc = chart.append('path')
+		const progressArc = chart
+			.append('path')
 			.attr('class', 'gauge-progress')
 			.attr('transform', `translate(${centerX}, ${centerY})`)
 			.attr('fill', getInclusivityColor(inclusivityPercentage))
@@ -142,7 +147,8 @@
 			const tickInner = radius * 0.65;
 			const tickOuter = radius * 0.7;
 
-			chart.append('line')
+			chart
+				.append('line')
 				.attr('class', 'gauge-tick')
 				.attr('transform', `translate(${centerX}, ${centerY})`)
 				.attr('x1', Math.cos(angle) * tickInner)
@@ -155,7 +161,8 @@
 
 			// Add labels for major ticks
 			if (i % 2 === 0) {
-				chart.append('text')
+				chart
+					.append('text')
 					.attr('class', 'gauge-label')
 					.attr('transform', `translate(${centerX}, ${centerY})`)
 					.attr('x', Math.cos(angle) * (radius * 0.6))
@@ -172,11 +179,13 @@
 		// Needle/pointer
 		const needleAngle = startAngle + (endAngle - startAngle) * (inclusivityPercentage / 100);
 
-		const needle = chart.append('g')
+		const needle = chart
+			.append('g')
 			.attr('class', 'gauge-needle')
 			.attr('transform', `translate(${centerX}, ${centerY})`);
 
-		needle.append('line')
+		needle
+			.append('line')
 			.attr('x1', 0)
 			.attr('y1', 0)
 			.attr('x2', Math.cos(startAngle) * radius * 0.5)
@@ -191,7 +200,8 @@
 			.attr('y2', Math.sin(needleAngle) * radius * 0.5);
 
 		// Center dot
-		needle.append('circle')
+		needle
+			.append('circle')
 			.attr('r', 5)
 			.attr('fill', '#ff2aad')
 			.attr('stroke', 'white')
@@ -199,12 +209,14 @@
 			.attr('filter', 'url(#neon-glow)');
 
 		// Center content
-		const centerGroup = chart.append('g')
+		const centerGroup = chart
+			.append('g')
 			.attr('class', 'center-content')
 			.attr('transform', `translate(${centerX}, ${centerY + radius * 0.3})`);
 
 		// Percentage display
-		centerGroup.append('text')
+		centerGroup
+			.append('text')
 			.attr('class', 'percentage-text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '-0.5em')
@@ -220,7 +232,8 @@
 			.attr('opacity', 1);
 
 		// Participation count
-		centerGroup.append('text')
+		centerGroup
+			.append('text')
 			.attr('class', 'participation-text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '0.5em')
@@ -235,7 +248,8 @@
 			.attr('opacity', 1);
 
 		// Fairness multiplier
-		centerGroup.append('text')
+		centerGroup
+			.append('text')
 			.attr('class', 'multiplier-text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '1.5em')
@@ -252,7 +266,8 @@
 
 		// Status label
 		const statusText = getInclusivityStatus(inclusivityPercentage);
-		centerGroup.append('text')
+		centerGroup
+			.append('text')
 			.attr('class', 'status-text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '2.5em')
@@ -268,10 +283,10 @@
 	}
 
 	function getInclusivityColor(percentage: number): string {
-		if (percentage >= 80) return NEON_COLORS.lime;    // Green - Excellent
-		if (percentage >= 60) return NEON_COLORS.yellow;  // Yellow - Good
-		if (percentage >= 40) return NEON_COLORS.orange;  // Orange - Fair
-		return NEON_COLORS.pink;                          // Pink - Needs improvement
+		if (percentage >= 80) return NEON_COLORS.lime; // Green - Excellent
+		if (percentage >= 60) return NEON_COLORS.yellow; // Yellow - Good
+		if (percentage >= 40) return NEON_COLORS.orange; // Orange - Fair
+		return NEON_COLORS.pink; // Pink - Needs improvement
 	}
 
 	function getInclusivityStatus(percentage: number): string {
@@ -303,7 +318,7 @@
 	title="Inclusivity Meter"
 	className="inclusivity-meter-chart"
 	ariaLabel={`Inclusivity gauge showing ${Math.round(inclusivityPercentage)}% participation with ${activeParticipants} of ${totalParticipants} participants active`}
-	on:resize={event => handleResize(event.detail)}
+	on:resize={(event) => handleResize(event.detail)}
 	on:mounted={handleMounted}
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>

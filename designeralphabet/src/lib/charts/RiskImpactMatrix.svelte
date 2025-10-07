@@ -42,7 +42,7 @@
 		}
 
 		// Filter for risk-related responses
-		const riskResponses = responses.filter(response => {
+		const riskResponses = responses.filter((response) => {
 			const lens = response.questions?.lens?.toLowerCase();
 			return lens === 'risk' || response.text.toLowerCase().includes('risk');
 		});
@@ -55,14 +55,16 @@
 			const voteCount = response.votes?.length || 0;
 
 			// Impact: based on votes and text complexity (1-5 scale)
-			const impact = Math.min(5, Math.max(1,
-				Math.ceil((voteCount * 0.5) + (textLength / 100) + Math.random())
-			));
+			const impact = Math.min(
+				5,
+				Math.max(1, Math.ceil(voteCount * 0.5 + textLength / 100 + Math.random()))
+			);
 
 			// Likelihood: based on response patterns (1-5 scale)
-			const likelihood = Math.min(5, Math.max(1,
-				Math.ceil((voteCount * 0.3) + (index % 3) + 1 + Math.random())
-			));
+			const likelihood = Math.min(
+				5,
+				Math.max(1, Math.ceil(voteCount * 0.3 + (index % 3) + 1 + Math.random()))
+			);
 
 			return {
 				id: response.id,
@@ -85,16 +87,12 @@
 		const { innerWidth, innerHeight, margins } = dimensions;
 
 		// Scales
-		const xScale = scaleLinear()
-			.domain([0.5, 5.5])
-			.range([0, innerWidth]);
+		const xScale = scaleLinear().domain([0.5, 5.5]).range([0, innerWidth]);
 
-		const yScale = scaleLinear()
-			.domain([0.5, 5.5])
-			.range([innerHeight, 0]);
+		const yScale = scaleLinear().domain([0.5, 5.5]).range([innerHeight, 0]);
 
 		const radiusScale = scaleSqrt()
-			.domain([0, Math.max(...riskData.map(d => d.votes))])
+			.domain([0, Math.max(...riskData.map((d) => d.votes))])
 			.range([8, 30]);
 
 		const chart = select(svgElement).select('.chart-content');
@@ -104,35 +102,72 @@
 
 		// Add quadrant backgrounds
 		const quadrants = [
-			{ x: 0, y: 0, width: innerWidth / 2, height: innerHeight / 2, risk: 'low', label: 'Low Impact\nHigh Likelihood' },
-			{ x: innerWidth / 2, y: 0, width: innerWidth / 2, height: innerHeight / 2, risk: 'high', label: 'High Impact\nHigh Likelihood' },
-			{ x: 0, y: innerHeight / 2, width: innerWidth / 2, height: innerHeight / 2, risk: 'low', label: 'Low Impact\nLow Likelihood' },
-			{ x: innerWidth / 2, y: innerHeight / 2, width: innerWidth / 2, height: innerHeight / 2, risk: 'medium', label: 'High Impact\nLow Likelihood' }
+			{
+				x: 0,
+				y: 0,
+				width: innerWidth / 2,
+				height: innerHeight / 2,
+				risk: 'low',
+				label: 'Low Impact\nHigh Likelihood'
+			},
+			{
+				x: innerWidth / 2,
+				y: 0,
+				width: innerWidth / 2,
+				height: innerHeight / 2,
+				risk: 'high',
+				label: 'High Impact\nHigh Likelihood'
+			},
+			{
+				x: 0,
+				y: innerHeight / 2,
+				width: innerWidth / 2,
+				height: innerHeight / 2,
+				risk: 'low',
+				label: 'Low Impact\nLow Likelihood'
+			},
+			{
+				x: innerWidth / 2,
+				y: innerHeight / 2,
+				width: innerWidth / 2,
+				height: innerHeight / 2,
+				risk: 'medium',
+				label: 'High Impact\nLow Likelihood'
+			}
 		];
 
-		chart.selectAll('.quadrant')
+		chart
+			.selectAll('.quadrant')
 			.data(quadrants)
 			.enter()
 			.append('rect')
 			.attr('class', 'quadrant')
-			.attr('x', d => d.x)
-			.attr('y', d => d.y)
-			.attr('width', d => d.width)
-			.attr('height', d => d.height)
-			.attr('fill', d => {
+			.attr('x', (d) => d.x)
+			.attr('y', (d) => d.y)
+			.attr('width', (d) => d.width)
+			.attr('height', (d) => d.height)
+			.attr('fill', (d) => {
 				switch (d.risk) {
-					case 'low': return 'rgba(16, 185, 129, 0.1)';   // Green
-					case 'medium': return 'rgba(245, 158, 11, 0.1)'; // Yellow
-					case 'high': return 'rgba(239, 68, 68, 0.1)';    // Red
-					default: return 'rgba(255, 255, 255, 0.05)';
+					case 'low':
+						return 'rgba(16, 185, 129, 0.1)'; // Green
+					case 'medium':
+						return 'rgba(245, 158, 11, 0.1)'; // Yellow
+					case 'high':
+						return 'rgba(239, 68, 68, 0.1)'; // Red
+					default:
+						return 'rgba(255, 255, 255, 0.05)';
 				}
 			})
-			.attr('stroke', d => {
+			.attr('stroke', (d) => {
 				switch (d.risk) {
-					case 'low': return RISK_COLORS.low;
-					case 'medium': return RISK_COLORS.medium;
-					case 'high': return RISK_COLORS.high;
-					default: return 'rgba(255, 255, 255, 0.1)';
+					case 'low':
+						return RISK_COLORS.low;
+					case 'medium':
+						return RISK_COLORS.medium;
+					case 'high':
+						return RISK_COLORS.high;
+					default:
+						return 'rgba(255, 255, 255, 0.1)';
 				}
 			})
 			.attr('stroke-width', 1)
@@ -140,32 +175,34 @@
 			.attr('opacity', 0.5);
 
 		// Add quadrant labels
-		chart.selectAll('.quadrant-label')
+		chart
+			.selectAll('.quadrant-label')
 			.data(quadrants)
 			.enter()
 			.append('text')
 			.attr('class', 'quadrant-label')
-			.attr('x', d => d.x + d.width / 2)
-			.attr('y', d => d.y + 20)
+			.attr('x', (d) => d.x + d.width / 2)
+			.attr('y', (d) => d.y + 20)
 			.attr('text-anchor', 'middle')
 			.attr('fill', 'currentColor')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '10px')
 			.attr('opacity', 0.6)
 			.selectAll('tspan')
-			.data(d => d.label.split('\n'))
+			.data((d) => d.label.split('\n'))
 			.enter()
 			.append('tspan')
-			.attr('x', function() {
+			.attr('x', function () {
 				return select(this.parentNode).attr('x');
 			})
-			.attr('dy', (d, i) => i === 0 ? 0 : '1.2em')
-			.text(d => d);
+			.attr('dy', (d, i) => (i === 0 ? 0 : '1.2em'))
+			.text((d) => d);
 
 		// Add grid lines
 		for (let i = 1; i <= 5; i++) {
 			// Vertical lines
-			chart.append('line')
+			chart
+				.append('line')
 				.attr('class', 'grid-line')
 				.attr('x1', xScale(i))
 				.attr('x2', xScale(i))
@@ -176,7 +213,8 @@
 				.attr('stroke-dasharray', '2,2');
 
 			// Horizontal lines
-			chart.append('line')
+			chart
+				.append('line')
 				.attr('class', 'grid-line')
 				.attr('x1', 0)
 				.attr('x2', innerWidth)
@@ -188,16 +226,17 @@
 		}
 
 		// Add risk bubbles
-		const bubbles = chart.selectAll('.risk-bubble')
+		const bubbles = chart
+			.selectAll('.risk-bubble')
 			.data(riskData)
 			.enter()
 			.append('circle')
 			.attr('class', 'risk-bubble')
-			.attr('cx', d => xScale(d.likelihood))
-			.attr('cy', d => yScale(d.impact))
+			.attr('cx', (d) => xScale(d.likelihood))
+			.attr('cy', (d) => yScale(d.impact))
 			.attr('r', 0)
-			.attr('fill', d => getRiskColor(d.impact, d.likelihood))
-			.attr('stroke', d => getRiskColor(d.impact, d.likelihood))
+			.attr('fill', (d) => getRiskColor(d.impact, d.likelihood))
+			.attr('stroke', (d) => getRiskColor(d.impact, d.likelihood))
 			.attr('stroke-width', 2)
 			.attr('opacity', 0.8)
 			.attr('filter', 'url(#neon-glow)')
@@ -208,7 +247,7 @@
 			.transition()
 			.duration(500)
 			.delay((d, i) => i * 100)
-			.attr('r', d => radiusScale(d.votes || 5));
+			.attr('r', (d) => radiusScale(d.votes || 5));
 
 		// Add interactions
 		bubbles
@@ -218,21 +257,23 @@
 			.on('click', handleClick);
 
 		// Add axes
-		const xAxis = chart.append('g')
+		const xAxis = chart
+			.append('g')
 			.attr('class', 'x-axis')
 			.attr('transform', `translate(0, ${innerHeight})`);
 
-		const yAxis = chart.append('g')
-			.attr('class', 'y-axis');
+		const yAxis = chart.append('g').attr('class', 'y-axis');
 
 		// X-axis
-		xAxis.append('line')
+		xAxis
+			.append('line')
 			.attr('x1', 0)
 			.attr('x2', innerWidth)
 			.attr('stroke', 'currentColor')
 			.attr('stroke-opacity', 0.3);
 
-		xAxis.append('text')
+		xAxis
+			.append('text')
 			.attr('x', innerWidth / 2)
 			.attr('y', 35)
 			.attr('text-anchor', 'middle')
@@ -242,13 +283,15 @@
 			.text('Likelihood →');
 
 		// Y-axis
-		yAxis.append('line')
+		yAxis
+			.append('line')
 			.attr('y1', 0)
 			.attr('y2', innerHeight)
 			.attr('stroke', 'currentColor')
 			.attr('stroke-opacity', 0.3);
 
-		yAxis.append('text')
+		yAxis
+			.append('text')
 			.attr('x', -innerHeight / 2)
 			.attr('y', -25)
 			.attr('text-anchor', 'middle')
@@ -260,7 +303,8 @@
 
 		// Add axis labels
 		for (let i = 1; i <= 5; i++) {
-			xAxis.append('text')
+			xAxis
+				.append('text')
 				.attr('x', xScale(i))
 				.attr('y', 20)
 				.attr('text-anchor', 'middle')
@@ -269,7 +313,8 @@
 				.attr('font-size', '12px')
 				.text(i);
 
-			yAxis.append('text')
+			yAxis
+				.append('text')
 				.attr('x', -10)
 				.attr('y', yScale(i))
 				.attr('text-anchor', 'end')
@@ -281,7 +326,8 @@
 		}
 
 		// Add legend
-		const legend = chart.append('g')
+		const legend = chart
+			.append('g')
 			.attr('class', 'legend')
 			.attr('transform', `translate(${innerWidth - 150}, 20)`);
 
@@ -292,22 +338,25 @@
 			{ color: RISK_COLORS.critical, label: 'Critical Risk' }
 		];
 
-		legend.selectAll('.legend-item')
+		legend
+			.selectAll('.legend-item')
 			.data(legendData)
 			.enter()
 			.append('g')
 			.attr('class', 'legend-item')
 			.attr('transform', (d, i) => `translate(0, ${i * 20})`)
-			.each(function(d) {
+			.each(function (d) {
 				const item = select(this);
 
-				item.append('circle')
+				item
+					.append('circle')
 					.attr('r', 6)
 					.attr('fill', d.color)
 					.attr('stroke', d.color)
 					.attr('stroke-width', 1);
 
-				item.append('text')
+				item
+					.append('text')
 					.attr('x', 15)
 					.attr('dy', '0.35em')
 					.attr('fill', 'currentColor')
@@ -330,7 +379,7 @@
 			.transition()
 			.duration(200)
 			.attr('stroke-width', 4)
-			.attr('r', function() {
+			.attr('r', function () {
 				return Number(select(this).attr('r')) * 1.2;
 			});
 	}
@@ -353,7 +402,7 @@
 
 		// Reset bubble
 		const radiusScale = scaleSqrt()
-			.domain([0, Math.max(...riskData.map(d => d.votes))])
+			.domain([0, Math.max(...riskData.map((d) => d.votes))])
 			.range([8, 30]);
 
 		select(event.currentTarget)
@@ -387,7 +436,7 @@
 	title="Risk Impact Matrix"
 	className="risk-impact-matrix-chart"
 	ariaLabel="Risk impact matrix showing identified risks plotted by likelihood and impact"
-	on:resize={event => handleResize(event.detail)}
+	on:resize={(event) => handleResize(event.detail)}
 	on:mounted={handleMounted}
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>
@@ -428,13 +477,18 @@
 		{#if tooltip.show && tooltip.data}
 			<div
 				class="tooltip bg-gray-900 text-white p-3 rounded-lg shadow-lg border max-w-xs"
-				style="transform: translate({tooltip.x + 10}px, {tooltip.y - 10}px); border-color: {getRiskColor(tooltip.data.impact, tooltip.data.likelihood)}"
+				style="transform: translate({tooltip.x + 10}px, {tooltip.y -
+					10}px); border-color: {getRiskColor(tooltip.data.impact, tooltip.data.likelihood)}"
 			>
-				<div class="font-bold text-sm mb-1" style="color: {getRiskColor(tooltip.data.impact, tooltip.data.likelihood)}">
+				<div
+					class="font-bold text-sm mb-1"
+					style="color: {getRiskColor(tooltip.data.impact, tooltip.data.likelihood)}"
+				>
 					Risk Assessment
 				</div>
 				<div class="text-xs mb-2">
-					Impact: {tooltip.data.impact}/5 • Likelihood: {tooltip.data.likelihood}/5 • {tooltip.data.votes} votes
+					Impact: {tooltip.data.impact}/5 • Likelihood: {tooltip.data.likelihood}/5 • {tooltip.data
+						.votes} votes
 				</div>
 				<div class="text-xs text-gray-300 leading-tight">
 					{tooltip.data.text.substring(0, 150)}{tooltip.data.text.length > 150 ? '...' : ''}

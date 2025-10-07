@@ -42,7 +42,11 @@ export interface Badge {
 	description: string;
 	icon: string;
 	color: string;
-	requirement: (participant: Participant, responses: Response[], timeline: TimelineEntry[]) => boolean;
+	requirement: (
+		participant: Participant,
+		responses: Response[],
+		timeline: TimelineEntry[]
+	) => boolean;
 	points: number;
 }
 
@@ -82,8 +86,8 @@ export const BADGES: Badge[] = [
 		icon: '🤝',
 		color: '#3b82f6',
 		requirement: (participant, responses) =>
-			responses.filter((r) => r.votes?.some((v) => v.participantId === participant.id))
-				.length >= 10,
+			responses.filter((r) => r.votes?.some((v) => v.participantId === participant.id)).length >=
+			10,
 		points: 20
 	},
 	{
@@ -185,11 +189,19 @@ export function calculateParticipantScore(
 	return totalScore;
 }
 
-export function getEarnedBadges(participant: Participant, responses: Response[], timeline: TimelineEntry[]): Badge[] {
+export function getEarnedBadges(
+	participant: Participant,
+	responses: Response[],
+	timeline: TimelineEntry[]
+): Badge[] {
 	return BADGES.filter((badge) => badge.requirement(participant, responses, timeline));
 }
 
-export function getLeaderboard(participants: Participant[], responses: Response[], timeline: TimelineEntry[]) {
+export function getLeaderboard(
+	participants: Participant[],
+	responses: Response[],
+	timeline: TimelineEntry[]
+) {
 	return participants
 		.map((participant) => ({
 			...participant,

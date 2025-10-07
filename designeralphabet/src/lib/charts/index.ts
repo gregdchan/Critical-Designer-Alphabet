@@ -7,13 +7,7 @@ export const CHART_COMPONENTS = {
 	maturityDial: () => import('./MaturityDial.svelte'),
 	participationPulse: () => import('./ParticipationPulse.svelte'),
 	inclusivityMeter: () => import('./InclusivityMeter.svelte'),
-	riskImpactMatrix: () => import('./RiskImpactMatrix.svelte'),
-	// Placeholder for additional charts
-	aiReadinessHeatmap: () => import('./QuadBubbles.svelte'), // Fallback for now
-	ethicsCompass: () => import('./QuadBubbles.svelte'),       // Fallback for now
-	culturalInsightWheel: () => import('./QuadBubbles.svelte'), // Fallback for now
-	storyPath: () => import('./QuadBubbles.svelte'),           // Fallback for now
-	wordConstellation: () => import('./QuadBubbles.svelte')     // Fallback for now
+	riskImpactMatrix: () => import('./RiskImpactMatrix.svelte')
 } as const;
 
 export type ChartType = keyof typeof CHART_COMPONENTS;
@@ -33,7 +27,7 @@ export interface ChartConfig {
 export const CHART_REGISTRY: Record<ChartType, ChartConfig> = {
 	quadBubbles: {
 		id: 'quadBubbles',
-		title: 'Response Bubbles',
+		title: 'Quad Bubbles',
 		description: 'Visualize responses grouped by critical design lens',
 		defaultWidth: 800,
 		defaultHeight: 600,
@@ -42,12 +36,12 @@ export const CHART_REGISTRY: Record<ChartType, ChartConfig> = {
 	},
 	maturityDial: {
 		id: 'maturityDial',
-		title: 'AI Maturity Level',
-		description: 'Radial gauge showing overall AI maturity progression',
+		title: 'Maturity Dial',
+		description: 'Radial gauge showing overall maturity progression',
 		defaultWidth: 400,
 		defaultHeight: 400,
 		category: 'insights',
-		realtime: false
+		realtime: true
 	},
 	participationPulse: {
 		id: 'participationPulse',
@@ -75,61 +69,16 @@ export const CHART_REGISTRY: Record<ChartType, ChartConfig> = {
 		defaultHeight: 500,
 		category: 'analysis',
 		realtime: true
-	},
-	aiReadinessHeatmap: {
-		id: 'aiReadinessHeatmap',
-		title: 'AI Readiness Heatmap',
-		description: 'Team readiness across different dimensions',
-		defaultWidth: 700,
-		defaultHeight: 400,
-		category: 'insights',
-		realtime: true
-	},
-	ethicsCompass: {
-		id: 'ethicsCompass',
-		title: 'Ethics Compass',
-		description: 'Four-axis radar showing ethical priorities',
-		defaultWidth: 400,
-		defaultHeight: 400,
-		category: 'insights',
-		realtime: true
-	},
-	culturalInsightWheel: {
-		id: 'culturalInsightWheel',
-		title: 'Cultural Insight Wheel',
-		description: 'Radial visualization of cultural themes',
-		defaultWidth: 400,
-		defaultHeight: 400,
-		category: 'insights',
-		realtime: true
-	},
-	storyPath: {
-		id: 'storyPath',
-		title: 'Workshop Story Path',
-		description: 'Animated timeline of workshop progress',
-		defaultWidth: 800,
-		defaultHeight: 200,
-		category: 'progress',
-		realtime: true
-	},
-	wordConstellation: {
-		id: 'wordConstellation',
-		title: 'Word Constellation',
-		description: 'Network visualization of keyword relationships',
-		defaultWidth: 600,
-		defaultHeight: 500,
-		category: 'analysis',
-		realtime: true
 	}
 };
 
 // Utility functions
 export function getChartsByCategory(category: ChartConfig['category']): ChartConfig[] {
-	return Object.values(CHART_REGISTRY).filter(chart => chart.category === category);
+	return Object.values(CHART_REGISTRY).filter((chart) => chart.category === category);
 }
 
 export function getRealtimeCharts(): ChartConfig[] {
-	return Object.values(CHART_REGISTRY).filter(chart => chart.realtime);
+	return Object.values(CHART_REGISTRY).filter((chart) => chart.realtime);
 }
 
 export async function loadChartComponent(chartType: ChartType) {

@@ -56,9 +56,7 @@
 			.cornerRadius(5);
 
 		// Angle scale (240 degrees total, starting from bottom left)
-		const angleScale = scaleLinear()
-			.domain([0, 5])
-			.range([-2.4, 0.6]); // radians
+		const angleScale = scaleLinear().domain([0, 5]).range([-2.4, 0.6]); // radians
 
 		const chart = select(svgElement).select('.chart-content');
 
@@ -66,7 +64,8 @@
 		chart.selectAll('*').remove();
 
 		// Create background arcs for all stages
-		const backgroundArcs = chart.selectAll('.background-arc')
+		const backgroundArcs = chart
+			.selectAll('.background-arc')
 			.data(stages)
 			.enter()
 			.append('path')
@@ -85,7 +84,8 @@
 			.attr('stroke-width', 1);
 
 		// Create progress arcs
-		const progressArcs = chart.selectAll('.progress-arc')
+		const progressArcs = chart
+			.selectAll('.progress-arc')
 			.data(stages.slice(0, maturityLevel))
 			.enter()
 			.append('path')
@@ -133,14 +133,16 @@
 			});
 
 		// Add stage labels
-		const labels = chart.selectAll('.stage-label')
+		const labels = chart
+			.selectAll('.stage-label')
 			.data(stages)
 			.enter()
 			.append('g')
 			.attr('class', 'stage-label')
 			.attr('transform', `translate(${centerX}, ${centerY})`);
 
-		labels.append('text')
+		labels
+			.append('text')
 			.attr('class', 'stage-text')
 			.attr('x', (d, i) => {
 				const angle = (angleScale(i) + angleScale(i + 1)) / 2;
@@ -155,19 +157,21 @@
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '12px')
 			.attr('opacity', 0)
-			.text(d => d.name)
+			.text((d) => d.name)
 			.transition()
 			.duration(500)
 			.delay(1200)
 			.attr('opacity', 1);
 
 		// Center content
-		const centerGroup = chart.append('g')
+		const centerGroup = chart
+			.append('g')
 			.attr('class', 'center-content')
 			.attr('transform', `translate(${centerX}, ${centerY})`);
 
 		// Center circle
-		centerGroup.append('circle')
+		centerGroup
+			.append('circle')
 			.attr('r', radius * 0.5)
 			.attr('fill', 'rgba(0, 0, 0, 0.7)')
 			.attr('stroke', getMaturityColor(maturityLevel))
@@ -180,7 +184,8 @@
 			.attr('opacity', 1);
 
 		// Current stage name
-		centerGroup.append('text')
+		centerGroup
+			.append('text')
 			.attr('class', 'current-stage')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '-0.5em')
@@ -196,7 +201,8 @@
 			.attr('opacity', 1);
 
 		// Level indicator
-		centerGroup.append('text')
+		centerGroup
+			.append('text')
 			.attr('class', 'level-indicator')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '0.5em')
@@ -211,7 +217,8 @@
 			.attr('opacity', 1);
 
 		// Progress percentage
-		centerGroup.append('text')
+		centerGroup
+			.append('text')
 			.attr('class', 'progress-text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '1.5em')
@@ -264,7 +271,7 @@
 	title="AI Maturity Level"
 	className="maturity-dial-chart"
 	ariaLabel={`AI Maturity gauge showing ${currentStage.name} level ${maturityLevel} at ${Math.round(progress * 100)}% completion`}
-	on:resize={event => handleResize(event.detail)}
+	on:resize={(event) => handleResize(event.detail)}
 	on:mounted={handleMounted}
 >
 	<svelte:fragment slot="default" let:dimensions let:svgElement>

@@ -29,11 +29,7 @@
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 	// New immersive chart components
-	import {
-		loadChartComponent,
-		CHART_REGISTRY,
-		type ChartType
-	} from '$lib/charts';
+	import { loadChartComponent, CHART_REGISTRY, type ChartType } from '$lib/charts';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
 	import MaturityDial from '$lib/charts/MaturityDial.svelte';
 	import ParticipationPulse from '$lib/charts/ParticipationPulse.svelte';
@@ -51,8 +47,12 @@
 		IconSend,
 		IconPlus,
 		IconThumbUp,
-		IconGridDots
+		IconGridDots,
+		IconCards
 	} from '@tabler/icons-svelte';
+	import CardPanel from '$lib/components/session/CardPanel.svelte';
+	import { createSessionCardStore } from '$lib/stores/sessionCards';
+	import type { Card } from '$lib/Cards';
 
 	export let data: { sessionCode: string; role: string };
 
@@ -91,6 +91,11 @@
 	let activeCharts: ChartType[] = ['quadBubbles', 'participationPulse', 'inclusivityMeter'];
 	let primaryChart: ChartType = 'quadBubbles';
 	let sidebarCharts: ChartType[] = ['participationPulse', 'inclusivityMeter'];
+
+	// Card integration
+	const cardStore = createSessionCardStore(sessionCode);
+	let isMobile = false;
+	let showCardPanel = false;
 
 	type SessionStatus = 'planned' | 'live' | 'done';
 
@@ -347,6 +352,13 @@
 				});
 			}
 
+			// Detect mobile
+			isMobile = window.innerWidth < 768;
+			function handleResize() {
+				isMobile = window.innerWidth < 768;
+			}
+			window.addEventListener('resize', handleResize);
+
 			// Add keyboard shortcut for emergency exit (Ctrl/Cmd + Shift + E)
 			function handleKeydown(event: KeyboardEvent) {
 				if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'E') {
@@ -358,6 +370,7 @@
 			document.addEventListener('keydown', handleKeydown);
 
 			return () => {
+				window.removeEventListener('resize', handleResize);
 				document.removeEventListener('keydown', handleKeydown);
 			};
 		}
@@ -384,14 +397,19 @@
 			return;
 		}
 
+		// Combine selected cards from panel with additional cards from text input
+		const selectedCardTitles = $cardStore.selectedCards.map((card) => card.title);
+		const additionalCards = linkedCardsText
+			.split(',')
+			.map((card) => card.trim())
+			.filter(Boolean);
+		const allCards = [...selectedCardTitles, ...additionalCards];
+
 		await apiAddResponse(sessionCode, {
 			questionId: selectedQuestionId,
 			participantId: currentParticipant?.id ?? null,
 			text: responseText.trim(),
-			cards: linkedCardsText
-				.split(',')
-				.map((card) => card.trim())
-				.filter(Boolean)
+			cards: allCards
 		});
 		responseModalOpen = false;
 		responseText = '';
@@ -508,903 +526,969 @@
 
 {#if sessionInfo}
 	<div
-		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 text-slate-100"
+		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 text-slate-100 {isMobile
+			? ''
+			: 'flex'}"
 	>
-		<header class="sticky top-0 z-40 border-b border-cyan-400/20 bg-slate-900/70 backdrop-blur">
-			<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-				<div>
-					<p class="text-xs uppercase tracking-[0.35em] text-cyan-300">
-						Inclusive Planning Session
-					</p>
-					<h1 class="text-2xl font-semibold text-white">
-						{sessionInfo.title ?? 'Untitled Session'}
-						<span
-							class="ml-2 rounded-full border border-cyan-400/30 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
-						>
-							{sessionCode}
-						</span>
-					</h1>
-					{#if sessionInfo.challenge}
-						<p class="mt-2 text-sm text-cyan-200 max-w-2xl">
-							Focus: {sessionInfo.challenge}
+		<!-- Main Content Area -->
+		<div class={isMobile ? 'w-full' : 'flex-1 overflow-auto'}>
+			<header class="sticky top-0 z-40 border-b border-cyan-400/20 bg-slate-900/70 backdrop-blur">
+				<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+					<div>
+						<p class="text-xs uppercase tracking-[0.35em] text-cyan-300">
+							Inclusive Planning Session
 						</p>
-					{/if}
-					<p class="mt-1 text-sm text-slate-300">
-						{currentParticipant?.name ?? 'Anonymous'} · {currentParticipant?.role ?? activeRole}
-					</p>
-				</div>
-			</div>
-		</header>
-
-		<main class="mx-auto max-w-7xl space-y-8 px-6 py-8">
-			{#if isFacilitator()}
-				<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-6 space-y-6">
-					<div class="flex flex-wrap items-center justify-between gap-4">
-						<div>
-							<h2 class="text-lg font-semibold text-white">Session Progress</h2>
-							<p class="text-sm text-slate-400">
-								Activate phases, manage timers, and advance the agenda.
-							</p>
-						</div>
-						<div class="flex flex-wrap items-center gap-2">
-							{#each sessionStatuses as status}
-								<button
-									class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-slate-900 shadow' : 'border border-cyan-400/40 text-cyan-200 hover:border-cyan-300'}`}
-									on:click={() => changeStatus(status)}
-									disabled={statusUpdating || sessionInfo?.status === status}
-								>
-									{statusLabels[status]}
-								</button>
-							{/each}
-							<button
-								class="rounded-lg bg-red-600/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 transition"
-								on:click={() => changeStatus('done')}
-								disabled={statusUpdating || sessionInfo?.status === 'done'}
+						<h1 class="text-2xl font-semibold text-white">
+							{sessionInfo.title ?? 'Untitled Session'}
+							<span
+								class="ml-2 rounded-full border border-cyan-400/30 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
 							>
-								End Session
-							</button>
-						</div>
-					</div>
-
-					<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4">
-						{#if activePhase}
-							<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-								<div class="space-y-1">
-									<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Current Phase</p>
-									<h3 class="text-base font-semibold text-white">
-										{activePhase.title ?? activePhase.phase_key ?? 'Phase'}
-									</h3>
-									{#if activePhase.description}
-										<p class="text-sm text-slate-300 leading-relaxed">{activePhase.description}</p>
-									{/if}
-								</div>
-								<div class="text-right space-y-1">
-									{#if phaseCountdownLabel}
-										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Time Remaining</p>
-										<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
-									{:else if activePhase.duration_minutes}
-										<p class="text-xs text-slate-400">
-											Duration: {activePhase.duration_minutes} min
-										</p>
-									{/if}
-									<p class="text-xs text-slate-500">
-										{getPhaseStatusLabel(activePhase.status)}{#if activePhase.started_at}
-											• Started {new Date(activePhase.started_at).toLocaleTimeString()}{/if}
-									</p>
-								</div>
-							</div>
-						{:else}
-							<p class="text-sm text-slate-400">
-								No active phase. Start the first phase to begin the journey.
+								{sessionCode}
+							</span>
+						</h1>
+						{#if sessionInfo.challenge}
+							<p class="mt-2 text-sm text-cyan-200 max-w-2xl">
+								Focus: {sessionInfo.challenge}
 							</p>
 						{/if}
+						<p class="mt-1 text-sm text-slate-300">
+							{currentParticipant?.name ?? 'Anonymous'} · {currentParticipant?.role ?? activeRole}
+						</p>
 					</div>
+				</div>
+			</header>
 
-					<div class="space-y-4">
-						{#if phasesList.length === 0}
-							<p class="text-sm text-slate-400">
-								This session was created without phases. Update the Sanity template to design a
-								structured flow.
-							</p>
-						{:else}
-							{#each phasesList as phase}
-								<article
-									class={`rounded-xl border px-6 py-6 transition ${
-										phase.status === 'completed'
-											? 'border-emerald-400/30 bg-emerald-500/10'
-											: phase.status === 'active'
-												? 'border-cyan-400/40 bg-cyan-500/10'
-												: 'border-slate-700 bg-slate-900/70 hover:border-cyan-400/30'
-									}`}
+			<main class="mx-auto max-w-full space-y-8 px-6 py-8">
+				{#if isFacilitator()}
+					<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-6 space-y-6">
+						<div class="flex flex-wrap items-center justify-between gap-4">
+							<div>
+								<h2 class="text-lg font-semibold text-white">Session Progress</h2>
+								<p class="text-sm text-slate-400">
+									Activate phases, manage timers, and advance the agenda.
+								</p>
+							</div>
+							<div class="flex flex-wrap items-center gap-2">
+								{#each sessionStatuses as status}
+									<button
+										class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-slate-900 shadow' : 'border border-cyan-400/40 text-cyan-200 hover:border-cyan-300'}`}
+										on:click={() => changeStatus(status)}
+										disabled={statusUpdating || sessionInfo?.status === status}
+									>
+										{statusLabels[status]}
+									</button>
+								{/each}
+								<button
+									class="rounded-lg bg-red-600/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 transition"
+									on:click={() => changeStatus('done')}
+									disabled={statusUpdating || sessionInfo?.status === 'done'}
 								>
-									<!-- Phase Header -->
-									<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-										<div class="flex-1">
-											<div class="flex items-center gap-3 mb-2">
-												<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
-													{getPhaseStatusLabel(phase.status)}
-												</p>
-												{#if phase.duration_minutes}
-													<span class="text-xs font-medium text-cyan-200"
-														>{phase.duration_minutes} min</span
-													>
-												{/if}
-											</div>
-											<h3 class="text-lg font-semibold text-white mb-2">
-												{phase.title ?? phase.phase_key ?? 'Phase'}
-											</h3>
-											{#if phase.description}
-												<p class="text-sm text-slate-300 leading-relaxed">{phase.description}</p>
-											{/if}
-										</div>
+									End Session
+								</button>
+							</div>
+						</div>
 
-										<!-- Timer Controls -->
-										{#if phase.status === 'active' && isFacilitator()}
-											<div class="flex items-center gap-2">
-												{#if phaseCountdownLabel}
-													<div class="text-right">
-														<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">
-															Time Remaining
-														</p>
-														<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
-													</div>
-												{/if}
-												<button
-													class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-amber-400 transition"
-													on:click={() => resetPhaseTimer(phase)}
-												>
-													Reset Timer
-												</button>
-											</div>
+						<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4">
+							{#if activePhase}
+								<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+									<div class="space-y-1">
+										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Current Phase</p>
+										<h3 class="text-base font-semibold text-white">
+											{activePhase.title ?? activePhase.phase_key ?? 'Phase'}
+										</h3>
+										{#if activePhase.description}
+											<p class="text-sm text-slate-300 leading-relaxed">
+												{activePhase.description}
+											</p>
 										{/if}
 									</div>
+									<div class="text-right space-y-1">
+										{#if phaseCountdownLabel}
+											<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Time Remaining</p>
+											<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
+										{:else if activePhase.duration_minutes}
+											<p class="text-xs text-slate-400">
+												Duration: {activePhase.duration_minutes} min
+											</p>
+										{/if}
+										<p class="text-xs text-slate-500">
+											{getPhaseStatusLabel(activePhase.status)}{#if activePhase.started_at}
+												• Started {new Date(activePhase.started_at).toLocaleTimeString()}{/if}
+										</p>
+									</div>
+								</div>
+							{:else}
+								<p class="text-sm text-slate-400">
+									No active phase. Start the first phase to begin the journey.
+								</p>
+							{/if}
+						</div>
 
-									<!-- Phase Controls for Facilitators -->
-									{#if isFacilitator()}
-										<div class="mt-4 flex flex-wrap items-center gap-2">
-											{#if phase.status === 'pending'}
-												<button
-													class="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-cyan-400 transition disabled:opacity-50"
-													on:click={() => activatePhase(phase)}
-													disabled={phaseUpdating}
-												>
-													Start Phase
-												</button>
-											{:else if phase.status === 'active'}
-												<button
-													class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-400 transition disabled:opacity-50"
-													on:click={() => finishPhase(phase)}
-													disabled={phaseUpdating}
-												>
-													Complete Phase
-												</button>
-											{:else}
-												<button
-													class="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:border-cyan-400/40 transition"
-													on:click={() => activatePhase(phase)}
-													disabled={phaseUpdating}
-												>
-													Revisit
-												</button>
+						<div class="space-y-4">
+							{#if phasesList.length === 0}
+								<p class="text-sm text-slate-400">
+									This session was created without phases. Update the Sanity template to design a
+									structured flow.
+								</p>
+							{:else}
+								{#each phasesList as phase}
+									<article
+										class={`rounded-xl border px-6 py-6 transition ${
+											phase.status === 'completed'
+												? 'border-emerald-400/30 bg-emerald-500/10'
+												: phase.status === 'active'
+													? 'border-cyan-400/40 bg-cyan-500/10'
+													: 'border-slate-700 bg-slate-900/70 hover:border-cyan-400/30'
+										}`}
+									>
+										<!-- Phase Header -->
+										<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+											<div class="flex-1">
+												<div class="flex items-center gap-3 mb-2">
+													<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+														{getPhaseStatusLabel(phase.status)}
+													</p>
+													{#if phase.duration_minutes}
+														<span class="text-xs font-medium text-cyan-200"
+															>{phase.duration_minutes} min</span
+														>
+													{/if}
+												</div>
+												<h3 class="text-lg font-semibold text-white mb-2">
+													{phase.title ?? phase.phase_key ?? 'Phase'}
+												</h3>
+												{#if phase.description}
+													<p class="text-sm text-slate-300 leading-relaxed">{phase.description}</p>
+												{/if}
+											</div>
+
+											<!-- Timer Controls -->
+											{#if phase.status === 'active' && isFacilitator()}
+												<div class="flex items-center gap-2">
+													{#if phaseCountdownLabel}
+														<div class="text-right">
+															<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">
+																Time Remaining
+															</p>
+															<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
+														</div>
+													{/if}
+													<button
+														class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-amber-400 transition"
+														on:click={() => resetPhaseTimer(phase)}
+													>
+														Reset Timer
+													</button>
+												</div>
 											{/if}
 										</div>
-									{/if}
 
-									<!-- Phase Cards (if associated with this phase) -->
-									{#if phase.cards?.length}
-										<div class="mt-6">
-											<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-3">
-												Phase Cards
-											</p>
-											<div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-												{#each phase.cards as card}
-													<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
-														<h4 class="text-sm font-semibold text-cyan-200">{card.title}</h4>
-														<p class="text-xs text-slate-300 mt-1">{card.description}</p>
-													</div>
-												{/each}
-											</div>
-										</div>
-									{/if}
-
-									<!-- Phase Questions -->
-									{#if questionsList.filter((q) => q.phase_key === phase.phase_key || (phase.status === 'active' && !q.phase_key)).length > 0}
-										{@const phaseQuestions = questionsList.filter(
-											(q) =>
-												q.phase_key === phase.phase_key ||
-												(phase.status === 'active' && !q.phase_key)
-										)}
-										<div class="mt-6">
-											<div class="flex items-center justify-between mb-4">
-												<h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
-													Phase Questions
-												</h4>
-												{#if phase.status === 'active' && !isFacilitator()}
+										<!-- Phase Controls for Facilitators -->
+										{#if isFacilitator()}
+											<div class="mt-4 flex flex-wrap items-center gap-2">
+												{#if phase.status === 'pending'}
 													<button
-														class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:from-cyan-400 hover:to-purple-500 transition-colors"
-														on:click={() => openResponseModal(null)}
-														disabled={!phaseRemainingMs}
+														class="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-cyan-400 transition disabled:opacity-50"
+														on:click={() => activatePhase(phase)}
+														disabled={phaseUpdating}
 													>
-														<IconPlus class="h-3 w-3" /> Respond
+														Start Phase
+													</button>
+												{:else if phase.status === 'active'}
+													<button
+														class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-400 transition disabled:opacity-50"
+														on:click={() => finishPhase(phase)}
+														disabled={phaseUpdating}
+													>
+														Complete Phase
+													</button>
+												{:else}
+													<button
+														class="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:border-cyan-400/40 transition"
+														on:click={() => activatePhase(phase)}
+														disabled={phaseUpdating}
+													>
+														Revisit
 													</button>
 												{/if}
 											</div>
+										{/if}
 
-											<div class="space-y-4">
-												{#each phaseQuestions as question}
-													<div
-														class="rounded-lg border border-slate-700 bg-slate-900/60 p-4 space-y-3"
-													>
-														<div class="flex items-start justify-between gap-3">
-															<div class="flex-1">
-																<div class="flex items-center gap-2 mb-2">
-																	<span class="text-xs uppercase tracking-[0.3em] text-cyan-200">
-																		{question.section}
-																	</span>
-																	{#if question.response_type && question.response_type !== 'written'}
-																		<span
-																			class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs"
-																		>
-																			{question.response_type}
-																		</span>
-																	{/if}
-																</div>
-																<h5 class="text-sm font-semibold text-white">{question.text}</h5>
-															</div>
-															{#if phase.status === 'active' && !isFacilitator()}
-																<button
-																	class="rounded-lg border border-cyan-400/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"
-																	on:click={() => openResponseModal(question.id)}
-																	disabled={!phaseRemainingMs}
-																>
-																	{phaseRemainingMs ? 'Respond' : 'Time up'}
-																</button>
-															{/if}
+										<!-- Phase Cards (if associated with this phase) -->
+										{#if phase.cards?.length}
+											<div class="mt-6">
+												<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-3">
+													Phase Cards
+												</p>
+												<div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+													{#each phase.cards as card}
+														<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
+															<h4 class="text-sm font-semibold text-cyan-200">{card.title}</h4>
+															<p class="text-xs text-slate-300 mt-1">{card.description}</p>
 														</div>
+													{/each}
+												</div>
+											</div>
+										{/if}
 
-														<!-- Question Responses -->
-														{#if responsesList.filter((r) => r.question_id === question.id).length > 0}
-															{@const questionResponses = responsesList.filter(
-																(r) => r.question_id === question.id
-															)}
-															{@const totalVotes = questionResponses.reduce(
-																(sum, r) => sum + (r.votes || 0),
-																0
-															)}
-															{@const sortedByVotes = questionResponses.sort(
-																(a, b) => (b.votes || 0) - (a.votes || 0)
-															)}
+										<!-- Phase Questions -->
+										{#if questionsList.filter((q) => q.phase_key === phase.phase_key || (phase.status === 'active' && !q.phase_key)).length > 0}
+											{@const phaseQuestions = questionsList.filter(
+												(q) =>
+													q.phase_key === phase.phase_key ||
+													(phase.status === 'active' && !q.phase_key)
+											)}
+											<div class="mt-6">
+												<div class="flex items-center justify-between mb-4">
+													<h4
+														class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200"
+													>
+														Phase Questions
+													</h4>
+													{#if phase.status === 'active' && !isFacilitator()}
+														<button
+															class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:from-cyan-400 hover:to-purple-500 transition-colors"
+															on:click={() => openResponseModal(null)}
+															disabled={!phaseRemainingMs}
+														>
+															<IconPlus class="h-3 w-3" /> Respond
+														</button>
+													{/if}
+												</div>
 
-															<!-- Vote Summary -->
-															{#if totalVotes > 0}
-																<div
-																	class="mb-3 p-2 rounded bg-cyan-400/10 border border-cyan-400/30"
-																>
-																	<p class="text-xs font-medium text-cyan-200 mb-2">
-																		Community Insights (Total votes: {totalVotes})
-																	</p>
-																	<div class="space-y-1">
-																		{#each sortedByVotes.slice(0, 3) as topResponse}
-																			{#if topResponse.votes && topResponse.votes > 0}
-																				<div class="flex items-center justify-between text-xs">
-																					<span class="text-slate-300 flex-1 pr-2"
-																						>{topResponse.text.slice(0, 50)}...</span
-																					>
-																					<div class="flex items-center gap-1 text-cyan-200">
-																						<IconThumbUp class="h-3 w-3" />
-																						<span class="font-medium">{topResponse.votes}</span>
-																					</div>
-																				</div>
-																			{/if}
-																		{/each}
-																	</div>
-																</div>
-															{/if}
-
-															<!-- Individual Responses -->
-															<div class="space-y-2 max-h-40 overflow-y-auto">
-																{#each sortedByVotes as response}
-																	<div
-																		class="rounded border border-slate-800 bg-slate-900/70 p-2 text-xs"
-																	>
-																		<div
-																			class="flex items-center justify-between text-slate-400 mb-1"
-																		>
+												<div class="space-y-4">
+													{#each phaseQuestions as question}
+														<div
+															class="rounded-lg border border-slate-700 bg-slate-900/60 p-4 space-y-3"
+														>
+															<div class="flex items-start justify-between gap-3">
+																<div class="flex-1">
+																	<div class="flex items-center gap-2 mb-2">
+																		<span class="text-xs uppercase tracking-[0.3em] text-cyan-200">
+																			{question.section}
+																		</span>
+																		{#if question.response_type && question.response_type !== 'written'}
 																			<span
-																				>{participantsList.find(
-																					(p) => p.id === response.participant_id
-																				)?.name ?? 'Anonymous'}</span
+																				class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs"
 																			>
-																			<button
-																				class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
-																				on:click={() => toggleVote(response.id)}
-																				disabled={activePhase && !phaseRemainingMs}
-																			>
-																				<IconThumbUp class="h-3 w-3" />
-																				{response.votes ?? 0}
-																			</button>
-																		</div>
-																		<p class="text-slate-200">{response.text}</p>
-																		{#if response.cards?.length}
-																			<div class="mt-1 flex flex-wrap gap-1">
-																				{#each response.cards as card}
-																					<span
-																						class="px-1 py-0.5 text-xs rounded bg-cyan-400/20 text-cyan-300"
-																						>{card}</span
-																					>
-																				{/each}
-																			</div>
+																				{question.response_type}
+																			</span>
 																		{/if}
 																	</div>
-																{/each}
+																	<h5 class="text-sm font-semibold text-white">{question.text}</h5>
+																</div>
+																{#if phase.status === 'active' && !isFacilitator()}
+																	<button
+																		class="rounded-lg border border-cyan-400/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"
+																		on:click={() => openResponseModal(question.id)}
+																		disabled={!phaseRemainingMs}
+																	>
+																		{phaseRemainingMs ? 'Respond' : 'Time up'}
+																	</button>
+																{/if}
 															</div>
-														{/if}
-													</div>
-												{/each}
-											</div>
-										</div>
-									{/if}
 
-									{#if Array.isArray(phase.dashboards) && phase.dashboards.length}
-										<div class="mt-6">
-											<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-2">
-												Recommended dashboards
-											</p>
-											<div class="flex flex-wrap gap-2">
-												{#each phase.dashboards as dashboard}
-													<span
-														class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200"
-														>{dashboardLabels[dashboard] ?? dashboard}</span
-													>
-												{/each}
-											</div>
-										</div>
-									{/if}
-								</article>
-							{/each}
-						{/if}
-					</div>
+															<!-- Question Responses -->
+															{#if responsesList.filter((r) => r.question_id === question.id).length > 0}
+																{@const questionResponses = responsesList.filter(
+																	(r) => r.question_id === question.id
+																)}
+																{@const totalVotes = questionResponses.reduce(
+																	(sum, r) => sum + (r.votes || 0),
+																	0
+																)}
+																{@const sortedByVotes = questionResponses.sort(
+																	(a, b) => (b.votes || 0) - (a.votes || 0)
+																)}
 
-					<div class="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-						<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4 space-y-4">
-							<div class="flex items-center justify-between">
-								<h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
-									Breakout Rounds
-								</h3>
+																<!-- Vote Summary -->
+																{#if totalVotes > 0}
+																	<div
+																		class="mb-3 p-2 rounded bg-cyan-400/10 border border-cyan-400/30"
+																	>
+																		<p class="text-xs font-medium text-cyan-200 mb-2">
+																			Community Insights (Total votes: {totalVotes})
+																		</p>
+																		<div class="space-y-1">
+																			{#each sortedByVotes.slice(0, 3) as topResponse}
+																				{#if topResponse.votes && topResponse.votes > 0}
+																					<div class="flex items-center justify-between text-xs">
+																						<span class="text-slate-300 flex-1 pr-2"
+																							>{topResponse.text.slice(0, 50)}...</span
+																						>
+																						<div class="flex items-center gap-1 text-cyan-200">
+																							<IconThumbUp class="h-3 w-3" />
+																							<span class="font-medium">{topResponse.votes}</span>
+																						</div>
+																					</div>
+																				{/if}
+																			{/each}
+																		</div>
+																	</div>
+																{/if}
+
+																<!-- Individual Responses -->
+																<div class="space-y-2 max-h-40 overflow-y-auto">
+																	{#each sortedByVotes as response}
+																		<div
+																			class="rounded border border-slate-800 bg-slate-900/70 p-2 text-xs"
+																		>
+																			<div
+																				class="flex items-center justify-between text-slate-400 mb-1"
+																			>
+																				<span
+																					>{participantsList.find(
+																						(p) => p.id === response.participant_id
+																					)?.name ?? 'Anonymous'}</span
+																				>
+																				<button
+																					class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
+																					on:click={() => toggleVote(response.id)}
+																					disabled={activePhase && !phaseRemainingMs}
+																				>
+																					<IconThumbUp class="h-3 w-3" />
+																					{response.votes ?? 0}
+																				</button>
+																			</div>
+																			<p class="text-slate-200">{response.text}</p>
+																			{#if response.cards?.length}
+																				<div class="mt-1 flex flex-wrap gap-1">
+																					{#each response.cards as card}
+																						<span
+																							class="px-1 py-0.5 text-xs rounded bg-cyan-400/20 text-cyan-300"
+																							>{card}</span
+																						>
+																					{/each}
+																				</div>
+																			{/if}
+																		</div>
+																	{/each}
+																</div>
+															{/if}
+														</div>
+													{/each}
+												</div>
+											</div>
+										{/if}
+
+										{#if Array.isArray(phase.dashboards) && phase.dashboards.length}
+											<div class="mt-6">
+												<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-2">
+													Recommended dashboards
+												</p>
+												<div class="flex flex-wrap gap-2">
+													{#each phase.dashboards as dashboard}
+														<span
+															class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200"
+															>{dashboardLabels[dashboard] ?? dashboard}</span
+														>
+													{/each}
+												</div>
+											</div>
+										{/if}
+									</article>
+								{/each}
+							{/if}
+						</div>
+
+						<div class="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+							<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4 space-y-4">
+								<div class="flex items-center justify-between">
+									<h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
+										Breakout Rounds
+									</h3>
+									{#if sessionInfo?.active_round}
+										<button
+											class="text-xs rounded-lg border border-cyan-400/40 px-3 py-1 text-cyan-200 hover:border-cyan-300 transition"
+											on:click={clearActiveRound}
+											disabled={roundUpdating}
+										>
+											End current round
+										</button>
+									{/if}
+								</div>
 								{#if sessionInfo?.active_round}
-									<button
-										class="text-xs rounded-lg border border-cyan-400/40 px-3 py-1 text-cyan-200 hover:border-cyan-300 transition"
-										on:click={clearActiveRound}
-										disabled={roundUpdating}
-									>
-										End current round
-									</button>
+									<div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
+										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Active Round</p>
+										<p class="mt-2 text-sm font-semibold text-slate-100">
+											{sessionInfo.active_round}
+										</p>
+										{#if roundCountdownLabel}
+											<p class="mt-1 text-xs text-cyan-100/80">
+												Time remaining: {roundCountdownLabel}
+											</p>
+										{/if}
+									</div>
+								{:else}
+									<p class="text-sm text-slate-400">No active breakout round.</p>
 								{/if}
-							</div>
-							{#if sessionInfo?.active_round}
-								<div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
-									<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Active Round</p>
-									<p class="mt-2 text-sm font-semibold text-slate-100">
-										{sessionInfo.active_round}
-									</p>
-									{#if roundCountdownLabel}
-										<p class="mt-1 text-xs text-cyan-100/80">
-											Time remaining: {roundCountdownLabel}
+								<div class="max-h-48 space-y-2 overflow-y-auto pr-1">
+									{#if templateLoading}
+										<p class="text-sm text-slate-400">Loading template rounds…</p>
+									{:else if templateError}
+										<p class="text-sm text-rose-300">{templateError}</p>
+									{:else if templateRounds.length}
+										{#each templateRounds as round}
+											<button
+												class="w-full rounded-lg border border-cyan-400/30 px-3 py-2 text-left text-sm text-cyan-100 hover:border-cyan-300 transition"
+												on:click={() => startTemplateRound(round)}
+												disabled={roundUpdating ||
+													sessionInfo?.active_round === (round.name ?? round.key)}
+											>
+												<span class="font-semibold text-slate-100"
+													>{round.name ?? round.key ?? 'Round'}</span
+												>
+												<span class="ml-2 text-xs text-cyan-200">{round.minutes ?? '?'} min</span>
+											</button>
+										{/each}
+									{:else}
+										<p class="text-sm text-slate-400">
+											This template does not define breakout rounds.
 										</p>
 									{/if}
 								</div>
-							{:else}
-								<p class="text-sm text-slate-400">No active breakout round.</p>
-							{/if}
-							<div class="max-h-48 space-y-2 overflow-y-auto pr-1">
-								{#if templateLoading}
-									<p class="text-sm text-slate-400">Loading template rounds…</p>
-								{:else if templateError}
-									<p class="text-sm text-rose-300">{templateError}</p>
-								{:else if templateRounds.length}
-									{#each templateRounds as round}
-										<button
-											class="w-full rounded-lg border border-cyan-400/30 px-3 py-2 text-left text-sm text-cyan-100 hover:border-cyan-300 transition"
-											on:click={() => startTemplateRound(round)}
-											disabled={roundUpdating ||
-												sessionInfo?.active_round === (round.name ?? round.key)}
-										>
-											<span class="font-semibold text-slate-100"
-												>{round.name ?? round.key ?? 'Round'}</span
-											>
-											<span class="ml-2 text-xs text-cyan-200">{round.minutes ?? '?'} min</span>
-										</button>
-									{/each}
-								{:else}
-									<p class="text-sm text-slate-400">
-										This template does not define breakout rounds.
-									</p>
-								{/if}
+							</div>
+
+							<div class="rounded-xl border border-purple-400/20 bg-slate-900/60 p-4 space-y-3">
+								<h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-purple-200">
+									Custom Timer
+								</h3>
+								<label class="flex flex-col gap-2 text-xs text-slate-300">
+									Label
+									<input
+										class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-purple-400 focus:outline-none"
+										placeholder="e.g., Reflection Sprint"
+										bind:value={customLabel}
+									/>
+								</label>
+								<label class="flex flex-col gap-2 text-xs text-slate-300">
+									Minutes
+									<input
+										class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-purple-400 focus:outline-none"
+										type="number"
+										min="1"
+										step="1"
+										bind:value={customMinutes}
+										on:input={(event) => (customMinutes = Number(event.currentTarget.value) || 0)}
+									/>
+								</label>
+								<button
+									class="w-full rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:from-purple-400 hover:to-cyan-400 transition"
+									on:click={startCustomRound}
+									disabled={roundUpdating}
+								>
+									Start Custom Timer
+								</button>
 							</div>
 						</div>
+					</section>
+				{/if}
 
-						<div class="rounded-xl border border-purple-400/20 bg-slate-900/60 p-4 space-y-3">
-							<h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-purple-200">
-								Custom Timer
-							</h3>
-							<label class="flex flex-col gap-2 text-xs text-slate-300">
-								Label
-								<input
-									class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-purple-400 focus:outline-none"
-									placeholder="e.g., Reflection Sprint"
-									bind:value={customLabel}
-								/>
-							</label>
-							<label class="flex flex-col gap-2 text-xs text-slate-300">
-								Minutes
-								<input
-									class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-purple-400 focus:outline-none"
-									type="number"
-									min="1"
-									step="1"
-									bind:value={customMinutes}
-									on:input={(event) => (customMinutes = Number(event.currentTarget.value) || 0)}
-								/>
-							</label>
-							<button
-								class="w-full rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:from-purple-400 hover:to-cyan-400 transition"
-								on:click={startCustomRound}
-								disabled={roundUpdating}
-							>
-								Start Custom Timer
-							</button>
+				<section class="grid gap-6 md:grid-cols-3">
+					{#if sessionInfo.challenge}
+						<div class="md:col-span-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4">
+							<p class="text-xs uppercase tracking-[0.3em] text-cyan-100">Challenge Focus</p>
+							<p class="mt-2 text-base font-semibold text-slate-100">
+								{sessionInfo.challenge}
+							</p>
+							<p class="mt-1 text-xs text-cyan-100/80">
+								Ground your ideas in this shared challenge as you move through the session.
+							</p>
 						</div>
+					{/if}
+					{#if sessionInfo.active_round}
+						<div class="md:col-span-3 rounded-xl border border-purple-400/30 bg-purple-500/10 p-4">
+							<p class="text-xs uppercase tracking-[0.3em] text-purple-200">Active Round</p>
+							<div class="mt-2 flex flex-wrap items-center gap-3">
+								<span class="text-sm font-semibold text-white">{sessionInfo.active_round}</span>
+								{#if roundCountdownLabel}
+									<span
+										class="rounded-full border border-purple-300/40 px-3 py-1 text-xs text-purple-100"
+									>
+										Time remaining: {roundCountdownLabel}
+									</span>
+								{/if}
+							</div>
+							<p class="mt-1 text-xs text-purple-100/80">
+								Stay with the prompt until the facilitator advances the agenda.
+							</p>
+						</div>
+					{/if}
+					<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+						<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Current Step</p>
+						<p class="mt-2 text-lg font-semibold text-white">{sessionInfo.status ?? 'planned'}</p>
+						<p class="text-sm text-slate-400 mt-1">
+							The facilitator will cue the next collaborative activity for the group.
+						</p>
+					</div>
+					<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+						<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Active Questions</p>
+						<p class="mt-2 text-lg font-semibold text-white">{questionsList.length}</p>
+						<p class="text-sm text-slate-400 mt-1">
+							Reflect across the lenses defined in your session blueprint.
+						</p>
+					</div>
+					<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+						<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Ideas Shared</p>
+						<p class="mt-2 text-lg font-semibold text-white">{responsesList.length}</p>
+						<p class="text-sm text-slate-400 mt-1">
+							Vote on responses that advance equity-centered planning.
+						</p>
 					</div>
 				</section>
-			{/if}
 
-			<section class="grid gap-6 md:grid-cols-3">
-				{#if sessionInfo.challenge}
-					<div class="md:col-span-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4">
-						<p class="text-xs uppercase tracking-[0.3em] text-cyan-100">Challenge Focus</p>
-						<p class="mt-2 text-base font-semibold text-slate-100">
-							{sessionInfo.challenge}
-						</p>
-						<p class="mt-1 text-xs text-cyan-100/80">
-							Ground your ideas in this shared challenge as you move through the session.
-						</p>
-					</div>
-				{/if}
-				{#if sessionInfo.active_round}
-					<div class="md:col-span-3 rounded-xl border border-purple-400/30 bg-purple-500/10 p-4">
-						<p class="text-xs uppercase tracking-[0.3em] text-purple-200">Active Round</p>
-						<div class="mt-2 flex flex-wrap items-center gap-3">
-							<span class="text-sm font-semibold text-white">{sessionInfo.active_round}</span>
-							{#if roundCountdownLabel}
-								<span
-									class="rounded-full border border-purple-300/40 px-3 py-1 text-xs text-purple-100"
-								>
-									Time remaining: {roundCountdownLabel}
-								</span>
-							{/if}
-						</div>
-						<p class="mt-1 text-xs text-purple-100/80">
-							Stay with the prompt until the facilitator advances the agenda.
-						</p>
-					</div>
-				{/if}
-				<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
-					<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Current Step</p>
-					<p class="mt-2 text-lg font-semibold text-white">{sessionInfo.status ?? 'planned'}</p>
-					<p class="text-sm text-slate-400 mt-1">
-						The facilitator will cue the next collaborative activity for the group.
-					</p>
-				</div>
-				<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
-					<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Active Questions</p>
-					<p class="mt-2 text-lg font-semibold text-white">{questionsList.length}</p>
-					<p class="text-sm text-slate-400 mt-1">
-						Reflect across the lenses defined in your session blueprint.
-					</p>
-				</div>
-				<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
-					<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Ideas Shared</p>
-					<p class="mt-2 text-lg font-semibold text-white">{responsesList.length}</p>
-					<p class="text-sm text-slate-400 mt-1">
-						Vote on responses that advance equity-centered planning.
-					</p>
-				</div>
-			</section>
-
-			<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-				<nav class="flex flex-wrap gap-3">
-					<button
-						class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'overview' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-						on:click={() => (activeTab = 'overview')}
-					>
-						<IconChartBubble class="h-4 w-4" />
-						Quad Bubble
-					</button>
-					<button
-						class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'heatmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-						on:click={() => (activeTab = 'heatmap')}
-					>
-						<IconGridDots class="h-4 w-4" />
-						Heatmap
-					</button>
-					<button
-						class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'roadmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-						on:click={() => (activeTab = 'roadmap')}
-					>
-						<IconMap class="h-4 w-4" />
-						Roadmap
-					</button>
-					<button
-						class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'timeline' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-						on:click={() => (activeTab = 'timeline')}
-					>
-						<IconFlame class="h-4 w-4" />
-						Timeline
-					</button>
-					<button
-						class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'chat' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-						on:click={() => (activeTab = 'chat')}
-					>
-						<IconMessage class="h-4 w-4" />
-						Arcade Chat
-					</button>
-					{#if isFacilitator()}
+				<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+					<nav class="flex flex-wrap gap-3">
 						<button
-							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'participants' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-							on:click={() => (activeTab = 'participants')}
+							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'overview' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							on:click={() => (activeTab = 'overview')}
 						>
-							<IconUsers class="h-4 w-4" />
-							Participant Activity
+							<IconChartBubble class="h-4 w-4" />
+							Quad Bubble
 						</button>
-					{/if}
-				</nav>
-
-				<div class="mt-6">
-					{#if dashboardMode === 'immersive'}
-						<!-- Immersive Dashboard Layout -->
-						<div class="grid grid-cols-12 gap-4 h-[600px]">
-							<!-- Left sidebar: Mini charts and controls -->
-							<aside class="col-span-3 space-y-4">
-								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
-									<ParticipationPulse roomCode={sessionCode} width={240} height={180} />
-								</div>
-								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
-									<InclusivityMeter roomCode={sessionCode} width={240} height={180} />
-								</div>
-								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-2">
-									<div class="text-xs uppercase tracking-wide text-cyan-200 mb-2">Active Chart</div>
-									<select
-										bind:value={primaryChart}
-										class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white"
-									>
-										{#each Object.entries(CHART_REGISTRY) as [id, config]}
-											<option value={id}>{config.title}</option>
-										{/each}
-									</select>
-								</div>
-							</aside>
-
-							<!-- Main chart area -->
-							<main class="col-span-6 bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
-								{#if primaryChart === 'quadBubbles'}
-									<QuadBubbles roomCode={sessionCode} width={600} height={520} />
-								{:else if primaryChart === 'maturityDial'}
-									<MaturityDial roomCode={sessionCode} width={600} height={520} />
-								{:else if primaryChart === 'riskImpactMatrix'}
-									<RiskImpactMatrix roomCode={sessionCode} width={600} height={520} />
-								{:else}
-									<QuadBubbleChart responses={responsesForViz} width={600} height={520} />
-								{/if}
-							</main>
-
-							<!-- Right sidebar: Leaderboard and chat -->
-							<aside class="col-span-3 space-y-4">
-								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-64 overflow-y-auto">
-									<h3 class="text-sm font-semibold text-cyan-200 mb-3">Live Leaderboard</h3>
-									{#if leaderboardList.length > 0}
-										{#each leaderboardList.slice(0, 5) as participant, index}
-											<div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
-												<div class="flex items-center gap-2">
-													<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
-													<span class="text-sm text-white truncate">{participant.name}</span>
-												</div>
-												<span class="text-xs text-cyan-200">{participant.score}pts</span>
-											</div>
-										{/each}
-									{:else}
-										<p class="text-xs text-slate-400">No participants yet</p>
-									{/if}
-								</div>
-								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 flex-1">
-									<h3 class="text-sm font-semibold text-cyan-200 mb-3">Quick Chat</h3>
-									<div class="h-32 overflow-y-auto mb-3 space-y-2">
-										{#each chatList.slice(-5) as message}
-											<div class="text-xs">
-												<span class="text-cyan-300">{message.participant_name}:</span>
-												<span class="text-slate-300">{message.message}</span>
-											</div>
-										{/each}
-									</div>
-									<div class="flex gap-2">
-										<input
-											bind:value={chatMessage}
-											on:keydown={(e) => e.key === 'Enter' && submitChatMessage()}
-											placeholder="Type message..."
-											class="flex-1 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white"
-										/>
-										<button
-											on:click={submitChatMessage}
-											class="px-2 py-1 bg-cyan-600 text-white rounded text-xs hover:bg-cyan-500"
-										>
-											<IconSend class="h-3 w-3" />
-										</button>
-									</div>
-								</div>
-							</aside>
-						</div>
-
-						<!-- Dashboard mode toggle -->
-						<div class="mt-4 flex justify-center">
+						<button
+							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'heatmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							on:click={() => (activeTab = 'heatmap')}
+						>
+							<IconGridDots class="h-4 w-4" />
+							Heatmap
+						</button>
+						<button
+							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'roadmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							on:click={() => (activeTab = 'roadmap')}
+						>
+							<IconMap class="h-4 w-4" />
+							Roadmap
+						</button>
+						<button
+							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'timeline' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							on:click={() => (activeTab = 'timeline')}
+						>
+							<IconFlame class="h-4 w-4" />
+							Timeline
+						</button>
+						<button
+							class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'chat' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+							on:click={() => (activeTab = 'chat')}
+						>
+							<IconMessage class="h-4 w-4" />
+							Arcade Chat
+						</button>
+						{#if isFacilitator()}
 							<button
-								on:click={() => dashboardMode = 'classic'}
-								class="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 text-sm"
+								class={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${activeTab === 'participants' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+								on:click={() => (activeTab = 'participants')}
 							>
-								Switch to Classic View
+								<IconUsers class="h-4 w-4" />
+								Participant Activity
 							</button>
-						</div>
-					{:else}
-						<!-- Classic Dashboard Layout -->
-						<div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
-							{#if activeTab === 'overview'}
-								<QuadBubbleChart responses={responsesForViz} width={900} height={520} />
-							{:else if activeTab === 'heatmap'}
-								<HeatmapChart responses={responsesForViz} width={900} height={520} />
-							{:else if activeTab === 'roadmap'}
-								<RoadmapChart responses={responsesForViz} width={900} height={520} />
-							{:else if activeTab === 'timeline'}
-						<div class="space-y-4">
-							{#each timelineList as item}
-								<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-									<div class="flex items-center justify-between">
-										<span
-											class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
-											>{item.label}</span
+						{/if}
+					</nav>
+
+					<div class="mt-6">
+						{#if dashboardMode === 'immersive'}
+							<!-- Immersive Dashboard Layout -->
+							<div class="grid grid-cols-12 gap-4 h-[600px]">
+								<!-- Left sidebar: Mini charts and controls -->
+								<aside class="col-span-3 space-y-4">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
+										<ParticipationPulse roomCode={sessionCode} width={240} height={180} />
+									</div>
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-48">
+										<InclusivityMeter roomCode={sessionCode} width={240} height={180} />
+									</div>
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-2">
+										<div class="text-xs uppercase tracking-wide text-cyan-200 mb-2">
+											Active Chart
+										</div>
+										<select
+											bind:value={primaryChart}
+											class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white"
 										>
-										<span class="text-xs text-slate-400">{item.created_at}</span>
+											{#each Object.entries(CHART_REGISTRY) as [id, config]}
+												<option value={id}>{config.title}</option>
+											{/each}
+										</select>
 									</div>
-									<p class="mt-3 text-sm text-slate-200">{item.item_text}</p>
-									<div class="mt-2 text-xs text-slate-400 flex flex-wrap gap-4">
-										{#if item.owner}<span>Owner: {item.owner}</span>{/if}
-										{#if item.metric}<span>Metric: {item.metric}</span>{/if}
-										{#if item.risk_note}<span>Risk: {item.risk_note}</span>{/if}
-									</div>
-								</div>
-							{/each}
-							{#if isFacilitator()}
-								<button
-									class="mt-2 inline-flex items-center gap-2 rounded-lg border border-cyan-400/40 px-4 py-2 text-sm text-cyan-200 hover:border-cyan-300 transition-colors"
-									on:click={() => (timelineModalOpen = true)}
-								>
-									<IconPlus class="h-4 w-4" />
-									Add timeline item
-								</button>
-							{/if}
-						</div>
-					{:else if activeTab === 'chat'}
-						<div class="flex flex-col gap-4">
-							<div class="max-h-80 space-y-3 overflow-y-auto pr-2">
-								{#each chatList as entry}
-									<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
-										<div class="flex items-center justify-between text-xs text-slate-400">
-											<span
-												>{participantsList.find((p) => p.id === entry.participant_id)?.name ??
-													'Anonymous'}</span
-											>
-											<span>{entry.created_at}</span>
-										</div>
-										<p class="mt-2 text-sm text-slate-200">{entry.message}</p>
-									</div>
-								{/each}
-							</div>
-							<form class="flex gap-3" on:submit|preventDefault={submitChatMessage}>
-								<input
-									class="flex-1 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
-									placeholder="Share a quick note for the room"
-									bind:value={chatMessage}
-								/>
-								<button
-									type="submit"
-									class="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-cyan-400 transition-colors"
-								>
-									<IconSend class="h-4 w-4" />
-									Send
-								</button>
-							</form>
-						</div>
-					{:else if activeTab === 'participants'}
-						<div class="space-y-4">
-							<div class="flex items-center justify-between">
-								<h3 class="text-lg font-semibold text-white">Participant Activity Dashboard</h3>
-								<span class="text-sm text-slate-400">{participantActivity.length} participants</span
-								>
-							</div>
+								</aside>
 
-							<!-- Activity Summary -->
-							<div class="grid gap-4 lg:grid-cols-4">
-								<div class="rounded-lg border border-green-400/30 bg-green-400/10 p-3">
-									<p class="text-xs uppercase tracking-wide text-green-200">Recently Active</p>
-									<p class="text-xl font-semibold text-white">
-										{participantActivity.filter((p) => p.isRecent).length}
-									</p>
-									<p class="text-xs text-green-100/80">Last 5 minutes</p>
-								</div>
-								<div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
-									<p class="text-xs uppercase tracking-wide text-cyan-200">Total Responses</p>
-									<p class="text-xl font-semibold text-white">
-										{participantActivity.reduce((sum, p) => sum + p.responseCount, 0)}
-									</p>
-									<p class="text-xs text-cyan-100/80">Ideas shared</p>
-								</div>
-								<div class="rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
-									<p class="text-xs uppercase tracking-wide text-purple-200">Total Votes</p>
-									<p class="text-xl font-semibold text-white">
-										{participantActivity.reduce((sum, p) => sum + p.totalVotes, 0)}
-									</p>
-									<p class="text-xs text-purple-100/80">Votes cast</p>
-								</div>
-								<div class="rounded-lg border border-yellow-400/30 bg-yellow-400/10 p-3">
-									<p class="text-xs uppercase tracking-wide text-yellow-200">Chat Messages</p>
-									<p class="text-xl font-semibold text-white">
-										{participantActivity.reduce((sum, p) => sum + p.chatCount, 0)}
-									</p>
-									<p class="text-xs text-yellow-100/80">Messages sent</p>
-								</div>
-							</div>
+								<!-- Main chart area -->
+								<main class="col-span-6 bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
+									{#if primaryChart === 'quadBubbles'}
+										<QuadBubbles roomCode={sessionCode} width={600} height={520} />
+									{:else if primaryChart === 'maturityDial'}
+										<MaturityDial roomCode={sessionCode} width={600} height={520} />
+									{:else if primaryChart === 'riskImpactMatrix'}
+										<RiskImpactMatrix roomCode={sessionCode} width={600} height={520} />
+									{:else}
+										<QuadBubbleChart responses={responsesForViz} width={600} height={520} />
+									{/if}
+								</main>
 
-							<!-- Participant List -->
-							<div class="space-y-3">
-								{#each participantActivity as participant}
-									<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-										<div class="flex items-center justify-between">
-											<div class="flex items-center gap-3">
+								<!-- Right sidebar: Leaderboard and chat -->
+								<aside class="col-span-3 space-y-4">
+									<div
+										class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-64 overflow-y-auto"
+									>
+										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Live Leaderboard</h3>
+										{#if leaderboardList.length > 0}
+											{#each leaderboardList.slice(0, 5) as participant, index}
 												<div
-													class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
-													style="background-color: {participant.color}"
+													class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0"
 												>
-													{participant.name.charAt(0).toUpperCase()}
-												</div>
-												<div>
 													<div class="flex items-center gap-2">
-														<span class="font-medium text-white">{participant.name}</span>
-														<span
-															class="px-2 py-1 text-xs rounded-full bg-slate-700 text-slate-300"
-														>
-															{participant.role}
-														</span>
-														{#if participant.isRecent}
-															<span
-																class="w-2 h-2 bg-green-400 rounded-full"
-																title="Active recently"
-															></span>
-														{/if}
+														<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
+														<span class="text-sm text-white truncate">{participant.name}</span>
 													</div>
-													<div class="flex items-center gap-4 text-xs text-slate-400 mt-1">
-														<span>Last: {participant.lastActivity}</span>
-														{#if participant.minutesSinceActivity < 60}
-															<span>{participant.minutesSinceActivity}m ago</span>
-														{:else if participant.minutesSinceActivity < 1440}
-															<span>{Math.floor(participant.minutesSinceActivity / 60)}h ago</span>
-														{:else}
-															<span>{Math.floor(participant.minutesSinceActivity / 1440)}d ago</span
-															>
-														{/if}
-													</div>
+													<span class="text-xs text-cyan-200">{participant.score}pts</span>
 												</div>
-											</div>
-											<div class="text-right">
-												<div class="text-lg font-semibold text-cyan-200">
-													{participant.activityScore}
-												</div>
-												<div class="text-xs text-slate-400">activity score</div>
-											</div>
-										</div>
-
-										<div class="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-											<div class="text-center p-2 rounded bg-slate-800/60">
-												<div class="font-medium text-white">{participant.responseCount}</div>
-												<div class="text-xs text-slate-400">responses</div>
-											</div>
-											<div class="text-center p-2 rounded bg-slate-800/60">
-												<div class="font-medium text-white">{participant.totalVotes}</div>
-												<div class="text-xs text-slate-400">votes</div>
-											</div>
-											<div class="text-center p-2 rounded bg-slate-800/60">
-												<div class="font-medium text-white">{participant.chatCount}</div>
-												<div class="text-xs text-slate-400">chats</div>
-											</div>
-											<div class="text-center p-2 rounded bg-slate-800/60">
-												<div class="font-medium text-white">{participant.points}</div>
-												<div class="text-xs text-slate-400">points</div>
-											</div>
-										</div>
-
-										{#if participant.badges && participant.badges.length > 0}
-											<div class="mt-3 flex flex-wrap gap-2">
-												{#each participant.badges as badge}
-													<span
-														class="px-2 py-1 text-xs rounded-full bg-yellow-400/20 text-yellow-300"
-													>
-														{badge}
-													</span>
-												{/each}
-											</div>
+											{/each}
+										{:else}
+											<p class="text-xs text-slate-400">No participants yet</p>
 										{/if}
 									</div>
-								{/each}
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 flex-1">
+										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Quick Chat</h3>
+										<div class="h-32 overflow-y-auto mb-3 space-y-2">
+											{#each chatList.slice(-5) as message}
+												<div class="text-xs">
+													<span class="text-cyan-300">{message.participant_name}:</span>
+													<span class="text-slate-300">{message.message}</span>
+												</div>
+											{/each}
+										</div>
+										<div class="flex gap-2">
+											<input
+												bind:value={chatMessage}
+												on:keydown={(e) => e.key === 'Enter' && submitChatMessage()}
+												placeholder="Type message..."
+												class="flex-1 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white"
+											/>
+											<button
+												on:click={submitChatMessage}
+												class="px-2 py-1 bg-cyan-600 text-white rounded text-xs hover:bg-cyan-500"
+											>
+												<IconSend class="h-3 w-3" />
+											</button>
+										</div>
+									</div>
+								</aside>
 							</div>
-						</div>
-					{/if}
 
-							<!-- Classic view toggle back to immersive -->
+							<!-- Dashboard mode toggle -->
 							<div class="mt-4 flex justify-center">
 								<button
-									on:click={() => dashboardMode = 'immersive'}
-									class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 text-sm"
+									on:click={() => (dashboardMode = 'classic')}
+									class="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 text-sm"
 								>
-									Switch to Immersive Dashboard
+									Switch to Classic View
 								</button>
 							</div>
-						</div>
-					{/if}
-				</div>
-			</section>
-
-			<!-- Leaderboard and QR Code Section -->
-			<section class="grid gap-6 lg:grid-cols-2">
-				<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-					<h2 class="text-lg font-semibold text-white">Leaderboard</h2>
-					<p class="text-sm text-slate-400">
-						Points reflect contributions, votes earned, and justice prompts.
-					</p>
-					<ul class="mt-4 space-y-3">
-						{#each leaderboardList as player, index}
-							<li
-								class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2"
-							>
-								<div class="flex items-center gap-3">
-									<span class="text-xs text-slate-400">#{index + 1}</span>
-									<span
-										class="h-8 w-8 rounded-full border border-slate-600 flex items-center justify-center font-semibold"
-										style={`background:${player.color}`}
-										>{player.name?.charAt(0)?.toUpperCase() ?? '?'}</span
-									>
-									<div>
-										<p class="text-sm text-white">{player.name}</p>
-										<p class="text-xs text-slate-400">{player.badges?.length ?? 0} badges</p>
+						{:else}
+							<!-- Classic Dashboard Layout -->
+							<div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
+								{#if activeTab === 'overview'}
+									<QuadBubbleChart responses={responsesForViz} width={900} height={520} />
+								{:else if activeTab === 'heatmap'}
+									<HeatmapChart responses={responsesForViz} width={900} height={520} />
+								{:else if activeTab === 'roadmap'}
+									<RoadmapChart responses={responsesForViz} width={900} height={520} />
+								{:else if activeTab === 'timeline'}
+									<div class="space-y-4">
+										{#each timelineList as item}
+											<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
+												<div class="flex items-center justify-between">
+													<span
+														class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
+														>{item.label}</span
+													>
+													<span class="text-xs text-slate-400">{item.created_at}</span>
+												</div>
+												<p class="mt-3 text-sm text-slate-200">{item.item_text}</p>
+												<div class="mt-2 text-xs text-slate-400 flex flex-wrap gap-4">
+													{#if item.owner}<span>Owner: {item.owner}</span>{/if}
+													{#if item.metric}<span>Metric: {item.metric}</span>{/if}
+													{#if item.risk_note}<span>Risk: {item.risk_note}</span>{/if}
+												</div>
+											</div>
+										{/each}
+										{#if isFacilitator()}
+											<button
+												class="mt-2 inline-flex items-center gap-2 rounded-lg border border-cyan-400/40 px-4 py-2 text-sm text-cyan-200 hover:border-cyan-300 transition-colors"
+												on:click={() => (timelineModalOpen = true)}
+											>
+												<IconPlus class="h-4 w-4" />
+												Add timeline item
+											</button>
+										{/if}
 									</div>
-								</div>
-								<span class="font-mono text-cyan-200">{player.points ?? 0} pts</span>
-							</li>
-						{/each}
-					</ul>
-				</div>
+								{:else if activeTab === 'chat'}
+									<div class="flex flex-col gap-4">
+										<div class="max-h-80 space-y-3 overflow-y-auto pr-2">
+											{#each chatList as entry}
+												<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
+													<div class="flex items-center justify-between text-xs text-slate-400">
+														<span
+															>{participantsList.find((p) => p.id === entry.participant_id)?.name ??
+																'Anonymous'}</span
+														>
+														<span>{entry.created_at}</span>
+													</div>
+													<p class="mt-2 text-sm text-slate-200">{entry.message}</p>
+												</div>
+											{/each}
+										</div>
+										<form class="flex gap-3" on:submit|preventDefault={submitChatMessage}>
+											<input
+												class="flex-1 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
+												placeholder="Share a quick note for the room"
+												bind:value={chatMessage}
+											/>
+											<button
+												type="submit"
+												class="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-cyan-400 transition-colors"
+											>
+												<IconSend class="h-4 w-4" />
+												Send
+											</button>
+										</form>
+									</div>
+								{:else if activeTab === 'participants'}
+									<div class="space-y-4">
+										<div class="flex items-center justify-between">
+											<h3 class="text-lg font-semibold text-white">
+												Participant Activity Dashboard
+											</h3>
+											<span class="text-sm text-slate-400"
+												>{participantActivity.length} participants</span
+											>
+										</div>
 
-				<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-					<h2 class="text-lg font-semibold text-white">QR Code</h2>
-					<p class="text-sm text-slate-400">New participants can scan to join instantly.</p>
-					<div class="mt-4 flex justify-center">
-						{#if qrSrc}
-							<img
-								class="h-40 w-40 rounded-lg border border-slate-700 bg-white p-2"
-								alt="Join session QR code"
-								src={qrSrc}
-							/>
+										<!-- Activity Summary -->
+										<div class="grid gap-4 lg:grid-cols-4">
+											<div class="rounded-lg border border-green-400/30 bg-green-400/10 p-3">
+												<p class="text-xs uppercase tracking-wide text-green-200">
+													Recently Active
+												</p>
+												<p class="text-xl font-semibold text-white">
+													{participantActivity.filter((p) => p.isRecent).length}
+												</p>
+												<p class="text-xs text-green-100/80">Last 5 minutes</p>
+											</div>
+											<div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
+												<p class="text-xs uppercase tracking-wide text-cyan-200">Total Responses</p>
+												<p class="text-xl font-semibold text-white">
+													{participantActivity.reduce((sum, p) => sum + p.responseCount, 0)}
+												</p>
+												<p class="text-xs text-cyan-100/80">Ideas shared</p>
+											</div>
+											<div class="rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
+												<p class="text-xs uppercase tracking-wide text-purple-200">Total Votes</p>
+												<p class="text-xl font-semibold text-white">
+													{participantActivity.reduce((sum, p) => sum + p.totalVotes, 0)}
+												</p>
+												<p class="text-xs text-purple-100/80">Votes cast</p>
+											</div>
+											<div class="rounded-lg border border-yellow-400/30 bg-yellow-400/10 p-3">
+												<p class="text-xs uppercase tracking-wide text-yellow-200">Chat Messages</p>
+												<p class="text-xl font-semibold text-white">
+													{participantActivity.reduce((sum, p) => sum + p.chatCount, 0)}
+												</p>
+												<p class="text-xs text-yellow-100/80">Messages sent</p>
+											</div>
+										</div>
+
+										<!-- Participant List -->
+										<div class="space-y-3">
+											{#each participantActivity as participant}
+												<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
+													<div class="flex items-center justify-between">
+														<div class="flex items-center gap-3">
+															<div
+																class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
+																style="background-color: {participant.color}"
+															>
+																{participant.name.charAt(0).toUpperCase()}
+															</div>
+															<div>
+																<div class="flex items-center gap-2">
+																	<span class="font-medium text-white">{participant.name}</span>
+																	<span
+																		class="px-2 py-1 text-xs rounded-full bg-slate-700 text-slate-300"
+																	>
+																		{participant.role}
+																	</span>
+																	{#if participant.isRecent}
+																		<span
+																			class="w-2 h-2 bg-green-400 rounded-full"
+																			title="Active recently"
+																		></span>
+																	{/if}
+																</div>
+																<div class="flex items-center gap-4 text-xs text-slate-400 mt-1">
+																	<span>Last: {participant.lastActivity}</span>
+																	{#if participant.minutesSinceActivity < 60}
+																		<span>{participant.minutesSinceActivity}m ago</span>
+																	{:else if participant.minutesSinceActivity < 1440}
+																		<span
+																			>{Math.floor(participant.minutesSinceActivity / 60)}h ago</span
+																		>
+																	{:else}
+																		<span
+																			>{Math.floor(participant.minutesSinceActivity / 1440)}d ago</span
+																		>
+																	{/if}
+																</div>
+															</div>
+														</div>
+														<div class="text-right">
+															<div class="text-lg font-semibold text-cyan-200">
+																{participant.activityScore}
+															</div>
+															<div class="text-xs text-slate-400">activity score</div>
+														</div>
+													</div>
+
+													<div class="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+														<div class="text-center p-2 rounded bg-slate-800/60">
+															<div class="font-medium text-white">{participant.responseCount}</div>
+															<div class="text-xs text-slate-400">responses</div>
+														</div>
+														<div class="text-center p-2 rounded bg-slate-800/60">
+															<div class="font-medium text-white">{participant.totalVotes}</div>
+															<div class="text-xs text-slate-400">votes</div>
+														</div>
+														<div class="text-center p-2 rounded bg-slate-800/60">
+															<div class="font-medium text-white">{participant.chatCount}</div>
+															<div class="text-xs text-slate-400">chats</div>
+														</div>
+														<div class="text-center p-2 rounded bg-slate-800/60">
+															<div class="font-medium text-white">{participant.points}</div>
+															<div class="text-xs text-slate-400">points</div>
+														</div>
+													</div>
+
+													{#if participant.badges && participant.badges.length > 0}
+														<div class="mt-3 flex flex-wrap gap-2">
+															{#each participant.badges as badge}
+																<span
+																	class="px-2 py-1 text-xs rounded-full bg-yellow-400/20 text-yellow-300"
+																>
+																	{badge}
+																</span>
+															{/each}
+														</div>
+													{/if}
+												</div>
+											{/each}
+										</div>
+									</div>
+								{/if}
+
+								<!-- Classic view toggle back to immersive -->
+								<div class="mt-4 flex justify-center">
+									<button
+										on:click={() => (dashboardMode = 'immersive')}
+										class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 text-sm"
+									>
+										Switch to Immersive Dashboard
+									</button>
+								</div>
+							</div>
 						{/if}
 					</div>
-					<p class="mt-3 text-center text-xs text-slate-500">/join?code={sessionCode}</p>
-				</div>
-			</section>
-		</main>
+				</section>
+
+				<!-- Leaderboard and QR Code Section -->
+				<section class="grid gap-6 lg:grid-cols-2">
+					<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+						<h2 class="text-lg font-semibold text-white">Leaderboard</h2>
+						<p class="text-sm text-slate-400">
+							Points reflect contributions, votes earned, and justice prompts.
+						</p>
+						<ul class="mt-4 space-y-3">
+							{#each leaderboardList as player, index}
+								<li
+									class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2"
+								>
+									<div class="flex items-center gap-3">
+										<span class="text-xs text-slate-400">#{index + 1}</span>
+										<span
+											class="h-8 w-8 rounded-full border border-slate-600 flex items-center justify-center font-semibold"
+											style={`background:${player.color}`}
+											>{player.name?.charAt(0)?.toUpperCase() ?? '?'}</span
+										>
+										<div>
+											<p class="text-sm text-white">{player.name}</p>
+											<p class="text-xs text-slate-400">{player.badges?.length ?? 0} badges</p>
+										</div>
+									</div>
+									<span class="font-mono text-cyan-200">{player.points ?? 0} pts</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+
+					<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+						<h2 class="text-lg font-semibold text-white">QR Code</h2>
+						<p class="text-sm text-slate-400">New participants can scan to join instantly.</p>
+						<div class="mt-4 flex justify-center">
+							{#if qrSrc}
+								<img
+									class="h-40 w-40 rounded-lg border border-slate-700 bg-white p-2"
+									alt="Join session QR code"
+									src={qrSrc}
+								/>
+							{/if}
+						</div>
+						<p class="mt-3 text-center text-xs text-slate-500">/join?code={sessionCode}</p>
+					</div>
+				</section>
+			</main>
+		</div>
+		<!-- End Main Content Area -->
+
+		<!-- Mobile Floating Action Button -->
+		{#if isMobile}
+			<button
+				on:click={() => cardStore.toggleCardPanel()}
+				class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500 text-slate-900 shadow-lg shadow-cyan-500/50 transition hover:bg-cyan-400 active:scale-95"
+				aria-label="Open card panel"
+			>
+				<IconCards class="h-6 w-6" />
+				{#if $cardStore.selectedCards.length > 0}
+					<span
+						class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-xs font-bold text-white"
+					>
+						{$cardStore.selectedCards.length}
+					</span>
+				{/if}
+			</button>
+		{/if}
+
+		<!-- Desktop Card Panel -->
+		{#if !isMobile}
+			<aside class="w-80 h-screen sticky top-0">
+				<CardPanel
+					bind:selectedCards={$cardStore.selectedCards}
+					maxSelection={5}
+					onCardToggle={(card) => cardStore.toggleCard(card)}
+					isOpen={true}
+					isMobile={false}
+				/>
+			</aside>
+		{/if}
+
+		<!-- Mobile Card Panel (Bottom Drawer) -->
+		{#if isMobile}
+			<CardPanel
+				bind:selectedCards={$cardStore.selectedCards}
+				maxSelection={5}
+				onCardToggle={(card) => cardStore.toggleCard(card)}
+				bind:isOpen={$cardStore.isCardPanelOpen}
+				isMobile={true}
+			/>
+		{/if}
 	</div>
 {:else}
 	<div
@@ -1420,7 +1504,9 @@
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur">
 		<div class="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900/90 p-6">
 			<h2 class="text-lg font-semibold text-white">Share your response</h2>
-			<p class="mt-1 text-sm text-slate-400">Link cards (comma separated) to earn bonus points.</p>
+			<p class="mt-1 text-sm text-slate-400">
+				Link cards to earn bonus points and center your thinking.
+			</p>
 			<div class="mt-4 space-y-4">
 				<label class="flex flex-col gap-2 text-sm text-slate-300">
 					Prompt
@@ -1442,13 +1528,62 @@
 						bind:value={responseText}
 					/>
 				</label>
+
+				<!-- Selected Cards Display -->
+				{#if $cardStore.selectedCards.length > 0}
+					<div class="flex flex-col gap-2">
+						<div class="flex items-center justify-between">
+							<p class="text-sm text-slate-300">Your selected cards</p>
+							<button
+								type="button"
+								on:click={() => (isMobile ? cardStore.setCardPanelOpen(true) : null)}
+								class="text-xs text-cyan-400 hover:text-cyan-300"
+							>
+								{isMobile ? 'View all cards' : 'See panel →'}
+							</button>
+						</div>
+						<div class="flex flex-wrap gap-2">
+							{#each $cardStore.selectedCards as card}
+								<div
+									class="flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3 py-1.5"
+								>
+									<span class="text-xs font-bold text-cyan-300">{card.letter}</span>
+									<span class="text-xs text-cyan-200">{card.title}</span>
+								</div>
+							{/each}
+						</div>
+						<p class="text-xs text-slate-500">
+							These cards will be automatically linked to your response
+						</p>
+					</div>
+				{:else}
+					<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
+						<p class="text-sm text-slate-400">
+							No cards selected.
+							{#if isMobile}
+								<button
+									type="button"
+									on:click={() => cardStore.setCardPanelOpen(true)}
+									class="text-cyan-400 hover:text-cyan-300 underline"
+								>
+									Open card panel
+								</button>
+							{:else}
+								Use the card panel on the right
+							{/if}
+							to select cards that frame your thinking.
+						</p>
+					</div>
+				{/if}
+
 				<label class="flex flex-col gap-2 text-sm text-slate-300">
-					Link cards
+					Additional cards (optional)
 					<input
 						class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
 						placeholder="e.g., justice, power, empathy"
 						bind:value={linkedCardsText}
 					/>
+					<p class="text-xs text-slate-500">Add other cards by name (comma separated)</p>
 				</label>
 			</div>
 			<div class="mt-6 flex items-center justify-end gap-3">

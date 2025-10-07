@@ -208,11 +208,17 @@ export const WorkshopTemplate = defineType({
               options: {
                 list: [
                   { title: 'Responses Board', value: 'responses' },
+                  { title: 'Response Landscape', value: 'response-landscape' },
                   { title: 'Heatmap', value: 'heatmap' },
                   { title: 'Roadmap', value: 'roadmap' },
                   { title: 'Timeline', value: 'timeline' },
                   { title: 'Leaderboard', value: 'leaderboard' },
-                  { title: 'Chat Feed', value: 'chat' }
+                  { title: 'Chat Feed', value: 'chat' },
+                  { title: 'Quad Bubbles', value: 'quadBubbles' },
+                  { title: 'Maturity Dial', value: 'maturityDial' },
+                  { title: 'Risk Impact Matrix', value: 'riskImpactMatrix' },
+                  { title: 'Participation Pulse', value: 'participationPulse' },
+                  { title: 'Inclusivity Meter', value: 'inclusivityMeter' }
                 ]
               },
               description: 'Controls which dashboards are highlighted during the phase.'
@@ -280,16 +286,12 @@ export const WorkshopTemplate = defineType({
           options: {
             list: [
               { title: 'Quad Bubbles', value: 'quadBubbles' },
-              { title: 'AI Maturity Dial', value: 'maturityDial' },
-              { title: 'AI Readiness Heatmap', value: 'aiReadinessHeatmap' },
+              { title: 'Maturity Dial', value: 'maturityDial' },
+              { title: 'Heatmap', value: 'heatmap' },
               { title: 'Risk Impact Matrix', value: 'riskImpactMatrix' },
               { title: 'Participation Pulse', value: 'participationPulse' },
-              { title: 'Ethics Compass', value: 'ethicsCompass' },
-              { title: 'Cultural Insight Wheel', value: 'culturalInsightWheel' },
               { title: 'Inclusivity Meter', value: 'inclusivityMeter' },
-              { title: 'Story Path Timeline', value: 'storyPath' },
-              { title: 'Word Constellation', value: 'wordConstellation' },
-              { title: 'Roadmap Swimlanes', value: 'roadmapSwimlanes' }
+              { title: 'Roadmap', value: 'roadmap' }
             ]
           },
           initialValue: ['quadBubbles', 'participationPulse', 'inclusivityMeter']

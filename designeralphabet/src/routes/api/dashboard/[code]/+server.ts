@@ -96,7 +96,9 @@ export const GET: RequestHandler = async ({ params }) => {
 			responses?.map((response) => {
 				const participant = participants?.find((p) => p.id === response.participant_id);
 				// Handle the joined questions data - it's an object, not an array
-				const question = Array.isArray(response.questions) ? response.questions[0] : response.questions;
+				const question = Array.isArray(response.questions)
+					? response.questions[0]
+					: response.questions;
 				const voteCount = Array.isArray(response.votes) ? response.votes.length : 0;
 				const responseLength = response.text?.length || 0;
 
