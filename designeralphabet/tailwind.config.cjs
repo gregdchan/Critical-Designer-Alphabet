@@ -33,10 +33,11 @@ module.exports = {
 				midnight: '#1e293b'
 			},
 			fontFamily: {
-				sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+				sans: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
 				mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
 				retro: ['"Press Start 2P"', 'cursive'],
-				techno: ['Orbitron', 'sans-serif']
+				techno: ['Orbitron', 'sans-serif'],
+				heading: ['Orbitron', 'sans-serif']
 			},
 			borderRadius: {
 				xl: '1rem',
