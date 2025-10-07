@@ -29,7 +29,6 @@
 
 	let sessionCode = data.sessionCode ?? '';
 	let joinCode = sessionCode;
-	let qrSrc = '';
 	let activeCode = '';
 	let ready = false;
 	let userCustomizedBoards = false;
@@ -287,10 +286,6 @@
 		activeCode = code;
 		userCustomizedBoards = false;
 		activeBoards = [];
-		if (browser) {
-			const base = window.location.origin;
-			qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(`${base}/join?code=${code}`)}`;
-		}
 	}
 
 	onMount(async () => {
@@ -546,20 +541,18 @@
 
 					<aside class="space-y-8">
 						<div class="rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
-							<h3 class="text-lg font-semibold text-white">Join the Session</h3>
+							<h3 class="text-lg font-semibold text-white">Session Dashboard</h3>
 							<p class="text-sm text-slate-400">
-								Scan the QR code or visit <span class="font-mono text-cyan-200">/join</span> and enter the
-								code.
+								View detailed analytics and controls for this session.
 							</p>
-							{#if qrSrc}
-								<div class="mt-6 flex justify-center">
-									<img
-										class="h-48 w-48 rounded-2xl border border-slate-700 bg-white p-3"
-										alt="Join session QR"
-										src={qrSrc}
-									/>
-								</div>
-							{/if}
+							<div class="mt-6 flex justify-center">
+								<a
+									href="/dashboard"
+									class="w-full rounded-lg bg-cyan-500 px-6 py-3 text-center text-sm font-semibold text-slate-900 transition-colors hover:bg-cyan-400"
+								>
+									Go to Dashboard
+								</a>
+							</div>
 							<p class="mt-3 text-center text-sm font-semibold text-cyan-200">Code: {activeCode}</p>
 						</div>
 
