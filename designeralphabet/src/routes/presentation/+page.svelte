@@ -32,6 +32,8 @@
 	let activeCode = '';
 	let ready = false;
 	let userCustomizedBoards = false;
+	let availableSessions: any[] = [];
+	let loadingSessions = false;
 
 	type BoardId =
 		| 'phase'
@@ -288,10 +290,33 @@
 		activeBoards = [];
 	}
 
+	async function fetchAvailableSessions() {
+		loadingSessions = true;
+		try {
+			const response = await fetch('/api/session/list?status=live,planned');
+			const result = await response.json();
+			if (result.success) {
+				availableSessions = result.sessions;
+			}
+		} catch (error) {
+			console.error('Failed to fetch sessions:', error);
+		} finally {
+			loadingSessions = false;
+		}
+	}
+
+	function selectSession(code: string) {
+		joinCode = code;
+		sessionCode = code;
+		loadSession(code);
+	}
+
 	onMount(async () => {
 		ready = true;
 		if (sessionCode) {
 			await loadSession(sessionCode);
+		} else {
+			await fetchAvailableSessions();
 		}
 	});
 
@@ -405,12 +430,73 @@
 
 	{#if !activeCode && ready}
 		<div class="flex min-h-[60vh] items-center justify-center px-6">
-			<div class="max-w-xl space-y-4 text-center">
-				<h2 class="text-2xl font-semibold text-white">Begin a presentation</h2>
-				<p class="text-slate-400">
-					Enter the session code shared by your facilitator. Once connected, curate the boards you
-					want to project and the system will live-stream responses, votes, and engagement metrics.
-				</p>
+			<div class="max-w-4xl w-full space-y-6">
+				<div class="text-center space-y-4">
+					<h2 class="text-2xl font-semibold text-white">Select a Session</h2>
+					<p class="text-slate-400">
+						Choose from available sessions or enter a session code manually to begin the presentation.
+					</p>
+				</div>
+
+				{#if loadingSessions}
+					<div class="flex items-center justify-center py-12">
+						<div class="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+					</div>
+				{:else if availableSessions.length > 0}
+					<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+						{#each availableSessions as session}
+							<button
+								type="button"
+								on:click={() => selectSession(session.code)}
+								class="group rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 text-left transition hover:border-cyan-400/60 hover:bg-slate-900"
+							>
+								<div class="flex items-center justify-between mb-3">
+									<span class="font-mono text-lg font-semibold text-cyan-300">{session.code}</span>
+									<span class="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase text-slate-400">
+										{session.status}
+									</span>
+								</div>
+								<h3 class="text-lg font-semibold text-white mb-2 line-clamp-2">
+									{session.title || 'Untitled Session'}
+								</h3>
+								{#if session.focus}
+									<p class="text-sm text-slate-400 line-clamp-2 mb-3">
+										{session.focus}
+									</p>
+								{/if}
+								<div class="flex items-center gap-2 text-xs text-slate-500">
+									<IconUsers class="h-4 w-4" />
+									<span>{session.participant_count || 0} participants</span>
+								</div>
+							</button>
+						{/each}
+					</div>
+				{:else}
+					<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-8 text-center">
+						<p class="text-slate-400">No active sessions found. Enter a code manually below.</p>
+					</div>
+				{/if}
+
+				<div class="pt-6 border-t border-slate-700">
+					<p class="text-center text-sm text-slate-400 mb-4">Or enter a session code manually:</p>
+					<form
+						class="flex items-center justify-center gap-3"
+						on:submit|preventDefault={handleStartPresentation}
+					>
+						<input
+							class="w-64 rounded-lg border border-slate-700 bg-slate-900/80 px-4 py-2 text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
+							placeholder="Enter session code"
+							bind:value={joinCode}
+							maxlength="16"
+						/>
+						<button
+							type="submit"
+							class="rounded-lg bg-cyan-500 px-6 py-2 font-semibold text-slate-900 transition-colors hover:bg-cyan-400"
+						>
+							Start
+						</button>
+					</form>
+				</div>
 			</div>
 		</div>
 	{:else}
