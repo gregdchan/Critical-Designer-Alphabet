@@ -66,7 +66,7 @@
 				window.open(`/presentation?code=${info.code}`, '_blank');
 			}
 		} else {
-			goto('/facilitator');
+			goto('/presentation');
 		}
 	}
 </script>
