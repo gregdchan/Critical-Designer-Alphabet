@@ -270,13 +270,13 @@
 		// Add click behavior here (e.g., drill down to detailed view)
 	}
 
-function handleResize(newDimensions: ChartDimensions) {
-	dimensions = newDimensions;
-	fallbackDimensions = newDimensions;
-	if (bubbleData.length > 0) {
-		updateVisualization();
+	function handleResize(newDimensions: ChartDimensions) {
+		dimensions = newDimensions;
+		fallbackDimensions = newDimensions;
+		if (bubbleData.length > 0) {
+			updateVisualization();
+		}
 	}
-}
 
 	const getCenterX = () => (dimensions ?? fallbackDimensions).innerWidth / 2;
 	const getCenterY = () => (dimensions ?? fallbackDimensions).innerHeight / 2;

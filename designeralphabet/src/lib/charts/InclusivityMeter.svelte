@@ -12,15 +12,15 @@
 	export let width = 300;
 	export let height = 300;
 
-let svgElement: SVGSVGElement | undefined;
-let dimensions: ChartDimensions | undefined;
-let fallbackDimensions: ChartDimensions = {
-	width,
-	height,
-	innerWidth: width,
-	innerHeight: height,
-	margins: { top: 0, right: 0, bottom: 0, left: 0 }
-};
+	let svgElement: SVGSVGElement | undefined;
+	let dimensions: ChartDimensions | undefined;
+	let fallbackDimensions: ChartDimensions = {
+		width,
+		height,
+		innerWidth: width,
+		innerHeight: height,
+		margins: { top: 0, right: 0, bottom: 0, left: 0 }
+	};
 
 	// Data state
 	let participants: any[] = [];

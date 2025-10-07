@@ -11,15 +11,15 @@
 	export let width = 600;
 	export let height = 500;
 
-let svgElement: SVGSVGElement;
-let dimensions: ChartDimensions;
-let fallbackDimensions: ChartDimensions = {
-	width,
-	height,
-	innerWidth: width,
-	innerHeight: height,
-	margins: { top: 0, right: 0, bottom: 0, left: 0 }
-};
+	let svgElement: SVGSVGElement;
+	let dimensions: ChartDimensions;
+	let fallbackDimensions: ChartDimensions = {
+		width,
+		height,
+		innerWidth: width,
+		innerHeight: height,
+		margins: { top: 0, right: 0, bottom: 0, left: 0 }
+	};
 	let tooltip: { show: boolean; x: number; y: number; data: RiskDatum | null } = {
 		show: false,
 		x: 0,
@@ -423,13 +423,13 @@ let fallbackDimensions: ChartDimensions = {
 		// Add click behavior here
 	}
 
-function handleResize(newDimensions: ChartDimensions) {
-	dimensions = newDimensions;
-	fallbackDimensions = newDimensions;
-	if (riskData.length > 0) {
-		updateVisualization();
+	function handleResize(newDimensions: ChartDimensions) {
+		dimensions = newDimensions;
+		fallbackDimensions = newDimensions;
+		if (riskData.length > 0) {
+			updateVisualization();
+		}
 	}
-}
 
 	const getCenterX = () => (dimensions ?? fallbackDimensions).innerWidth / 2;
 	const getCenterY = () => (dimensions ?? fallbackDimensions).innerHeight / 2;
