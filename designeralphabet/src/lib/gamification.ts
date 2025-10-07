@@ -1,11 +1,12 @@
 export interface Participant {
 	id: string;
-	name?: string;
-	email?: string;
-	role?: string;
-	color?: string;
-	points?: number;
-	badges?: string[];
+	room_code: string;
+	name: string;
+	role: 'facilitator' | 'participant';
+	color: string;
+	points: number;
+	badges: string[];
+	created_at: string;
 }
 
 export interface Vote {
@@ -15,25 +16,31 @@ export interface Vote {
 
 export interface Response {
 	id: string;
-	participantId: string;
+	room_code: string;
+	question_id: string;
+	participant_id: string | null;
 	text: string;
-	lens: string;
-	type: string;
-	mapType: string;
-	votes?: Vote[];
-	cards?: unknown[];
-	createdAt: string;
+	metadata: Record<string, unknown> | null;
+	cards: string[];
+	votes: number;
+	created_at: string;
+	// Populated from joins
+	questions?: {
+		lens: string | null;
+		response_type: string | null;
+		map_type: string | null;
+	};
 }
 
 export interface TimelineEntry {
 	id: string;
-	type: string;
-	timestamp: string;
-	sessionCode: string;
-	metric?: string;
-	risk_note?: string;
-	owner?: string;
-	label?: string;
+	room_code: string;
+	label: 'Now' | 'Next' | 'Later';
+	item_text: string;
+	owner: string | null;
+	metric: string | null;
+	risk_note: string | null;
+	created_at: string;
 }
 
 export interface Badge {
@@ -66,7 +73,7 @@ export const BADGES: Badge[] = [
 		icon: '🌱',
 		color: '#10b981',
 		requirement: (participant, responses) =>
-			responses.filter((r) => r.participantId === participant.id).length >= 1,
+			responses.filter((r) => r.participant_id === participant.id).length >= 1,
 		points: 10
 	},
 	{

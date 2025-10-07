@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { derived, writable } from 'svelte/store';
 import { supabase } from './supabase';
+import type { Card } from './Cards';
 import type { Participant, Response, TimelineEntry } from './gamification';
 
 const SESSION_COOKIE = 'cda-session';
@@ -8,28 +9,37 @@ const SESSION_STORAGE_KEY = 'cda-session';
 const PARTICIPANT_KEY_PREFIX = 'cda:participant:';
 
 export interface Session {
-	id: string;
 	code: string;
-	name: string;
-	description?: string;
-	status: string;
+	title: string | null;
+	template_slug: string | null;
+	challenge: string | null;
+	facilitator_email: string | null;
+	active_phase_key: string | null;
+	active_round: string | null;
+	round_expires_at: string | null;
+	status: 'planned' | 'live' | 'done';
 	created_at: string;
-	updated_at: string;
 }
 
 export interface Question {
 	id: string;
+	room_code: string;
 	section: string;
+	phase_key: string | null;
 	text: string;
-	lens: string;
-	response_type: string;
-	map_type: string;
+	lens: string | null;
+	response_type: string | null;
+	map_type: string | null;
+	config: Record<string, unknown> | null;
+	order_index: number | null;
+	recommended_dashboards: string[];
+	created_at: string;
 }
 
 export interface ChatMessage {
 	id: string;
-	session_code: string;
-	participant_id: string;
+	room_code: string;
+	participant_id: string | null;
 	message: string;
 	created_at: string;
 }
@@ -37,11 +47,18 @@ export interface ChatMessage {
 export interface Phase {
 	id: string;
 	session_code: string;
-	name: string;
-	description?: string;
-	status: string;
-	started_at?: string;
-	ended_at?: string;
+	phase_key: string | null;
+	cards?: Card[];
+	title: string | null;
+	description: string | null;
+	order_index: number | null;
+	duration_minutes: number | null;
+	dashboards: string[];
+	status: 'pending' | 'active' | 'completed';
+	started_at: string | null;
+	completed_at: string | null;
+	created_at: string | null;
+	updated_at: string | null;
 }
 
 export type SessionBundle = {

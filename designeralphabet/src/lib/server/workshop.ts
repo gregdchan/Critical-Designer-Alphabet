@@ -56,6 +56,7 @@ export interface Question {
 	id: string;
 	room_code: string;
 	section: string;
+	phase_key: string | null;
 	text: string;
 	lens: string | null;
 	response_type: string | null;

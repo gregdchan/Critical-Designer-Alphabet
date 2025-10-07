@@ -369,8 +369,9 @@
 
 	let qrSrc = '';
 
-	onMount(async () => {
-		await ensureProfile();
+	onMount(() => {
+		// Run async profile check without blocking mount
+		ensureProfile();
 		startRealtimeSession(sessionCode);
 
 		// Set loading to false once session data starts coming in
@@ -1222,7 +1223,7 @@
 														<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
 														<span class="text-sm text-white truncate">{participant.name}</span>
 													</div>
-													<span class="text-xs text-cyan-200">{participant.score}pts</span>
+													<span class="text-xs text-cyan-200">{participant.points}pts</span>
 												</div>
 											{/each}
 										{:else}
@@ -1233,8 +1234,11 @@
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Quick Chat</h3>
 										<div class="h-32 overflow-y-auto mb-3 space-y-2">
 											{#each chatList.slice(-5) as message}
+												{@const participantName =
+													participantsList.find((p) => p.id === message.participant_id)
+														?.name ?? 'Guest'}
 												<div class="text-xs">
-													<span class="text-cyan-300">{message.participant_name}:</span>
+													<span class="text-cyan-300">{participantName}:</span>
 													<span class="text-slate-300">{message.message}</span>
 												</div>
 											{/each}
