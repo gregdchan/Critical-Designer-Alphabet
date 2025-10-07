@@ -156,7 +156,27 @@
 	$: {
 		const nextTemplateId = selectedTemplate?._id ?? null;
 		if (nextTemplateId !== lastTemplateId) {
-			sessionChallenge = selectedTemplate?.challenge ?? '';
+			// Handle challenge field - could be string or block content object
+			const challenge = selectedTemplate?.challenge;
+			if (typeof challenge === 'string') {
+				sessionChallenge = challenge;
+			} else if (Array.isArray(challenge)) {
+				// Block content array - extract text from blocks
+				sessionChallenge = challenge
+					.filter((block: any) => block._type === 'block')
+					.map((block: any) =>
+						block.children
+							?.filter((child: any) => child._type === 'span')
+							?.map((child: any) => child.text)
+							?.join('') ?? ''
+					)
+					.join('\n');
+			} else if (challenge && typeof challenge === 'object') {
+				// Single block or other object - try to stringify
+				sessionChallenge = JSON.stringify(challenge);
+			} else {
+				sessionChallenge = '';
+			}
 			lastTemplateId = nextTemplateId;
 		}
 	}
@@ -391,6 +411,25 @@
 	function previewPhase(index: number) {
 		selectedPhaseIndex = index;
 	}
+
+	function getChallengeText(challenge: any): string {
+		if (!challenge) return '';
+		if (typeof challenge === 'string') return challenge;
+		if (Array.isArray(challenge)) {
+			// Block content array - extract text from blocks
+			return challenge
+				.filter((block: any) => block._type === 'block')
+				.map((block: any) =>
+					block.children
+						?.filter((child: any) => child._type === 'span')
+						?.map((child: any) => child.text)
+						?.join('') ?? ''
+				)
+				.join('\n');
+		}
+		// Fallback for objects
+		return JSON.stringify(challenge);
+	}
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 p-6">
@@ -574,12 +613,17 @@
 										{template.description || 'No description available'}
 									</p>
 									{#if template.challenge}
-										<div class="mb-3 rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
-											<p class="text-xs uppercase tracking-[0.3em] text-purple-200">
-												Challenge Focus
-											</p>
-											<p class="mt-2 text-sm text-slate-100">{template.challenge}</p>
-										</div>
+										{@const challengeText = getChallengeText(template.challenge)}
+										{#if challengeText}
+											<div class="mb-3 rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
+												<p class="text-xs uppercase tracking-[0.3em] text-purple-200">
+													Challenge Focus
+												</p>
+												<p class="mt-2 text-sm text-slate-100 whitespace-pre-line">
+													{challengeText}
+												</p>
+											</div>
+										{/if}
 									{/if}
 
 									<div class="space-y-3 text-xs">
@@ -927,7 +971,9 @@
 							{#if sessionChallenge}
 								<div class="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4 mb-6">
 									<p class="text-xs uppercase tracking-wide text-cyan-200 mb-2">Challenge Focus</p>
-									<p class="text-slate-100">{sessionChallenge}</p>
+									<p class="text-slate-100 whitespace-pre-line">
+										{sessionChallenge}
+									</p>
 								</div>
 							{/if}
 						</div>

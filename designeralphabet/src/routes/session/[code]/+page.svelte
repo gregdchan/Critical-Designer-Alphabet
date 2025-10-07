@@ -651,6 +651,110 @@
 			</header>
 
 			<main class="mx-auto max-w-full space-y-6 md:space-y-8 px-4 md:px-6 py-6 md:py-8">
+				<!-- Participant View: Show active phase info only -->
+				{#if !isFacilitator() && activePhase}
+					<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-4 md:p-6">
+						<div class="flex items-center justify-between mb-4">
+							<div>
+								<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Current Phase</p>
+								<h3 class="text-lg md:text-xl font-semibold text-white">
+									{activePhase.title ?? activePhase.phase_key ?? 'Active Phase'}
+								</h3>
+								{#if activePhase.description}
+									<p class="text-sm text-slate-300 mt-1">{activePhase.description}</p>
+								{/if}
+							</div>
+							{#if phaseCountdownLabel}
+								<div class="text-right">
+									<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Time Left</p>
+									<p class="text-2xl md:text-3xl font-mono text-cyan-100">{phaseCountdownLabel}</p>
+								</div>
+							{/if}
+						</div>
+
+						<!-- Phase Questions for Participants -->
+						{#if questionsList.filter((q) => q.phase_key === activePhase.phase_key || (!q.phase_key && activePhase.status === 'active')).length > 0}
+							{@const phaseQuestions = questionsList.filter(
+								(q) => q.phase_key === activePhase.phase_key || (!q.phase_key && activePhase.status === 'active')
+							)}
+							<div class="mt-6">
+								<div class="flex items-center justify-between mb-4">
+									<h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
+										Questions
+									</h4>
+									<button
+										class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-cyan-400 hover:to-purple-500 transition-colors"
+										on:click={() => openResponseModal(null)}
+										disabled={!phaseRemainingMs}
+									>
+										<IconPlus class="h-4 w-4" /> {phaseRemainingMs ? 'Respond' : 'Time Up'}
+									</button>
+								</div>
+
+								<div class="grid gap-4 md:grid-cols-2">
+									{#each phaseQuestions as question}
+										<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
+											<div class="flex items-start justify-between gap-3 mb-3">
+												<div class="flex-1">
+													<span class="text-xs uppercase tracking-[0.3em] text-cyan-200">
+														{question.section}
+													</span>
+													<h5 class="text-sm font-semibold text-white mt-1">{question.text}</h5>
+												</div>
+												<button
+													class="rounded-lg border border-cyan-400/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-300 transition-colors whitespace-nowrap"
+													on:click={() => openResponseModal(question.id)}
+													disabled={!phaseRemainingMs}
+												>
+													{phaseRemainingMs ? 'Respond' : 'Time up'}
+												</button>
+											</div>
+
+											<!-- Show responses with voting -->
+											{#if responsesList.filter((r) => r.question_id === question.id).length > 0}
+												{@const questionResponses = responsesList
+													.filter((r) => r.question_id === question.id)
+													.sort((a, b) => (b.votes || 0) - (a.votes || 0))}
+												<div class="space-y-2 max-h-60 overflow-y-auto">
+													{#each questionResponses as response}
+														<div class="rounded border border-slate-800 bg-slate-900/70 p-3 text-xs">
+															<div class="flex items-center justify-between text-slate-400 mb-1">
+																<span
+																	>{participantsList.find((p) => p.id === response.participant_id)
+																		?.name ?? 'Anonymous'}</span
+																>
+																<button
+																	class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-2 py-1 text-cyan-200 hover:border-cyan-300 transition-colors"
+																	on:click={() => toggleVote(response.id)}
+																	disabled={!phaseRemainingMs}
+																>
+																	<IconThumbUp class="h-3 w-3" />
+																	{response.votes ?? 0}
+																</button>
+															</div>
+															<p class="text-slate-200">{response.text}</p>
+															{#if response.cards?.length}
+																<div class="mt-2 flex flex-wrap gap-1">
+																	{#each response.cards as card}
+																		<span class="px-1.5 py-0.5 text-xs rounded bg-cyan-400/20 text-cyan-300"
+																			>{card}</span
+																		>
+																	{/each}
+																</div>
+															{/if}
+														</div>
+													{/each}
+												</div>
+											{/if}
+										</div>
+									{/each}
+								</div>
+							</div>
+						{/if}
+					</section>
+				{/if}
+
+				<!-- Facilitator View: Full controls -->
 				{#if isFacilitator()}
 					<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-6 space-y-6">
 						<div class="flex flex-wrap items-center justify-between gap-4">

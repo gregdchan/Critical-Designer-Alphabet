@@ -419,13 +419,13 @@
 			</div>
 		</div>
 	{:else}
-		<main class="px-10 py-8">
+		<main class="mx-auto px-4 md:px-6 py-8" style="max-width: 95vw;">
 			{#if activeBoards.length === 0}
 				<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-10 text-center text-sm text-slate-300">
 					Choose at least one board from the controls above to start the broadcast layout.
 				</div>
 			{:else}
-				<div class="grid gap-8 lg:grid-cols-[3fr_1.3fr]">
+				<div class="grid gap-6 lg:grid-cols-[2.5fr_1fr]">
 					<section class="space-y-8">
 						{#each mainBoards as boardId}
 							{#if boardId === 'responses'}
@@ -445,7 +445,7 @@
 											{responsesList.length} responses
 										</span>
 									</header>
-									<QuadBubbleChart responses={responsesForViz} width={960} height={540} />
+									<QuadBubbleChart responses={responsesForViz} width={1200} height={600} />
 								</div>
 							{:else if boardId === 'heatmap'}
 								<div
@@ -459,7 +459,7 @@
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
-									<HeatmapChart responses={responsesForViz} width={960} height={480} />
+									<HeatmapChart responses={responsesForViz} width={1200} height={560} />
 								</div>
 							{:else if boardId === 'roadmap'}
 								<div
@@ -473,13 +473,13 @@
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
-									<RoadmapChart responses={responsesForViz} width={960} height={500} />
+									<RoadmapChart responses={responsesForViz} width={1200} height={580} />
 								</div>
 								{:else if boardId === 'quadBubbles' || boardId === 'participationPulse' || boardId === 'riskImpactMatrix'}
 									{#if activeCode}
 										{@const component = boardChartComponents[boardId]}
 										{@const dimensions =
-											boardChartDimensions[boardId] ?? { width: 960, height: 540 }}
+											boardChartDimensions[boardId] ?? { width: 1200, height: 600 }}
 										<div class="rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
 											<header class="mb-4">
 												<h2 class="text-xl font-semibold text-slate-100">
