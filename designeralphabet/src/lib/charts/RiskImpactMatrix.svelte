@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { select } from 'd3-selection';
 	import { scaleLinear, scaleSqrt } from 'd3-scale';
 	import BaseChart from './BaseChart.svelte';
 	import { useResponses } from '$lib/hooks/useSupabaseRealtime';
-	import { getRiskColor, RISK_COLORS, NEON_COLORS } from '$lib/utils/colors';
-	import type { ChartProps, RiskDatum, ChartDimensions } from '$lib/types/charts';
+	import { getRiskColor, RISK_COLORS } from '$lib/utils/colors';
+	import type { RiskDatum, ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let theme: 'dark' | 'light' = 'dark';
@@ -84,7 +83,7 @@
 	function updateVisualization() {
 		if (!svgElement || !dimensions || !riskData.length) return;
 
-		const { innerWidth, innerHeight, margins } = dimensions;
+		const { innerWidth, innerHeight } = dimensions;
 
 		// Scales
 		const xScale = scaleLinear().domain([0.5, 5.5]).range([0, innerWidth]);
@@ -423,10 +422,6 @@
 			updateVisualization();
 		}
 	}
-
-	function handleMounted(element: HTMLElement) {
-		// Chart mounted
-	}
 </script>
 
 <BaseChart
@@ -437,9 +432,8 @@
 	className="risk-impact-matrix-chart"
 	ariaLabel="Risk impact matrix showing identified risks plotted by likelihood and impact"
 	on:resize={(event) => handleResize(event.detail)}
-	on:mounted={handleMounted}
 >
-	<svelte:fragment slot="default" let:dimensions let:svgElement>
+	<svelte:fragment slot="default">
 		{#if loading}
 			<text
 				x={dimensions.innerWidth / 2}

@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { select } from 'd3-selection';
 	import { forceSimulation, forceManyBody, forceCenter, forceX, forceY } from 'd3-force';
-	import { scaleLinear, scaleSqrt } from 'd3-scale';
+	import { scaleSqrt } from 'd3-scale';
 	import BaseChart from './BaseChart.svelte';
 	import { useResponses } from '$lib/hooks/useSupabaseRealtime';
-	import { getLensColor, NEON_COLORS } from '$lib/utils/colors';
-	import type { ChartProps, BubbleDatum, ChartDimensions } from '$lib/types/charts';
+	import { getLensColor } from '$lib/utils/colors';
+	import type { BubbleDatum, ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let theme: 'dark' | 'light' = 'dark';
@@ -30,7 +29,6 @@
 
 	// D3 elements
 	let simulation: any;
-	let nodes: any;
 	let bubbles: any;
 
 	// Lens centers for force positioning
@@ -271,10 +269,6 @@
 			updateVisualization();
 		}
 	}
-
-	function handleMounted(element: HTMLElement) {
-		// Chart mounted
-	}
 </script>
 
 <BaseChart
@@ -285,9 +279,8 @@
 	className="quad-bubbles-chart"
 	ariaLabel="Bubble chart showing responses grouped by critical design lens"
 	on:resize={(event) => handleResize(event.detail)}
-	on:mounted={handleMounted}
 >
-	<svelte:fragment slot="default" let:dimensions let:svgElement>
+	<svelte:fragment slot="default">
 		{#if loading}
 			<text
 				x={dimensions.innerWidth / 2}

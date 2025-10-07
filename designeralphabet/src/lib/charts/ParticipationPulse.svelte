@@ -7,7 +7,7 @@
 	import BaseChart from './BaseChart.svelte';
 	import { useTimeline } from '$lib/hooks/useSupabaseRealtime';
 	import { NEON_COLORS } from '$lib/utils/colors';
-	import type { ChartProps, ParticipationPoint, ChartDimensions } from '$lib/types/charts';
+	import type { ParticipationPoint, ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let theme: 'dark' | 'light' = 'dark';
@@ -117,7 +117,7 @@
 	function updateVisualization() {
 		if (!svgElement || !dimensions || !participationData.length) return;
 
-		const { innerWidth, innerHeight, margins } = dimensions;
+		const { innerWidth, innerHeight } = dimensions;
 
 		// Scales
 		const xScale = scaleTime()
@@ -333,10 +333,6 @@
 			updateVisualization();
 		}
 	}
-
-	function handleMounted(element: HTMLElement) {
-		// Chart mounted
-	}
 </script>
 
 <BaseChart
@@ -347,9 +343,8 @@
 	className="participation-pulse-chart"
 	ariaLabel="Real-time participation activity showing submissions per minute over the last 5 minutes"
 	on:resize={(event) => handleResize(event.detail)}
-	on:mounted={handleMounted}
 >
-	<svelte:fragment slot="default" let:dimensions let:svgElement>
+	<svelte:fragment slot="default">
 		{#if loading}
 			<text
 				x={dimensions.innerWidth / 2}

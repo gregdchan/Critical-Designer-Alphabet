@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { select } from 'd3-selection';
 	import { arc } from 'd3-shape';
 	import { scaleLinear } from 'd3-scale';
 	import { interpolate } from 'd3-interpolate';
 	import BaseChart from './BaseChart.svelte';
 	import { getMaturityColor, MATURITY_COLORS } from '$lib/utils/colors';
-	import type { ChartProps, MaturityData, ChartDimensions } from '$lib/types/charts';
+	import type { ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let theme: 'dark' | 'light' = 'dark';
@@ -15,8 +14,8 @@
 	export let maturityLevel = 3; // 1-5
 	export let progress = 0.6; // 0-1 within current level
 
-	let svgElement: SVGSVGElement;
-	let dimensions: ChartDimensions;
+	let svgElement: SVGSVGElement | undefined;
+	let dimensions: ChartDimensions | undefined;
 
 	// Room code for future real-time integration
 	$: if (roomCode) {
@@ -34,12 +33,6 @@
 	];
 
 	$: currentStage = stages[Math.max(0, Math.min(4, maturityLevel - 1))];
-	$: maturityData = {
-		level: maturityLevel,
-		stage: currentStage.name,
-		description: currentStage.description,
-		progress: progress
-	} as MaturityData;
 
 	function updateVisualization() {
 		if (!svgElement || !dimensions) return;
@@ -64,7 +57,7 @@
 		chart.selectAll('*').remove();
 
 		// Create background arcs for all stages
-		const backgroundArcs = chart
+		chart
 			.selectAll('.background-arc')
 			.data(stages)
 			.enter()
@@ -123,12 +116,13 @@
 				const interpolateAngle = interpolate(startAngle, targetEndAngle);
 
 				return (t: number) => {
-					return arcGenerator({
+					const result = arcGenerator({
 						startAngle: startAngle,
 						endAngle: interpolateAngle(t),
 						innerRadius: radius * 0.6,
 						outerRadius: radius * 0.9
 					});
+					return result || '';
 				};
 			});
 
@@ -144,11 +138,11 @@
 		labels
 			.append('text')
 			.attr('class', 'stage-text')
-			.attr('x', (d, i) => {
+			.attr('x', (_d, i) => {
 				const angle = (angleScale(i) + angleScale(i + 1)) / 2;
 				return Math.cos(angle) * radius * 1.1;
 			})
-			.attr('y', (d, i) => {
+			.attr('y', (_d, i) => {
 				const angle = (angleScale(i) + angleScale(i + 1)) / 2;
 				return Math.sin(angle) * radius * 1.1;
 			})
@@ -254,10 +248,6 @@
 		updateVisualization();
 	}
 
-	function handleMounted(element: HTMLElement) {
-		updateVisualization();
-	}
-
 	// Watch for changes to maturity data
 	$: if (svgElement && dimensions) {
 		updateVisualization();
@@ -272,9 +262,10 @@
 	className="maturity-dial-chart"
 	ariaLabel={`AI Maturity gauge showing ${currentStage.name} level ${maturityLevel} at ${Math.round(progress * 100)}% completion`}
 	on:resize={(event) => handleResize(event.detail)}
-	on:mounted={handleMounted}
+	on:mounted={() => updateVisualization()}
 >
-	<svelte:fragment slot="default" let:dimensions let:svgElement>
+	<svelte:fragment slot="default" let:svgElement={svg} let:dimensions={dims}>
+		{@const _ = svg && dims ? ((svgElement = svg), (dimensions = dims)) : null}
 		<!-- SVG content is handled in updateVisualization -->
 	</svelte:fragment>
 </BaseChart>

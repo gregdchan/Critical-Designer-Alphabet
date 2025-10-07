@@ -1,21 +1,19 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { select } from 'd3-selection';
 	import { arc } from 'd3-shape';
-	import { scaleLinear } from 'd3-scale';
 	import { interpolate } from 'd3-interpolate';
 	import BaseChart from './BaseChart.svelte';
 	import { useParticipants, useResponses } from '$lib/hooks/useSupabaseRealtime';
 	import { NEON_COLORS } from '$lib/utils/colors';
-	import type { ChartProps, ChartDimensions } from '$lib/types/charts';
+	import type { ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let theme: 'dark' | 'light' = 'dark';
 	export let width = 300;
 	export let height = 300;
 
-	let svgElement: SVGSVGElement;
-	let dimensions: ChartDimensions;
+	let svgElement: SVGSVGElement | undefined;
+	let dimensions: ChartDimensions | undefined;
 
 	// Data state
 	let participants: any[] = [];
@@ -131,12 +129,13 @@
 			.attrTween('d', () => {
 				const interpolateAngle = interpolate(startAngle, progressAngle);
 				return (t: number) => {
-					return arcGenerator({
+					const result = arcGenerator({
 						startAngle: startAngle,
 						endAngle: interpolateAngle(t),
 						innerRadius: radius * 0.7,
 						outerRadius: radius * 0.9
 					});
+					return result || '';
 				};
 			});
 
@@ -301,10 +300,6 @@
 		updateVisualization();
 	}
 
-	function handleMounted(element: HTMLElement) {
-		updateVisualization();
-	}
-
 	// Watch for changes
 	$: if (svgElement && dimensions) {
 		updateVisualization();
@@ -319,9 +314,10 @@
 	className="inclusivity-meter-chart"
 	ariaLabel={`Inclusivity gauge showing ${Math.round(inclusivityPercentage)}% participation with ${activeParticipants} of ${totalParticipants} participants active`}
 	on:resize={(event) => handleResize(event.detail)}
-	on:mounted={handleMounted}
+	on:mounted={() => updateVisualization()}
 >
-	<svelte:fragment slot="default" let:dimensions let:svgElement>
+	<svelte:fragment slot="default" let:svgElement={svg} let:dimensions={dims}>
+		{@const _ = svg && dims ? ((svgElement = svg), (dimensions = dims)) : null}
 		{#if loading}
 			<text
 				x={dimensions.innerWidth / 2}
