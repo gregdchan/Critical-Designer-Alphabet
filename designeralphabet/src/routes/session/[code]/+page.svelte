@@ -69,6 +69,20 @@
 	let selectedQuestionId: string | null = null;
 	let responseText = '';
 	let linkedCardsText = '';
+	let currentQuestion: Record<string, unknown> | null = null;
+	let currentQuestionConfig: Record<string, unknown> = {};
+	let modalResponseType = 'written';
+	let modalOptions: string[] = [];
+	let scaleMin = 0;
+	let scaleMax = 10;
+	let scaleMinLabel = 'Min';
+	let scaleMaxLabel = 'Max';
+	let landscapeXLabel = 'X Axis';
+	let landscapeYLabel = 'Y Axis';
+	let landscapeMinX = 0;
+	let landscapeMaxX = 10;
+	let landscapeMinY = 0;
+	let landscapeMaxY = 10;
 
 	let timelineModalOpen = false;
 	let timelineLabel: 'Now' | 'Next' | 'Later' = 'Now';
@@ -151,6 +165,52 @@
 	$: timelineList = $timeline ?? [];
 	$: chatList = $chat ?? [];
 	$: leaderboardList = $leaderboard ?? [];
+	$: currentQuestion = questionsList.find((q) => q.id === selectedQuestionId) ?? null;
+	$: currentQuestionConfig =
+		(currentQuestion?.config as Record<string, unknown>) ?? {};
+	$: modalResponseType = (currentQuestion?.response_type as string) ?? 'written';
+	$: modalOptions = Array.isArray(
+		(currentQuestionConfig as { options?: unknown[] }).options
+	)
+		? ((currentQuestionConfig as { options?: unknown[] }).options ?? []).filter(
+				(option): option is string => typeof option === 'string' && option.trim().length > 0
+			)
+		: [];
+
+	const numberOr = (value: unknown, fallback: number) =>
+		typeof value === 'number'
+			? value
+			: typeof value === 'string' && value.trim() !== ''
+				? Number(value)
+				: fallback;
+
+	const stringOr = (value: unknown, fallback: string) =>
+		typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+
+	$: {
+		scaleMin = numberOr((currentQuestionConfig as { min?: unknown }).min, 0);
+		scaleMax = numberOr((currentQuestionConfig as { max?: unknown }).max, 10);
+		scaleMinLabel = stringOr(
+			(currentQuestionConfig as { minLabel?: unknown }).minLabel,
+			'Min'
+		);
+		scaleMaxLabel = stringOr(
+			(currentQuestionConfig as { maxLabel?: unknown }).maxLabel,
+			'Max'
+		);
+		landscapeXLabel = stringOr(
+			(currentQuestionConfig as { xLabel?: unknown }).xLabel,
+			'X Axis'
+		);
+		landscapeYLabel = stringOr(
+			(currentQuestionConfig as { yLabel?: unknown }).yLabel,
+			'Y Axis'
+		);
+		landscapeMinX = numberOr((currentQuestionConfig as { minX?: unknown }).minX, 0);
+		landscapeMaxX = numberOr((currentQuestionConfig as { maxX?: unknown }).maxX, 10);
+		landscapeMinY = numberOr((currentQuestionConfig as { minY?: unknown }).minY, 0);
+		landscapeMaxY = numberOr((currentQuestionConfig as { maxY?: unknown }).maxY, 10);
+	}
 
 	// Turn off loading once session data arrives
 	$: if ($sessionDetails && sessionLoading) {
@@ -1954,8 +2014,8 @@
 										value={option}
 										checked={selections.includes(option)}
 										on:change={(e) => {
-											const target = e.target as HTMLInputElement;
-											if (target.checked) {
+											const target = e.currentTarget;
+											if (target instanceof HTMLInputElement && target.checked) {
 												responseText = [...selections, option].join(', ');
 											} else {
 												responseText = selections.filter(s => s !== option).join(', ');
