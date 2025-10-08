@@ -267,35 +267,52 @@
 
 		const dashboards: string[] = ['phase'];
 
-		// Collect dashboards from question recommendations
+		// Collect dashboards ONLY from manually selected dashboards in Sanity
 		phaseQuestions.forEach((q) => {
-			// Use recommended_dashboards if available
-			if (Array.isArray(q.recommended_dashboards) && q.recommended_dashboards.length > 0) {
-				q.recommended_dashboards.forEach((d: string) => {
-					if (!dashboards.includes(d)) {
+			// Check for field (supports both snake_case from DB and camelCase from Sanity)
+			const selectedDashboards = q.recommendedDashboards || q.recommended_dashboards;
+			
+			if (Array.isArray(selectedDashboards) && selectedDashboards.length > 0) {
+				selectedDashboards.forEach((d: string) => {
+					// Validate that the dashboard has required data before adding
+					if (!dashboards.includes(d) && isDashboardValid(d, q, responsesList, phaseQuestions)) {
 						dashboards.push(d);
 					}
 				});
-			} else {
-				// Fallback: infer from response type
-				const responseType = q.response_type || 'written';
-				if (responseType === 'written') {
-					dashboards.push('heatmap', 'roadmap', 'quadBubbles');
-				} else if (responseType === 'landscape') {
-					dashboards.push('response-landscape');
-				}
 			}
 		});
 
-		// Always available
-		dashboards.push('participationPulse', 'timeline', 'chat');
-
-		if (responsesList.length > 0) {
-			dashboards.push('leaderboard');
-		}
-
 		return normalizeBoards(dashboards);
 	})();
+
+	// Helper function to validate if a dashboard should be shown based on available data
+	function isDashboardValid(dashboardId: string, question: any, responses: any[], questions: any[]): boolean {
+		const hasResponses = responses.some(r => r.question_id === question.id);
+		const responseType = question.response_type || 'written';
+		
+		// Always valid dashboards
+		if (['overview', 'timeline', 'chat', 'phase'].includes(dashboardId)) return true;
+		
+		// Participation/leaderboard need responses
+		if (['leaderboard', 'participationPulse'].includes(dashboardId)) return hasResponses;
+		
+		// Written response visualizations
+		if (['heatmap', 'roadmap', 'quadBubbles'].includes(dashboardId)) {
+			return responseType === 'written' && hasResponses;
+		}
+		
+		// Landscape needs landscape response type
+		if (dashboardId === 'response-landscape') {
+			return responseType === 'landscape' && hasResponses;
+		}
+		
+		// Scale visualizations
+		if (['maturityDial'].includes(dashboardId)) {
+			return responseType === 'scale' && hasResponses;
+		}
+		
+		return true; // Default to showing if unknown type
+	}
 	$: fallbackBoards = normalizeBoards(DEFAULT_ACTIVE_BOARDS);
 
 	$: if (!userCustomizedBoards) {

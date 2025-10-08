@@ -110,7 +110,7 @@ export const sessionQuestion = defineField({
       }
     }),
     defineField({
-      name: 'dashboards',
+      name: 'recommendedDashboards',
       type: 'array',
       title: 'Dashboards to Display',
       description: `Select which visualizations to show for this question. Note compatibility:
