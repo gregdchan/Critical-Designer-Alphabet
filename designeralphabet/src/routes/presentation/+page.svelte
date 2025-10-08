@@ -682,22 +682,34 @@
 													}).length
 												}))}
 												{@const maxCount = Math.max(...responseCounts.map(r => r.count), 1)}
+												{@const totalResponses = responseCounts.reduce((sum, rc) => sum + rc.count, 0)}
 												
 												<div class="space-y-3">
-													<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+													<div class="flex items-center justify-between">
+														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+														<div class="text-xs text-slate-400">
+															<span class="font-semibold text-cyan-300">{totalResponses}</span> total responses
+														</div>
+													</div>
 													<div class="space-y-2">
 														{#each responseCounts as {option, count}}
+															{@const percentage = totalResponses > 0 ? ((count / totalResponses) * 100).toFixed(1) : '0'}
 															<div class="flex items-center gap-3">
-																<div class="w-32 text-xs text-slate-400 truncate">{option}</div>
-																<div class="flex-1 h-8 bg-slate-800/50 rounded-lg overflow-hidden">
+																<div class="w-40 text-xs text-slate-300 truncate font-medium" title={option}>
+																	{option}
+																</div>
+																<div class="flex-1 h-8 bg-slate-800/50 rounded-lg overflow-hidden relative">
 																	<div 
 																		class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500 flex items-center justify-end px-2"
-																		style="width: {(count / maxCount) * 100}%"
+																		style="width: {totalResponses > 0 ? (count / maxCount) * 100 : 0}%"
 																	>
 																		{#if count > 0}
 																			<span class="text-xs font-semibold text-white">{count}</span>
 																		{/if}
 																	</div>
+																</div>
+																<div class="w-16 text-right text-xs text-slate-400">
+																	{percentage}%
 																</div>
 															</div>
 														{/each}
@@ -747,48 +759,63 @@
 												{@const centerY = 100}
 												
 												<div class="space-y-4">
-													<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+													<div class="flex items-center justify-between">
+														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+														<div class="text-xs text-slate-400">
+															<span class="font-semibold text-purple-300">{totalCount}</span> total responses
+														</div>
+													</div>
 													{#if totalCount > 0}
-														<div class="flex items-center gap-8">
+														<div class="flex items-start gap-8">
 															<!-- Pie Chart SVG -->
-															<svg viewBox="0 0 200 200" class="w-48 h-48">
-																{#each responseCounts as {option, count}, i}
-																	{@const percentage = (count / totalCount) * 100}
-																	{@const startAngle = responseCounts.slice(0, i).reduce((sum, rc) => sum + (rc.count / totalCount) * 360, 0)}
-																	{@const endAngle = startAngle + (count / totalCount) * 360}
-																	{@const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0}
-																	{@const startX = centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180)}
-																	{@const startY = centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180)}
-																	{@const endX = centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180)}
-																	{@const endY = centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180)}
-																	
-																	<path
-																		d="M {centerX} {centerY} L {startX} {startY} A {radius} {radius} 0 {largeArcFlag} 1 {endX} {endY} Z"
-																		fill={colors[i % colors.length]}
-																		stroke="#1e293b"
-																		stroke-width="2"
-																		class="transition-all duration-300 hover:opacity-80"
-																	/>
-																{/each}
-																<!-- Center circle for donut effect -->
-																<circle cx={centerX} cy={centerY} r="50" fill="#0f172a" />
-																<text x={centerX} y={centerY - 5} text-anchor="middle" class="text-2xl font-bold fill-slate-100">
-																	{totalCount}
-																</text>
-																<text x={centerX} y={centerY + 15} text-anchor="middle" class="text-xs fill-slate-400">
-																	responses
-																</text>
-															</svg>
+															<div class="flex-shrink-0">
+																<svg viewBox="0 0 200 200" class="w-52 h-52">
+																	{#each responseCounts as {option, count}, i}
+																		{@const percentage = (count / totalCount) * 100}
+																		{@const startAngle = responseCounts.slice(0, i).reduce((sum, rc) => sum + (rc.count / totalCount) * 360, 0)}
+																		{@const endAngle = startAngle + (count / totalCount) * 360}
+																		{@const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0}
+																		{@const startX = centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180)}
+																		{@const startY = centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180)}
+																		{@const endX = centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180)}
+																		{@const endY = centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180)}
+																		
+																		<path
+																			d="M {centerX} {centerY} L {startX} {startY} A {radius} {radius} 0 {largeArcFlag} 1 {endX} {endY} Z"
+																			fill={colors[i % colors.length]}
+																			stroke="#1e293b"
+																			stroke-width="2"
+																			class="transition-all duration-300 hover:opacity-80"
+																		>
+																			<title>{option}: {count} ({percentage.toFixed(1)}%)</title>
+																		</path>
+																	{/each}
+																	<!-- Center circle for donut effect -->
+																	<circle cx={centerX} cy={centerY} r="50" fill="#0f172a" />
+																	<text x={centerX} y={centerY - 5} text-anchor="middle" class="text-2xl font-bold fill-slate-100">
+																		{totalCount}
+																	</text>
+																	<text x={centerX} y={centerY + 15} text-anchor="middle" class="text-xs fill-slate-400">
+																		responses
+																	</text>
+																</svg>
+															</div>
 															
 															<!-- Legend -->
-															<div class="flex-1 space-y-2">
+															<div class="flex-1 space-y-1">
+																<div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+																	Distribution
+																</div>
 																{#each responseCounts as {option, count}, i}
 																	{@const percentage = ((count / totalCount) * 100).toFixed(1)}
-																	<div class="flex items-center gap-3">
-																		<div class="w-4 h-4 rounded" style="background-color: {colors[i % colors.length]}"></div>
-																		<div class="flex-1 text-sm text-slate-300">{option}</div>
-																		<div class="text-sm font-semibold text-slate-200">
-																			{count} <span class="text-xs text-slate-400">({percentage}%)</span>
+																	<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/50 transition-colors">
+																		<div class="w-3 h-3 rounded-sm flex-shrink-0" style="background-color: {colors[i % colors.length]}"></div>
+																		<div class="flex-1 text-sm text-slate-300 truncate" title={option}>{option}</div>
+																		<div class="text-sm font-semibold text-slate-200 tabular-nums">
+																			{count}
+																		</div>
+																		<div class="w-14 text-right text-xs text-slate-400 tabular-nums">
+																			{percentage}%
 																		</div>
 																	</div>
 																{/each}
