@@ -118,8 +118,9 @@ export const sessionQuestion = defineField({
         {
           type: 'string',
           options: {
-            list: ({ parent }: any) => {
-              const responseType = parent?.parent?.responseType || 'written';
+            list: (context: any) => {
+              // Access parent from context.parent which gives us the sessionQuestion object
+              const responseType = context?.parent?.responseType || 'written';
               const allDashboards = [
                 { title: 'Overview (always available)', value: 'overview' },
                 { title: 'Heatmap (lens clustering)', value: 'heatmap' },

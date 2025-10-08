@@ -28,6 +28,7 @@
 	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
+	import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
 	// New immersive chart components
 	import { loadChartComponent, CHART_REGISTRY, type ChartType } from '$lib/charts';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
@@ -48,7 +49,8 @@
 		IconPlus,
 		IconThumbUp,
 		IconGridDots,
-		IconCards
+		IconCards,
+		IconChartDots3
 	} from '@tabler/icons-svelte';
 	import CardPanel from '$lib/components/session/CardPanel.svelte';
 	import { createSessionCardStore } from '$lib/stores/sessionCards';
@@ -63,7 +65,7 @@
 	let sessionLoading = true;
 	let sessionError = '';
 
-	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'timeline' | 'chat' | 'participants' =
+	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'response-landscape' | 'timeline' | 'chat' | 'participants' =
 		'overview';
 	let responseModalOpen = false;
 	let selectedQuestionId: string | null = null;
@@ -1505,6 +1507,15 @@
 							<IconMap class="h-4 w-4 flex-shrink-0" />
 							Roadmap
 						</button>
+						{#if availableDashboards.includes('response-landscape')}
+							<button
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'response-landscape' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+								on:click={() => (activeTab = 'response-landscape')}
+							>
+								<IconChartDots3 class="h-4 w-4 flex-shrink-0" />
+								<span class="hidden sm:inline">Landscape</span>
+							</button>
+						{/if}
 						<button
 							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'timeline' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'timeline')}
@@ -1568,6 +1579,21 @@
 										<h3 class="text-lg font-semibold text-white mb-4">Roadmap Timeline</h3>
 										<div class="w-full h-[520px] overflow-hidden">
 											<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+										</div>
+									{:else if activeTab === 'response-landscape'}
+										<h3 class="text-lg font-semibold text-white mb-4">Response Landscape</h3>
+										<div class="w-full h-[520px] overflow-hidden">
+											<LandscapeChart
+												responses={responsesForViz}
+												width={isMobile ? 350 : 900}
+												height={isMobile ? 400 : 520}
+												xLabel={landscapeXLabel}
+												yLabel={landscapeYLabel}
+												minX={landscapeMinX}
+												maxX={landscapeMaxX}
+												minY={landscapeMinY}
+												maxY={landscapeMaxY}
+											/>
 										</div>
 									{:else if activeTab === 'participants'}
 										<h3 class="text-lg font-semibold text-white mb-4">Advanced Analytics</h3>
@@ -1670,6 +1696,20 @@
 								{:else if activeTab === 'roadmap'}
 									<div class="min-w-[350px]">
 										<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									</div>
+								{:else if activeTab === 'response-landscape'}
+									<div class="min-w-[350px]">
+										<LandscapeChart
+											responses={responsesForViz}
+											width={isMobile ? 350 : 900}
+											height={isMobile ? 400 : 520}
+											xLabel={landscapeXLabel}
+											yLabel={landscapeYLabel}
+											minX={landscapeMinX}
+											maxX={landscapeMaxX}
+											minY={landscapeMinY}
+											maxY={landscapeMaxY}
+										/>
 									</div>
 								{:else if activeTab === 'timeline'}
 									<div class="space-y-4">
