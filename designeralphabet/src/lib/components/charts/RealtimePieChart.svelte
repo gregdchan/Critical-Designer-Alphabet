@@ -82,7 +82,7 @@
 			<p>Error: {error}</p>
 		</div>
 	{:else}
-		<PieChart {data} {width} {height} {showLegend} roomCode="" questionId="" />
+		<PieChart {data} {width} {height} {showLegend} />
 	{/if}
 </div>
 

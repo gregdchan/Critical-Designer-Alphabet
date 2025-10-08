@@ -77,7 +77,7 @@
 			<p>Error: {error}</p>
 		</div>
 	{:else}
-		<LineChart {data} {scaleSettings} {totalResponses} {width} {height} roomCode="" questionId="" />
+		<LineChart {data} {scaleSettings} {totalResponses} {width} {height} />
 	{/if}
 </div>
 

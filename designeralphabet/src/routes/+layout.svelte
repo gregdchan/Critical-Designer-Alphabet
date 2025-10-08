@@ -10,7 +10,7 @@
 		<Header />
 		<main
 			id="main-content"
-			class="surface mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-8 focus:outline-none sm:px-8"
+			class="surface mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-8 text-slate-800 focus:outline-none sm:px-8"
 			tabindex="-1"
 		>
 			<slot />

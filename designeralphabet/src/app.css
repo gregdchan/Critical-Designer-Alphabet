@@ -6,16 +6,28 @@
 
 :root {
 	color-scheme: light;
-	--brand: 212 100% 46%;
-	--accent-critical: 18 92% 55%;
-	--surface: 214 45% 97%;
+	--brand: 220 75% 48%;
+	--brand-soft: 213 92% 62%;
+	--accent-critical: 16 78% 56%;
+	--accent-soft: 27 93% 65%;
+	--surface: 215 25% 95%;
 	--surface-elevated: 0 0% 100%;
-	--muted: 215 30% 90%;
-	--text-primary: 215 27% 15%;
-	--text-secondary: 215 20% 32%;
-	--text-muted: 215 15% 52%;
-	--border-subtle: 215 32% 88%;
-	--ring: 210 95% 52%;
+	--surface-muted: 216 25% 90%;
+	--surface-subtle: 216 24% 86%;
+	--text-primary: 219 28% 18%;
+	--text-secondary: 219 18% 36%;
+	--text-muted: 219 14% 50%;
+	--border-subtle: 217 22% 85%;
+	--border-strong: 218 17% 72%;
+	--ring: 218 100% 59%;
+	--chart-1: #4c6ef5;
+	--chart-2: #38bdf8;
+	--chart-3: #22a06b;
+	--chart-4: #f6b042;
+	--chart-5: #f7745e;
+	--chart-6: #9b5de5;
+	--chart-7: #14b8a6;
+	--chart-8: #f472b6;
 }
 
 html {
@@ -24,7 +36,7 @@ html {
 
 body {
 	@apply min-h-screen antialiased;
-	background: radial-gradient(circle at top, hsl(214, 45%, 98%) 0%, hsl(210, 50%, 96%) 45%, hsl(200, 45%, 94%) 100%);
+	background: linear-gradient(180deg, hsl(215, 25%, 96%) 0%, hsl(216, 24%, 92%) 45%, hsl(216, 22%, 88%) 100%);
 	color: hsl(var(--text-primary));
 	font-family:
 		'Poppins',
@@ -39,13 +51,17 @@ h1, h2, h3, h4, h5, h6 {
 
 a {
 	color: hsl(var(--brand));
-	transition: color 150ms ease;
-	text-decoration: none;
+	transition: color 150ms ease, text-decoration-color 150ms ease;
+	text-decoration: underline;
+	text-decoration-color: transparent;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 4px;
 }
 
 a:hover,
 a:focus-visible {
-	color: hsl(210, 90%, 40%);
+	color: hsl(var(--brand-soft));
+	text-decoration-color: currentColor;
 }
 
 a:focus-visible {
@@ -62,7 +78,7 @@ a:focus-visible {
 	@apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2;
 	background: hsl(var(--surface-elevated));
 	border: 1px solid hsl(var(--border-subtle));
-	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+	box-shadow: 0 16px 45px rgba(15, 23, 42, 0.12);
 	color: hsl(var(--text-primary));
 }
 
@@ -74,12 +90,50 @@ a:focus-visible {
 .surface {
 	background: hsl(var(--surface-elevated));
 	border: 1px solid hsl(var(--border-subtle));
-	box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+	box-shadow: 0 22px 55px rgba(15, 23, 42, 0.08);
+	color: hsl(var(--text-secondary));
 }
 
 .surface-muted {
-	background: hsl(var(--muted));
+	background: hsl(var(--surface-muted));
 	border: 1px solid hsl(var(--border-subtle));
+	color: hsl(var(--text-secondary));
+}
+
+.surface-soft {
+	background: hsl(var(--surface-subtle));
+	border: 1px solid hsl(var(--border-subtle) / 0.8);
+	color: hsl(var(--text-secondary));
+}
+
+.panel {
+	background: hsl(var(--surface-elevated) / 0.96);
+	border: 1px solid hsl(var(--border-subtle));
+	box-shadow:
+		0 24px 60px rgba(15, 23, 42, 0.12),
+		0 12px 32px rgba(15, 23, 42, 0.06);
+	color: hsl(var(--text-secondary));
+}
+
+.panel h1,
+.panel h2,
+.panel h3,
+.panel h4,
+.panel h5,
+.panel h6 {
+	color: hsl(var(--text-primary));
+}
+
+.chip {
+	background: hsl(var(--brand) / 0.12);
+	border: 1px solid hsl(var(--brand) / 0.25);
+	color: hsl(var(--brand));
+}
+
+.chart-card {
+	background: hsl(var(--surface-elevated) / 0.96);
+	border: 1px solid hsl(var(--border-subtle));
+	box-shadow: 0 18px 55px rgba(15, 23, 42, 0.1);
 }
 
 [data-reduced-motion='true'] *,

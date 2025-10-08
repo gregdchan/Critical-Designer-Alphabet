@@ -8,29 +8,33 @@ module.exports = {
 		extend: {
 			colors: {
 				brand: 'hsl(var(--brand))',
+				'brand-soft': 'hsl(var(--brand-soft))',
 				surface: 'hsl(var(--surface))',
-				muted: 'hsl(var(--muted))',
+				'surface-elevated': 'hsl(var(--surface-elevated))',
+				'surface-muted': 'hsl(var(--surface-muted))',
+				muted: 'hsl(var(--surface-muted))',
 				'critical-accent': 'hsl(var(--accent-critical))',
-				primary: '#2563eb',
-				secondary: '#7c3aed',
-				accent: '#0ea5e9',
-				success: '#16a34a',
+				primary: '#4c6ef5',
+				secondary: '#9b5de5',
+				accent: '#38bdf8',
+				success: '#22a06b',
 				warning: '#f59e0b',
-				error: '#dc2626',
-				// Enhanced neon colors for immersive dashboard
-				neonPink: '#ff2aad',
-				neonCyan: '#00fff7',
-				neonLime: '#aaff00',
-				neonPurple: '#6c00ff',
-				neonOrange: '#ff6b00',
-				neonBlue: '#0099ff',
-				neonYellow: '#ffff00',
-				neonMagenta: '#ff00ff',
-				retroPurple: '#8a2be2',
-				darkBg: '#f5f7ff',
+				error: '#f2645c',
+				// Insightful palette for charts and infographics
+				chart: {
+					blue: '#4c6ef5',
+					sky: '#38bdf8',
+					teal: '#14b8a6',
+					green: '#22a06b',
+					gold: '#f6b042',
+					coral: '#f7745e',
+					plum: '#9b5de5',
+					rose: '#f472b6'
+				},
+				darkBg: '#eef1f5',
 				surfaceBase: '#ffffff',
-				card: '#f8fafc',
-				midnight: '#e6efff'
+				card: '#f1f5f9',
+				midnight: '#dde3ef'
 			},
 			fontFamily: {
 				sans: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],

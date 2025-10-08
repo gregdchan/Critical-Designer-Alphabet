@@ -6,8 +6,13 @@ All SVG infographics have been converted to D3-based charts with full Supabase r
 ## Architecture
 
 ```
-Supabase Database → useSupabaseRealtime Hooks → Realtime Chart Wrappers → D3 Visualizations
+Supabase Database → useSupabaseRealtime Hooks → Realtime Chart Wrappers → D3 Chart Components (Visualization Only)
 ```
+
+**Key Principle**: Separation of concerns
+- **D3 Chart Components** (BarChart, PieChart, LineChart): Pure visualization components that accept data via props
+- **Realtime Wrapper Components** (RealtimeBarChart, RealtimePieChart, RealtimeLineChart): Handle Supabase subscriptions and data transformation
+- **Hooks** (useResponses, useQuestions): Manage Supabase realtime connections
 
 ## Components Created
 

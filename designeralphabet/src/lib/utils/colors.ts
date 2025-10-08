@@ -1,62 +1,66 @@
-// Neon color palette constants
-export const NEON_COLORS = {
-	pink: '#ff2aad',
-	cyan: '#00fff7',
-	lime: '#aaff00',
-	purple: '#6c00ff',
-	orange: '#ff6b00',
-	blue: '#0099ff',
-	yellow: '#ffff00',
-	magenta: '#ff00ff'
+// Insightful color palette constants tuned for the lighter theme
+export const INSIGHT_COLORS = {
+	ocean: '#4c6ef5',
+	sky: '#38bdf8',
+	teal: '#2ab3bf',
+	mint: '#22a06b',
+	gold: '#f6b042',
+	coral: '#f7745e',
+	plum: '#9b5de5',
+	rose: '#f472b6'
 } as const;
 
 export const BACKGROUND_COLORS = {
-	dark: '#0d0d0d',
-	surface: '#1a1a1a',
-	card: '#2a2a2a'
+	base: '#eef1f5',
+	surface: '#f8fafc',
+	card: '#ffffff',
+	strong: '#e2e7f0'
 } as const;
 
 // Lens color mapping
 export const LENS_COLORS = {
-	Risk: NEON_COLORS.pink,
-	Work: NEON_COLORS.cyan,
-	Sustainability: NEON_COLORS.lime,
-	Ethics: NEON_COLORS.purple,
-	Justice: NEON_COLORS.orange,
-	Culture: NEON_COLORS.blue,
-	Innovation: NEON_COLORS.yellow,
-	Governance: NEON_COLORS.magenta
+	Risk: INSIGHT_COLORS.coral,
+	Work: INSIGHT_COLORS.sky,
+	Sustainability: INSIGHT_COLORS.mint,
+	Ethics: INSIGHT_COLORS.plum,
+	Justice: INSIGHT_COLORS.gold,
+	Culture: INSIGHT_COLORS.ocean,
+	Innovation: INSIGHT_COLORS.teal,
+	Governance: INSIGHT_COLORS.rose
 } as const;
 
 // Risk matrix colors
 export const RISK_COLORS = {
-	low: '#10b981', // Green
-	medium: '#f59e0b', // Yellow
-	high: '#ef4444', // Red
-	critical: '#dc2626' // Dark red
+	low: '#22a06b', // Meadow
+	medium: '#f6b042', // Amber
+	high: '#f7745e', // Coral
+	critical: '#d63f5c' // Deep rose
 } as const;
 
 // Maturity stage colors
 export const MATURITY_COLORS = [
-	'#6b7280', // Gray - Foundational
-	'#3b82f6', // Blue - Developing
-	'#10b981', // Green - Proficient
-	'#f59e0b', // Yellow - Advanced
-	'#8b5cf6' // Purple - Aspirational
+	'#94a3b8', // Slate - Foundational
+	INSIGHT_COLORS.ocean, // Developing
+	INSIGHT_COLORS.mint, // Proficient
+	INSIGHT_COLORS.gold, // Advanced
+	INSIGHT_COLORS.plum // Aspirational
 ] as const;
 
 // Color scales for heatmaps
 export const HEATMAP_SCALE = [
-	'#1e293b', // Very low
-	'#0f766e', // Low
-	'#059669', // Medium
-	'#fbbf24', // High
-	'#f59e0b' // Very high
+	'#e7f0ff', // Very low
+	'#c5e1f7', // Low
+	'#7ec9d9', // Medium
+	'#3a94c2', // High
+	'#1d4ed8' // Very high
 ] as const;
+
+// Backwards compatibility export for existing imports
+export const NEON_COLORS = INSIGHT_COLORS;
 
 // Utility functions
 export function getLensColor(lens: string): string {
-	return LENS_COLORS[lens as keyof typeof LENS_COLORS] || NEON_COLORS.cyan;
+	return LENS_COLORS[lens as keyof typeof LENS_COLORS] || INSIGHT_COLORS.sky;
 }
 
 export function getRiskColor(impact: number, likelihood: number): string {
@@ -72,16 +76,18 @@ export function getMaturityColor(level: number): string {
 }
 
 export function interpolateNeonGradient(t: number): string {
-	// Create gradient from cyan to pink
-	const r = Math.round(0 + t * 255);
-	const g = Math.round(255 - t * 213);
-	const b = Math.round(247 - t * 74);
+	// Create gradient from ocean blue to warm coral
+	const start = [76, 110, 245]; // ocean
+	const end = [247, 116, 94]; // coral
+	const r = Math.round(start[0] + t * (end[0] - start[0]));
+	const g = Math.round(start[1] + t * (end[1] - start[1]));
+	const b = Math.round(start[2] + t * (end[2] - start[2]));
 	return `rgb(${r}, ${g}, ${b})`;
 }
 
 // Generate accessible color palette
 export function generateAccessiblePalette(count: number): string[] {
-	const colors = Object.values(NEON_COLORS);
+	const colors = Object.values(INSIGHT_COLORS);
 	const result: string[] = [];
 
 	for (let i = 0; i < count; i++) {

@@ -107,12 +107,9 @@ async function fetchBundle(code: string) {
 function connectWebSocket(code: string) {
 	if (!browser) return;
 
-	// Skip WebSocket if explicitly disabled (e.g., on Railway/Node.js deployments)
-	const useWebSocket = import.meta.env.VITE_USE_WEBSOCKET !== 'false';
-	if (!useWebSocket) {
-		console.log('[WS] WebSocket disabled - using Supabase Realtime only');
-		return;
-	}
+	// WebSocket is completely disabled - use Supabase Realtime instead
+	console.log('[WS] WebSocket disabled - all realtime functionality uses Supabase');
+	return;
 
 	// Clean up existing connection
 	if (ws) {
