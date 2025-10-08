@@ -106,8 +106,7 @@
 	let sessionPreview = {
 		phases: [] as any[],
 		totalDuration: 0,
-		questionCount: 0,
-		dashboardTypes: [] as string[]
+		questionCount: 0
 	};
 	let selectedPhaseIndex = 0;
 	let activeSessions: Array<{
@@ -202,8 +201,7 @@
 						responseType: 'written',
 						mapType: 'responses',
 						config: {},
-						orderIndex: roundIndex * 100 + questionIndex,
-						recommendedDashboards: []
+						orderIndex: roundIndex * 100 + questionIndex
 					});
 				} else {
 					payloads.push({
@@ -213,9 +211,8 @@
 						lens: question.lens || null,
 						responseType: question.responseType || 'written',
 						mapType: question.mapType || 'responses',
-						config: question.scale || question.landscape || question.options || {},
-						orderIndex: roundIndex * 100 + questionIndex,
-						recommendedDashboards: question.recommendedDashboards || []
+						config: question.scale || question.landscape || question.heatmap || question.roadmap || question.options || {},
+						orderIndex: roundIndex * 100 + questionIndex
 					});
 				}
 			});
@@ -376,18 +373,13 @@
 			...phase,
 			index,
 			status: index === 0 ? 'ready' : 'pending',
-			questions: rounds
-				.flatMap((r) => r.questions ?? [])
-				.filter((q: any) =>
-					q.recommendedDashboards?.some((d: string) => phase.dashboards?.includes(d))
-				)
+			breakoutRounds: phase.breakoutRounds || []
 		}));
 
 		sessionPreview = {
 			phases: previewPhases,
 			totalDuration: phases.reduce((sum, p) => sum + (p.durationMinutes ?? 0), 0),
-			questionCount: rounds.reduce((sum, r) => sum + (r.questions?.length ?? 0), 0),
-			dashboardTypes: [...new Set(phases.flatMap((p) => p.dashboards ?? []))]
+			questionCount: rounds.reduce((sum, r) => sum + (r.questions?.length ?? 0), 0)
 		};
 	}
 
@@ -992,12 +984,6 @@
 								<div class="flex justify-between items-center">
 									<span class="text-slate-400">Questions</span>
 									<span class="text-white font-semibold">{sessionPreview.questionCount}</span>
-								</div>
-								<div class="flex justify-between items-center">
-									<span class="text-slate-400">Dashboard Types</span>
-									<span class="text-white font-semibold"
-										>{sessionPreview.dashboardTypes.length}</span
-									>
 								</div>
 							</div>
 						</div>

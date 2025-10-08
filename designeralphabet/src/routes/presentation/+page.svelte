@@ -248,7 +248,38 @@
 		return a.length === b.length && a.every((value, index) => value === b[index]);
 	}
 
-	$: recommendedBoards = normalizeBoards(activePhase?.dashboards ?? []);
+	// Dynamically determine available dashboards based on question response types in active phase
+	$: recommendedBoards = (() => {
+		if (!activePhase) return normalizeBoards([]);
+
+		const phaseQuestions = questionsList.filter(
+			(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
+		);
+
+		const dashboards: string[] = ['phase'];
+
+		// Add dashboards based on question response types
+		phaseQuestions.forEach((q) => {
+			const responseType = q.response_type || 'written';
+
+			if (responseType === 'written') {
+				dashboards.push('heatmap', 'roadmap', 'quadBubbles');
+			} else if (responseType === 'landscape') {
+				// Landscape questions could add a specific landscape board
+			} else if (responseType === 'scale') {
+				// Scale questions work with aggregate views
+			}
+		});
+
+		// Always available
+		dashboards.push('participationPulse', 'timeline', 'chat');
+
+		if (responsesList.length > 0) {
+			dashboards.push('leaderboard');
+		}
+
+		return normalizeBoards(dashboards);
+	})();
 	$: fallbackBoards = normalizeBoards(DEFAULT_ACTIVE_BOARDS);
 
 	$: if (!userCustomizedBoards) {

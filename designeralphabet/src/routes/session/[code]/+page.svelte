@@ -216,10 +216,39 @@
 			: null;
 		return keyed ?? phasesList.find((phase) => phase.status === 'active');
 	})();
-	$: recommendedDashboards =
-		Array.isArray(activePhase?.dashboards) && activePhase.dashboards?.length
-			? activePhase.dashboards
-			: ['responses', 'heatmap', 'roadmap', 'timeline', 'chat'];
+	// Dynamically determine available dashboards based on question response types in active phase
+	$: availableDashboards = (() => {
+		if (!activePhase) return ['overview', 'timeline', 'chat', 'participants'];
+
+		const phaseQuestions = questionsList.filter(
+			(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
+		);
+
+		const dashboards = new Set<string>(['overview', 'timeline', 'chat', 'participants']);
+
+		// Add dashboards based on question response types
+		phaseQuestions.forEach((q) => {
+			const responseType = q.response_type || 'written';
+
+			if (responseType === 'written') {
+				dashboards.add('heatmap');
+				dashboards.add('roadmap');
+			} else if (responseType === 'landscape') {
+				// Landscape questions only work with landscape view (not currently a tab, could be added)
+			} else if (responseType === 'scale') {
+				// Scale questions work with distribution/aggregate views
+			}
+		});
+
+		// Always available if there are responses
+		if (responsesList.length > 0) {
+			dashboards.add('leaderboard');
+		}
+
+		return Array.from(dashboards);
+	})();
+
+	$: recommendedDashboards = availableDashboards;
 
 	function updatePhaseCountdown() {
 		if (!browser) return;

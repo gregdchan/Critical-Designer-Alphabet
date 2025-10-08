@@ -169,28 +169,6 @@ export const WorkshopTemplate = defineType({
               description: 'Optional: used to pre-fill timers.'
             }),
             defineField({
-              name: 'dashboards',
-              type: 'array',
-              of: [{ type: 'string' }],
-              options: {
-                list: [
-                  { title: 'Responses Board', value: 'responses' },
-                  { title: 'Response Landscape', value: 'response-landscape' },
-                  { title: 'Heatmap', value: 'heatmap' },
-                  { title: 'Roadmap', value: 'roadmap' },
-                  { title: 'Timeline', value: 'timeline' },
-                  { title: 'Leaderboard', value: 'leaderboard' },
-                  { title: 'Chat Feed', value: 'chat' },
-                  { title: 'Quad Bubbles', value: 'quadBubbles' },
-                  { title: 'Maturity Dial', value: 'maturityDial' },
-                  { title: 'Risk Impact Matrix', value: 'riskImpactMatrix' },
-                  { title: 'Participation Pulse', value: 'participationPulse' },
-                  { title: 'Inclusivity Meter', value: 'inclusivityMeter' }
-                ]
-              },
-              description: 'Controls which dashboards are highlighted during the phase.'
-            }),
-            defineField({
               name: 'breakoutRounds',
               title: 'Breakout Rounds',
               type: 'array',
@@ -223,28 +201,6 @@ export const WorkshopTemplate = defineType({
                       type: 'array',
                       of: [{ type: 'sessionQuestion' }],
                       description: 'Questions for participants to respond to during this round.'
-                    }),
-                    defineField({
-                      name: 'dashboards',
-                      type: 'array',
-                      of: [{ type: 'string' }],
-                      options: {
-                        list: [
-                          { title: 'Responses Board', value: 'responses' },
-                          { title: 'Response Landscape', value: 'response-landscape' },
-                          { title: 'Heatmap', value: 'heatmap' },
-                          { title: 'Roadmap', value: 'roadmap' },
-                          { title: 'Timeline', value: 'timeline' },
-                          { title: 'Leaderboard', value: 'leaderboard' },
-                          { title: 'Chat Feed', value: 'chat' },
-                          { title: 'Quad Bubbles', value: 'quadBubbles' },
-                          { title: 'Maturity Dial', value: 'maturityDial' },
-                          { title: 'Risk Impact Matrix', value: 'riskImpactMatrix' },
-                          { title: 'Participation Pulse', value: 'participationPulse' },
-                          { title: 'Inclusivity Meter', value: 'inclusivityMeter' }
-                        ]
-                      },
-                      description: 'Override default dashboards for this breakout round.'
                     })
                   ],
                   preview: {
