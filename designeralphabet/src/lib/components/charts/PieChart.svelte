@@ -4,20 +4,14 @@
 	import { scaleOrdinal } from 'd3-scale';
 	import { interpolate } from 'd3-interpolate';
 	import { onMount, afterUpdate } from 'svelte';
-	import { useResponses, useQuestions } from '$lib/hooks/useSupabaseRealtime';
 
-	export let roomCode: string = '';
-	export let questionId: string = '';
+	export let data: Array<{ label: string; value: number; percentage: number }> = [];
 	export let width = 400;
 	export let height = 400;
 	export let showLegend = true;
 
 	let svgElement: SVGSVGElement;
 	let chartGroup: SVGGElement;
-	let data: Array<{ label: string; value: number; percentage: number }> = [];
-	let previousData: Array<{ label: string; value: number }> = [];
-	let loading = true;
-	let error: string | null = null;
 
 	const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 	$: radius = Math.min(width, height) / 2 - Math.max(...Object.values(margin));
@@ -36,67 +30,6 @@
 	];
 
 	const colorScale = scaleOrdinal<string>().range(colors);
-
-	// Supabase realtime subscriptions
-	let responses: any[] = [];
-	let questions: any[] = [];
-
-	if (roomCode) {
-		useResponses(roomCode, (state) => {
-			responses = state.data;
-			loading = state.loading;
-			error = state.error;
-			updateData();
-		});
-
-		useQuestions(roomCode, (state) => {
-			questions = state.data;
-			updateData();
-		});
-	}
-
-	function updateData() {
-		if (!questionId || !responses.length || !questions.length) {
-			data = [];
-			return;
-		}
-
-		const question = questions.find((q) => q.id === questionId);
-		if (!question) {
-			data = [];
-			return;
-		}
-
-		const questionResponses = responses.filter((r) => r.question_id === questionId);
-		const options = question.options || [];
-
-		const responseCounts = options.map((option: string) => {
-			const count = questionResponses.filter((r) => {
-				try {
-					const value = typeof r.value === 'string' ? JSON.parse(r.value) : r.value;
-					return Array.isArray(value) ? value.includes(option) : value === option;
-				} catch {
-					return r.value === option;
-				}
-			}).length;
-			return { label: option, value: count };
-		});
-
-		const totalCount = responseCounts.reduce((sum, rc) => sum + rc.value, 0);
-
-		// Filter out zero values and calculate percentages
-		data = responseCounts
-			.filter((rc) => rc.value > 0)
-			.map((rc) => ({
-				label: rc.label,
-				value: rc.value,
-				percentage: totalCount > 0 ? (rc.value / totalCount) * 100 : 0
-			}));
-
-		if (svgElement && chartGroup) {
-			updateChart();
-		}
-	}
 
 	function updateChart() {
 		if (!svgElement || !chartGroup || data.length === 0) return;
@@ -227,13 +160,11 @@
 	}
 
 	onMount(() => {
-		if (!roomCode) {
-			updateChart();
-		}
+		updateChart();
 	});
 
 	afterUpdate(() => {
-		if (!roomCode && data.length > 0) {
+		if (data.length > 0) {
 			updateChart();
 		}
 	});
@@ -271,16 +202,7 @@
 		</div>
 	{/if}
 
-	{#if loading}
-		<div class="overlay">
-			<div class="spinner"></div>
-			<div class="loading-text">Loading data...</div>
-		</div>
-	{:else if error}
-		<div class="overlay">
-			<div class="error-text">Error: {error}</div>
-		</div>
-	{:else if data.length === 0}
+	{#if data.length === 0}
 		<div class="overlay">
 			<div class="empty-text">No responses yet</div>
 		</div>
@@ -376,29 +298,8 @@
 		backdrop-filter: blur(4px);
 	}
 
-	.spinner {
-		width: 2rem;
-		height: 2rem;
-		border: 4px solid rgb(6, 182, 212);
-		border-top-color: transparent;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	.loading-text,
 	.empty-text {
 		color: rgb(148, 163, 184);
-		font-size: 0.875rem;
-	}
-
-	.error-text {
-		color: rgb(239, 68, 68);
 		font-size: 0.875rem;
 	}
 

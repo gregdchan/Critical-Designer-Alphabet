@@ -4,78 +4,19 @@
 	import { line, curveMonotoneX, area } from 'd3-shape';
 	import { extent, max } from 'd3-array';
 	import { onMount, afterUpdate } from 'svelte';
-	import { useResponses, useQuestions } from '$lib/hooks/useSupabaseRealtime';
 
-	export let roomCode: string = '';
-	export let questionId: string = '';
+	export let data: Array<{ value: number; count: number }> = [];
+	export let scaleSettings = { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
+	export let totalResponses = 0;
 	export let width = 800;
 	export let height = 400;
 
 	let svgElement: SVGSVGElement;
 	let chartGroup: SVGGElement;
-	let data: Array<{ value: number; count: number }> = [];
-	let scaleSettings = { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
-	let totalResponses = 0;
-	let loading = true;
-	let error: string | null = null;
 
 	const margin = { top: 20, right: 40, bottom: 60, left: 60 };
 	$: innerWidth = width - margin.left - margin.right;
 	$: innerHeight = height - margin.top - margin.bottom;
-
-	// Supabase realtime subscriptions
-	let responses: any[] = [];
-	let questions: any[] = [];
-
-	if (roomCode) {
-		useResponses(roomCode, (state) => {
-			responses = state.data;
-			loading = state.loading;
-			error = state.error;
-			updateData();
-		});
-
-		useQuestions(roomCode, (state) => {
-			questions = state.data;
-			updateData();
-		});
-	}
-
-	function updateData() {
-		if (!questionId || !responses.length || !questions.length) {
-			data = [];
-			return;
-		}
-
-		const question = questions.find((q) => q.id === questionId);
-		if (!question) {
-			data = [];
-			return;
-		}
-
-		scaleSettings = question.scale || { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
-		const questionResponses = responses.filter((r) => r.question_id === questionId);
-
-		// Count occurrences of each value
-		const valueCounts = new Map<number, number>();
-		questionResponses.forEach((response) => {
-			const value = typeof response.value === 'string' ? parseFloat(response.value) : response.value;
-			if (!isNaN(value)) {
-				valueCounts.set(value, (valueCounts.get(value) || 0) + 1);
-			}
-		});
-
-		// Convert to array and sort
-		data = Array.from(valueCounts.entries())
-			.map(([value, count]) => ({ value, count }))
-			.sort((a, b) => a.value - b.value);
-
-		totalResponses = data.reduce((sum, d) => sum + d.count, 0);
-
-		if (svgElement && chartGroup) {
-			updateChart();
-		}
-	}
 
 	function updateChart() {
 		if (!svgElement || !chartGroup || data.length === 0) return;
@@ -332,13 +273,11 @@
 	}
 
 	onMount(() => {
-		if (!roomCode) {
-			updateChart();
-		}
+		updateChart();
 	});
 
 	afterUpdate(() => {
-		if (!roomCode && data.length > 0) {
+		if (data.length > 0) {
 			updateChart();
 		}
 	});
@@ -366,16 +305,7 @@
 		<g bind:this={chartGroup} transform="translate({margin.left}, {margin.top})" />
 	</svg>
 
-	{#if loading}
-		<div class="overlay">
-			<div class="spinner"></div>
-			<div class="loading-text">Loading data...</div>
-		</div>
-	{:else if error}
-		<div class="overlay">
-			<div class="error-text">Error: {error}</div>
-		</div>
-	{:else if data.length === 0}
+	{#if data.length === 0}
 		<div class="overlay">
 			<div class="empty-text">No responses yet</div>
 		</div>
@@ -401,29 +331,8 @@
 		backdrop-filter: blur(4px);
 	}
 
-	.spinner {
-		width: 2rem;
-		height: 2rem;
-		border: 4px solid rgb(6, 182, 212);
-		border-top-color: transparent;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	.loading-text,
 	.empty-text {
 		color: rgb(148, 163, 184);
-		font-size: 0.875rem;
-	}
-
-	.error-text {
-		color: rgb(239, 68, 68);
 		font-size: 0.875rem;
 	}
 

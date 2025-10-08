@@ -10,8 +10,8 @@
 		chat,
 		leaderboard,
 		phases as phasesStore,
-		startRealtimeSession,
-		stopRealtimeSession
+		// startRealtimeSession,
+		// stopRealtimeSession
 	} from '$lib/realtime';
 	import { CHART_REGISTRY } from '$lib/charts';
 	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
@@ -408,8 +408,8 @@
 
 	async function loadSession(code: string) {
 		if (!code) return;
-		await stopRealtimeSession();
-		await startRealtimeSession(code);
+		// await stopRealtimeSession();
+		// await startRealtimeSession(code);
 		activeCode = code;
 		userCustomizedBoards = false;
 		activeBoards = [];
@@ -446,7 +446,7 @@
 	});
 
 	onDestroy(() => {
-		stopRealtimeSession();
+		// stopRealtimeSession();
 	});
 
 	async function handleStartPresentation(event: Event) {
