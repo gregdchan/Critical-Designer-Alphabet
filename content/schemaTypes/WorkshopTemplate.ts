@@ -68,14 +68,22 @@ export const WorkshopTemplate = defineType({
         }
       ],
       description: 'Describe the core challenge or opportunity this template addresses.',
-      group: 'overview'
+      group: 'overview',
+      validation: (rule) =>
+        rule.custom((value) =>
+          value === undefined || Array.isArray(value) ? true : 'Challenge must be an array of blocks.',
+        ),
     }),
     defineField({
       name: 'lenses',
       type: 'array',
       of: [{ type: 'string' }],
       initialValue: ['Risk', 'Work', 'Sustainability', 'Ethics'],
-      group: 'overview'
+      group: 'overview',
+      validation: (rule) =>
+        rule.custom((value) =>
+          value === undefined || Array.isArray(value) ? true : 'Provide lenses as an array.',
+        ),
     }),
     defineField({
       name: 'sections',
@@ -92,10 +100,32 @@ export const WorkshopTemplate = defineType({
               name: 'whatToBring',
               title: 'What to Bring',
               type: 'array',
-              of: [{ type: 'string' }]
+              of: [{ type: 'string' }],
+              validation: (rule) =>
+                rule.custom((value) =>
+                  value === undefined || Array.isArray(value)
+                    ? true
+                    : 'Enter “What to bring” as a list.',
+                )
             }),
-            defineField({ name: 'rules', type: 'array', of: [{ type: 'string' }] }),
-            defineField({ name: 'quickStart', type: 'array', of: [{ type: 'string' }] })
+            defineField({
+              name: 'rules',
+              type: 'array',
+              of: [{ type: 'string' }],
+              validation: (rule) =>
+                rule.custom((value) =>
+                  value === undefined || Array.isArray(value) ? true : 'Rules must be a list.',
+                )
+            }),
+            defineField({
+              name: 'quickStart',
+              type: 'array',
+              of: [{ type: 'string' }],
+              validation: (rule) =>
+                rule.custom((value) =>
+                  value === undefined || Array.isArray(value) ? true : 'Quick start must be a list.',
+                )
+            })
           ]
         }),
         defineField({
@@ -113,7 +143,11 @@ export const WorkshopTemplate = defineType({
                   { title: 'Debrief Circle', value: 'debrief-circle' }
                 ]
               },
-              initialValue: ['prioritize', 'now-next-later']
+              initialValue: ['prioritize', 'now-next-later'],
+              validation: (rule) =>
+                rule.custom((value) =>
+                  value === undefined || Array.isArray(value) ? true : 'Methods must be a list.',
+                )
             }),
             defineField({ name: 'instructions', type: 'text', rows: 4 })
           ]
@@ -126,7 +160,13 @@ export const WorkshopTemplate = defineType({
             defineField({
               name: 'exportFields',
               type: 'array',
-              of: [{ type: 'string' }]
+              of: [{ type: 'string' }],
+              validation: (rule) =>
+                rule.custom((value) =>
+                  value === undefined || Array.isArray(value)
+                    ? true
+                    : 'Export fields must be provided as a list.',
+                )
             })
           ]
         })
@@ -200,7 +240,13 @@ export const WorkshopTemplate = defineType({
                       name: 'questions',
                       type: 'array',
                       of: [{ type: 'sessionQuestion' }],
-                      description: 'Questions for participants to respond to during this round.'
+                      description: 'Questions for participants to respond to during this round.',
+                      validation: (rule) =>
+                        rule.custom((value) =>
+                          value === undefined || Array.isArray(value)
+                            ? true
+                            : 'Questions must be saved as a list.',
+                        )
                     })
                   ],
                   preview: {
@@ -210,7 +256,13 @@ export const WorkshopTemplate = defineType({
                     }
                   }
                 })
-              ]
+              ],
+              validation: (rule) =>
+                rule.custom((value) =>
+                  value === undefined || Array.isArray(value)
+                    ? true
+                    : 'Breakout rounds must be saved as a list.',
+                )
             })
           ],
           preview: {
@@ -226,7 +278,11 @@ export const WorkshopTemplate = defineType({
             }
           }
         })
-      ]
+      ],
+      validation: (rule) =>
+        rule.custom((value) =>
+          value === undefined || Array.isArray(value) ? true : 'Phases must be saved as an array.',
+        ),
     }),
     defineField({
       name: 'facilitation',
@@ -237,7 +293,11 @@ export const WorkshopTemplate = defineType({
           name: 'roles',
           type: 'array',
           of: [{ type: 'string' }],
-          initialValue: ['facilitator', 'participant']
+          initialValue: ['facilitator', 'participant'],
+          validation: (rule) =>
+            rule.custom((value) =>
+              value === undefined || Array.isArray(value) ? true : 'Roles must be provided as a list.',
+            )
         }),
         defineField({
           name: 'fairnessThreshold',
@@ -259,7 +319,11 @@ export const WorkshopTemplate = defineType({
           name: 'badges',
           type: 'array',
           of: [{ type: 'string' }],
-          initialValue: ['Bridge Builder', 'Reflective', 'Justice Seeker', 'Amplifier']
+          initialValue: ['Bridge Builder', 'Reflective', 'Justice Seeker', 'Amplifier'],
+          validation: (rule) =>
+            rule.custom((value) =>
+              value === undefined || Array.isArray(value) ? true : 'Badges must be provided as a list.',
+            )
         })
       ]
     }),
@@ -283,7 +347,11 @@ export const WorkshopTemplate = defineType({
               { title: 'Roadmap', value: 'roadmap' }
             ]
           },
-          initialValue: ['quadBubbles', 'participationPulse', 'inclusivityMeter']
+          initialValue: ['quadBubbles', 'participationPulse', 'inclusivityMeter'],
+          validation: (rule) =>
+            rule.custom((value) =>
+              value === undefined || Array.isArray(value) ? true : 'Charts must be selected as a list.',
+            )
         }),
         defineField({
           name: 'theme',
@@ -321,7 +389,11 @@ export const WorkshopTemplate = defineType({
             defineField({ name: 'url', type: 'url' })
           ]
         })
-      ]
+      ],
+      validation: (rule) =>
+        rule.custom((value) =>
+          value === undefined || Array.isArray(value) ? true : 'Resources must be saved as a list.',
+        )
     })
   ],
   preview: {

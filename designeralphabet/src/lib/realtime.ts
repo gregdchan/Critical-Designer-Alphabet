@@ -114,8 +114,9 @@ function connectWebSocket(code: string) {
 	}
 
 	// Create WebSocket connection
+	const explicitWsUrl = (import.meta.env.VITE_REALTIME_WS_URL ?? '').trim();
 	const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-	const wsUrl = `${protocol}//${window.location.host}/ws`;
+	const wsUrl = explicitWsUrl.length > 0 ? explicitWsUrl : `${protocol}//${window.location.host}/ws`;
 
 	ws = new WebSocket(wsUrl);
 
@@ -239,8 +240,14 @@ function handleWebSocketMessage(message: any, code: string) {
 
 export async function startRealtimeSession(code: string) {
 	if (!browser) return;
-	activeCode = code;
+	if (!code) return;
+
+	if (activeCode === code && ws) {
+		return;
+	}
+
 	stopRealtimeSession();
+	activeCode = code;
 	await fetchBundle(code);
 
 	// Connect WebSocket for realtime updates

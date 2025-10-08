@@ -266,6 +266,14 @@
 			landscapeLabel = coords.label;
 			landscapeX = coords.x;
 			landscapeY = coords.y;
+			const serialized = JSON.stringify({
+				x: landscapeX,
+				y: landscapeY,
+				label: landscapeLabel
+			});
+			if (responseText !== serialized) {
+				responseText = serialized;
+			}
 		} else {
 			landscapeLabel = '';
 			landscapeX = 5;
@@ -605,7 +613,14 @@
 	});
 
 	async function submitResponse() {
-		if (!selectedQuestionId || !responseText.trim()) return;
+		const normalizedResponseText =
+			typeof responseText === 'string'
+				? responseText.trim()
+				: responseText
+					? JSON.stringify(responseText)
+					: '';
+
+		if (!selectedQuestionId || !normalizedResponseText) return;
 
 		// Check if we're in an active phase with remaining time
 		if (activePhase && !phaseRemainingMs) {
@@ -624,7 +639,7 @@
 		await apiAddResponse(sessionCode, {
 			questionId: selectedQuestionId,
 			participantId: currentParticipant?.id ?? null,
-			text: responseText.trim(),
+			text: normalizedResponseText,
 			cards: allCards
 		});
 		responseModalOpen = false;

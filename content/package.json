@@ -9,12 +9,14 @@
     "start": "sanity start",
     "build": "sanity build",
     "deploy": "sanity deploy",
-    "deploy-graphql": "sanity graphql deploy"
+    "deploy-graphql": "sanity graphql deploy",
+    "normalize:workshop": "ts-node ./scripts/normalizeWorkshopTemplate.ts"
   },
   "keywords": [
     "sanity"
   ],
   "dependencies": {
+    "@sanity/client": "^6.21.3",
     "@sanity/vision": "^3.52.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -24,8 +26,10 @@
   "devDependencies": {
     "@sanity/eslint-config-studio": "^4.0.0",
     "@types/react": "^18.0.25",
+    "dotenv": "^16.4.5",
     "eslint": "^8.6.0",
     "prettier": "^3.0.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.1.6"
   },
   "prettier": {

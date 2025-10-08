@@ -8,6 +8,9 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+	interface ImportMetaEnv {
+		readonly VITE_REALTIME_WS_URL?: string;
+	}
 }
 
 export {};
