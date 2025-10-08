@@ -157,15 +157,24 @@
 		sessionLoading = false;
 	}
 
-	$: responsesForViz = responsesList.map((entry) => {
-		const question = questionsList.find((q) => q.id === entry.question_id);
-		const author = participantsList.find((p) => p.id === entry.participant_id);
-		return {
-			...entry,
-			lens: question?.section ?? 'Unknown',
-			participantName: author?.name ?? 'Anonymous'
-		};
-	});
+	$: responsesForViz = responsesList
+		.filter((entry) => {
+			// Filter responses by active phase
+			if (!activePhase) return true;
+			const question = questionsList.find((q) => q.id === entry.question_id);
+			return question?.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !question?.phase_key);
+		})
+		.map((entry) => {
+			const question = questionsList.find((q) => q.id === entry.question_id);
+			const author = participantsList.find((p) => p.id === entry.participant_id);
+			return {
+				...entry,
+				lens: question?.lens || question?.section || 'Uncategorized',
+				section: question?.section || 'General',
+				participantName: author?.name ?? 'Anonymous',
+				questionText: question?.text || ''
+			};
+		});
 
 	$: participantActivity = participantsList
 		.map((participant) => {
@@ -216,7 +225,7 @@
 			: null;
 		return keyed ?? phasesList.find((phase) => phase.status === 'active');
 	})();
-	// Dynamically determine available dashboards based on question response types in active phase
+	// Dynamically determine available dashboards based on questions in active phase
 	$: availableDashboards = (() => {
 		if (!activePhase) return ['overview', 'timeline', 'chat', 'participants'];
 
@@ -226,17 +235,21 @@
 
 		const dashboards = new Set<string>(['overview', 'timeline', 'chat', 'participants']);
 
-		// Add dashboards based on question response types
+		// Collect dashboards from question recommendations
 		phaseQuestions.forEach((q) => {
-			const responseType = q.response_type || 'written';
-
-			if (responseType === 'written') {
-				dashboards.add('heatmap');
-				dashboards.add('roadmap');
-			} else if (responseType === 'landscape') {
-				// Landscape questions only work with landscape view (not currently a tab, could be added)
-			} else if (responseType === 'scale') {
-				// Scale questions work with distribution/aggregate views
+			// Use recommended_dashboards if available
+			if (Array.isArray(q.recommended_dashboards) && q.recommended_dashboards.length > 0) {
+				q.recommended_dashboards.forEach((d: string) => dashboards.add(d));
+			} else {
+				// Fallback: infer from response type
+				const responseType = q.response_type || 'written';
+				if (responseType === 'written') {
+					dashboards.add('heatmap');
+					dashboards.add('roadmap');
+					dashboards.add('quadBubbles');
+				} else if (responseType === 'landscape') {
+					dashboards.add('response-landscape');
+				}
 			}
 		});
 
@@ -748,18 +761,18 @@
 									</button>
 								</div>
 
-								<div class="grid gap-4 md:grid-cols-2">
+								<div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
 									{#each phaseQuestions as question}
 										<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-											<div class="flex items-start justify-between gap-3 mb-3">
-												<div class="flex-1">
+											<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+												<div class="flex-1 min-w-0">
 													<span class="text-xs uppercase tracking-[0.3em] text-cyan-200">
 														{question.section}
 													</span>
-													<h5 class="text-sm font-semibold text-white mt-1">{question.text}</h5>
+													<h5 class="text-sm font-semibold text-white mt-1 break-words">{question.text}</h5>
 												</div>
 												<button
-													class="rounded-lg border border-cyan-400/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-300 transition-colors whitespace-nowrap"
+													class="rounded-lg border border-cyan-400/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-300 transition-colors whitespace-nowrap flex-shrink-0 self-start"
 													on:click={() => openResponseModal(question.id)}
 													disabled={!phaseRemainingMs}
 												>
@@ -1868,31 +1881,154 @@
 							{@const phaseQuestions = questionsList.filter(
 								(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
 							)}
-							{#if phaseQuestions.length > 0}
-								<optgroup label="Current Phase Questions">
-									{#each phaseQuestions as question}
-										<option value={question.id}>{question.section}: {question.text}</option>
-									{/each}
-								</optgroup>
-							{/if}
-						{/if}
-						{#if questionsList.length > 0}
-							<optgroup label="All Questions">
-								{#each questionsList as question}
-									<option value={question.id}>{question.section}: {question.text}</option>
-								{/each}
-							</optgroup>
+							{#each phaseQuestions as question}
+								<option value={question.id}>{question.section}: {question.text}</option>
+							{/each}
 						{/if}
 					</select>
 				</label>
-				<label class="flex flex-col gap-2 text-sm text-slate-300">
-					Your idea or insight
-					<textarea
-						class="min-h-[120px] rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
-						placeholder="Describe your thought, story, or challenge…"
-						bind:value={responseText}
-					/>
-				</label>
+				<!-- Dynamic Response Input based on question type -->
+				{@const currentQuestion = questionsList.find((q) => q.id === selectedQuestionId)}
+				{@const responseType = currentQuestion?.response_type || 'written'}
+
+				{#if responseType === 'scale'}
+					<!-- Scale / Slider Input -->
+					{@const config = currentQuestion?.config || {}}
+					{@const min = config.min || 0}
+					{@const max = config.max || 10}
+					{@const minLabel = config.minLabel || 'Min'}
+					{@const maxLabel = config.maxLabel || 'Max'}
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
+						Your rating ({min}-{max})
+						<div class="space-y-2">
+							<input
+								type="range"
+								min={min}
+								max={max}
+								step="1"
+								class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+								bind:value={responseText}
+							/>
+							<div class="flex justify-between text-xs">
+								<span class="text-slate-400">{minLabel}</span>
+								<span class="text-cyan-300 font-bold text-lg">{responseText || min}</span>
+								<span class="text-slate-400">{maxLabel}</span>
+							</div>
+						</div>
+					</label>
+
+				{:else if responseType === 'singleChoice'}
+					<!-- Single Choice Radio Buttons -->
+					{@const config = currentQuestion?.config || {}}
+					{@const options = config.options || []}
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
+						Select one option
+						<div class="space-y-2">
+							{#each options as option}
+								<label class="flex items-center gap-2 p-2 rounded border border-slate-700 bg-slate-900/50 hover:border-cyan-400/50 cursor-pointer">
+									<input
+										type="radio"
+										name="response-choice"
+										value={option}
+										bind:group={responseText}
+										class="accent-cyan-500"
+									/>
+									<span class="text-sm text-white">{option}</span>
+								</label>
+							{/each}
+						</div>
+					</label>
+
+				{:else if responseType === 'multiSelect'}
+					<!-- Multi-Select Checkboxes -->
+					{@const config = currentQuestion?.config || {}}
+					{@const options = config.options || []}
+					{@const selections = responseText ? responseText.split(',').map(s => s.trim()) : []}
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
+						Select all that apply
+						<div class="space-y-2 max-h-64 overflow-y-auto">
+							{#each options as option}
+								<label class="flex items-center gap-2 p-2 rounded border border-slate-700 bg-slate-900/50 hover:border-cyan-400/50 cursor-pointer">
+									<input
+										type="checkbox"
+										value={option}
+										checked={selections.includes(option)}
+										on:change={(e) => {
+											const target = e.target as HTMLInputElement;
+											if (target.checked) {
+												responseText = [...selections, option].join(', ');
+											} else {
+												responseText = selections.filter(s => s !== option).join(', ');
+											}
+										}}
+										class="accent-cyan-500"
+									/>
+									<span class="text-sm text-white">{option}</span>
+								</label>
+							{/each}
+						</div>
+					</label>
+
+				{:else if responseType === 'landscape'}
+					<!-- 2D Landscape Positioning -->
+					{@const config = currentQuestion?.config || {}}
+					{@const xLabel = config.xLabel || 'X Axis'}
+					{@const yLabel = config.yLabel || 'Y Axis'}
+					{@const minX = config.minX || 0}
+					{@const maxX = config.maxX || 10}
+					{@const minY = config.minY || 0}
+					{@const maxY = config.maxY || 10}
+					{@const coords = responseText ? JSON.parse(responseText) : { x: 5, y: 5, label: '' }}
+					<div class="space-y-4">
+						<label class="flex flex-col gap-2 text-sm text-slate-300">
+							Label your position (optional)
+							<input
+								type="text"
+								class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
+								placeholder="Brief description..."
+								bind:value={coords.label}
+								on:input={() => responseText = JSON.stringify(coords)}
+							/>
+						</label>
+						<div class="flex flex-col gap-2">
+							<label class="text-sm text-slate-300">
+								{xLabel}: <span class="text-cyan-300 font-bold">{coords.x}</span>
+								<input
+									type="range"
+									min={minX}
+									max={maxX}
+									step="0.1"
+									class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
+									bind:value={coords.x}
+									on:input={() => responseText = JSON.stringify(coords)}
+								/>
+							</label>
+							<label class="text-sm text-slate-300">
+								{yLabel}: <span class="text-cyan-300 font-bold">{coords.y}</span>
+								<input
+									type="range"
+									min={minY}
+									max={maxY}
+									step="0.1"
+									class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
+									bind:value={coords.y}
+									on:input={() => responseText = JSON.stringify(coords)}
+								/>
+							</label>
+						</div>
+					</div>
+
+				{:else}
+					<!-- Written / Text Response (default) -->
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
+						Your idea or insight
+						<textarea
+							class="min-h-[120px] rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
+							placeholder="Describe your thought, story, or challenge…"
+							bind:value={responseText}
+						/>
+					</label>
+				{/if}
 
 				<!-- Selected Cards Display -->
 				{#if selectedCards.length > 0}

@@ -211,15 +211,24 @@
 		completed: 'Completed'
 	};
 
-	$: responsesForViz = responsesList.map((entry) => {
-		const question = questionsList.find((q) => q.id === entry.question_id);
-		const author = participantsList.find((p) => p.id === entry.participant_id);
-		return {
-			...entry,
-			lens: question?.section ?? 'Unknown',
-			participantName: author?.name ?? 'Anonymous'
-		};
-	});
+	$: responsesForViz = responsesList
+		.filter((entry) => {
+			// Filter responses by active phase
+			if (!activePhase) return true;
+			const question = questionsList.find((q) => q.id === entry.question_id);
+			return question?.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !question?.phase_key);
+		})
+		.map((entry) => {
+			const question = questionsList.find((q) => q.id === entry.question_id);
+			const author = participantsList.find((p) => p.id === entry.participant_id);
+			return {
+				...entry,
+				lens: question?.lens || question?.section || 'Uncategorized',
+				section: question?.section || 'General',
+				participantName: author?.name ?? 'Anonymous',
+				questionText: question?.text || ''
+			};
+		});
 
 	$: phaseQuestions = activePhase
 		? questionsList.filter(
@@ -248,7 +257,7 @@
 		return a.length === b.length && a.every((value, index) => value === b[index]);
 	}
 
-	// Dynamically determine available dashboards based on question response types in active phase
+	// Dynamically determine available dashboards based on questions in active phase
 	$: recommendedBoards = (() => {
 		if (!activePhase) return normalizeBoards([]);
 
@@ -258,16 +267,23 @@
 
 		const dashboards: string[] = ['phase'];
 
-		// Add dashboards based on question response types
+		// Collect dashboards from question recommendations
 		phaseQuestions.forEach((q) => {
-			const responseType = q.response_type || 'written';
-
-			if (responseType === 'written') {
-				dashboards.push('heatmap', 'roadmap', 'quadBubbles');
-			} else if (responseType === 'landscape') {
-				// Landscape questions could add a specific landscape board
-			} else if (responseType === 'scale') {
-				// Scale questions work with aggregate views
+			// Use recommended_dashboards if available
+			if (Array.isArray(q.recommended_dashboards) && q.recommended_dashboards.length > 0) {
+				q.recommended_dashboards.forEach((d: string) => {
+					if (!dashboards.includes(d)) {
+						dashboards.push(d);
+					}
+				});
+			} else {
+				// Fallback: infer from response type
+				const responseType = q.response_type || 'written';
+				if (responseType === 'written') {
+					dashboards.push('heatmap', 'roadmap', 'quadBubbles');
+				} else if (responseType === 'landscape') {
+					dashboards.push('response-landscape');
+				}
 			}
 		});
 

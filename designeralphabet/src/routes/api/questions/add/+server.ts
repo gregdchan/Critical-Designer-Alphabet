@@ -12,6 +12,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			responseType,
 			mapType,
 			config,
+			phaseKey,
 			orderIndex,
 			recommendedDashboards,
 			enableVoting
@@ -32,6 +33,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			responseType,
 			mapType,
 			config,
+			phaseKey,
 			orderIndex,
 			recommendedDashboards,
 			enableVoting

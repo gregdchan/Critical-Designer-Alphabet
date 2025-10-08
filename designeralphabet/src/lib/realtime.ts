@@ -84,6 +84,8 @@ export const phases = writable<Phase[]>([]);
 
 let pollHandle: ReturnType<typeof setInterval> | null = null;
 let activeCode: string | null = null;
+let ws: WebSocket | null = null;
+let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 
 async function fetchBundle(code: string) {
 	try {
@@ -102,12 +104,150 @@ async function fetchBundle(code: string) {
 	}
 }
 
+function connectWebSocket(code: string) {
+	if (!browser) return;
+
+	// Clean up existing connection
+	if (ws) {
+		ws.close();
+		ws = null;
+	}
+
+	// Create WebSocket connection
+	const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+	const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+	ws = new WebSocket(wsUrl);
+
+	ws.onopen = () => {
+		console.log('[WS] Connected to session:', code);
+		// Send HELLO message to register with session
+		ws?.send(JSON.stringify({ type: 'HELLO', code }));
+	};
+
+	ws.onmessage = (event) => {
+		try {
+			const message = JSON.parse(event.data);
+			handleWebSocketMessage(message, code);
+		} catch (error) {
+			console.error('[WS] Failed to parse message:', error);
+		}
+	};
+
+	ws.onerror = (error) => {
+		console.error('[WS] Error:', error);
+	};
+
+	ws.onclose = () => {
+		console.log('[WS] Disconnected from session:', code);
+		ws = null;
+
+		// Attempt to reconnect if still active
+		if (activeCode === code) {
+			reconnectTimeout = setTimeout(() => {
+				console.log('[WS] Attempting to reconnect...');
+				connectWebSocket(code);
+			}, 3000);
+		}
+	};
+}
+
+function handleWebSocketMessage(message: any, code: string) {
+	switch (message.type) {
+		case 'VOTE_UPDATED': {
+			// Update specific response vote count
+			responses.update((current) =>
+				current.map((r) =>
+					r.id === message.responseId ? { ...r, votes: message.votes } : r
+				)
+			);
+			break;
+		}
+
+		case 'RESPONSE_ADDED': {
+			// Add new response to list
+			responses.update((current) => [...current, message.response]);
+			break;
+		}
+
+		case 'PHASE_UPDATE': {
+			// Update phases
+			if (message.phases) {
+				phases.set(message.phases);
+			}
+			// Refresh session to get latest active phase
+			fetchBundle(code);
+			break;
+		}
+
+		case 'PRESENCE': {
+			// Update participants list
+			if (message.participants) {
+				participants.set(message.participants);
+			}
+			break;
+		}
+
+		case 'TIMELINE_ADDED': {
+			// Add timeline item
+			timeline.update((current) => [...current, message.item]);
+			break;
+		}
+
+		case 'CHAT_MESSAGE': {
+			// Add chat message
+			chat.update((current) => [...current, message.message]);
+			break;
+		}
+
+		case 'QUESTION_ADDED': {
+			// Add new question
+			questions.update((current) => [...current, message.question]);
+			break;
+		}
+
+		case 'SCORE_UPDATED': {
+			// Update participant score
+			participants.update((current) =>
+				current.map((p) =>
+					p.id === message.participantId
+						? { ...p, points: message.points, badges: message.badges }
+						: p
+				)
+			);
+			break;
+		}
+
+		case 'ROUND_UPDATE': {
+			// Update active round
+			sessionDetails.update((s) =>
+				s ? { ...s, active_round: message.round, round_expires_at: message.endsAt } : s
+			);
+			break;
+		}
+
+		case 'STEP_CHANGE': {
+			// Update session status
+			sessionDetails.update((s) => (s ? { ...s, status: message.status } : s));
+			break;
+		}
+
+		default:
+			console.log('[WS] Unhandled message type:', message.type);
+	}
+}
+
 export async function startRealtimeSession(code: string) {
 	if (!browser) return;
 	activeCode = code;
 	stopRealtimeSession();
 	await fetchBundle(code);
-	pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL);
+
+	// Connect WebSocket for realtime updates
+	connectWebSocket(code);
+
+	// Keep polling as fallback (longer interval)
+	pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 3);
 }
 
 export async function refreshSession(code: string) {
@@ -120,6 +260,18 @@ export function stopRealtimeSession() {
 		clearInterval(pollHandle);
 		pollHandle = null;
 	}
+
+	if (reconnectTimeout) {
+		clearTimeout(reconnectTimeout);
+		reconnectTimeout = null;
+	}
+
+	if (ws) {
+		ws.close();
+		ws = null;
+	}
+
+	activeCode = null;
 }
 
 export async function addResponse(

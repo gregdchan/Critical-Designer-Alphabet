@@ -190,6 +190,8 @@
 		const payloads: any[] = [];
 
 		rounds.forEach((round, roundIndex) => {
+			const phaseKey = (round as any).phaseKey || null;
+
 			(round?.questions ?? []).forEach((question: any, questionIndex) => {
 				// Handle both string questions (legacy) and structured question objects
 				if (typeof question === 'string') {
@@ -201,17 +203,33 @@
 						responseType: 'written',
 						mapType: 'responses',
 						config: {},
+						phaseKey: phaseKey,
 						orderIndex: roundIndex * 100 + questionIndex
 					});
 				} else {
+					// Build config object based on response type
+					const responseType = question.responseType || 'written';
+					let config: any = {};
+
+					if (responseType === 'scale' && question.scale) {
+						config = question.scale;
+					} else if (responseType === 'landscape' && question.landscape) {
+						config = question.landscape;
+					} else if (['singleChoice', 'multiSelect'].includes(responseType) && question.options) {
+						config = { options: question.options };
+					}
+
 					payloads.push({
 						code,
 						section: round?.name ?? round?.key ?? 'Breakout',
 						text: question.prompt || question.text || 'Question',
 						lens: question.lens || null,
-						responseType: question.responseType || 'written',
+						responseType: responseType,
 						mapType: question.mapType || 'responses',
-						config: question.scale || question.landscape || question.heatmap || question.roadmap || question.options || {},
+						config: config,
+						phaseKey: phaseKey,
+						recommendedDashboards: question.dashboards || [],
+						enableVoting: question.enableVoting !== false,
 						orderIndex: roundIndex * 100 + questionIndex
 					});
 				}
@@ -288,11 +306,14 @@
 				throw new Error(participantData.error);
 			}
 
-			// Collect all breakout rounds from all phases
-			const allRounds = (selectedTemplate.phases ?? []).flatMap(
-				(phase: any) => phase.breakoutRounds ?? []
+			// Collect all breakout rounds from all phases with phase context
+			const roundsWithPhase = (selectedTemplate.phases ?? []).flatMap(
+				(phase: any) => (phase.breakoutRounds ?? []).map((round: any) => ({
+					...round,
+					phaseKey: phase.key
+				}))
 			);
-			await seedQuestions(sessionCode, allRounds);
+			await seedQuestions(sessionCode, roundsWithPhase);
 
 			if (browser && participantData.participant) {
 				const profile = {

@@ -425,6 +425,7 @@ export async function addQuestion({
 	responseType,
 	mapType,
 	config,
+	phaseKey,
 	orderIndex,
 	recommendedDashboards,
 	enableVoting
@@ -436,6 +437,7 @@ export async function addQuestion({
 	responseType?: string | null;
 	mapType?: string | null;
 	config?: Record<string, unknown> | null;
+	phaseKey?: string | null;
 	orderIndex?: number | null;
 	recommendedDashboards?: string[];
 	enableVoting?: boolean | null;
@@ -450,6 +452,7 @@ export async function addQuestion({
 			response_type: responseType ?? 'written',
 			map_type: mapType ?? 'responses',
 			config: config ?? {},
+			phase_key: phaseKey ?? null,
 			order_index: typeof orderIndex === 'number' ? orderIndex : null,
 			recommended_dashboards: recommendedDashboards ?? [],
 			enable_voting: enableVoting ?? true

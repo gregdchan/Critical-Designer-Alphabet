@@ -108,6 +108,55 @@ export const sessionQuestion = defineField({
         // Show the toggle for everything else
         return false;
       }
+    }),
+    defineField({
+      name: 'dashboards',
+      type: 'array',
+      title: 'Recommended Dashboards',
+      description: 'Choose which visualizations to show for this question (only compatible options shown)',
+      of: [{ type: 'string' }],
+      options: {
+        list: ({ parent }: any) => {
+          const responseType = parent?.responseType || 'written';
+          const allDashboards = [
+            { title: 'Overview (always available)', value: 'overview' },
+            { title: 'Heatmap (lens clustering)', value: 'heatmap' },
+            { title: 'Roadmap (priority by votes)', value: 'roadmap' },
+            { title: 'Quad Bubbles (similarity clusters)', value: 'quadBubbles' },
+            { title: 'Response Landscape (2D positioning)', value: 'response-landscape' },
+            { title: 'Timeline (always available)', value: 'timeline' },
+            { title: 'Leaderboard (participation)', value: 'leaderboard' },
+            { title: 'Chat (always available)', value: 'chat' }
+          ];
+
+          // Filter based on response type compatibility
+          if (responseType === 'written') {
+            // Written responses work with heatmap, roadmap, quad bubbles
+            return allDashboards.filter(d =>
+              ['overview', 'heatmap', 'roadmap', 'quadBubbles', 'timeline', 'leaderboard', 'chat'].includes(d.value)
+            );
+          } else if (responseType === 'landscape') {
+            // Landscape only works with response-landscape
+            return allDashboards.filter(d =>
+              ['overview', 'response-landscape', 'timeline', 'leaderboard', 'chat'].includes(d.value)
+            );
+          } else if (responseType === 'scale') {
+            // Scale responses work with distribution views
+            return allDashboards.filter(d =>
+              ['overview', 'timeline', 'leaderboard', 'chat'].includes(d.value)
+            );
+          } else if (responseType === 'multiSelect' || responseType === 'singleChoice') {
+            // Choice responses work with categorical views
+            return allDashboards.filter(d =>
+              ['overview', 'heatmap', 'timeline', 'leaderboard', 'chat'].includes(d.value)
+            );
+          }
+
+          // Default: all dashboards
+          return allDashboards;
+        },
+        layout: 'tags'
+      }
     })
   ],
   preview: {
