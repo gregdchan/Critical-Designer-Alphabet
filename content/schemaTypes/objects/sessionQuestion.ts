@@ -47,7 +47,13 @@ export const sessionQuestion = defineField({
           { title: 'Heatmap', value: 'heatmap' },
           { title: 'Roadmap Swimlanes', value: 'roadmap' },
           { title: 'Timeline', value: 'timeline' },
-          { title: 'Chat Feed', value: 'chat' }
+          { title: 'Chat Feed', value: 'chat' },
+          { title: 'Leaderboard', value: 'leaderboard' },
+          { title: 'Quad Bubbles', value: 'quadBubbles' },
+          { title: 'Maturity Dial', value: 'maturityDial' },
+          { title: 'Risk Impact Matrix', value: 'riskImpactMatrix' },
+          { title: 'Participation Pulse', value: 'participationPulse' },
+          { title: 'Inclusivity Meter', value: 'inclusivityMeter' }
         ]
       }
     }),
@@ -103,6 +109,80 @@ export const sessionQuestion = defineField({
         defineField({ name: 'maxY', type: 'number', initialValue: 10 }),
         defineField({ name: 'xPrompt', type: 'string', title: 'X Axis Prompt', description: 'Question asked to determine the X value.' }),
         defineField({ name: 'yPrompt', type: 'string', title: 'Y Axis Prompt', description: 'Question asked to determine the Y value.' })
+      ]
+    }),
+    defineField({
+      name: 'heatmap',
+      type: 'object',
+      title: 'Heatmap Settings',
+      hidden: ({ parent }) => parent?.mapType !== 'heatmap',
+      fields: [
+        defineField({
+          name: 'title',
+          type: 'string',
+          title: 'Chart Title',
+          initialValue: 'Maturity Heatmap — Justice-Centered Readiness'
+        }),
+        defineField({
+          name: 'xAxisLabel',
+          type: 'string',
+          title: 'X Axis Label',
+          description: 'Label for horizontal axis',
+          initialValue: 'Maturity Level'
+        }),
+        defineField({
+          name: 'yAxisLabel',
+          type: 'string',
+          title: 'Y Axis Label',
+          description: 'Label for vertical axis',
+          initialValue: 'Lens'
+        }),
+        defineField({
+          name: 'xAxisValues',
+          type: 'array',
+          title: 'X Axis Values',
+          of: [{ type: 'string' }],
+          description: 'Categories for X axis (e.g., Emerging, Developing, Established)',
+          initialValue: ['Emerging', 'Developing', 'Established', 'Advanced', 'Leading']
+        }),
+        defineField({
+          name: 'yAxisValues',
+          type: 'array',
+          title: 'Y Axis Values',
+          of: [{ type: 'string' }],
+          description: 'Categories for Y axis (use lenses from template or custom)',
+          initialValue: ['Risk', 'Work', 'Sustainability', 'Ethics', 'Community', 'Justice', 'Agency']
+        })
+      ]
+    }),
+    defineField({
+      name: 'roadmap',
+      type: 'object',
+      title: 'Roadmap Settings',
+      hidden: ({ parent }) => parent?.mapType !== 'roadmap',
+      fields: [
+        defineField({
+          name: 'title',
+          type: 'string',
+          title: 'Chart Title',
+          initialValue: 'Roadmap Swimlanes — Momentum Tracker'
+        }),
+        defineField({
+          name: 'phases',
+          type: 'array',
+          title: 'Phases (Columns)',
+          of: [{ type: 'string' }],
+          description: 'Time-based phases for horizontal axis',
+          initialValue: ['Now', 'Next', 'Later', 'Signal']
+        }),
+        defineField({
+          name: 'lanes',
+          type: 'array',
+          title: 'Lanes (Rows)',
+          of: [{ type: 'string' }],
+          description: 'Swim lanes for vertical axis (use lenses or custom categories)',
+          initialValue: ['Infrastructure', 'Practice', 'Policy', 'Community']
+        })
       ]
     }),
     defineField({
