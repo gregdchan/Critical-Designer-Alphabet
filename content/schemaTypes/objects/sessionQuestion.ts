@@ -112,52 +112,58 @@ export const sessionQuestion = defineField({
     defineField({
       name: 'dashboards',
       type: 'array',
-      title: 'Recommended Dashboards',
-      description: 'Select which visualizations to show for this question (options filtered by response type)',
+      title: 'Dashboards to Display',
+      description: `Select which visualizations to show for this question. Note compatibility:
+      • Written: Overview, Heatmap, Roadmap, Quad Bubbles, Timeline, Leaderboard, Chat
+      • Landscape (2D): Overview, Response Landscape, Timeline, Leaderboard, Chat
+      • Scale: Overview, Timeline, Leaderboard, Chat
+      • Single/Multi Choice: Overview, Heatmap, Timeline, Leaderboard, Chat`,
       of: [
         {
           type: 'string',
           options: {
-            list: (context: any) => {
-              // Access parent from context.parent which gives us the sessionQuestion object
-              const responseType = context?.parent?.responseType || 'written';
-              const allDashboards = [
-                { title: 'Overview (always available)', value: 'overview' },
-                { title: 'Heatmap (lens clustering)', value: 'heatmap' },
-                { title: 'Roadmap (priority by votes)', value: 'roadmap' },
-                { title: 'Quad Bubbles (similarity clusters)', value: 'quadBubbles' },
-                { title: 'Response Landscape (2D positioning)', value: 'response-landscape' },
-                { title: 'Timeline (always available)', value: 'timeline' },
-                { title: 'Leaderboard (participation)', value: 'leaderboard' },
-                { title: 'Chat (always available)', value: 'chat' }
-              ];
-
-              // Filter based on response type compatibility
-              if (responseType === 'written') {
-                return allDashboards.filter(d =>
-                  ['overview', 'heatmap', 'roadmap', 'quadBubbles', 'timeline', 'leaderboard', 'chat'].includes(d.value)
-                );
-              } else if (responseType === 'landscape') {
-                return allDashboards.filter(d =>
-                  ['overview', 'response-landscape', 'timeline', 'leaderboard', 'chat'].includes(d.value)
-                );
-              } else if (responseType === 'scale') {
-                return allDashboards.filter(d =>
-                  ['overview', 'timeline', 'leaderboard', 'chat'].includes(d.value)
-                );
-              } else if (responseType === 'multiSelect' || responseType === 'singleChoice') {
-                return allDashboards.filter(d =>
-                  ['overview', 'heatmap', 'timeline', 'leaderboard', 'chat'].includes(d.value)
-                );
-              }
-
-              return allDashboards;
-            }
+            list: [
+              { title: 'Overview (works with all types)', value: 'overview' },
+              { title: 'Heatmap (requires written or choice responses)', value: 'heatmap' },
+              { title: 'Roadmap (requires written responses + voting)', value: 'roadmap' },
+              { title: 'Quad Bubbles (requires written responses)', value: 'quadBubbles' },
+              { title: 'Response Landscape (requires 2D positioning)', value: 'response-landscape' },
+              { title: 'Timeline (works with all types)', value: 'timeline' },
+              { title: 'Leaderboard (works with all types)', value: 'leaderboard' },
+              { title: 'Chat (works with all types)', value: 'chat' }
+            ]
           }
         }
       ],
+      validation: (rule) =>
+        rule.custom((dashboards, context) => {
+          const parent = context?.parent as { responseType?: string; enableVoting?: boolean } | undefined;
+          const responseType = parent?.responseType || 'written';
+          const selectedDashboards = (dashboards as string[]) || [];
+
+          // Warn if incompatible dashboards are selected
+          const warnings: string[] = [];
+
+          if (selectedDashboards.includes('response-landscape') && responseType !== 'landscape') {
+            warnings.push('⚠️ Response Landscape requires responseType = "landscape"');
+          }
+
+          if (selectedDashboards.includes('roadmap') && responseType !== 'written') {
+            warnings.push('⚠️ Roadmap works best with written responses');
+          }
+
+          if (selectedDashboards.includes('quadBubbles') && responseType !== 'written') {
+            warnings.push('⚠️ Quad Bubbles works best with written responses');
+          }
+
+          if (selectedDashboards.includes('heatmap') && !['written', 'singleChoice', 'multiSelect'].includes(responseType)) {
+            warnings.push('⚠️ Heatmap requires written or choice responses');
+          }
+
+          return warnings.length > 0 ? warnings.join('\n') : true;
+        }),
       options: {
-        layout: 'dropdown'
+        layout: 'list'
       }
     })
   ],
