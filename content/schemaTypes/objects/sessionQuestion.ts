@@ -117,13 +117,15 @@ export const sessionQuestion = defineField({
       • Written: Overview, Heatmap, Roadmap, Quad Bubbles, Timeline, Leaderboard, Chat
       • Landscape (2D): Overview, Response Landscape, Timeline, Leaderboard, Chat
       • Scale: Overview, Timeline, Leaderboard, Chat
-      • Single/Multi Choice: Overview, Heatmap, Timeline, Leaderboard, Chat`,
+      • Single/Multi Choice: Overview, Bar Chart, Pie Chart, Heatmap, Timeline, Leaderboard, Chat`,
       of: [
         {
           type: 'string',
           options: {
             list: [
               { title: 'Overview (works with all types)', value: 'overview' },
+              { title: 'Bar Chart (choice responses only)', value: 'barChart' },
+              { title: 'Pie Chart (choice responses only)', value: 'pieChart' },
               { title: 'Heatmap (requires written or choice responses)', value: 'heatmap' },
               { title: 'Roadmap (requires written responses + voting)', value: 'roadmap' },
               { title: 'Quad Bubbles (requires written responses)', value: 'quadBubbles' },
@@ -158,6 +160,14 @@ export const sessionQuestion = defineField({
 
           if (selectedDashboards.includes('heatmap') && !['written', 'singleChoice', 'multiSelect'].includes(responseType)) {
             warnings.push('⚠️ Heatmap requires written or choice responses');
+          }
+
+          if (selectedDashboards.includes('barChart') && !['singleChoice', 'multiSelect'].includes(responseType)) {
+            warnings.push('⚠️ Bar Chart requires singleChoice or multiSelect response type');
+          }
+
+          if (selectedDashboards.includes('pieChart') && !['singleChoice', 'multiSelect'].includes(responseType)) {
+            warnings.push('⚠️ Pie Chart requires singleChoice or multiSelect response type');
           }
 
           return warnings.length > 0 ? warnings.join('\n') : true;

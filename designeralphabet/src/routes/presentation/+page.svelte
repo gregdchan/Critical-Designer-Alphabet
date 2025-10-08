@@ -40,6 +40,8 @@
 		| 'responses'
 		| 'heatmap'
 		| 'roadmap'
+		| 'barChart'
+		| 'pieChart'
 		| 'quadBubbles'
 		| 'maturityDial'
 		| 'participationPulse'
@@ -79,6 +81,18 @@
 			id: 'roadmap',
 			label: 'Roadmap Swimlanes',
 			description: 'Now / Next / Later commitments shaped in session.',
+			layout: 'main'
+		},
+		barChart: {
+			id: 'barChart',
+			label: 'Bar Chart',
+			description: 'Choice distribution visualization for single/multi-select questions.',
+			layout: 'main'
+		},
+		pieChart: {
+			id: 'pieChart',
+			label: 'Pie Chart',
+			description: 'Proportional distribution of choice responses.',
 			layout: 'main'
 		},
 		quadBubbles: {
@@ -134,6 +148,8 @@
 	const BOARD_SEQUENCE: BoardId[] = [
 		'phase',
 		'responses',
+		'barChart',
+		'pieChart',
 		'quadBubbles',
 		'participationPulse',
 		'heatmap',
@@ -295,6 +311,16 @@
 		
 		// Participation/leaderboard need responses
 		if (['leaderboard', 'participationPulse'].includes(dashboardId)) return hasResponses;
+		
+		// Bar chart for choice-based responses
+		if (dashboardId === 'barChart') {
+			return ['singleChoice', 'multiSelect'].includes(responseType) && hasResponses;
+		}
+		
+		// Pie chart for choice-based responses
+		if (dashboardId === 'pieChart') {
+			return ['singleChoice', 'multiSelect'].includes(responseType) && hasResponses;
+		}
 		
 		// Written response visualizations
 		if (['heatmap', 'roadmap', 'quadBubbles'].includes(dashboardId)) {
@@ -626,6 +652,160 @@
 										<RoadmapChart responses={responsesForViz} width={1200} height={580} />
 									</div>
 								</div>
+							{:else if boardId === 'barChart'}
+								{@const choiceQuestions = phaseQuestions.filter(q => ['singleChoice', 'multiSelect'].includes(q.response_type || ''))}
+								{#if choiceQuestions.length > 0}
+									<div
+										class="rounded-2xl border border-blue-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(59,130,246,0.2)]"
+									>
+										<header class="mb-4">
+											<h2 class="text-xl font-semibold text-slate-100">
+												{BOARD_DEFINITIONS[boardId].label}
+											</h2>
+											<p class="text-sm text-slate-400">
+												{BOARD_DEFINITIONS[boardId].description}
+											</p>
+										</header>
+										<div class="space-y-6">
+											{#each choiceQuestions as question}
+												{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
+												{@const options = question.options || []}
+												{@const responseCounts = options.map(option => ({
+													option,
+													count: questionResponses.filter(r => {
+														try {
+															const value = typeof r.value === 'string' ? JSON.parse(r.value) : r.value;
+															return Array.isArray(value) ? value.includes(option) : value === option;
+														} catch {
+															return r.value === option;
+														}
+													}).length
+												}))}
+												{@const maxCount = Math.max(...responseCounts.map(r => r.count), 1)}
+												
+												<div class="space-y-3">
+													<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+													<div class="space-y-2">
+														{#each responseCounts as {option, count}}
+															<div class="flex items-center gap-3">
+																<div class="w-32 text-xs text-slate-400 truncate">{option}</div>
+																<div class="flex-1 h-8 bg-slate-800/50 rounded-lg overflow-hidden">
+																	<div 
+																		class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500 flex items-center justify-end px-2"
+																		style="width: {(count / maxCount) * 100}%"
+																	>
+																		{#if count > 0}
+																			<span class="text-xs font-semibold text-white">{count}</span>
+																		{/if}
+																	</div>
+																</div>
+															</div>
+														{/each}
+													</div>
+												</div>
+											{/each}
+										</div>
+									</div>
+								{:else}
+									<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+										No choice-based questions in this phase.
+									</div>
+								{/if}
+							{:else if boardId === 'pieChart'}
+								{@const choiceQuestions = phaseQuestions.filter(q => ['singleChoice', 'multiSelect'].includes(q.response_type || ''))}
+								{#if choiceQuestions.length > 0}
+									<div
+										class="rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
+									>
+										<header class="mb-4">
+											<h2 class="text-xl font-semibold text-slate-100">
+												{BOARD_DEFINITIONS[boardId].label}
+											</h2>
+											<p class="text-sm text-slate-400">
+												{BOARD_DEFINITIONS[boardId].description}
+											</p>
+										</header>
+										<div class="space-y-8">
+											{#each choiceQuestions as question}
+												{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
+												{@const options = question.options || []}
+												{@const responseCounts = options.map(option => ({
+													option,
+													count: questionResponses.filter(r => {
+														try {
+															const value = typeof r.value === 'string' ? JSON.parse(r.value) : r.value;
+															return Array.isArray(value) ? value.includes(option) : value === option;
+														} catch {
+															return r.value === option;
+														}
+													}).length
+												})).filter(rc => rc.count > 0)}
+												{@const totalCount = responseCounts.reduce((sum, rc) => sum + rc.count, 0)}
+												{@const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#f43f5e']}
+												{@const radius = 90}
+												{@const centerX = 100}
+												{@const centerY = 100}
+												
+												<div class="space-y-4">
+													<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+													{#if totalCount > 0}
+														<div class="flex items-center gap-8">
+															<!-- Pie Chart SVG -->
+															<svg viewBox="0 0 200 200" class="w-48 h-48">
+																{#each responseCounts as {option, count}, i}
+																	{@const percentage = (count / totalCount) * 100}
+																	{@const startAngle = responseCounts.slice(0, i).reduce((sum, rc) => sum + (rc.count / totalCount) * 360, 0)}
+																	{@const endAngle = startAngle + (count / totalCount) * 360}
+																	{@const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0}
+																	{@const startX = centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180)}
+																	{@const startY = centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180)}
+																	{@const endX = centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180)}
+																	{@const endY = centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180)}
+																	
+																	<path
+																		d="M {centerX} {centerY} L {startX} {startY} A {radius} {radius} 0 {largeArcFlag} 1 {endX} {endY} Z"
+																		fill={colors[i % colors.length]}
+																		stroke="#1e293b"
+																		stroke-width="2"
+																		class="transition-all duration-300 hover:opacity-80"
+																	/>
+																{/each}
+																<!-- Center circle for donut effect -->
+																<circle cx={centerX} cy={centerY} r="50" fill="#0f172a" />
+																<text x={centerX} y={centerY - 5} text-anchor="middle" class="text-2xl font-bold fill-slate-100">
+																	{totalCount}
+																</text>
+																<text x={centerX} y={centerY + 15} text-anchor="middle" class="text-xs fill-slate-400">
+																	responses
+																</text>
+															</svg>
+															
+															<!-- Legend -->
+															<div class="flex-1 space-y-2">
+																{#each responseCounts as {option, count}, i}
+																	{@const percentage = ((count / totalCount) * 100).toFixed(1)}
+																	<div class="flex items-center gap-3">
+																		<div class="w-4 h-4 rounded" style="background-color: {colors[i % colors.length]}"></div>
+																		<div class="flex-1 text-sm text-slate-300">{option}</div>
+																		<div class="text-sm font-semibold text-slate-200">
+																			{count} <span class="text-xs text-slate-400">({percentage}%)</span>
+																		</div>
+																	</div>
+																{/each}
+															</div>
+														</div>
+													{:else}
+														<p class="text-sm text-slate-400">No responses yet</p>
+													{/if}
+												</div>
+											{/each}
+										</div>
+									</div>
+								{:else}
+									<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+										No choice-based questions in this phase.
+									</div>
+								{/if}
 								{:else if boardId === 'quadBubbles' || boardId === 'participationPulse' || boardId === 'riskImpactMatrix'}
 									{#if activeCode}
 										{@const component = boardChartComponents[boardId]}

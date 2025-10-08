@@ -65,7 +65,7 @@
 	let sessionLoading = true;
 	let sessionError = '';
 
-	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'response-landscape' | 'timeline' | 'chat' | 'participants' =
+	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'barChart' | 'pieChart' | 'response-landscape' | 'timeline' | 'chat' | 'participants' =
 		'overview';
 	let responseModalOpen = false;
 	let selectedQuestionId: string | null = null;
