@@ -17,7 +17,8 @@ export const POST: RequestHandler = async ({ request }) => {
 				await startSessionPhase(code, phaseKey);
 				break;
 			case 'complete':
-				await completeSessionPhase(code, phaseKey);
+				// Don't auto-advance to next phase - facilitator controls when to start
+				await completeSessionPhase(code, phaseKey, { autoAdvance: false });
 				break;
 			case 'restart':
 				// Restart the timer by updating the started_at timestamp
