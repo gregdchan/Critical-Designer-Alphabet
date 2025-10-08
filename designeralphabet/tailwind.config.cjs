@@ -11,12 +11,12 @@ module.exports = {
 				surface: 'hsl(var(--surface))',
 				muted: 'hsl(var(--muted))',
 				'critical-accent': 'hsl(var(--accent-critical))',
-				primary: '#3b82f6',
-				secondary: '#8b5cf6',
-				accent: '#06b6d4',
-				success: '#10b981',
+				primary: '#2563eb',
+				secondary: '#7c3aed',
+				accent: '#0ea5e9',
+				success: '#16a34a',
 				warning: '#f59e0b',
-				error: '#ef4444',
+				error: '#dc2626',
 				// Enhanced neon colors for immersive dashboard
 				neonPink: '#ff2aad',
 				neonCyan: '#00fff7',
@@ -27,10 +27,10 @@ module.exports = {
 				neonYellow: '#ffff00',
 				neonMagenta: '#ff00ff',
 				retroPurple: '#8a2be2',
-				darkBg: '#0d0d0d',
-				surface: '#1a1a1a',
-				card: '#2a2a2a',
-				midnight: '#1e293b'
+				darkBg: '#f5f7ff',
+				surfaceBase: '#ffffff',
+				card: '#f8fafc',
+				midnight: '#e6efff'
 			},
 			fontFamily: {
 				sans: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],

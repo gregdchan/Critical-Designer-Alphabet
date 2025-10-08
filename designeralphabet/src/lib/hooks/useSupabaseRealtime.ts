@@ -194,6 +194,17 @@ export function useChat(roomCode: string, setState: (state: RealtimeState<any>) 
 	);
 }
 
+export function useQuestions(roomCode: string, setState: (state: RealtimeState<any>) => void) {
+	return useSupabaseRealtime(
+		{
+			table: 'questions',
+			roomCode,
+			select: '*'
+		},
+		setState
+	);
+}
+
 // Utility for managing multiple subscriptions
 export function useMultipleRealtime<T extends Record<string, any>>(
 	subscriptions: Array<{

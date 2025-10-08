@@ -4,7 +4,10 @@
 	import { max } from 'd3-array';
 	import { interpolate } from 'd3-interpolate';
 	import { onMount, afterUpdate } from 'svelte';
+	import { useResponses, useQuestions } from '$lib/hooks/useSupabaseRealtime';
 
+	export let roomCode: string = '';
+	export let questionId: string = '';
 	export let data: Array<{ label: string; value: number; percentage: number }> = [];
 	export let width = 800;
 	export let height = 400;
@@ -13,6 +16,72 @@
 
 	let svgElement: SVGSVGElement;
 	let chartGroup: SVGGElement;
+	let loading = false;
+	let error: string | null = null;
+
+	// Supabase realtime subscriptions - only when roomCode is provided
+	let responses: any[] = [];
+	let questions: any[] = [];
+
+	// Set up realtime subscriptions when roomCode is available
+	$: if (roomCode && questionId) {
+		loading = true;
+
+		useResponses(roomCode, (state) => {
+			responses = state.data;
+			loading = state.loading;
+			error = state.error;
+			updateDataFromRealtime();
+		});
+
+		useQuestions(roomCode, (state) => {
+			questions = state.data;
+			updateDataFromRealtime();
+		});
+	}
+
+	function updateDataFromRealtime() {
+		if (!questionId || !responses.length || !questions.length) {
+			if (!loading) {
+				data = [];
+			}
+			return;
+		}
+
+		const questionData = questions.find((q) => q.id === questionId);
+		if (!questionData) {
+			data = [];
+			return;
+		}
+
+		question = questionData.text || '';
+		const questionResponses = responses.filter((r) => r.question_id === questionId);
+		const options = questionData.options || [];
+
+		const responseCounts = options.map((option: string) => {
+			const count = questionResponses.filter((r) => {
+				try {
+					const value = typeof r.value === 'string' ? JSON.parse(r.value) : r.value;
+					return Array.isArray(value) ? value.includes(option) : value === option;
+				} catch {
+					return r.value === option;
+				}
+			}).length;
+			return { label: option, value: count };
+		});
+
+		totalResponses = responseCounts.reduce((sum, rc) => sum + rc.value, 0);
+
+		data = responseCounts.map((rc) => ({
+			label: rc.label,
+			value: rc.value,
+			percentage: totalResponses > 0 ? (rc.value / totalResponses) * 100 : 0
+		}));
+
+		if (svgElement && chartGroup) {
+			updateChart();
+		}
+	}
 
 	const margin = { top: 20, right: 80, bottom: 60, left: 200 };
 	$: innerWidth = width - margin.left - margin.right;
@@ -140,14 +209,18 @@
 	}
 
 	onMount(() => {
-		updateChart();
+		if (!roomCode) {
+			updateChart();
+		}
 	});
 
 	afterUpdate(() => {
-		updateChart();
+		if (!roomCode && data.length > 0) {
+			updateChart();
+		}
 	});
 
-	$: if (svgElement && data) {
+	$: if (svgElement && chartGroup && data) {
 		updateChart();
 	}
 </script>
@@ -169,12 +242,66 @@
 		</defs>
 		<g bind:this={chartGroup} transform="translate({margin.left}, {margin.top})" />
 	</svg>
+
+	{#if loading}
+		<div class="overlay">
+			<div class="spinner"></div>
+			<div class="loading-text">Loading data...</div>
+		</div>
+	{:else if error}
+		<div class="overlay">
+			<div class="error-text">Error: {error}</div>
+		</div>
+	{:else if data.length === 0}
+		<div class="overlay">
+			<div class="empty-text">No responses yet</div>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.bar-chart-container {
+		position: relative;
 		width: 100%;
 		height: 100%;
+	}
+
+	.overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		background-color: rgba(15, 23, 42, 0.8);
+		backdrop-filter: blur(4px);
+	}
+
+	.spinner {
+		width: 2rem;
+		height: 2rem;
+		border: 4px solid rgb(6, 182, 212);
+		border-top-color: transparent;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.loading-text,
+	.empty-text {
+		color: rgb(148, 163, 184);
+		font-size: 0.875rem;
+	}
+
+	.error-text {
+		color: rgb(239, 68, 68);
+		font-size: 0.875rem;
 	}
 
 	:global(.bar) {

@@ -18,6 +18,8 @@
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 	import BarChart from '$lib/components/charts/BarChart.svelte';
+	import PieChart from '$lib/components/charts/PieChart.svelte';
+	import LineChart from '$lib/components/charts/LineChart.svelte';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
 	import MaturityDial from '$lib/charts/MaturityDial.svelte';
 	import ParticipationPulse from '$lib/charts/ParticipationPulse.svelte';
