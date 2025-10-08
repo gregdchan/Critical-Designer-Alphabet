@@ -288,7 +288,11 @@
 				throw new Error(participantData.error);
 			}
 
-			await seedQuestions(sessionCode, selectedTemplate.sections?.breakout?.rounds ?? []);
+			// Collect all breakout rounds from all phases
+			const allRounds = (selectedTemplate.phases ?? []).flatMap(
+				(phase: any) => phase.breakoutRounds ?? []
+			);
+			await seedQuestions(sessionCode, allRounds);
 
 			if (browser && participantData.participant) {
 				const profile = {
@@ -303,16 +307,12 @@
 				storeParticipantProfile(sessionCode, profile);
 			}
 
-			if (browser) {
-				window.open(`/presentation?code=${sessionCode}`, '_blank');
-			}
-
 			currentView = 'launching';
 
-			// Small delay to show the transition, then navigate
+			// Navigate to facilitator mode
 			setTimeout(() => {
 				goto(`/session/${sessionCode}?role=facilitator`);
-			}, 1500);
+			}, 800);
 		} catch (error) {
 			console.error('Error creating session:', error);
 			alert('Failed to create session. Please try again.');
@@ -367,7 +367,6 @@
 		if (!selectedTemplate) return;
 
 		const phases = selectedTemplate.phases ?? [];
-		const rounds = selectedTemplate.sections?.breakout?.rounds ?? [];
 
 		previewPhases = phases.map((phase, index) => ({
 			...phase,
@@ -376,10 +375,19 @@
 			breakoutRounds: phase.breakoutRounds || []
 		}));
 
+		// Count questions from all breakout rounds across all phases
+		const questionCount = phases.reduce((sum: number, phase: any) => {
+			const phaseQuestions = (phase.breakoutRounds ?? []).reduce(
+				(roundSum: number, round: any) => roundSum + (round.questions?.length ?? 0),
+				0
+			);
+			return sum + phaseQuestions;
+		}, 0);
+
 		sessionPreview = {
 			phases: previewPhases,
 			totalDuration: phases.reduce((sum, p) => sum + (p.durationMinutes ?? 0), 0),
-			questionCount: rounds.reduce((sum, r) => sum + (r.questions?.length ?? 0), 0)
+			questionCount
 		};
 	}
 
