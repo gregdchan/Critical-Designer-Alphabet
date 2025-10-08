@@ -17,6 +17,7 @@
 	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
+	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
 	import MaturityDial from '$lib/charts/MaturityDial.svelte';
 	import ParticipationPulse from '$lib/charts/ParticipationPulse.svelte';
@@ -698,7 +699,7 @@
 												{BOARD_DEFINITIONS[boardId].description}
 											</p>
 										</header>
-										<div class="space-y-6">
+										<div class="space-y-8">
 											{#each choiceQuestions as question}
 												{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
 												{@const options = question.options || []}
@@ -713,39 +714,27 @@
 														}
 													}).length
 												}))}
-												{@const maxCount = Math.max(...responseCounts.map(r => r.count), 1)}
 												{@const totalResponses = responseCounts.reduce((sum, rc) => sum + rc.count, 0)}
-												
+												{@const chartData = responseCounts.map(({option, count}) => ({
+													label: option,
+													value: count,
+													percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0
+												}))}
+
 												<div class="space-y-3">
-													<div class="flex items-center justify-between">
+													<div class="flex items-center justify-between mb-2">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
 														<div class="text-xs text-slate-400">
 															<span class="font-semibold text-cyan-300">{totalResponses}</span> total responses
 														</div>
 													</div>
-													<div class="space-y-2">
-														{#each responseCounts as {option, count}}
-															{@const percentage = totalResponses > 0 ? ((count / totalResponses) * 100).toFixed(1) : '0'}
-															<div class="flex items-center gap-3">
-																<div class="w-40 text-xs text-slate-300 truncate font-medium" title={option}>
-																	{option}
-																</div>
-																<div class="flex-1 h-8 bg-slate-800/50 rounded-lg overflow-hidden relative">
-																	<div 
-																		class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500 flex items-center justify-end px-2"
-																		style="width: {totalResponses > 0 ? (count / maxCount) * 100 : 0}%"
-																	>
-																		{#if count > 0}
-																			<span class="text-xs font-semibold text-white">{count}</span>
-																		{/if}
-																	</div>
-																</div>
-																<div class="w-16 text-right text-xs text-slate-400">
-																	{percentage}%
-																</div>
-															</div>
-														{/each}
-													</div>
+													<BarChart
+														data={chartData}
+														question={question.text}
+														totalResponses={totalResponses}
+														width={1200}
+														height={Math.max(200, chartData.length * 60)}
+													/>
 												</div>
 											{/each}
 										</div>

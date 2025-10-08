@@ -10,8 +10,8 @@
 		timeline,
 		chat,
 		leaderboard,
-		startRealtimeSession,
-		stopRealtimeSession,
+		// startRealtimeSession,
+		// stopRealtimeSession,
 		addResponse as apiAddResponse,
 		voteResponse as apiVoteResponse,
 		addTimelineEntry as apiAddTimelineEntry,
@@ -25,8 +25,6 @@
 		completePhase as completePhaseRequest
 	} from '$lib/realtime';
 	import { currentUser } from '$lib/stores/user';
-	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
-	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 	import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
 	import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
@@ -358,13 +356,13 @@
 	})();
 	// Dynamically determine available dashboards based on questions in active phase
 	$: availableDashboards = (() => {
-		if (!activePhase) return ['overview', 'timeline', 'chat', 'participants'];
+		if (!activePhase) return ['roadmap', 'wordcloud', 'timeline', 'chat', 'participants'];
 
 		const phaseQuestions = questionsList.filter(
 			(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
 		);
 
-		const dashboards = new Set<string>(['overview', 'timeline', 'chat', 'participants']);
+		const dashboards = new Set<string>(['timeline', 'chat', 'participants']);
 
 		// Collect dashboards from question recommendations
 		phaseQuestions.forEach((q) => {
@@ -375,9 +373,7 @@
 				// Fallback: infer from response type
 				const responseType = q.response_type || 'written';
 				if (responseType === 'written') {
-					dashboards.add('heatmap');
 					dashboards.add('roadmap');
-					dashboards.add('quadBubbles');
 					dashboards.add('wordcloud');
 				} else if (responseType === 'landscape') {
 					dashboards.add('response-landscape');
@@ -563,7 +559,7 @@
 	onMount(() => {
 		// Run async profile check without blocking mount
 		ensureProfile();
-		startRealtimeSession(sessionCode);
+		// startRealtimeSession(sessionCode);
 
 		// Set loading to false once session data starts coming in
 		if ($sessionDetails) {
@@ -604,7 +600,7 @@
 	});
 
 	onDestroy(() => {
-		stopRealtimeSession();
+		// stopRealtimeSession();
 		if (phaseTimer) {
 			clearInterval(phaseTimer);
 			phaseTimer = null;
@@ -768,7 +764,7 @@
 				clearParticipantProfile(sessionCode);
 				currentUser.set(null);
 			}
-			stopRealtimeSession();
+			// stopRealtimeSession();
 			goto('/');
 		}
 	}
@@ -1504,28 +1500,15 @@
 				{#if isFacilitator()}
 					<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 md:p-6">
 						<nav class="flex gap-2 md:gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-							on:click={() => (activeTab = 'overview')}
-						>
-							<IconChartBubble class="h-4 w-4 flex-shrink-0" />
-							<span class="hidden sm:inline">Quad Bubble</span>
-							<span class="sm:hidden">Quad</span>
-						</button>
-						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'heatmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-							on:click={() => (activeTab = 'heatmap')}
-						>
-							<IconGridDots class="h-4 w-4 flex-shrink-0" />
-							Heatmap
-						</button>
-						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
-							on:click={() => (activeTab = 'roadmap')}
-						>
-							<IconMap class="h-4 w-4 flex-shrink-0" />
-							Roadmap
-						</button>
+						{#if availableDashboards.includes('roadmap')}
+							<button
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+								on:click={() => (activeTab = 'roadmap')}
+							>
+								<IconMap class="h-4 w-4 flex-shrink-0" />
+								Roadmap
+							</button>
+						{/if}
 						{#if availableDashboards.includes('wordcloud')}
 							<button
 								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'wordcloud' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
@@ -1594,17 +1577,7 @@
 
 								<!-- Main Chart Area: Full Width Below -->
 								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-6">
-									{#if activeTab === 'overview'}
-										<h3 class="text-lg font-semibold text-white mb-4">Response Quadrant Analysis</h3>
-										<div class="w-full h-[520px] overflow-hidden">
-											<QuadBubbleChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
-										</div>
-									{:else if activeTab === 'heatmap'}
-										<h3 class="text-lg font-semibold text-white mb-4">Insight Heatmap</h3>
-										<div class="w-full h-[520px] overflow-hidden">
-											<HeatmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
-										</div>
-									{:else if activeTab === 'roadmap'}
+									{#if activeTab === 'roadmap'}
 										<h3 class="text-lg font-semibold text-white mb-4">Roadmap Timeline</h3>
 										<div class="w-full h-[520px] overflow-hidden">
 											<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
@@ -1719,15 +1692,7 @@
 						{:else}
 							<!-- Classic Dashboard Layout -->
 							<div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4 overflow-x-auto">
-								{#if activeTab === 'overview'}
-									<div class="min-w-[350px]">
-										<QuadBubbleChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
-									</div>
-								{:else if activeTab === 'heatmap'}
-									<div class="min-w-[350px]">
-										<HeatmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
-									</div>
-								{:else if activeTab === 'roadmap'}
+								{#if activeTab === 'roadmap'}
 									<div class="min-w-[350px]">
 										<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
 									</div>
