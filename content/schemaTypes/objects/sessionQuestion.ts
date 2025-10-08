@@ -155,7 +155,7 @@ export const sessionQuestion = defineField({
           // Default: all dashboards
           return allDashboards;
         },
-        layout: 'tags'
+        layout: 'grid'
       }
     })
   ],
