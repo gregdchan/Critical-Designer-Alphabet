@@ -2,7 +2,6 @@
 	import { select } from 'd3-selection';
 	import { scaleLinear, scaleBand } from 'd3-scale';
 	import { max } from 'd3-array';
-	import { interpolate } from 'd3-interpolate';
 	import { onMount, afterUpdate } from 'svelte';
 
 	export let data: Array<{ label: string; value: number; percentage: number }> = [];
@@ -42,16 +41,16 @@
 			.append('g')
 			.attr('class', 'bar-group');
 
-		// Bar backgrounds
-		bars
-			.append('rect')
-			.attr('class', 'bar-background')
-			.attr('x', 0)
-			.attr('y', (d) => yScale(d.label) || 0)
-			.attr('width', innerWidth)
-			.attr('height', yScale.bandwidth())
-			.attr('fill', 'rgba(51, 65, 85, 0.3)')
-			.attr('rx', 6);
+			// Bar backgrounds
+			bars
+				.append('rect')
+				.attr('class', 'bar-background')
+				.attr('x', 0)
+				.attr('y', (d) => yScale(d.label) || 0)
+				.attr('width', innerWidth)
+				.attr('height', yScale.bandwidth())
+				.attr('fill', 'rgba(148, 163, 184, 0.25)')
+				.attr('rx', 6);
 
 		// Animated bars
 		const barRects = bars
@@ -79,7 +78,7 @@
 			.attr('y', (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
 			.attr('dy', '0.35em')
 			.attr('text-anchor', 'end')
-			.attr('fill', 'white')
+			.attr('fill', '#0f172a')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '14px')
 			.attr('font-weight', 'bold')
@@ -98,7 +97,7 @@
 			.attr('y', (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
 			.attr('dy', '0.35em')
 			.attr('text-anchor', 'start')
-			.attr('fill', 'rgb(148, 163, 184)')
+			.attr('fill', '#475569')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '12px')
 			.attr('opacity', 0)
@@ -119,7 +118,7 @@
 			.attr('y', (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
 			.attr('dy', '0.35em')
 			.attr('text-anchor', 'end')
-			.attr('fill', 'rgb(203, 213, 225)')
+			.attr('fill', '#1f2937')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '13px')
 			.attr('font-weight', '500')
@@ -155,19 +154,19 @@
 </script>
 
 <div class="bar-chart-container">
-	<svg bind:this={svgElement} {width} {height} class="bar-chart">
+		<svg bind:this={svgElement} {width} {height} class="bar-chart">
 		<defs>
-			<linearGradient id="bar-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-				<stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-				<stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
-			</linearGradient>
-			<filter id="bar-glow">
-				<feGaussianBlur stdDeviation="3" result="coloredBlur" />
-				<feMerge>
-					<feMergeNode in="coloredBlur" />
-					<feMergeNode in="SourceGraphic" />
-				</feMerge>
-			</filter>
+				<linearGradient id="bar-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+					<stop offset="0%" style="stop-color:#4c6ef5;stop-opacity:1" />
+					<stop offset="100%" style="stop-color:#38bdf8;stop-opacity:1" />
+				</linearGradient>
+				<filter id="bar-glow">
+					<feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+					<feMerge>
+						<feMergeNode in="coloredBlur" />
+						<feMergeNode in="SourceGraphic" />
+					</feMerge>
+				</filter>
 		</defs>
 		<g bind:this={chartGroup} transform="translate({margin.left}, {margin.top})" />
 	</svg>
@@ -194,22 +193,26 @@
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
-		background-color: rgba(15, 23, 42, 0.8);
-		backdrop-filter: blur(4px);
+		background-color: rgba(255, 255, 255, 0.82);
+		border: 1px solid rgba(148, 163, 184, 0.35);
+		border-radius: 1rem;
+		color: #475569;
+		backdrop-filter: blur(6px);
 	}
 
 	.empty-text {
-		color: rgb(148, 163, 184);
+		color: #475569;
 		font-size: 0.875rem;
 	}
 
 	:global(.bar) {
 		filter: url(#bar-glow);
-		transition: opacity 0.3s ease;
+		transition: opacity 0.3s ease, transform 0.2s ease;
 	}
 
 	:global(.bar:hover) {
-		opacity: 0.8;
+		opacity: 0.9;
+		transform: translateX(2px);
 	}
 
 	:global(.y-label) {

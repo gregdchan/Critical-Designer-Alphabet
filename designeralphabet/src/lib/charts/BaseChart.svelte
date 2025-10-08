@@ -139,6 +139,9 @@ export let theme: 'dark' | 'light' = 'light';
 		width: 100%;
 		height: 100%;
 		overflow: hidden;
+		border: 1px solid hsl(var(--border-subtle));
+		border-radius: 1.5rem;
+		box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
 	}
 
 	.chart-svg {

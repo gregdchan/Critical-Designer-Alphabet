@@ -19,14 +19,15 @@
 	$: centerY = height / 2;
 
 	const colors = [
-		'#3b82f6', // blue
-		'#8b5cf6', // purple
-		'#ec4899', // pink
-		'#f59e0b', // amber
-		'#10b981', // emerald
-		'#06b6d4', // cyan
-		'#6366f1', // indigo
-		'#f43f5e'  // rose
+		'#4c6ef5', // ocean blue
+		'#38bdf8', // sky
+		'#2ab3bf', // teal
+		'#22a06b', // mint
+		'#f6b042', // gold
+		'#f7745e', // coral
+		'#9b5de5', // plum
+		'#f472b6', // rose
+		'#64748b' // slate
 	];
 
 	const colorScale = scaleOrdinal<string>().range(colors);
@@ -68,8 +69,8 @@
 			.append('path')
 			.attr('class', 'slice-path')
 			.attr('fill', (d: any) => colorScale(d.data.label))
-			.attr('stroke', '#1e293b')
-			.attr('stroke-width', 2)
+			.attr('stroke', '#e2e8f0')
+			.attr('stroke-width', 1.5)
 			.style('cursor', 'pointer')
 			.attr('opacity', 0)
 			.on('mouseover', handleMouseOver)
@@ -113,7 +114,7 @@
 			.append('text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '-0.3em')
-			.attr('fill', 'white')
+			.attr('fill', '#0f172a')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '32px')
 			.attr('font-weight', 'bold')
@@ -127,7 +128,7 @@
 			.append('text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '1.2em')
-			.attr('fill', 'rgb(148, 163, 184)')
+			.attr('fill', '#64748b')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '14px')
 			.attr('opacity', 0)
@@ -236,23 +237,24 @@
 	.legend-title {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: rgb(148, 163, 184);
+		color: #64748b;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		margin-bottom: 0.75rem;
 	}
 
-	.legend-item {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.5rem;
-		border-radius: 0.5rem;
-		transition: background-color 0.2s;
-	}
+.legend-item {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.5rem;
+	border-radius: 0.5rem;
+	transition: background-color 0.2s, transform 0.2s;
+}
 
-	.legend-item:hover {
-		background-color: rgba(51, 65, 85, 0.5);
+.legend-item:hover {
+	background-color: rgba(148, 163, 184, 0.18);
+	transform: translateX(4px);
 	}
 
 	.legend-color {
