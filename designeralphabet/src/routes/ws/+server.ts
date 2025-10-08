@@ -25,8 +25,18 @@ export const GET: RequestHandler = async ({ request }) => {
 
 	const WebSocketPair = (globalThis as any).WebSocketPair;
 	if (!WebSocketPair) {
-		console.error('WebSocketPair is not available in this environment');
-		return new Response('WebSockets not supported', { status: 500 });
+		console.error('WebSocketPair is not available in this environment - WebSockets are not supported on Node.js adapter');
+		console.error('Please use Supabase Realtime instead, or deploy to Cloudflare Workers/Pages');
+		return new Response(
+			JSON.stringify({
+				error: 'WebSockets not supported in this environment',
+				message: 'This deployment uses Node.js adapter which does not support WebSockets. Please use Supabase Realtime or deploy to Cloudflare.'
+			}),
+			{
+				status: 501,
+				headers: { 'Content-Type': 'application/json' }
+			}
+		);
 	}
 
 	const pair = new WebSocketPair();
