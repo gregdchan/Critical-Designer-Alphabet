@@ -29,6 +29,7 @@
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 	import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
+	import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
 	// New immersive chart components
 	import { loadChartComponent, CHART_REGISTRY, type ChartType } from '$lib/charts';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
@@ -50,7 +51,8 @@
 		IconThumbUp,
 		IconGridDots,
 		// IconCards, // Temporarily hidden - not usable with current exercise
-		IconChartDots3
+		IconChartDots3,
+		IconCloud
 	} from '@tabler/icons-svelte';
 	// import CardPanel from '$lib/components/session/CardPanel.svelte'; // Temporarily hidden - not usable with current exercise
 	// import { createSessionCardStore } from '$lib/stores/sessionCards'; // Temporarily hidden - not usable with current exercise
@@ -65,7 +67,7 @@
 	let sessionLoading = true;
 	let sessionError = '';
 
-	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'barChart' | 'pieChart' | 'response-landscape' | 'timeline' | 'chat' | 'participants' =
+	let activeTab: 'overview' | 'heatmap' | 'roadmap' | 'wordcloud' | 'barChart' | 'pieChart' | 'lineChart' | 'response-landscape' | 'timeline' | 'chat' | 'participants' =
 		'overview';
 	let responseModalOpen = false;
 	let selectedQuestionId: string | null = null;
@@ -376,6 +378,7 @@
 					dashboards.add('heatmap');
 					dashboards.add('roadmap');
 					dashboards.add('quadBubbles');
+					dashboards.add('wordcloud');
 				} else if (responseType === 'landscape') {
 					dashboards.add('response-landscape');
 				}
@@ -1523,6 +1526,16 @@
 							<IconMap class="h-4 w-4 flex-shrink-0" />
 							Roadmap
 						</button>
+						{#if availableDashboards.includes('wordcloud')}
+							<button
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'wordcloud' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
+								on:click={() => (activeTab = 'wordcloud')}
+							>
+								<IconCloud class="h-4 w-4 flex-shrink-0" />
+								<span class="hidden sm:inline">Word Cloud</span>
+								<span class="sm:hidden">Cloud</span>
+							</button>
+						{/if}
 						{#if availableDashboards.includes('response-landscape')}
 							<button
 								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'response-landscape' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
@@ -1595,6 +1608,11 @@
 										<h3 class="text-lg font-semibold text-white mb-4">Roadmap Timeline</h3>
 										<div class="w-full h-[520px] overflow-hidden">
 											<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+										</div>
+									{:else if activeTab === 'wordcloud'}
+										<h3 class="text-lg font-semibold text-white mb-4">Response Word Cloud</h3>
+										<div class="w-full h-[520px] overflow-hidden">
+											<WordCloudChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
 										</div>
 									{:else if activeTab === 'response-landscape'}
 										<h3 class="text-lg font-semibold text-white mb-4">Response Landscape</h3>

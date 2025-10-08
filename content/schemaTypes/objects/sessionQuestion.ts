@@ -114,9 +114,9 @@ export const sessionQuestion = defineField({
       type: 'array',
       title: 'Dashboards to Display',
       description: `Select which visualizations to show for this question. Note compatibility:
-      • Written: Overview, Heatmap, Roadmap, Quad Bubbles, Timeline, Leaderboard, Chat
+      • Written: Overview, Heatmap, Roadmap, Quad Bubbles, Word Cloud, Timeline, Leaderboard, Chat
       • Landscape (2D): Overview, Response Landscape, Timeline, Leaderboard, Chat
-      • Scale: Overview, Timeline, Leaderboard, Chat
+      • Scale: Overview, Line Chart, Timeline, Leaderboard, Chat
       • Single/Multi Choice: Overview, Bar Chart, Pie Chart, Heatmap, Timeline, Leaderboard, Chat`,
       of: [
         {
@@ -126,9 +126,11 @@ export const sessionQuestion = defineField({
               { title: 'Overview (works with all types)', value: 'overview' },
               { title: 'Bar Chart (choice responses only)', value: 'barChart' },
               { title: 'Pie Chart (choice responses only)', value: 'pieChart' },
+              { title: 'Line Chart (scale/slider responses only)', value: 'lineChart' },
               { title: 'Heatmap (requires written or choice responses)', value: 'heatmap' },
               { title: 'Roadmap (requires written responses + voting)', value: 'roadmap' },
               { title: 'Quad Bubbles (requires written responses)', value: 'quadBubbles' },
+              { title: 'Word Cloud (requires written responses + voting)', value: 'wordcloud' },
               { title: 'Response Landscape (requires 2D positioning)', value: 'response-landscape' },
               { title: 'Timeline (works with all types)', value: 'timeline' },
               { title: 'Leaderboard (works with all types)', value: 'leaderboard' },
@@ -158,6 +160,10 @@ export const sessionQuestion = defineField({
             warnings.push('⚠️ Quad Bubbles works best with written responses');
           }
 
+          if (selectedDashboards.includes('wordcloud') && responseType !== 'written') {
+            warnings.push('⚠️ Word Cloud works best with written responses');
+          }
+
           if (selectedDashboards.includes('heatmap') && !['written', 'singleChoice', 'multiSelect'].includes(responseType)) {
             warnings.push('⚠️ Heatmap requires written or choice responses');
           }
@@ -168,6 +174,10 @@ export const sessionQuestion = defineField({
 
           if (selectedDashboards.includes('pieChart') && !['singleChoice', 'multiSelect'].includes(responseType)) {
             warnings.push('⚠️ Pie Chart requires singleChoice or multiSelect response type');
+          }
+
+          if (selectedDashboards.includes('lineChart') && responseType !== 'scale') {
+            warnings.push('⚠️ Line Chart requires scale response type');
           }
 
           return warnings.length > 0 ? warnings.join('\n') : true;

@@ -42,6 +42,7 @@
 		| 'roadmap'
 		| 'barChart'
 		| 'pieChart'
+		| 'lineChart'
 		| 'quadBubbles'
 		| 'maturityDial'
 		| 'participationPulse'
@@ -93,6 +94,12 @@
 			id: 'pieChart',
 			label: 'Pie Chart',
 			description: 'Proportional distribution of choice responses.',
+			layout: 'main'
+		},
+		lineChart: {
+			id: 'lineChart',
+			label: 'Line Chart',
+			description: 'Distribution plot for scale/slider responses.',
 			layout: 'main'
 		},
 		quadBubbles: {
@@ -150,6 +157,7 @@
 		'responses',
 		'barChart',
 		'pieChart',
+		'lineChart',
 		'quadBubbles',
 		'participationPulse',
 		'heatmap',
@@ -320,6 +328,11 @@
 		// Pie chart for choice-based responses
 		if (dashboardId === 'pieChart') {
 			return ['singleChoice', 'multiSelect'].includes(responseType) && hasResponses;
+		}
+		
+		// Line chart for scale responses
+		if (dashboardId === 'lineChart') {
+			return responseType === 'scale' && hasResponses;
 		}
 		
 		// Written response visualizations
@@ -850,6 +863,144 @@
 								{:else}
 									<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
 										No choice-based questions in this phase.
+									</div>
+								{/if}
+							{:else if boardId === 'lineChart'}
+								{@const scaleQuestions = phaseQuestions.filter(q => q.response_type === 'scale')}
+								{#if scaleQuestions.length > 0}
+									<div
+										class="rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+									>
+										<header class="mb-4">
+											<h2 class="text-xl font-semibold text-slate-100">
+												{BOARD_DEFINITIONS[boardId].label}
+											</h2>
+											<p class="text-sm text-slate-400">
+												{BOARD_DEFINITIONS[boardId].description}
+											</p>
+										</header>
+										<div class="space-y-8">
+											{#each scaleQuestions as question}
+												{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
+												{@const scaleSettings = question.scale || { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' }}
+												{@const minValue = scaleSettings.min || 0}
+												{@const maxValue = scaleSettings.max || 10}
+												{@const range = maxValue - minValue}
+												
+												<!-- Create data points: for each unique value, count occurrences -->
+												{@const valueCounts = new Map()}
+												{#each questionResponses as response}
+													{@const value = typeof response.value === 'string' ? parseFloat(response.value) : response.value}
+													{#if !isNaN(value)}
+														{@const count = valueCounts.get(value) || 0}
+														{#each [valueCounts.set(value, count + 1)] as _}<!-- side effect -->{/each}
+													{/if}
+												{/each}
+												
+												{@const dataPoints = Array.from(valueCounts.entries()).map(([value, count]) => ({ value, count })).sort((a, b) => a.value - b.value)}
+												{@const maxCount = Math.max(...dataPoints.map(d => d.count), 1)}
+												{@const totalResponses = dataPoints.reduce((sum, d) => sum + d.count, 0)}
+												
+												<div class="space-y-4">
+													<div class="flex items-center justify-between">
+														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+														<div class="text-xs text-slate-400">
+															<span class="font-semibold text-emerald-300">{totalResponses}</span> responses
+														</div>
+													</div>
+													
+													{#if dataPoints.length > 0}
+														{@const pathData = dataPoints.map((point, i) => {
+															const x = range > 0 ? ((point.value - minValue) / range) * 100 : 0;
+															const y = 100 - ((point.count / maxCount) * 100);
+															return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+														}).join(' ')}
+														
+														<!-- Chart container -->
+														<div class="relative w-full h-64 bg-slate-800/30 rounded-xl p-4">
+															<!-- Y-axis labels -->
+															<div class="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between text-xs text-slate-400 text-right pr-2">
+																<span>{maxCount}</span>
+																<span>{Math.floor(maxCount / 2)}</span>
+																<span>0</span>
+															</div>
+															
+															<!-- Chart area -->
+															<div class="ml-10 mr-4 h-full relative">
+																<svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full absolute inset-0">
+																	<!-- Grid lines -->
+																	<line x1="0" y1="0" x2="100" y2="0" stroke="#334155" stroke-width="0.5" />
+																	<line x1="0" y1="50" x2="100" y2="50" stroke="#334155" stroke-width="0.5" />
+																	<line x1="0" y1="100" x2="100" y2="100" stroke="#334155" stroke-width="0.5" />
+																	
+																	<!-- Line path -->
+																	<path
+																		d={pathData}
+																		fill="none"
+																		stroke="#10b981"
+																		stroke-width="2"
+																		class="transition-all duration-300"
+																	/>
+																	
+																	<!-- Data points -->
+																	{#each dataPoints as point}
+																		{@const x = range > 0 ? ((point.value - minValue) / range) * 100 : 0}
+																		{@const y = 100 - ((point.count / maxCount) * 100)}
+																		<circle
+																			cx={x}
+																			cy={y}
+																			r="3"
+																			fill="#10b981"
+																			stroke="#0f172a"
+																			stroke-width="1.5"
+																			class="transition-all duration-300 hover:r-4"
+																		>
+																			<title>{point.value}: {point.count} response{point.count !== 1 ? 's' : ''}</title>
+																		</circle>
+																	{/each}
+																</svg>
+															</div>
+															
+															<!-- X-axis labels -->
+															<div class="ml-10 mr-4 mt-2 flex justify-between text-xs text-slate-400">
+																<div class="flex flex-col items-start">
+																	<span class="font-semibold">{minValue}</span>
+																	{#if scaleSettings.minLabel}
+																		<span class="text-[10px] text-slate-500">{scaleSettings.minLabel}</span>
+																	{/if}
+																</div>
+																<div class="flex flex-col items-center">
+																	<span class="font-semibold">{Math.floor((minValue + maxValue) / 2)}</span>
+																</div>
+																<div class="flex flex-col items-end">
+																	<span class="font-semibold">{maxValue}</span>
+																	{#if scaleSettings.maxLabel}
+																		<span class="text-[10px] text-slate-500">{scaleSettings.maxLabel}</span>
+																	{/if}
+																</div>
+															</div>
+														</div>
+														
+														<!-- Data summary -->
+														<div class="flex flex-wrap gap-2 text-xs">
+															{#each dataPoints as point}
+																<div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+																	<span class="font-semibold text-emerald-300">{point.value}</span>
+																	<span class="text-slate-400">→</span>
+																	<span class="text-slate-300">{point.count} response{point.count !== 1 ? 's' : ''}</span>
+																</div>
+															{/each}
+														</div>
+													{:else}
+														<p class="text-sm text-slate-400">No responses yet</p>
+													{/if}
+												</div>
+											{/each}
+										</div>
+									</div>
+								{:else}
+									<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+										No scale questions in this phase.
 									</div>
 								{/if}
 								{:else if boardId === 'quadBubbles' || boardId === 'participationPulse' || boardId === 'riskImpactMatrix'}
