@@ -114,6 +114,67 @@
 		return { slope, intercept, r2 };
 	}
 
+	// Calculate 2D kernel density estimation for contour generation
+	function calculateDensityContours(
+		points: PlotPoint[],
+		width: number,
+		height: number,
+		xScale: d3.ScaleLinear<number, number>,
+		yScale: d3.ScaleLinear<number, number>
+	) {
+		if (points.length < 3) return null;
+
+		// Create a grid for density estimation
+		const gridSize = 40; // Resolution of density grid
+		const bandwidth = 1.5; // Smoothing parameter (adjust for more/less smoothing)
+
+		// Calculate density at each grid point using Gaussian kernel
+		const densityData: number[][] = [];
+		const xStep = (maxX - minX) / gridSize;
+		const yStep = (maxY - minY) / gridSize;
+
+		for (let i = 0; i <= gridSize; i++) {
+			densityData[i] = [];
+			for (let j = 0; j <= gridSize; j++) {
+				const gridX = minX + i * xStep;
+				const gridY = minY + j * yStep;
+
+				// Calculate density using Gaussian kernel
+				let density = 0;
+				for (const point of points) {
+					const dx = (gridX - point.x) / bandwidth;
+					const dy = (gridY - point.y) / bandwidth;
+					const distSq = dx * dx + dy * dy;
+					density += Math.exp(-distSq / 2);
+				}
+
+				// Normalize by number of points and bandwidth
+				densityData[i][j] = density / (points.length * bandwidth * bandwidth * 2 * Math.PI);
+			}
+		}
+
+		// Convert to format needed for d3.contours
+		const values: number[] = [];
+		for (let j = 0; j <= gridSize; j++) {
+			for (let i = 0; i <= gridSize; i++) {
+				values.push(densityData[i][j]);
+			}
+		}
+
+		// Generate contours
+		const contours = d3
+			.contours()
+			.size([gridSize + 1, gridSize + 1])
+			.thresholds(6) // Number of contour levels
+			(values);
+
+		// Create scale to map grid indices to actual coordinates
+		const xGridScale = d3.scaleLinear().domain([0, gridSize]).range([minX, maxX]);
+		const yGridScale = d3.scaleLinear().domain([0, gridSize]).range([minY, maxY]);
+
+		return { contours, xGridScale, yGridScale };
+	}
+
 	function renderChart() {
 		if (!mounted || !svg || !tooltipEl) return;
 
@@ -167,6 +228,39 @@
 			.attr('y2', (d) => yScale(d))
 			.attr('stroke', 'rgba(148, 163, 184, 0.1)')
 			.attr('stroke-width', 1);
+
+		// Draw density contours
+		const densityContours = calculateDensityContours(parsedPoints, chartWidth, chartHeight, xScale, yScale);
+		if (densityContours) {
+			const { contours, xGridScale, yGridScale } = densityContours;
+
+			// Create path generator that transforms grid coordinates to screen coordinates
+			const geoPath = d3.geoPath().projection(
+				d3.geoTransform({
+					point: function (x, y) {
+						this.stream.point(xScale(xGridScale(x)), yScale(yGridScale(y)));
+					}
+				})
+			);
+
+			// Color scale for contours (from transparent to visible)
+			const contourColorScale = d3
+				.scaleSequential()
+				.domain([0, contours.length - 1])
+				.interpolator(d3.interpolateRgb('rgba(6, 182, 212, 0.05)', 'rgba(6, 182, 212, 0.3)'));
+
+			// Draw contour paths
+			g.append('g')
+				.attr('class', 'contours')
+				.selectAll('path')
+				.data(contours)
+				.join('path')
+				.attr('d', geoPath as any)
+				.attr('fill', (d, i) => contourColorScale(i))
+				.attr('stroke', 'rgba(6, 182, 212, 0.4)')
+				.attr('stroke-width', 1)
+				.attr('opacity', 0.8);
+		}
 
 		// Calculate and draw trend line
 		const trendLine = calculateTrendLine(parsedPoints);

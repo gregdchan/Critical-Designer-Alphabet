@@ -228,7 +228,7 @@
 						mapType: question.mapType || 'responses',
 						config: config,
 						phaseKey: phaseKey,
-						recommendedDashboards: question.dashboards || [],
+						recommendedDashboards: question.recommendedDashboards || question.dashboards || [],
 						enableVoting: question.enableVoting !== false,
 						orderIndex: roundIndex * 100 + questionIndex
 					});
