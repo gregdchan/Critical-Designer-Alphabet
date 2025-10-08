@@ -2044,23 +2044,21 @@
 				Link cards to earn bonus points and center your thinking.
 			</p>
 			<div class="mt-4 space-y-4">
-				<label class="flex flex-col gap-2 text-sm text-slate-300">
+				<div class="flex flex-col gap-2 text-sm text-slate-300">
 					Prompt
-					<select
-						class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
-						bind:value={selectedQuestionId}
-					>
-						<option value={null}>Select a question…</option>
-						{#if activePhase}
-							{@const phaseQuestions = questionsList.filter(
-								(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
-							)}
-							{#each phaseQuestions as question}
-								<option value={question.id}>{question.section}: {question.text}</option>
-							{/each}
-						{/if}
-					</select>
-				</label>
+					<div class="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2">
+						<p class="text-sm text-white leading-relaxed">
+							{#if currentQuestion}
+								{#if currentQuestion.section}
+									<strong class="text-cyan-300 mr-1">{currentQuestion.section}:</strong>
+								{/if}
+								{currentQuestion.text}
+							{:else}
+								Select a question to respond to.
+							{/if}
+						</p>
+					</div>
+				</div>
 				{#if modalResponseType === 'scale'}
 					<!-- Scale / Slider Input -->
 					<label class="flex flex-col gap-2 text-sm text-slate-300">
@@ -2210,35 +2208,7 @@
 							These cards will be automatically linked to your response
 						</p>
 					</div>
-				{:else}
-					<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
-						<p class="text-sm text-slate-400">
-							No cards selected.
-							{#if isMobile}
-								<button
-									type="button"
-									on:click={() => cardStore.setCardPanelOpen(true)}
-									class="text-cyan-400 hover:text-cyan-300 underline"
-								>
-									Open card panel
-								</button>
-							{:else}
-								Use the card panel on the right
-							{/if}
-							to select cards that frame your thinking.
-						</p>
-					</div>
 				{/if}
-
-				<label class="flex flex-col gap-2 text-sm text-slate-300">
-					Additional cards (optional)
-					<input
-						class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
-						placeholder="e.g., justice, power, empathy"
-						bind:value={linkedCardsText}
-					/>
-					<p class="text-xs text-slate-500">Add other cards by name (comma separated)</p>
-				</label>
 			</div>
 			<div class="mt-6 flex items-center justify-end gap-3">
 				<button
