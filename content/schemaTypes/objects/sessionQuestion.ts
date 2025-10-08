@@ -78,7 +78,8 @@ export const sessionQuestion = defineField({
       hidden: ({ parent }) => parent?.mapType !== 'response-landscape',
       validation: (rule) =>
         rule.custom((value, context) => {
-          const isLandscape = context.parent?.mapType === 'response-landscape';
+          const parent = (context?.parent as { mapType?: string } | undefined) ?? undefined;
+          const isLandscape = parent?.mapType === 'response-landscape';
           if (!isLandscape) {
             return true;
           }
