@@ -33,6 +33,7 @@ export interface Question {
 	config: Record<string, unknown> | null;
 	order_index: number | null;
 	recommended_dashboards: string[];
+	enable_voting: boolean | null;
 	created_at: string;
 }
 

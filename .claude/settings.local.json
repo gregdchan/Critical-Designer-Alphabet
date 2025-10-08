@@ -18,7 +18,9 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Read(//Users/gchan/Desktop/**)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx supabase:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

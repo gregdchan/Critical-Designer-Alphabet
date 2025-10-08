@@ -747,6 +747,7 @@
 													{#each questionResponses as response}
 														{@const hasVoted = userVotes.has(response.id)}
 														{@const isOwnResponse = response.participant_id === currentParticipant?.id}
+														{@const votingEnabled = question.enable_voting ?? true}
 														<div class="rounded border border-slate-800 bg-slate-900/70 p-3 text-xs">
 															<div class="flex items-center justify-between text-slate-400 mb-1">
 																<div class="flex items-center gap-2">
@@ -758,19 +759,26 @@
 																		<span class="px-1.5 py-0.5 text-[10px] rounded bg-purple-500/20 text-purple-300">You</span>
 																	{/if}
 																</div>
-																<button
-																	class={`inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors ${
-																		hasVoted
-																			? 'border-cyan-400 bg-cyan-400/20 text-cyan-100'
-																			: 'border-cyan-400/40 text-cyan-200 hover:border-cyan-300'
-																	}`}
-																	on:click={() => toggleVote(response.id)}
-																	disabled={!phaseRemainingMs || isOwnResponse}
-																	title={isOwnResponse ? "Can't vote on your own response" : hasVoted ? 'Remove vote' : 'Vote for this response'}
-																>
-																	<IconThumbUp class="h-3 w-3" />
-																	{response.votes ?? 0}
-																</button>
+																{#if votingEnabled}
+																	<button
+																		class={`inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors ${
+																			hasVoted
+																				? 'border-cyan-400 bg-cyan-400/20 text-cyan-100'
+																				: 'border-cyan-400/40 text-cyan-200 hover:border-cyan-300'
+																		}`}
+																		on:click={() => toggleVote(response.id)}
+																		disabled={!phaseRemainingMs || isOwnResponse}
+																		title={isOwnResponse ? "Can't vote on your own response" : hasVoted ? 'Remove vote' : 'Vote for this response'}
+																	>
+																		<IconThumbUp class="h-3 w-3" />
+																		{response.votes ?? 0}
+																	</button>
+																{:else}
+																	<span class="inline-flex items-center gap-1 text-slate-500 text-xs">
+																		<IconThumbUp class="h-3 w-3" />
+																		{response.votes ?? 0}
+																	</span>
+																{/if}
 															</div>
 															<p class="text-slate-200">{response.text}</p>
 															{#if response.cards?.length}
@@ -1065,9 +1073,10 @@
 																{@const sortedByVotes = questionResponses.sort(
 																	(a, b) => (b.votes || 0) - (a.votes || 0)
 																)}
+																{@const votingEnabled = question.enable_voting ?? true}
 
 																<!-- Vote Summary -->
-																{#if totalVotes > 0}
+																{#if totalVotes > 0 && votingEnabled}
 																	<div
 																		class="mb-3 p-2 rounded bg-cyan-400/10 border border-cyan-400/30"
 																	>
@@ -1106,14 +1115,21 @@
 																						(p) => p.id === response.participant_id
 																					)?.name ?? 'Anonymous'}</span
 																				>
-																				<button
-																					class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
-																					on:click={() => toggleVote(response.id)}
-																					disabled={activePhase && !phaseRemainingMs}
-																				>
-																					<IconThumbUp class="h-3 w-3" />
-																					{response.votes ?? 0}
-																				</button>
+																				{#if votingEnabled}
+																					<button
+																						class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
+																						on:click={() => toggleVote(response.id)}
+																						disabled={activePhase && !phaseRemainingMs}
+																					>
+																						<IconThumbUp class="h-3 w-3" />
+																						{response.votes ?? 0}
+																					</button>
+																				{:else}
+																					<span class="inline-flex items-center gap-1 text-slate-500 text-xs">
+																						<IconThumbUp class="h-3 w-3" />
+																						{response.votes ?? 0}
+																					</span>
+																				{/if}
 																			</div>
 																			<p class="text-slate-200">{response.text}</p>
 																			{#if response.cards?.length}

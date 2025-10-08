@@ -64,6 +64,7 @@ export interface Question {
 	config: Record<string, unknown> | null;
 	order_index: number | null;
 	recommended_dashboards: string[];
+	enable_voting: boolean | null;
 	created_at: string;
 }
 
@@ -425,7 +426,8 @@ export async function addQuestion({
 	mapType,
 	config,
 	orderIndex,
-	recommendedDashboards
+	recommendedDashboards,
+	enableVoting
 }: {
 	code: string;
 	section: string;
@@ -436,6 +438,7 @@ export async function addQuestion({
 	config?: Record<string, unknown> | null;
 	orderIndex?: number | null;
 	recommendedDashboards?: string[];
+	enableVoting?: boolean | null;
 }) {
 	const response = await supabaseAdmin
 		.from('questions')
@@ -448,7 +451,8 @@ export async function addQuestion({
 			map_type: mapType ?? 'responses',
 			config: config ?? {},
 			order_index: typeof orderIndex === 'number' ? orderIndex : null,
-			recommended_dashboards: recommendedDashboards ?? []
+			recommended_dashboards: recommendedDashboards ?? [],
+			enable_voting: enableVoting ?? true
 		})
 		.select()
 		.single();

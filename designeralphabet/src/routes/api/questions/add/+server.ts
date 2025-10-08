@@ -13,7 +13,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			mapType,
 			config,
 			orderIndex,
-			recommendedDashboards
+			recommendedDashboards,
+			enableVoting
 		} = await request.json();
 
 		if (!code || !section || !text) {
@@ -32,7 +33,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			mapType,
 			config,
 			orderIndex,
-			recommendedDashboards
+			recommendedDashboards,
+			enableVoting
 		});
 		return json({ success: true, question });
 	} catch (error: any) {

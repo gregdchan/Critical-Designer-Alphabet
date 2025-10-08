@@ -110,6 +110,26 @@ export const sessionQuestion = defineField({
       title: 'Recommended Dashboards',
       of: [{ type: 'string' }],
       description: 'Overrides default dashboards for phases referencing this question.'
+    }),
+    defineField({
+      name: 'enableVoting',
+      type: 'boolean',
+      title: 'Enable Voting',
+      description: 'Allow participants to vote on responses to prioritize ideas',
+      initialValue: true,
+      hidden: ({ parent }) => {
+        const mapType = parent?.mapType;
+        const responseType = parent?.responseType;
+
+        // Auto-disable and hide for response landscapes (positioning shows priority)
+        if (mapType === 'response-landscape') return true;
+
+        // Auto-disable and hide for scale responses (distribution is the insight)
+        if (responseType === 'scale') return true;
+
+        // Show the toggle for everything else
+        return false;
+      }
     })
   ],
   preview: {
