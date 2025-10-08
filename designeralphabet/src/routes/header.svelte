@@ -16,7 +16,7 @@
 	const links = [
 		{ href: '/', label: 'Home' },
 		{ href: '/dashboard', label: 'Dashboard' },
-		{ href: '/cards', label: 'Card Library' },
+		// { href: '/cards', label: 'Card Library' }, // Temporarily hidden - not usable with current exercise
 		{ href: '/session', label: 'Live Session' },
 		{ href: '/about', label: 'About' }
 	];

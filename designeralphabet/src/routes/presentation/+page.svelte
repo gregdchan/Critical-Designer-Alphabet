@@ -339,7 +339,26 @@
 		
 		return true; // Default to showing if unknown type
 	}
-	$: fallbackBoards = normalizeBoards(DEFAULT_ACTIVE_BOARDS);
+	
+	// Filter fallback boards to only show those with valid data
+	$: fallbackBoards = (() => {
+		if (!activePhase) return normalizeBoards(['phase']); // Only show phase when no active phase
+		
+		const phaseQuestions = questionsList.filter(
+			(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
+		);
+		
+		// Filter default boards to only include those with valid data
+		const validBoards = DEFAULT_ACTIVE_BOARDS.filter((boardId) => {
+			// Always show phase, timeline, and chat
+			if (['phase', 'timeline', 'chat'].includes(boardId)) return true;
+			
+			// For data-dependent boards, check if ANY question validates this board
+			return phaseQuestions.some(q => isDashboardValid(boardId, q, responsesList, phaseQuestions));
+		});
+		
+		return normalizeBoards(validBoards);
+	})();
 
 	$: if (!userCustomizedBoards) {
 		const combined = normalizeBoards([...recommendedBoards, ...fallbackBoards]);
