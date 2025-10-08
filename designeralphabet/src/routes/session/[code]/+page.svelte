@@ -772,7 +772,7 @@
 
 {#if sessionLoading}
 	<div
-		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 flex items-center justify-center"
+		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white flex items-center justify-center"
 	>
 		<div class="text-center space-y-4">
 			<div
@@ -784,7 +784,7 @@
 	</div>
 {:else if sessionError}
 	<div
-		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 flex items-center justify-center p-6"
+		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white flex items-center justify-center p-6"
 	>
 		<div class="max-w-md text-center space-y-6">
 			<div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
@@ -819,7 +819,7 @@
 	</div>
 {:else if sessionInfo}
 	<div
-		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 text-slate-100 {isMobile
+		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white text-slate-100 {isMobile
 			? ''
 			: 'flex'}"
 	>
@@ -842,8 +842,8 @@
 									</span>
 								</h1>
 								{#if sessionInfo.challenge && !isMobile}
-									<div class="mt-2 text-sm text-cyan-200 max-w-2xl line-clamp-3">
-										<PortableText value={sessionInfo.challenge} styleClass="prose-sm prose-invert" />
+									<div class="mt-2 text-sm text-slate-600 max-w-2xl line-clamp-3">
+										<PortableText value={sessionInfo.challenge} styleClass="prose-sm prose-slate" />
 									</div>
 								{/if}
 								<p class="mt-1 text-xs md:text-sm text-slate-300 truncate">
@@ -1448,7 +1448,7 @@
 						<div class="md:col-span-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4">
 							<p class="text-xs uppercase tracking-[0.3em] text-cyan-100 mb-2">Challenge Focus</p>
 							<div class="text-base text-slate-100">
-								<PortableText value={sessionInfo.challenge} styleClass="prose prose-invert" />
+								<PortableText value={sessionInfo.challenge} styleClass="prose prose-slate" />
 							</div>
 							<p class="mt-3 text-xs text-cyan-100/80">
 								Ground your ideas in this shared challenge as you move through the session.
@@ -2012,7 +2012,7 @@
 	</div>
 {:else}
 	<div
-		class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 flex items-center justify-center"
+		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white flex items-center justify-center"
 	>
 		<div class="rounded-2xl border border-slate-700 bg-slate-900/80 px-6 py-10 text-center">
 			<p class="text-sm text-slate-300">Loading session…</p>

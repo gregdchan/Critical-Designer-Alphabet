@@ -299,7 +299,7 @@
 </script>
 
 <div
-	class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 flex items-center justify-center p-6"
+	class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white flex items-center justify-center p-6"
 >
 	<div class="w-full max-w-md">
 		<!-- Back Navigation -->

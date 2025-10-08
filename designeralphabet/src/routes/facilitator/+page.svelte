@@ -454,7 +454,7 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 p-6">
+<div class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white p-6">
 	{#if currentView === 'launching'}
 		<div class="flex items-center justify-center min-h-screen">
 			<div class="text-center">
@@ -640,7 +640,7 @@
 												Challenge Focus
 											</p>
 											<div class="mt-2 text-sm text-slate-100">
-												<PortableText value={template.challenge} styleClass="prose-sm prose-invert" />
+												<PortableText value={template.challenge} styleClass="prose-sm prose-slate" />
 											</div>
 										</div>
 									{/if}
@@ -991,7 +991,7 @@
 								<div class="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4 mb-6">
 									<p class="text-xs uppercase tracking-wide text-cyan-200 mb-2">Challenge Focus</p>
 									<div class="text-slate-100">
-										<PortableText value={sessionChallenge} styleClass="prose-sm prose-invert" />
+										<PortableText value={sessionChallenge} styleClass="prose-sm prose-slate" />
 									</div>
 								</div>
 							{/if}

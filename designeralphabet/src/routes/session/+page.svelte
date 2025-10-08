@@ -73,15 +73,15 @@
 
 {#if $sessionInfo}
 	<div
-		class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-cyan-900/90 px-4 py-2 text-white shadow"
+		class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-brand/20 bg-white/85 px-4 py-2 text-sm text-slate-700 shadow-sm backdrop-blur"
 	>
 		<div class="flex items-center gap-2">
-			<span class="inline-block h-3 w-3 rounded-full bg-emerald-400 animate-pulse"></span>
-			<span class="font-semibold">Session Active:</span>
-			<span class="ml-1 font-mono text-cyan-200">{$sessionInfo.code}</span>
+			<span class="inline-block h-3 w-3 rounded-full bg-success animate-pulse"></span>
+			<span class="font-semibold text-slate-900">Session Active:</span>
+			<span class="ml-1 font-mono text-brand-soft">{$sessionInfo.code}</span>
 		</div>
 		<button
-			class="rounded-full border border-white/20 bg-cyan-800/60 px-4 py-1 text-xs uppercase tracking-wider text-white hover:bg-cyan-700 transition"
+			class="rounded-full border border-brand/30 bg-brand-soft/10 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-brand hover:bg-brand-soft hover:text-white transition"
 			on:click={leaveSession}
 		>
 			Leave Session
@@ -90,16 +90,16 @@
 {/if}
 
 <div
-	class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 flex items-center justify-center p-6"
+	class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-slate-200 flex items-center justify-center p-6"
 >
 	<div class="max-w-4xl w-full space-y-10 text-center">
 		<div class="space-y-4">
 			<h1
-				class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400"
+				class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand to-secondary"
 			>
 				Live Session Arcade
 			</h1>
-			<p class="text-lg text-slate-300">
+			<p class="text-lg text-slate-600">
 				Choose how you want to join the Critical Designer Alphabet experience. Facilitators launch
 				sessions, participants dive into collaborative play, and the presentation view keeps the
 				whole room in sync.
@@ -108,34 +108,34 @@
 
 		<div class="grid gap-6 md:grid-cols-3">
 			<button
-				class="group flex flex-col items-center gap-3 rounded-2xl border border-cyan-400/30 bg-slate-900/70 px-6 py-8 text-left text-slate-200 transition hover:border-cyan-300 hover:text-white"
+				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-slate-600 transition hover:-translate-y-1 hover:border-brand-soft/50 hover:shadow-lg"
 				on:click={openFacilitator}
 			>
-				<IconSparkles class="h-10 w-10 text-cyan-300" />
-				<h2 class="text-lg font-semibold">Facilitator Console</h2>
-				<p class="text-sm text-slate-400 group-hover:text-slate-200">
+				<IconSparkles class="h-10 w-10 text-brand" />
+				<h2 class="text-lg font-semibold text-slate-900">Facilitator Console</h2>
+				<p class="text-sm text-slate-600 group-hover:text-slate-500">
 					Create a session, pick templates, and guide inclusive planning.
 				</p>
 			</button>
 
 			<button
-				class="group flex flex-col items-center gap-3 rounded-2xl border border-purple-400/30 bg-slate-900/70 px-6 py-8 text-left text-slate-200 transition hover:border-purple-300 hover:text-white"
+				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-slate-600 transition hover:-translate-y-1 hover:border-secondary/40 hover:shadow-lg"
 				on:click={openPresentation}
 			>
-				<IconPresentationAnalytics class="h-10 w-10 text-purple-300" />
-				<h2 class="text-lg font-semibold">Presentation View</h2>
-				<p class="text-sm text-slate-400 group-hover:text-slate-200">
+				<IconPresentationAnalytics class="h-10 w-10 text-secondary" />
+				<h2 class="text-lg font-semibold text-slate-900">Presentation View</h2>
+				<p class="text-sm text-slate-600 group-hover:text-slate-500">
 					Broadcast live stats, heatmaps, and QR join codes on the big screen.
 				</p>
 			</button>
 
 			<button
-				class="group flex flex-col items-center gap-3 rounded-2xl border border-emerald-400/30 bg-slate-900/70 px-6 py-8 text-left text-slate-200 transition hover:border-emerald-300 hover:text-white"
+				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-slate-600 transition hover:-translate-y-1 hover:border-success/40 hover:shadow-lg"
 				on:click={openJoin}
 			>
-				<IconUsers class="h-10 w-10 text-emerald-300" />
-				<h2 class="text-lg font-semibold">Participant Join</h2>
-				<p class="text-sm text-slate-400 group-hover:text-slate-200">
+				<IconUsers class="h-10 w-10 text-success" />
+				<h2 class="text-lg font-semibold text-slate-900">Participant Join</h2>
+				<p class="text-sm text-slate-600 group-hover:text-slate-500">
 					Enter a code, pick a neon avatar, and start sharing inclusive insights.
 				</p>
 			</button>

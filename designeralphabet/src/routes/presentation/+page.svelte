@@ -20,6 +20,9 @@
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import PieChart from '$lib/components/charts/PieChart.svelte';
 	import LineChart from '$lib/components/charts/LineChart.svelte';
+	import RealtimeBarChart from '$lib/components/charts/RealtimeBarChart.svelte';
+	import RealtimePieChart from '$lib/components/charts/RealtimePieChart.svelte';
+	import RealtimeLineChart from '$lib/components/charts/RealtimeLineChart.svelte';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
 	import MaturityDial from '$lib/charts/MaturityDial.svelte';
 	import ParticipationPulse from '$lib/charts/ParticipationPulse.svelte';
@@ -703,39 +706,15 @@
 										</header>
 										<div class="space-y-8">
 											{#each choiceQuestions as question}
-												{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
-												{@const options = question.options || []}
-												{@const responseCounts = options.map(option => ({
-													option,
-													count: questionResponses.filter(r => {
-														try {
-															const value = typeof r.value === 'string' ? JSON.parse(r.value) : r.value;
-															return Array.isArray(value) ? value.includes(option) : value === option;
-														} catch {
-															return r.value === option;
-														}
-													}).length
-												}))}
-												{@const totalResponses = responseCounts.reduce((sum, rc) => sum + rc.count, 0)}
-												{@const chartData = responseCounts.map(({option, count}) => ({
-													label: option,
-													value: count,
-													percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0
-												}))}
-
 												<div class="space-y-3">
 													<div class="flex items-center justify-between mb-2">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
-														<div class="text-xs text-slate-400">
-															<span class="font-semibold text-cyan-300">{totalResponses}</span> total responses
-														</div>
 													</div>
-													<BarChart
-														data={chartData}
-														question={question.text}
-														totalResponses={totalResponses}
+													<RealtimeBarChart
+														roomCode={activeCode}
+														questionId={question.id}
 														width={1200}
-														height={Math.max(200, chartData.length * 60)}
+														height={Math.max(200, (question.options?.length || 3) * 60)}
 													/>
 												</div>
 											{/each}
@@ -762,91 +741,17 @@
 										</header>
 										<div class="space-y-8">
 											{#each choiceQuestions as question}
-												{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
-												{@const options = question.options || []}
-												{@const responseCounts = options.map(option => ({
-													option,
-													count: questionResponses.filter(r => {
-														try {
-															const value = typeof r.value === 'string' ? JSON.parse(r.value) : r.value;
-															return Array.isArray(value) ? value.includes(option) : value === option;
-														} catch {
-															return r.value === option;
-														}
-													}).length
-												})).filter(rc => rc.count > 0)}
-												{@const totalCount = responseCounts.reduce((sum, rc) => sum + rc.count, 0)}
-												{@const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#f43f5e']}
-												{@const radius = 90}
-												{@const centerX = 100}
-												{@const centerY = 100}
-												
 												<div class="space-y-4">
 													<div class="flex items-center justify-between">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
-														<div class="text-xs text-slate-400">
-															<span class="font-semibold text-purple-300">{totalCount}</span> total responses
-														</div>
 													</div>
-													{#if totalCount > 0}
-														<div class="flex items-start gap-8">
-															<!-- Pie Chart SVG -->
-															<div class="flex-shrink-0">
-																<svg viewBox="0 0 200 200" class="w-52 h-52">
-																	{#each responseCounts as {option, count}, i}
-																		{@const percentage = (count / totalCount) * 100}
-																		{@const startAngle = responseCounts.slice(0, i).reduce((sum, rc) => sum + (rc.count / totalCount) * 360, 0)}
-																		{@const endAngle = startAngle + (count / totalCount) * 360}
-																		{@const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0}
-																		{@const startX = centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180)}
-																		{@const startY = centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180)}
-																		{@const endX = centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180)}
-																		{@const endY = centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180)}
-																		
-																		<path
-																			d="M {centerX} {centerY} L {startX} {startY} A {radius} {radius} 0 {largeArcFlag} 1 {endX} {endY} Z"
-																			fill={colors[i % colors.length]}
-																			stroke="#1e293b"
-																			stroke-width="2"
-																			class="transition-all duration-300 hover:opacity-80"
-																		>
-																			<title>{option}: {count} ({percentage.toFixed(1)}%)</title>
-																		</path>
-																	{/each}
-																	<!-- Center circle for donut effect -->
-																	<circle cx={centerX} cy={centerY} r="50" fill="#0f172a" />
-																	<text x={centerX} y={centerY - 5} text-anchor="middle" class="text-2xl font-bold fill-slate-100">
-																		{totalCount}
-																	</text>
-																	<text x={centerX} y={centerY + 15} text-anchor="middle" class="text-xs fill-slate-400">
-																		responses
-																	</text>
-																</svg>
-															</div>
-															
-															<!-- Legend -->
-															<div class="flex-1 space-y-1">
-																<div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-																	Distribution
-																</div>
-																{#each responseCounts as {option, count}, i}
-																	{@const percentage = ((count / totalCount) * 100).toFixed(1)}
-																	<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/50 transition-colors">
-																		<div class="w-3 h-3 rounded-sm flex-shrink-0" style="background-color: {colors[i % colors.length]}"></div>
-																		<div class="flex-1 text-sm text-slate-300 truncate" title={option}>{option}</div>
-																		<div class="text-sm font-semibold text-slate-200 tabular-nums">
-																			{count}
-																		</div>
-																		<div class="w-14 text-right text-xs text-slate-400 tabular-nums">
-																			{percentage}%
-																		</div>
-																	</div>
-																{/each}
-															</div>
-														</div>
-													{:else}
-														<p class="text-sm text-slate-400">No responses yet</p>
-													{/if}
+													<RealtimePieChart
+														roomCode={activeCode}
+														questionId={question.id}
+														width={1000}
+														height={400}
+														showLegend={true}
+													/>
 												</div>
 											{/each}
 										</div>
@@ -872,119 +777,16 @@
 										</header>
 										<div class="space-y-8">
 											{#each scaleQuestions as question}
-												{@const questionResponses = responsesList.filter(r => r.question_id === question.id)}
-												{@const scaleSettings = question.scale || { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' }}
-												{@const minValue = scaleSettings.min || 0}
-												{@const maxValue = scaleSettings.max || 10}
-												{@const range = maxValue - minValue}
-												
-												<!-- Create data points: for each unique value, count occurrences -->
-												{@const valueCounts = new Map()}
-												{#each questionResponses as response}
-													{@const value = typeof response.value === 'string' ? parseFloat(response.value) : response.value}
-													{#if !isNaN(value)}
-														{@const count = valueCounts.get(value) || 0}
-														{#each [valueCounts.set(value, count + 1)] as _}<!-- side effect -->{/each}
-													{/if}
-												{/each}
-												
-												{@const dataPoints = Array.from(valueCounts.entries()).map(([value, count]) => ({ value, count })).sort((a, b) => a.value - b.value)}
-												{@const maxCount = Math.max(...dataPoints.map(d => d.count), 1)}
-												{@const totalResponses = dataPoints.reduce((sum, d) => sum + d.count, 0)}
-												
 												<div class="space-y-4">
 													<div class="flex items-center justify-between">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
-														<div class="text-xs text-slate-400">
-															<span class="font-semibold text-emerald-300">{totalResponses}</span> responses
-														</div>
 													</div>
-													
-													{#if dataPoints.length > 0}
-														{@const pathData = dataPoints.map((point, i) => {
-															const x = range > 0 ? ((point.value - minValue) / range) * 100 : 0;
-															const y = 100 - ((point.count / maxCount) * 100);
-															return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-														}).join(' ')}
-														
-														<!-- Chart container -->
-														<div class="relative w-full h-64 bg-slate-800/30 rounded-xl p-4">
-															<!-- Y-axis labels -->
-															<div class="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between text-xs text-slate-400 text-right pr-2">
-																<span>{maxCount}</span>
-																<span>{Math.floor(maxCount / 2)}</span>
-																<span>0</span>
-															</div>
-															
-															<!-- Chart area -->
-															<div class="ml-10 mr-4 h-full relative">
-																<svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full absolute inset-0">
-																	<!-- Grid lines -->
-																	<line x1="0" y1="0" x2="100" y2="0" stroke="#334155" stroke-width="0.5" />
-																	<line x1="0" y1="50" x2="100" y2="50" stroke="#334155" stroke-width="0.5" />
-																	<line x1="0" y1="100" x2="100" y2="100" stroke="#334155" stroke-width="0.5" />
-																	
-																	<!-- Line path -->
-																	<path
-																		d={pathData}
-																		fill="none"
-																		stroke="#10b981"
-																		stroke-width="2"
-																		class="transition-all duration-300"
-																	/>
-																	
-																	<!-- Data points -->
-																	{#each dataPoints as point}
-																		{@const x = range > 0 ? ((point.value - minValue) / range) * 100 : 0}
-																		{@const y = 100 - ((point.count / maxCount) * 100)}
-																		<circle
-																			cx={x}
-																			cy={y}
-																			r="3"
-																			fill="#10b981"
-																			stroke="#0f172a"
-																			stroke-width="1.5"
-																			class="transition-all duration-300 hover:r-4"
-																		>
-																			<title>{point.value}: {point.count} response{point.count !== 1 ? 's' : ''}</title>
-																		</circle>
-																	{/each}
-																</svg>
-															</div>
-															
-															<!-- X-axis labels -->
-															<div class="ml-10 mr-4 mt-2 flex justify-between text-xs text-slate-400">
-																<div class="flex flex-col items-start">
-																	<span class="font-semibold">{minValue}</span>
-																	{#if scaleSettings.minLabel}
-																		<span class="text-[10px] text-slate-500">{scaleSettings.minLabel}</span>
-																	{/if}
-																</div>
-																<div class="flex flex-col items-center">
-																	<span class="font-semibold">{Math.floor((minValue + maxValue) / 2)}</span>
-																</div>
-																<div class="flex flex-col items-end">
-																	<span class="font-semibold">{maxValue}</span>
-																	{#if scaleSettings.maxLabel}
-																		<span class="text-[10px] text-slate-500">{scaleSettings.maxLabel}</span>
-																	{/if}
-																</div>
-															</div>
-														</div>
-														
-														<!-- Data summary -->
-														<div class="flex flex-wrap gap-2 text-xs">
-															{#each dataPoints as point}
-																<div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
-																	<span class="font-semibold text-emerald-300">{point.value}</span>
-																	<span class="text-slate-400">→</span>
-																	<span class="text-slate-300">{point.count} response{point.count !== 1 ? 's' : ''}</span>
-																</div>
-															{/each}
-														</div>
-													{:else}
-														<p class="text-sm text-slate-400">No responses yet</p>
-													{/if}
+													<RealtimeLineChart
+														roomCode={activeCode}
+														questionId={question.id}
+														width={1200}
+														height={400}
+													/>
 												</div>
 											{/each}
 										</div>
