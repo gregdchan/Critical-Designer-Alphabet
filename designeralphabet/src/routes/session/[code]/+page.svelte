@@ -83,6 +83,9 @@
 	let landscapeMaxX = 10;
 	let landscapeMinY = 0;
 	let landscapeMaxY = 10;
+	let landscapeLabel = '';
+	let landscapeX = 5;
+	let landscapeY = 5;
 
 	let timelineModalOpen = false;
 	let timelineLabel: 'Now' | 'Next' | 'Later' = 'Now';
@@ -187,6 +190,52 @@
 	const stringOr = (value: unknown, fallback: string) =>
 		typeof value === 'string' && value.trim().length > 0 ? value : fallback;
 
+	const parseLandscapeResponse = (value: string) => {
+		if (!value) {
+			return { x: 5, y: 5, label: '' };
+		}
+
+		try {
+			const parsed = JSON.parse(value);
+			return {
+				x: numberOr(parsed?.x, 5),
+				y: numberOr(parsed?.y, 5),
+				label: stringOr(parsed?.label, '')
+			};
+		} catch {
+			return { x: 5, y: 5, label: '' };
+		}
+	};
+
+	const updateLandscapeResponse = () => {
+		responseText = JSON.stringify({
+			x: landscapeX,
+			y: landscapeY,
+			label: landscapeLabel
+		});
+	};
+
+	const handleLandscapeLabelInput = (event: Event) => {
+		const target = event.currentTarget;
+		if (!(target instanceof HTMLInputElement)) return;
+		landscapeLabel = target.value;
+		updateLandscapeResponse();
+	};
+
+	const handleLandscapeAxisChange = (axis: 'x' | 'y', event: Event) => {
+		const target = event.currentTarget;
+		if (!(target instanceof HTMLInputElement)) return;
+		const value = Number(target.value);
+		if (Number.isNaN(value)) return;
+
+		if (axis === 'x') {
+			landscapeX = value;
+		} else {
+			landscapeY = value;
+		}
+		updateLandscapeResponse();
+	};
+
 	$: {
 		scaleMin = numberOr((currentQuestionConfig as { min?: unknown }).min, 0);
 		scaleMax = numberOr((currentQuestionConfig as { max?: unknown }).max, 10);
@@ -210,6 +259,16 @@
 		landscapeMaxX = numberOr((currentQuestionConfig as { maxX?: unknown }).maxX, 10);
 		landscapeMinY = numberOr((currentQuestionConfig as { minY?: unknown }).minY, 0);
 		landscapeMaxY = numberOr((currentQuestionConfig as { maxY?: unknown }).maxY, 10);
+		if (modalResponseType === 'landscape') {
+			const coords = parseLandscapeResponse(responseText);
+			landscapeLabel = coords.label;
+			landscapeX = coords.x;
+			landscapeY = coords.y;
+		} else {
+			landscapeLabel = '';
+			landscapeX = 5;
+			landscapeY = 5;
+		}
 	}
 
 	// Turn off loading once session data arrives
@@ -1947,44 +2006,33 @@
 						{/if}
 					</select>
 				</label>
-				<!-- Dynamic Response Input based on question type -->
-				{@const currentQuestion = questionsList.find((q) => q.id === selectedQuestionId)}
-				{@const responseType = currentQuestion?.response_type || 'written'}
-
-				{#if responseType === 'scale'}
+				{#if modalResponseType === 'scale'}
 					<!-- Scale / Slider Input -->
-					{@const config = currentQuestion?.config || {}}
-					{@const min = config.min || 0}
-					{@const max = config.max || 10}
-					{@const minLabel = config.minLabel || 'Min'}
-					{@const maxLabel = config.maxLabel || 'Max'}
 					<label class="flex flex-col gap-2 text-sm text-slate-300">
-						Your rating ({min}-{max})
+						Your rating ({scaleMin}-{scaleMax})
 						<div class="space-y-2">
 							<input
 								type="range"
-								min={min}
-								max={max}
+								min={scaleMin}
+								max={scaleMax}
 								step="1"
 								class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
 								bind:value={responseText}
 							/>
 							<div class="flex justify-between text-xs">
-								<span class="text-slate-400">{minLabel}</span>
-								<span class="text-cyan-300 font-bold text-lg">{responseText || min}</span>
-								<span class="text-slate-400">{maxLabel}</span>
+								<span class="text-slate-400">{scaleMinLabel}</span>
+								<span class="text-cyan-300 font-bold text-lg">{responseText || scaleMin}</span>
+								<span class="text-slate-400">{scaleMaxLabel}</span>
 							</div>
 						</div>
 					</label>
 
-				{:else if responseType === 'singleChoice'}
+				{:else if modalResponseType === 'singleChoice'}
 					<!-- Single Choice Radio Buttons -->
-					{@const config = currentQuestion?.config || {}}
-					{@const options = config.options || []}
 					<label class="flex flex-col gap-2 text-sm text-slate-300">
 						Select one option
 						<div class="space-y-2">
-							{#each options as option}
+							{#each modalOptions as option}
 								<label class="flex items-center gap-2 p-2 rounded border border-slate-700 bg-slate-900/50 hover:border-cyan-400/50 cursor-pointer">
 									<input
 										type="radio"
@@ -1999,15 +2047,13 @@
 						</div>
 					</label>
 
-				{:else if responseType === 'multiSelect'}
+				{:else if modalResponseType === 'multiSelect'}
 					<!-- Multi-Select Checkboxes -->
-					{@const config = currentQuestion?.config || {}}
-					{@const options = config.options || []}
 					{@const selections = responseText ? responseText.split(',').map(s => s.trim()) : []}
 					<label class="flex flex-col gap-2 text-sm text-slate-300">
 						Select all that apply
 						<div class="space-y-2 max-h-64 overflow-y-auto">
-							{#each options as option}
+							{#each modalOptions as option}
 								<label class="flex items-center gap-2 p-2 rounded border border-slate-700 bg-slate-900/50 hover:border-cyan-400/50 cursor-pointer">
 									<input
 										type="checkbox"
@@ -2029,16 +2075,8 @@
 						</div>
 					</label>
 
-				{:else if responseType === 'landscape'}
+				{:else if modalResponseType === 'landscape'}
 					<!-- 2D Landscape Positioning -->
-					{@const config = currentQuestion?.config || {}}
-					{@const xLabel = config.xLabel || 'X Axis'}
-					{@const yLabel = config.yLabel || 'Y Axis'}
-					{@const minX = config.minX || 0}
-					{@const maxX = config.maxX || 10}
-					{@const minY = config.minY || 0}
-					{@const maxY = config.maxY || 10}
-					{@const coords = responseText ? JSON.parse(responseText) : { x: 5, y: 5, label: '' }}
 					<div class="space-y-4">
 						<label class="flex flex-col gap-2 text-sm text-slate-300">
 							Label your position (optional)
@@ -2046,33 +2084,33 @@
 								type="text"
 								class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
 								placeholder="Brief description..."
-								bind:value={coords.label}
-								on:input={() => responseText = JSON.stringify(coords)}
+								value={landscapeLabel}
+								on:input={handleLandscapeLabelInput}
 							/>
 						</label>
 						<div class="flex flex-col gap-2">
 							<label class="text-sm text-slate-300">
-								{xLabel}: <span class="text-cyan-300 font-bold">{coords.x}</span>
+								{landscapeXLabel}: <span class="text-cyan-300 font-bold">{landscapeX}</span>
 								<input
 									type="range"
-									min={minX}
-									max={maxX}
+									min={landscapeMinX}
+									max={landscapeMaxX}
 									step="0.1"
 									class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
-									bind:value={coords.x}
-									on:input={() => responseText = JSON.stringify(coords)}
+									value={landscapeX}
+									on:input={(event) => handleLandscapeAxisChange('x', event)}
 								/>
 							</label>
 							<label class="text-sm text-slate-300">
-								{yLabel}: <span class="text-cyan-300 font-bold">{coords.y}</span>
+								{landscapeYLabel}: <span class="text-cyan-300 font-bold">{landscapeY}</span>
 								<input
 									type="range"
-									min={minY}
-									max={maxY}
+									min={landscapeMinY}
+									max={landscapeMaxY}
 									step="0.1"
 									class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
-									bind:value={coords.y}
-									on:input={() => responseText = JSON.stringify(coords)}
+									value={landscapeY}
+									on:input={(event) => handleLandscapeAxisChange('y', event)}
 								/>
 							</label>
 						</div>
