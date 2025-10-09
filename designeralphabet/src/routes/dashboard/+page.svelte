@@ -2,18 +2,7 @@
 	import { onMount } from 'svelte';
 	import {
 		IconChartBar as BarChart,
-		function getStatusClass(status: string): string {
-		switch (status) {
-			case 'live':
-				return 'text-green-400 bg-green-400/10';
-			case 'done':
-				return 'text-blue-400 bg-blue-400/10';
-			case 'planned':
-				return 'text-yellow-400 bg-yellow-400/10';
-			default:
-				return 'text-secondary surface-muted';
-		}
-	}s Users,
+		IconUsers as Users,
 		IconClock as Clock,
 		IconTrophy as Trophy,
 		IconDownload as Download,
@@ -152,7 +141,7 @@
 					<p class="text-secondary mt-1">Comprehensive workshop analytics and session management</p>
 				</div>
 				<button
-					class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-primary hover:bg-blue-700 transition-colors shadow-sm"
+					class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
 					on:click={() => (window.location.href = '/facilitator')}
 				>
 					<Target class="h-4 w-4" />
@@ -166,7 +155,7 @@
 						<div class="text-red-600 mb-2 font-semibold">⚠️ Error loading dashboard</div>
 						<div class="text-secondary text-sm">{error}</div>
 						<button
-							class="mt-4 px-4 py-2 bg-blue-600 text-primary rounded-lg hover:bg-blue-700 transition shadow-sm"
+							class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
 							on:click={() => {
 								error = '';
 								loading = true;
@@ -270,7 +259,7 @@
 										class="w-full text-left p-4 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 {selectedSession?.code ===
 										session.code
 											? 'bg-blue-50 border-blue-200'
-											: 'border-surface-accent hover:surface'}"
+											: 'border-surface-accent hover:bg-surface-muted'}"
 										on:click={() => loadSessionDetails(session)}
 										disabled={loadingSession}
 									>
@@ -313,14 +302,14 @@
 										</div>
 										<div class="flex items-center gap-2">
 											<button
-												class="inline-flex items-center gap-2 rounded-lg border border-surface-accent surface px-3 py-2 text-sm font-medium text-primary hover:surface transition-colors shadow-sm"
+												class="inline-flex items-center gap-2 rounded-lg border border-surface-accent surface px-3 py-2 text-sm font-medium text-primary hover:bg-surface-muted transition-colors shadow-sm"
 												on:click={() => (window.location.href = `/session/${selectedSession.code}`)}
 											>
 												<Eye class="h-4 w-4" />
 												View Live
 											</button>
 											<button
-												class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-primary hover:bg-blue-700 transition-colors shadow-sm"
+												class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
 												on:click={() => exportSessionData(selectedSession.code)}
 											>
 												<Download class="h-4 w-4" />
@@ -366,13 +355,13 @@
 									</h3>
 									<div class="space-y-3">
 										{#each leaderboard.slice(0, 5) as participant, index}
-											<div class="flex items-center gap-4 p-3 rounded-lg border border-surface-accent hover:surface transition-colors">
+											<div class="flex items-center gap-4 p-3 rounded-lg border border-surface-accent hover:bg-surface-muted transition-colors">
 												<div class="flex items-center gap-3">
 													<span class="text-lg font-semibold text-primary w-6 text-center"
 														>#{index + 1}</span
 													>
 													<div
-														class="w-8 h-8 rounded-full flex items-center justify-center text-primary text-sm font-medium"
+														class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
 														style="background-color: {participant.avatarColor || '#6b7280'}"
 													>
 														{participant.name.charAt(0)}
