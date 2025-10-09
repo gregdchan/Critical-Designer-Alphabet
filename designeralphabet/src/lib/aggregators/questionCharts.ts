@@ -120,31 +120,14 @@ export function buildChartForQuestion(
         }
       }
 
-      // Check if this is a multiSelect question (can have comma-separated values)
-      const isMultiSelect = ((question as any)?.response_type ?? '').toLowerCase() === 'multiselect';
-
+      // Treat all responses as a single selection (no splitting by comma)
       for (const r of responses ?? []) {
         const raw = (r?.text ?? '').toString().trim();
         if (!raw) continue;
-
-        if (isMultiSelect) {
-          // Split comma-separated values and count each individually
-          const selections = raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
-          for (const selection of selections) {
-            const normalized = normalize(selection);
-            counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
-            // Store first occurrence of label if not already stored
-            if (!labelMap.has(normalized)) {
-              labelMap.set(normalized, selection);
-            }
-          }
-        } else {
-          // Single selection - count as-is
-          const normalized = normalize(raw);
-          counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
-          if (!labelMap.has(normalized)) {
-            labelMap.set(normalized, raw);
-          }
+        const normalized = normalize(raw);
+        counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
+        if (!labelMap.has(normalized)) {
+          labelMap.set(normalized, raw);
         }
       }
 
