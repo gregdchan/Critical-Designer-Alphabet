@@ -405,7 +405,13 @@ a:focus-visible {
 
 :global(.text-cyan-100),
 :global(.text-cyan-200) {
-	color: hsl(var(--brand-soft)) !important;
+	color: hsl(var(--text-primary)) !important;
+}
+
+/* Ensure hover variants are also high contrast */
+:global(.hover\:text-cyan-100:hover),
+:global(.hover\:text-cyan-200:hover) {
+	color: hsl(var(--text-primary)) !important;
 }
 
 :global(.bg-slate-900),
