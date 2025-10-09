@@ -5,26 +5,64 @@
 	 * Each question gets its own chart based on Sanity configuration
 	 */
 	import { browser } from '$app/environment';
-	import { responses, questions, phases } from '$lib/realtime';
-	import { getPhaseCharts, getChartType } from '$lib/stores/charts';
-	import BarChart from '$lib/components/charts/BarChart.svelte';
-	import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
-	import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
-	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
+    import { responses, questions, phases } from '$lib/realtime';
+    import { buildChartForQuestion, type InferredQuestionType } from '$lib/aggregators/questionCharts';
+    import BarChart from '$lib/components/charts/BarChart.svelte';
+    import PieChart from '$lib/components/charts/PieChart.svelte';
+    import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
+    import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
+    import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 
-	export let phaseKey: string;
-	export let width = 900;
-	export let height = 520;
+export let phaseKey: string;
+export let width = 900;
+export let height = 520;
 
-	// Get charts for this phase
-	$: phaseCharts = browser && $responses && $questions
-		? getPhaseCharts(phaseKey, $responses, $questions)
-		: new Map();
+// Map inferred types to components
+const componentMap: Record<InferredQuestionType, any> = {
+    multipleChoice: BarChart,
+    rating: PieChart,
+    boolean: PieChart,
+    voting: WordCloudChart,
+    openText: WordCloudChart
+};
 
-	$: chartEntries = Array.from(phaseCharts.values());
+type ChartEntry = {
+    question: any;
+    type: InferredQuestionType | 'landscape' | 'roadmap' | 'timeline';
+    data: import('$lib/types/charts').ChartData | null;
+};
 
-	// Get phase info
-	$: phase = $phases.find(p => p.phase_key === phaseKey || p.id === phaseKey);
+// Compute charts for this phase using inference, with graceful fallbacks
+$: chartEntries = ((): ChartEntry[] => {
+    if (!browser || !$responses || !$questions) return [];
+    const result: ChartEntry[] = [];
+    const phaseQs = $questions.filter(q => q.phase_key === phaseKey || q.id === phaseKey);
+    for (const question of phaseQs) {
+        const qResponses = $responses.filter(r => r.question_id === question.id);
+
+        // Honor explicit spatial/timeline kinds from Sanity when present
+        if (question?.map_type === 'landscape') {
+            result.push({ question, type: 'landscape', data: null });
+            continue;
+        }
+        const rec = (question as any)?.recommended_dashboards ?? (question as any)?.recommendedDashboards;
+        if (Array.isArray(rec) && rec.includes('roadmap')) {
+            result.push({ question, type: 'roadmap', data: null });
+            continue;
+        }
+        if (Array.isArray(rec) && rec.includes('timeline')) {
+            result.push({ question, type: 'timeline', data: null });
+            continue;
+        }
+
+        const built = buildChartForQuestion(question, qResponses);
+        result.push({ question, type: built.type, data: built.data });
+    }
+    return result;
+})();
+
+// Get phase info
+$: phase = $phases.find(p => p.phase_key === phaseKey || p.id === phaseKey);
 </script>
 
 {#if browser}
@@ -44,7 +82,7 @@
 			</div>
 		{:else}
 			<div class="charts-list space-y-8">
-				{#each chartEntries as { question, chartData, chartType }}
+				{#each chartEntries as { question, type, data }}
 					<div class="chart-card panel p-6">
 						<!-- Question Title -->
 						<div class="mb-4">
@@ -57,56 +95,49 @@
 						</div>
 
 						<!-- Chart Visualization -->
-						{#if chartData}
-							{#if chartType === 'bar' || chartType === 'pie'}
-								<BarChart {chartData} {width} {height} />
-
-							{:else if chartType === 'wordcloud'}
-								<WordCloudChart
-									responses={$responses.filter(r => r.question_id === question.id)}
-									{width}
-									{height}
-									question={question.text || ''}
-								/>
-
-							{:else if chartType === 'landscape'}
-								<LandscapeChart
-									responses={$responses.filter(r => r.question_id === question.id)}
-									{width}
-									{height}
-									question={question.text || ''}
-								/>
-
-							{:else if chartType === 'roadmap' || chartType === 'timeline'}
-								<RoadmapChart
-									responses={$responses.filter(r => r.question_id === question.id)}
-									{width}
-									{height}
-									question={question.text || ''}
-								/>
-
-							{:else}
-								<!-- Fallback to bar chart -->
-								<BarChart {chartData} {width} {height} />
-							{/if}
-						{:else}
-							<div class="no-data panel p-8 text-center">
-								<p class="text-xs text-secondary">No responses yet</p>
-							</div>
-						{/if}
+            {#if type === 'landscape'}
+                <LandscapeChart
+                    responses={$responses.filter(r => r.question_id === question.id)}
+                    {width}
+                    {height}
+                    question={question.text || ''}
+                />
+            {:else if type === 'roadmap' || type === 'timeline'}
+                <RoadmapChart
+                    responses={$responses.filter(r => r.question_id === question.id)}
+                    {width}
+                    {height}
+                    question={question.text || ''}
+                />
+            {:else if type === 'voting' || type === 'openText'}
+                <WordCloudChart
+                    responses={$responses.filter(r => r.question_id === question.id)}
+                    {width}
+                    {height}
+                    question={question.text || ''}
+                />
+            {:else if type === 'multipleChoice' && data}
+                <BarChart data={data} {width} {height} />
+            {:else if (type === 'rating' || type === 'boolean') && data}
+                <PieChart data={data} {width} {height} />
+            {:else}
+                <div class="no-data panel p-8 text-center">
+                    <p class="text-xs text-secondary">No responses yet</p>
+                </div>
+            {/if}
 
 						<!-- Chart Type Badge -->
 						<div class="mt-3 flex items-center justify-between">
-							<span class="px-2 py-1 bg-brand/10 text-brand text-xs rounded font-medium">
-								{chartType}
-							</span>
-							<span class="text-xs text-secondary">
-								{chartData?.meta?.totalResponses || 0} responses
-							</span>
-						</div>
-					</div>
-				{/each}
-			</div>
+                    <span class="px-2 py-1 bg-brand/10 text-brand text-xs rounded font-medium">
+                        {type}
+                    </span>
+                    <span class="text-xs text-secondary">
+                        {data?.meta?.totalResponses || 0} responses
+                    </span>
+                </div>
+            </div>
+        {/each}
+        </div>
 		{/if}
 	</div>
 {:else}
