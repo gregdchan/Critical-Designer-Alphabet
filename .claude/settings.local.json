@@ -22,7 +22,9 @@
       "Bash(npx supabase:*)",
       "mcp__ide__getDiagnostics",
       "Read(//var/folders/yb/q1z8tbys1pbd717pv0f674kw0000gp/T/TemporaryItems/NSIRD_screencaptureui_5Qo9UF/**)",
-      "Read(//var/folders/yb/q1z8tbys1pbd717pv0f674kw0000gp/T/TemporaryItems/NSIRD_screencaptureui_KVF13P/**)"
+      "Read(//var/folders/yb/q1z8tbys1pbd717pv0f674kw0000gp/T/TemporaryItems/NSIRD_screencaptureui_KVF13P/**)",
+      "Read(//var/folders/yb/q1z8tbys1pbd717pv0f674kw0000gp/T/TemporaryItems/NSIRD_screencaptureui_x7amGt/**)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

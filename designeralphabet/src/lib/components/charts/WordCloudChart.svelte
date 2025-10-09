@@ -10,7 +10,7 @@
 		lens?: string;
 		participantName?: string;
 		participantColor?: string;
-		participant_id?: string;
+		participant_id?: string | null;
 	};
 
 	export let responses: WordCloudResponse[] = [];

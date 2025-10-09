@@ -284,16 +284,63 @@
 			const question = questionsList.find((q) => q.id === entry.question_id);
 			return question?.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !question?.phase_key);
 		})
-		.map((entry) => {
+		.flatMap((entry) => {
 			const question = questionsList.find((q) => q.id === entry.question_id);
 			const author = participantsList.find((p) => p.id === entry.participant_id);
-			return {
+			const baseData = {
 				...entry,
 				lens: question?.lens || question?.section || 'Uncategorized',
 				section: question?.section || 'General',
 				participantName: author?.name ?? 'Anonymous',
 				questionText: question?.text || ''
 			};
+
+			// Split multiple choice responses into separate entries
+			const responseType = question?.response_type || (question as any)?.type;
+			const text = entry.text || '';
+
+			// Check if text contains semicolons (often used in multi-select) or multiple comma-separated items
+			const hasSemicolon = text.includes(';');
+			const hasComma = text.includes(',');
+
+			// Split by semicolon first, then by comma within each part
+			let choices: string[] = [];
+			if (hasSemicolon) {
+				// Split by semicolon for lens-based responses like "Community: X; Sustainability: Y"
+				choices = text.split(';').map(s => s.trim()).filter(s => s.length > 0);
+			} else if (hasComma) {
+				// Split by comma for simple multi-choice
+				choices = text.split(',').map(s => s.trim()).filter(s => s.length > 0);
+			}
+
+			const shouldSplit = choices.length > 1;
+
+			if (browser && shouldSplit) {
+				console.log('[Presentation] Response with multiple values:', {
+					questionText: question?.text,
+					responseType,
+					originalText: text,
+					splitBy: hasSemicolon ? 'semicolon' : 'comma',
+					choices,
+					choiceCount: choices.length
+				});
+			}
+
+			// Always split for supercloud if multiple values detected
+			if (shouldSplit) {
+				console.log('[Presentation] ✓ Splitting response into', choices.length, 'bubbles');
+				// Multiple choices - create separate bubbles for each
+				return choices.map((choice, idx) => ({
+					...baseData,
+					id: `${entry.id}-${idx}`,
+					text: choice,
+					// Distribute votes evenly across choices (or use 0 if no votes)
+					votes: entry.votes ? Math.floor(entry.votes / choices.length) : 0
+				}));
+			}
+
+			// Single choice or non-choice question - keep as is
+			return [baseData];
 		});
 
 	$: phaseQuestions = activePhase

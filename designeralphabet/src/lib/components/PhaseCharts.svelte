@@ -65,15 +65,34 @@ $: chartEntries = ((): ChartEntry[] => {
 // Get phase info
 $: phase = $phases.find(p => p.phase_key === phaseKey || p.id === phaseKey);
 
-// Helper to enrich responses with participant data
-function enrichResponses(responses: any[]) {
-    return responses.map(r => {
+// Helper to enrich responses with participant data and split multiple choice
+function enrichResponses(responses: any[], question: any) {
+    return responses.flatMap(r => {
         const participant = $participants.find(p => p.id === r.participant_id);
-        return {
+        const baseData = {
             ...r,
             participantName: participant?.name,
             participantColor: participant?.color
         };
+
+        // Split multiple choice responses into separate entries
+        const responseType = question?.response_type;
+        if (['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect'].includes(responseType || '')) {
+            const choices = (r.text || '').split(',').map(s => s.trim()).filter(s => s.length > 0);
+            if (choices.length > 1) {
+                // Multiple choices - create separate bubbles for each
+                return choices.map((choice, idx) => ({
+                    ...baseData,
+                    id: `${r.id}-${idx}`,
+                    text: choice,
+                    // Distribute votes evenly across choices (or use 0 if no votes)
+                    votes: r.votes ? Math.floor(r.votes / choices.length) : 0
+                }));
+            }
+        }
+
+        // Single choice or non-choice question - keep as is
+        return [baseData];
     });
 }
 </script>
@@ -124,7 +143,7 @@ function enrichResponses(responses: any[]) {
                 />
             {:else if type === 'voting' || type === 'openText'}
                 <WordCloudChart
-                    responses={enrichResponses($responses.filter(r => r.question_id === question.id))}
+                    responses={enrichResponses($responses.filter(r => r.question_id === question.id), question)}
                     {width}
                     {height}
                     question={question.text || ''}

@@ -296,7 +296,7 @@
 			const question = questionsList.find((q) => q.id === entry.question_id);
 			return question?.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !question?.phase_key);
 		})
-			.map((entry) => {
+			.flatMap((entry) => {
 				const question = questionsList.find((q) => q.id === entry.question_id);
 				const author = participantsList.find((p) => p.id === entry.participant_id);
 
@@ -319,7 +319,7 @@
 					if (typeof metadata.label !== 'string') metadata.label = entry.text?.slice(0, 30) || '';
 				}
 
-				return {
+				const baseData = {
 					...entry,
 					metadata,
 					lens: question?.lens || question?.section || 'Uncategorized',
@@ -327,6 +327,25 @@
 					participantName: author?.name ?? 'Anonymous',
 					questionText: question?.text || ''
 				};
+
+				// Split multiple choice responses into separate entries
+				const responseType = question?.response_type;
+				if (['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect'].includes(responseType || '')) {
+					const choices = (entry.text || '').split(',').map(s => s.trim()).filter(s => s.length > 0);
+					if (choices.length > 1) {
+						// Multiple choices - create separate bubbles for each
+						return choices.map((choice, idx) => ({
+							...baseData,
+							id: `${entry.id}-${idx}`,
+							text: choice,
+							// Distribute votes evenly across choices (or use 0 if no votes)
+							votes: entry.votes ? Math.floor(entry.votes / choices.length) : 0
+						}));
+					}
+				}
+
+				// Single choice or non-choice question - keep as is
+				return [baseData];
 			});
 
 	$: participantActivity = participantsList
