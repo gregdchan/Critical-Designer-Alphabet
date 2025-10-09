@@ -182,15 +182,6 @@ a:focus-visible {
 	color: hsl(var(--text-primary));
 }
 
-.chip {
-  background: hsl(var(--accent-warm) / 0.15);
-  border: 2px solid hsl(var(--accent-warm));
-  color: hsl(var(--orange-dk));
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 2px hsl(var(--accent-warm) / 0.1);
-}
-
 .chart-card {
   background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
   border: 2px solid hsl(var(--border-subtle));

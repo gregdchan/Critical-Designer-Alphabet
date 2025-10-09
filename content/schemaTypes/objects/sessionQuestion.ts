@@ -15,8 +15,23 @@ export const sessionQuestion = defineField({
     defineField({
       name: 'lens',
       type: 'string',
-      title: 'Lens / Theme',
-      description: 'Optional category to group responses (e.g., Risk, Ethics).'
+      title: 'Critical Design Lens',
+      description: 'Category to group responses by design perspective.',
+      options: {
+        list: [
+          { title: 'Risk', value: 'Risk' },
+          { title: 'Work', value: 'Work' },
+          { title: 'Sustainability', value: 'Sustainability' },
+          { title: 'Ethics', value: 'Ethics' },
+          { title: 'Justice', value: 'Justice' },
+          { title: 'Culture', value: 'Culture' },
+          { title: 'Innovation', value: 'Innovation' },
+          { title: 'Governance', value: 'Governance' },
+          { title: 'Community', value: 'Community' },
+          { title: 'Agency', value: 'Agency' }
+        ],
+        layout: 'dropdown'
+      }
     }),
     defineField({
       name: 'responseType',
@@ -31,7 +46,10 @@ export const sessionQuestion = defineField({
           { title: 'Single choice (pick one option)', value: 'singleChoice' },
           { title: 'Multi select (pick multiple)', value: 'multiSelect' },
           { title: 'Scale / slider (numeric 0-10)', value: 'scale' },
-          { title: '2D Landscape (position on X/Y axes)', value: 'landscape' }
+          { title: '2D Landscape (position on X/Y axes)', value: 'landscape' },
+          { title: 'Risk Assessment (impact + likelihood)', value: 'riskAssessment' },
+          { title: 'Maturity Dial (5-level assessment)', value: 'maturityDial' },
+          { title: 'Inclusivity Meter (progress gauge)', value: 'inclusivityMeter' }
         ]
       }
     }),
@@ -90,6 +108,123 @@ export const sessionQuestion = defineField({
       ]
     }),
     defineField({
+      name: 'riskMatrix',
+      type: 'object',
+      title: 'Risk Assessment Settings',
+      hidden: ({ parent }) => parent?.responseType !== 'riskAssessment',
+      fields: [
+        defineField({
+          name: 'impactLabel',
+          type: 'string',
+          title: 'Impact Axis Label',
+          initialValue: 'Impact',
+          validation: (rule) => rule.required()
+        }),
+        defineField({
+          name: 'likelihoodLabel',
+          type: 'string',
+          title: 'Likelihood Axis Label',
+          initialValue: 'Likelihood',
+          validation: (rule) => rule.required()
+        }),
+        defineField({
+          name: 'impactPrompt',
+          type: 'text',
+          title: 'Impact Question',
+          description: 'Ask participants to rate the impact (1-5)',
+          placeholder: 'How severe would this risk be? (1=minimal, 5=critical)',
+          rows: 2
+        }),
+        defineField({
+          name: 'likelihoodPrompt',
+          type: 'text',
+          title: 'Likelihood Question',
+          description: 'Ask participants to rate the likelihood (1-5)',
+          placeholder: 'How likely is this to occur? (1=rare, 5=certain)',
+          rows: 2
+        })
+      ]
+    }),
+    defineField({
+      name: 'maturityDial',
+      type: 'object',
+      title: 'Maturity Dial Settings',
+      hidden: ({ parent }) => parent?.responseType !== 'maturityDial',
+      fields: [
+        defineField({
+          name: 'dimension',
+          type: 'string',
+          title: 'What is being assessed?',
+          description: 'e.g., "Design Thinking Maturity", "Inclusive Practice", "Sustainability Integration"',
+          placeholder: 'Design Practice Maturity'
+        }),
+        defineField({
+          name: 'stages',
+          type: 'array',
+          title: 'Maturity Stages',
+          description: 'Define the 5 levels of maturity (leave default for standard model)',
+          of: [{
+            type: 'object',
+            fields: [
+              defineField({ name: 'level', type: 'number', title: 'Level', validation: (rule) => rule.min(1).max(5).required() }),
+              defineField({ name: 'name', type: 'string', title: 'Stage Name', validation: (rule) => rule.required() }),
+              defineField({ name: 'description', type: 'string', title: 'Description' })
+            ],
+            preview: {
+              select: { level: 'level', name: 'name', description: 'description' },
+              prepare({ level, name, description }) {
+                return {
+                  title: `Level ${level}: ${name}`,
+                  subtitle: description
+                };
+              }
+            }
+          }],
+          initialValue: [
+            { level: 1, name: 'Foundational', description: 'Basic awareness and early exploration' },
+            { level: 2, name: 'Developing', description: 'Early adoption and experimentation' },
+            { level: 3, name: 'Proficient', description: 'Regular practice and integration' },
+            { level: 4, name: 'Advanced', description: 'Strategic integration and optimization' },
+            { level: 5, name: 'Aspirational', description: 'Innovation leadership and best practice' }
+          ]
+        })
+      ]
+    }),
+    defineField({
+      name: 'inclusivityMeter',
+      type: 'object',
+      title: 'Inclusivity Meter Settings',
+      hidden: ({ parent }) => parent?.responseType !== 'inclusivityMeter',
+      fields: [
+        defineField({
+          name: 'dimension',
+          type: 'string',
+          title: 'What aspect of inclusivity?',
+          description: 'e.g., "Accessibility", "Cultural Representation", "Diverse Perspectives"',
+          placeholder: 'Overall Inclusivity'
+        }),
+        defineField({
+          name: 'lowLabel',
+          type: 'string',
+          title: 'Low End Label',
+          initialValue: 'Needs Improvement'
+        }),
+        defineField({
+          name: 'highLabel',
+          type: 'string',
+          title: 'High End Label',
+          initialValue: 'Highly Inclusive'
+        }),
+        defineField({
+          name: 'targetScore',
+          type: 'number',
+          title: 'Target Score (optional)',
+          description: 'Goal score to visualize as a target line (0-100)',
+          validation: (rule) => rule.min(0).max(100)
+        })
+      ]
+    }),
+    defineField({
       name: 'enableVoting',
       type: 'boolean',
       title: 'Enable Voting',
@@ -117,7 +252,10 @@ export const sessionQuestion = defineField({
       • Written: Overview, Heatmap, Roadmap, Quad Bubbles, Word Cloud, Timeline, Leaderboard, Chat
       • Landscape (2D): Overview, Response Landscape, Timeline, Leaderboard, Chat
       • Scale: Overview, Line Chart, Timeline, Leaderboard, Chat
-      • Single/Multi Choice: Overview, Bar Chart, Pie Chart, Heatmap, Timeline, Leaderboard, Chat`,
+      • Single/Multi Choice: Overview, Bar Chart, Pie Chart, Heatmap, Timeline, Leaderboard, Chat
+      • Risk Assessment: Overview, Risk Impact Matrix, Timeline, Leaderboard, Chat
+      • Maturity Dial: Overview, Maturity Dial, Timeline, Leaderboard, Chat
+      • Inclusivity Meter: Overview, Inclusivity Meter, Timeline, Leaderboard, Chat`,
       of: [
         {
           type: 'string',
@@ -132,6 +270,9 @@ export const sessionQuestion = defineField({
               { title: 'Quad Bubbles (requires written responses)', value: 'quadBubbles' },
               { title: 'Word Cloud (requires written responses + voting)', value: 'wordcloud' },
               { title: 'Response Landscape (requires 2D positioning)', value: 'response-landscape' },
+              { title: 'Risk Impact Matrix (requires risk assessment)', value: 'riskImpactMatrix' },
+              { title: 'Maturity Dial (requires maturity assessment)', value: 'maturityDial' },
+              { title: 'Inclusivity Meter (requires inclusivity assessment)', value: 'inclusivityMeter' },
               { title: 'Timeline (works with all types)', value: 'timeline' },
               { title: 'Leaderboard (works with all types)', value: 'leaderboard' },
               { title: 'Chat (works with all types)', value: 'chat' }
@@ -178,6 +319,18 @@ export const sessionQuestion = defineField({
 
           if (selectedDashboards.includes('lineChart') && responseType !== 'scale') {
             warnings.push('⚠️ Line Chart requires scale response type');
+          }
+
+          if (selectedDashboards.includes('riskImpactMatrix') && responseType !== 'riskAssessment') {
+            warnings.push('⚠️ Risk Impact Matrix requires riskAssessment response type');
+          }
+
+          if (selectedDashboards.includes('maturityDial') && responseType !== 'maturityDial') {
+            warnings.push('⚠️ Maturity Dial requires maturityDial response type');
+          }
+
+          if (selectedDashboards.includes('inclusivityMeter') && responseType !== 'inclusivityMeter') {
+            warnings.push('⚠️ Inclusivity Meter requires inclusivityMeter response type');
           }
 
           return warnings.length > 0 ? warnings.join('\n') : true;
