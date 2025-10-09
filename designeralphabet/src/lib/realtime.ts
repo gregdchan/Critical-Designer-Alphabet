@@ -86,6 +86,7 @@ let pollHandle: ReturnType<typeof setInterval> | null = null;
 let activeCode: string | null = null;
 let ws: WebSocket | null = null;
 let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+let supabaseChannel: ReturnType<typeof supabase.channel> | null = null;
 
 async function fetchBundle(code: string) {
 	try {
@@ -246,7 +247,7 @@ export async function startRealtimeSession(code: string) {
 	if (!browser) return;
 	if (!code) return;
 
-	if (activeCode === code && ws) {
+	if (activeCode === code && supabaseChannel) {
 		return;
 	}
 
@@ -254,11 +255,71 @@ export async function startRealtimeSession(code: string) {
 	activeCode = code;
 	await fetchBundle(code);
 
-	// Connect WebSocket for realtime updates
-	connectWebSocket(code);
+	// Set up Supabase Realtime subscriptions
+	supabaseChannel = supabase
+		.channel(`session:${code}`)
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'sessions', filter: `code=eq.${code}` },
+			async () => {
+				console.log('[Realtime] Session updated');
+				await fetchBundle(code);
+			}
+		)
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'participants', filter: `room_code=eq.${code}` },
+			async () => {
+				console.log('[Realtime] Participants updated');
+				await fetchBundle(code);
+			}
+		)
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'responses', filter: `room_code=eq.${code}` },
+			async () => {
+				console.log('[Realtime] Responses updated');
+				await fetchBundle(code);
+			}
+		)
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'questions', filter: `room_code=eq.${code}` },
+			async () => {
+				console.log('[Realtime] Questions updated');
+				await fetchBundle(code);
+			}
+		)
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'timeline', filter: `room_code=eq.${code}` },
+			async () => {
+				console.log('[Realtime] Timeline updated');
+				await fetchBundle(code);
+			}
+		)
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'chat', filter: `room_code=eq.${code}` },
+			async () => {
+				console.log('[Realtime] Chat updated');
+				await fetchBundle(code);
+			}
+		)
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'session_phases', filter: `session_code=eq.${code}` },
+			async () => {
+				console.log('[Realtime] Phases updated');
+				await fetchBundle(code);
+			}
+		)
+		.subscribe((status) => {
+			console.log(`[Realtime] Subscription status: ${status}`);
+		});
 
-	// Keep polling as fallback (longer interval)
-	pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 3);
+	// Keep polling as fallback (less frequent now that we have realtime)
+	pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 6); // 30 seconds
 }
 
 export async function refreshSession(code: string) {
@@ -280,6 +341,11 @@ export function stopRealtimeSession() {
 	if (ws) {
 		ws.close();
 		ws = null;
+	}
+
+	if (supabaseChannel) {
+		supabase.removeChannel(supabaseChannel);
+		supabaseChannel = null;
 	}
 
 	activeCode = null;
