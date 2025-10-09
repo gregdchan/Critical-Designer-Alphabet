@@ -214,7 +214,9 @@ a:focus-visible {
 .card {
 	@apply rounded-[2rem] p-5 shadow-xl transition-all duration-300;
 	border: 3px solid;
-	min-height: 320px;
+	height: 380px;
+	width: 100%;
+	aspect-ratio: 3/4;
 	display: flex;
 	flex-direction: column;
 }
@@ -227,10 +229,10 @@ a:focus-visible {
 	@apply ring-4 ring-white scale-105;
 }
 
-/* Cyan cards (Practice) - Teal */
+/* Cyan cards (Practice) - Playful Teal/Turquoise */
 .card-cyan {
-	background: linear-gradient(135deg, #007172 0%, #025259 100%);
-	border-color: #025259;
+	background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+	border-color: #0891b2;
 	color: #ffffff;
 }
 
@@ -240,47 +242,47 @@ a:focus-visible {
 }
 
 .card-cyan .card-text-secondary {
-	color: rgba(255, 255, 255, 0.9);
+	color: rgba(255, 255, 255, 0.95);
 }
 
 .card-cyan .card-badge {
-	@apply border-2 border-white/50 bg-surface-elevated/25 backdrop-blur font-bold;
+	@apply border-2 border-white/60 bg-white/20 backdrop-blur font-bold;
 	color: #ffffff;
 }
 
 .card-cyan .card-icon-bg {
-	@apply border-2 border-white/40 bg-surface-elevated/20 backdrop-blur;
+	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
 }
 
-/* Pink cards (Lens) - Orange */
+/* Pink cards (Lens) - Vibrant Magenta/Pink */
 .card-pink {
-	background: linear-gradient(135deg, #F29325 0%, #ff9f1c 100%);
-	border-color: #D94F04;
-	color: #0f172a;
+	background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+	border-color: #db2777;
+	color: #ffffff;
 }
 
 .card-pink .card-title,
 .card-pink .card-text-primary {
-	color: #0f172a;
+	color: #ffffff;
 }
 
 .card-pink .card-text-secondary {
-	color: #1e293b;
+	color: rgba(255, 255, 255, 0.95);
 }
 
 .card-pink .card-badge {
-	@apply border-2 border-slate-900/40 bg-slate-900/20 backdrop-blur font-bold;
-	color: #0f172a;
+	@apply border-2 border-white/60 bg-white/20 backdrop-blur font-bold;
+	color: #ffffff;
 }
 
 .card-pink .card-icon-bg {
-	@apply border-2 border-slate-900/40 bg-slate-900/20 backdrop-blur;
+	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
 }
 
-/* Lime cards (Mindset) - Light Teal */
+/* Lime cards (Mindset) - Bright Lime/Yellow-Green */
 .card-lime {
-	background: linear-gradient(135deg, #00a0a3 0%, #007172 100%);
-	border-color: #007172;
+	background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
+	border-color: #65a30d;
 	color: #ffffff;
 }
 
@@ -290,22 +292,22 @@ a:focus-visible {
 }
 
 .card-lime .card-text-secondary {
-	color: rgba(255, 255, 255, 0.9);
+	color: rgba(255, 255, 255, 0.95);
 }
 
 .card-lime .card-badge {
-	@apply border-2 border-white/50 bg-surface-elevated/25 backdrop-blur font-bold;
+	@apply border-2 border-white/60 bg-white/20 backdrop-blur font-bold;
 	color: #ffffff;
 }
 
 .card-lime .card-icon-bg {
-	@apply border-2 border-white/40 bg-surface-elevated/20 backdrop-blur;
+	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
 }
 
-/* Purple cards (Theory) - Dark Teal */
+/* Purple cards (Theory) - Deep Purple/Violet */
 .card-purple {
-	background: linear-gradient(135deg, #025259 0%, #013840 100%);
-	border-color: #013840;
+	background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+	border-color: #7c3aed;
 	color: #ffffff;
 }
 
@@ -319,18 +321,18 @@ a:focus-visible {
 }
 
 .card-purple .card-badge {
-	@apply border-2 border-white/50 bg-surface-elevated/25 backdrop-blur font-bold;
+	@apply border-2 border-white/60 bg-white/20 backdrop-blur font-bold;
 	color: #ffffff;
 }
 
 .card-purple .card-icon-bg {
-	@apply border-2 border-white/40 bg-surface-elevated/20 backdrop-blur;
+	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
 }
 
-/* Orange cards (Method) - Deep Orange */
+/* Orange cards (Method) - Vibrant Orange/Amber */
 .card-orange {
-	background: linear-gradient(135deg, #D94F04 0%, #bf4304 100%);
-	border-color: #bf4304;
+	background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+	border-color: #ea580c;
 	color: #ffffff;
 }
 
@@ -340,21 +342,21 @@ a:focus-visible {
 }
 
 .card-orange .card-text-secondary {
-	color: rgba(255, 255, 255, 0.9);
+	color: rgba(255, 255, 255, 0.95);
 }
 
 .card-orange .card-badge {
-	@apply border-2 border-white/50 bg-surface-elevated/25 backdrop-blur font-bold;
+	@apply border-2 border-white/60 bg-white/20 backdrop-blur font-bold;
 	color: #ffffff;
 }
 
 .card-orange .card-icon-bg {
-	@apply border-2 border-white/40 bg-surface-elevated/20 backdrop-blur;
+	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
 }
 
 /* Card component parts */
 .card-icon-bg {
-	@apply flex h-12 w-12 items-center justify-center rounded-xl shadow-lg;
+	@apply flex h-12 w-12 items-center justify-center rounded-full shadow-lg;
 }
 
 .card-title {

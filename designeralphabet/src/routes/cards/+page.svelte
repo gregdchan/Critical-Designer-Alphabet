@@ -35,10 +35,27 @@ function getCardClass(card: Card): string {
 	return `card-${variant}`;
 }
 
+function getCardColorVariation(card: Card): string {
+	// Generate a slight color variation based on the card's letter
+	const letter = card.letter?.charCodeAt(0) || 65;
+	const variation = ((letter - 65) * 7) % 20; // 0-19 range for subtle variations
+	return `filter: brightness(${1 + variation * 0.02 - 0.2}) saturate(${1 + (variation % 10) * 0.03 - 0.15});`;
+}
+
 function variantClass(card: Card | null, role: string): string {
 	if (!card) return '';
-	const variant = card.category ? CATEGORY_VARIANTS[card.category as CategoryType] : 'cyan';
-	return `card-${variant}-${role}`;
+	const category = card.category as CategoryType;
+
+	// Color mapping for drawer chip badges
+	const categoryColors: Record<CategoryType, string> = {
+		practice: 'border-cyan-500 bg-cyan-100 text-cyan-900',
+		lens: 'border-pink-500 bg-pink-100 text-pink-900',
+		mindset: 'border-lime-600 bg-lime-100 text-lime-900',
+		theory: 'border-purple-500 bg-purple-100 text-purple-900',
+		method: 'border-orange-500 bg-orange-100 text-orange-900'
+	};
+
+	return categoryColors[category] || 'border-slate-500 bg-slate-100 text-slate-900';
 }
 
 	let cards: Card[] = [];
@@ -332,6 +349,7 @@ function variantClass(card: Card | null, role: string): string {
 						class={`card ${getCardClass(card)} gap-3 ${
 							selectedCards.some((entry) => entry._id === card._id) ? 'selected' : ''
 						}`}
+						style={getCardColorVariation(card)}
 					>
 						<div class="flex items-start gap-3">
 							<span class="card-icon-bg font-retro text-xs font-bold uppercase tracking-[0.25em]">
@@ -433,68 +451,68 @@ function variantClass(card: Card | null, role: string): string {
 
 <SimpleDrawer open={$drawerOpen} on:backdrop={closeDetails}>
 	{#if activeCard}
-		<article class="flex h-full flex-col gap-6 overflow-y-auto bg-midnight/95 p-6 text-white">
+		<article class="flex h-full flex-col gap-6 overflow-y-auto bg-white p-6 text-slate-900">
 			<header class="flex items-start justify-between gap-4">
 				<div class="space-y-3">
 					<div
-						class="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-white/80"
+						class="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em]"
 					>
 						{#if activeCard.category}
-							<span class={`rounded-full border px-3 py-1 ${variantClass(activeCard, 'chip')}`}>
+							<span class={`rounded-full border-2 px-3 py-1.5 font-bold ${variantClass(activeCard, 'chip')}`}>
 								{activeCard.category}
 							</span>
 						{/if}
-						<span class="rounded-full border border-white/15 px-3 py-1">{activeCard.cardID}</span>
+						<span class="rounded-full border-2 border-slate-300 bg-slate-100 px-3 py-1.5 font-semibold text-slate-700">{activeCard.cardID}</span>
 					</div>
-					<h2 class="font-retro text-xl uppercase tracking-[0.4em]">{activeCard.title}</h2>
-					<p class="text-xs uppercase tracking-[0.35em] text-white/80">
+					<h2 class="font-retro text-2xl uppercase tracking-[0.4em] text-slate-900">{activeCard.title}</h2>
+					<p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-600">
 						Letter {activeCard.letter}
 					</p>
 				</div>
 				<button
-					class="rounded-full border border-white/15 bg-black/50 p-2 text-white/85 transition hover:border-neonCyan/40 hover:text-neonCyan"
+					class="rounded-full border-2 border-slate-300 bg-slate-100 p-2.5 text-slate-700 transition hover:border-slate-400 hover:bg-slate-200"
 					type="button"
 					on:click={closeDetails}
 					aria-label="Close"
 				>
-					<X class="h-4 w-4" />
+					<X class="h-5 w-5" />
 				</button>
 			</header>
 			{#if activeCard.description}
 				<section
-					class="space-y-3 rounded-2xl border border-white/10 bg-black/40 p-4 text-sm text-white/75"
+					class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5 text-base"
 				>
-					<h3 class="text-xs uppercase tracking-[0.3em] text-neonCyan">Description</h3>
-					<p>{activeCard.description}</p>
+					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-900">Description</h3>
+					<p class="leading-relaxed text-slate-800">{activeCard.description}</p>
 				</section>
 			{/if}
 			{#if activeCard.prompt}
 				<section
-					class="rounded-2xl border border-neonPink/40 bg-neonPink/10 p-4 text-sm text-white/85 shadow-neon-pink"
+					class="rounded-2xl border-2 border-purple-300 bg-purple-50 p-5 text-base"
 				>
-					<h3 class="text-xs uppercase tracking-[0.3em] text-neonPink">Prompt</h3>
-					<p class="mt-2">{activeCard.prompt}</p>
+					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-purple-900">Prompt</h3>
+					<p class="mt-2 leading-relaxed text-purple-900">{activeCard.prompt}</p>
 				</section>
 			{/if}
 			{#if activeCard.exampleUse?.length}
-				<section class="space-y-3 text-sm text-white/75">
-					<h3 class="text-xs uppercase tracking-[0.3em] text-neonCyan">Example Uses</h3>
-					<ul class="space-y-2 rounded-2xl border border-white/10 bg-black/40 p-4">
+				<section class="space-y-3 text-base">
+					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-900">Example Uses</h3>
+					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
 						{#each activeCard.exampleUse as example}
-							<li class="leading-relaxed">{example}</li>
+							<li class="leading-relaxed text-slate-800">• {example}</li>
 						{/each}
 					</ul>
 				</section>
 			{/if}
 			{#if activeCard.readingList?.length}
-				<section class="space-y-3 text-sm text-white/75">
-					<h3 class="text-xs uppercase tracking-[0.3em] text-neonCyan">Reading List</h3>
-					<ul class="space-y-2">
+				<section class="space-y-3 text-base">
+					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-900">Reading List</h3>
+					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
 						{#each activeCard.readingList as item}
-							<li>
+							<li class="text-slate-800">
 								{#if item.url}
 									<a
-										class="text-neonCyan underline-offset-4 hover:underline"
+										class="font-semibold text-blue-600 underline-offset-4 hover:underline"
 										href={item.url}
 										target="_blank"
 										rel="noreferrer"
@@ -510,13 +528,13 @@ function variantClass(card: Card | null, role: string): string {
 				</section>
 			{/if}
 			{#if activeCard.sources?.length}
-				<section class="space-y-3 text-sm text-white/75">
-					<h3 class="text-xs uppercase tracking-[0.3em] text-neonCyan">Sources</h3>
-					<ul class="space-y-2">
+				<section class="space-y-3 text-base">
+					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-900">Sources</h3>
+					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
 						{#each activeCard.sources as source}
 							<li>
 								<a
-									class="text-neonPink underline-offset-4 hover:underline"
+									class="break-all font-semibold text-pink-600 underline-offset-4 hover:underline"
 									href={source}
 									target="_blank"
 									rel="noreferrer">{source}</a
@@ -526,9 +544,9 @@ function variantClass(card: Card | null, role: string): string {
 					</ul>
 				</section>
 			{/if}
-			<footer class="mt-auto space-y-3 text-xs text-white/80">
+			<footer class="mt-auto space-y-3 border-t-2 border-slate-200 pt-4 text-sm">
 				<button
-					class="w-full rounded-full border border-neonCyan/40 bg-neonCyan/20 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neonCyan shadow-brand transition hover:bg-neonCyan/30"
+					class="w-full rounded-full border-2 border-purple-500 bg-purple-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.3em] text-white shadow-lg transition hover:bg-purple-700"
 					type="button"
 					on:click={() => activeCard && toggleCard(activeCard)}
 				>
@@ -536,8 +554,8 @@ function variantClass(card: Card | null, role: string): string {
 						? 'Remove from staged deck'
 						: 'Stage this card'}
 				</button>
-				<p>
-					The Designer’s Critical Alphabet is by Dr. Lesley-Ann Noel. Respect licensing and context
+				<p class="leading-relaxed text-slate-600">
+					The Designer's Critical Alphabet is by Dr. Lesley-Ann Noel. Respect licensing and context
 					when sharing.
 				</p>
 			</footer>
