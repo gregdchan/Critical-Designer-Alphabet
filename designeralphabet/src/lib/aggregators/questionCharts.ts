@@ -120,14 +120,19 @@ export function buildChartForQuestion(
         }
       }
 
-      // Treat all responses as a single selection (no splitting by comma)
+      // Split responses by comma to count individual option selections
       for (const r of responses ?? []) {
         const raw = (r?.text ?? '').toString().trim();
         if (!raw) continue;
-        const normalized = normalize(raw);
-        counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
-        if (!labelMap.has(normalized)) {
-          labelMap.set(normalized, raw);
+        
+        // Split by comma and count each option separately
+        const selectedOptions = raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        for (const option of selectedOptions) {
+          const normalized = normalize(option);
+          counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
+          if (!labelMap.has(normalized)) {
+            labelMap.set(normalized, option);
+          }
         }
       }
 
