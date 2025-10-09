@@ -1139,7 +1139,7 @@
 											<div class="mt-4 flex flex-wrap items-center gap-2">
 												{#if phase.status === 'pending'}
 													<button
-														class="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-primary hover:bg-brand transition disabled:opacity-50"
+														class="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand transition disabled:opacity-50"
 														on:click={() => activatePhase(phase)}
 														disabled={phaseUpdating}
 													>
@@ -1147,7 +1147,7 @@
 													</button>
 												{:else if phase.status === 'active'}
 													<button
-														class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-emerald-400 transition disabled:opacity-50"
+														class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-400 transition disabled:opacity-50"
 														on:click={() => finishPhase(phase)}
 														disabled={phaseUpdating}
 													>
@@ -1515,7 +1515,7 @@
 						<nav class="flex gap-2 md:gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
 						{#if availableDashboards.includes('roadmap')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'roadmap')}
 							>
 								<IconMap class="h-4 w-4 flex-shrink-0" />
@@ -1524,7 +1524,7 @@
 						{/if}
 						{#if availableDashboards.includes('wordcloud')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'wordcloud' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'wordcloud' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'wordcloud')}
 							>
 								<IconCloud class="h-4 w-4 flex-shrink-0" />
@@ -1534,7 +1534,7 @@
 						{/if}
 						{#if availableDashboards.includes('response-landscape')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'response-landscape' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'response-landscape' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'response-landscape')}
 							>
 								<IconChartDots3 class="h-4 w-4 flex-shrink-0" />
@@ -1542,14 +1542,14 @@
 							</button>
 						{/if}
 						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'timeline' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'timeline' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'timeline')}
 						>
 							<IconFlame class="h-4 w-4 flex-shrink-0" />
 							Timeline
 						</button>
 						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'chat' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'chat' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'chat')}
 						>
 							<IconMessage class="h-4 w-4 flex-shrink-0" />
@@ -1558,7 +1558,7 @@
 						</button>
 						{#if isFacilitator()}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'participants')}
 							>
 								<IconUsers class="h-4 w-4 flex-shrink-0" />
@@ -1684,7 +1684,7 @@
 											/>
 											<button
 												on:click={submitChatMessage}
-												class="px-3 py-2 bg-brand text-primary rounded hover:bg-brand transition"
+												class="px-3 py-2 bg-brand text-white rounded hover:bg-brand transition"
 											>
 												<IconSend class="h-4 w-4" />
 											</button>
@@ -1776,7 +1776,7 @@
 											/>
 											<button
 												type="submit"
-												class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary hover:bg-brand transition-colors"
+												class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand transition-colors"
 											>
 												<IconSend class="h-4 w-4" />
 												Send

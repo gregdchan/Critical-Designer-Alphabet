@@ -939,7 +939,7 @@
 										<span class="text-sm text-secondary mb-2 block">Methods:</span>
 										<div class="flex flex-wrap gap-2">
 											{#each selectedTemplate.sections.synthesis.methods as method}
-												<span class="px-3 py-2 bg-green-400/20 text-green-300 rounded text-sm"
+												<span class="px-3 py-2 bg-teal text-white rounded text-sm font-semibold"
 													>{method}</span
 												>
 											{/each}
