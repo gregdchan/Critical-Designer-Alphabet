@@ -858,8 +858,8 @@
 							{:else if boardId === 'barChart'}
 								{@const choiceQuestions = phaseQuestions.filter(q => {
 									const recommended = q.recommended_dashboards || [];
-									const isBarChart = (Array.isArray(recommended) && (recommended.some(d => ['bar', 'barchart', 'barChart'].includes(d)))) ||
-										   (!recommended.length && ['singleChoice', 'multiSelect'].includes(q.response_type || ''));
+									// Only show if explicitly set to barChart (not if empty or set to other charts)
+									const isBarChart = Array.isArray(recommended) && recommended.some(d => ['bar', 'barchart', 'barChart'].includes(d));
 									console.log('[BarChart Filter]', q.text?.substring(0, 50), { recommended, isBarChart, responseType: q.response_type });
 									return isBarChart;
 								})}
