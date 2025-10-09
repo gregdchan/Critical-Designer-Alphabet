@@ -4,16 +4,12 @@
   import ChartFrame from '$lib/components/charts/ChartFrame.svelte';
   import type { ChartData } from '$lib/types/charts';
 
-  interface Props {
-    data: ChartData | null;
-    title?: string;
-  }
-
-  let { data = null, title = '' }: Props = $props();
+  export let data: ChartData | null = null;
+  export let title = '';
   const ariaLabel = 'Pie chart of option proportions';
 
-  let tooltipEl: HTMLDivElement | null = $state(null);
-  let rootEl: SVGGElement | null = $state(null);
+  let tooltipEl: HTMLDivElement | null = null;
+  let rootEl: SVGGElement;
 
   function render(root: SVGGElement, innerWidth: number, innerHeight: number, currentData: ChartData | null) {
     const g = select(root);
@@ -62,15 +58,9 @@
   }
 </script>
 
-<ChartFrame {title} {ariaLabel}>
-  {#snippet children({ innerWidth, innerHeight })}
-    <g bind:this={rootEl}>
-      {#if rootEl}
-        {@html (render(rootEl, innerWidth, innerHeight, data), '')}
-      {/if}
-    </g>
-  {/snippet}
-  {#snippet tooltip()}
-    <div bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
-  {/snippet}
+<ChartFrame {title} {ariaLabel} let:innerWidth let:innerHeight>
+  <g bind:this={rootEl}>
+    {@html (render(rootEl, innerWidth, innerHeight, data), '')}
+  </g>
+  <div slot="tooltip" bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
 </ChartFrame>

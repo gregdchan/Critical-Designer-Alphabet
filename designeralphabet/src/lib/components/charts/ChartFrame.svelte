@@ -1,21 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { Snippet } from 'svelte';
 
-  interface Props {
-    title?: string;
-    ariaLabel?: string;
-    margin?: { top: number; right: number; bottom: number; left: number };
-    className?: string;
-    children: Snippet<[{ width: number; height: number; innerWidth: number; innerHeight: number; margin: { top: number; right: number; bottom: number; left: number } }]>;
-    tooltip?: Snippet;
-  }
+  export let title: string = '';
+  export let ariaLabel: string = 'Interactive chart';
+  export let margin = { top: 24, right: 24, bottom: 40, left: 56 };
+  export let className = '';
 
-  let { title = '', ariaLabel = 'Interactive chart', margin = { top: 24, right: 24, bottom: 40, left: 56 }, className = '', children, tooltip }: Props = $props();
-
-  let container: HTMLDivElement | null = $state(null);
-  let width = $state(800);
-  let height = $state(400);
+  let container: HTMLDivElement | null = null;
+  let width = 800;
+  let height = 400;
 
   const ro = typeof ResizeObserver !== 'undefined'
     ? new ResizeObserver((entries) => {
@@ -32,8 +25,8 @@
     return () => ro?.disconnect();
   });
 
-  const innerWidth = $derived(Math.max(0, width - margin.left - margin.right));
-  const innerHeight = $derived(Math.max(0, height - margin.top - margin.bottom));
+  $: innerWidth = Math.max(0, width - margin.left - margin.right);
+  $: innerHeight = Math.max(0, height - margin.top - margin.bottom);
 </script>
 
 <div bind:this={container} class={`w-full h-full ${className}`}>
@@ -48,12 +41,10 @@
       <title>{title}</title>
     {/if}
     <g transform={`translate(${margin.left},${margin.top})`}>
-      {@render children({ width, height, innerWidth, innerHeight, margin })}
+      <slot {width} {height} {innerWidth} {innerHeight} {margin}></slot>
     </g>
   </svg>
-  {#if tooltip}
-    {@render tooltip()}
-  {/if}
+  <slot name="tooltip" />
 </div>
 
 <style>

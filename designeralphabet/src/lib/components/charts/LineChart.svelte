@@ -6,32 +6,24 @@
   import ChartFrame from '$lib/components/charts/ChartFrame.svelte';
   import type { ChartData } from '$lib/types/charts';
 
-  interface Props {
-    data: ChartData | null;
-    title?: string;
-  }
-
-  let { data = null, title = '' }: Props = $props();
+  export let data: ChartData | null = null;
+  export let title = '';
   const ariaLabel = 'Line chart showing rating distribution';
 
-  let tooltipEl: HTMLDivElement | null = $state(null);
-  let rootEl: SVGGElement | null = $state(null);
+  let tooltipEl: HTMLDivElement | null = null;
+  let rootEl: SVGGElement;
 
   // Extract scale settings from data metadata or use defaults
-  const scaleSettings = $derived(
-    (data?.meta as any)?.scaleSettings ?? { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' }
-  );
+  $: scaleSettings = (data?.meta as any)?.scaleSettings ?? { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
 
   // Convert ChartData to line chart format: label is rating value, value is count
-  const chartPoints = $derived(
-    data?.series?.[0]?.points
-      ?.map((p) => ({
-        value: Number(p.label), // label contains the rating value (e.g., "5")
-        count: p.value // value contains the count of responses
-      }))
-      .filter((p) => !isNaN(p.value))
-      .sort((a, b) => a.value - b.value) ?? []
-  );
+  $: chartPoints = data?.series?.[0]?.points
+    ?.map((p) => ({
+      value: Number(p.label), // label contains the rating value (e.g., "5")
+      count: p.value // value contains the count of responses
+    }))
+    .filter((p) => !isNaN(p.value))
+    .sort((a, b) => a.value - b.value) ?? [];
 
   function render(
     root: SVGGElement,
@@ -162,15 +154,9 @@
   }
 </script>
 
-<ChartFrame {title} {ariaLabel}>
-  {#snippet children({ innerWidth, innerHeight })}
-    <g bind:this={rootEl}>
-      {#if rootEl}
-        {@html (render(rootEl, innerWidth, innerHeight, chartPoints), '')}
-      {/if}
-    </g>
-  {/snippet}
-  {#snippet tooltip()}
-    <div bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:4px;padding:6px 10px;font-size:12px;color:hsl(var(--text-primary));white-space:nowrap" />
-  {/snippet}
+<ChartFrame {title} {ariaLabel} let:innerWidth let:innerHeight>
+  <g bind:this={rootEl}>
+    {@html (render(rootEl, innerWidth, innerHeight, chartPoints), '')}
+  </g>
+  <div slot="tooltip" bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:4px;padding:6px 10px;font-size:12px;color:hsl(var(--text-primary));white-space:nowrap" />
 </ChartFrame>
