@@ -314,10 +314,10 @@ function variantClass(card: Card | null, role: string): string {
 	</header>
 
 	{#if loading}
-		<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+		<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 			{#each Array.from({ length: 6 }) as _, index}
 				<div
-					class="animate-pulse rounded-[2rem] border border-white/10 bg-black/40 p-5 shadow-[0_0_30px_rgba(255,255,255,0.04)] min-h-[320px]"
+					class="animate-pulse rounded-[2rem] border border-white/10 bg-black/40 p-5 shadow-[0_0_30px_rgba(255,255,255,0.04)] min-h-[380px]"
 				>
 					<div class="h-6 w-24 rounded-full bg-surface-elevated/10"></div>
 					<div class="mt-4 h-4 w-full rounded-full bg-surface-elevated/10"></div>
@@ -342,7 +342,7 @@ function variantClass(card: Card | null, role: string): string {
 			No cards match these filters. Try clearing filters or drawing at random.
 		</div>
 	{:else}
-		<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+		<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 			{#each filteredCards as card, index (card._id)}
 				<div>
 					<article
@@ -370,15 +370,21 @@ function variantClass(card: Card | null, role: string): string {
 							</div>
 						</div>
 						{#if card.description}
-							<p class="card-description card-text-primary break-words">{card.description}</p>
+							<p class="text-[0.75rem] font-medium leading-relaxed card-text-primary break-words line-clamp-4">{card.description}</p>
+						{/if}
+						{#if card.prompt}
+							<div class="rounded-xl border-2 border-white/30 bg-white/10 backdrop-blur px-3 py-2">
+								<p class="text-[0.6rem] font-bold uppercase tracking-[0.2em] card-text-secondary mb-1">Prompt</p>
+								<p class="text-[0.7rem] leading-snug card-text-primary line-clamp-3">{card.prompt}</p>
+							</div>
 						{/if}
 						<div class="flex flex-wrap gap-1.5">
 							{#if card.tags?.length}
-								{#each card.tags.slice(0, 3) as tag}
+								{#each card.tags.slice(0, 4) as tag}
 									<span class="card-tag card-text-secondary">{tag}</span>
 								{/each}
-								{#if card.tags.length > 3}
-									<span class="card-tag card-text-secondary">+{card.tags.length - 3}</span>
+								{#if card.tags.length > 4}
+									<span class="card-tag card-text-secondary">+{card.tags.length - 4}</span>
 								{/if}
 							{/if}
 						</div>

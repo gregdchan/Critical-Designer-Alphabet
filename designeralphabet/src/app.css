@@ -214,9 +214,8 @@ a:focus-visible {
 .card {
 	@apply rounded-[2rem] p-5 shadow-xl transition-all duration-300;
 	border: 3px solid;
-	height: 380px;
+	min-height: 450px;
 	width: 100%;
-	aspect-ratio: 3/4;
 	display: flex;
 	flex-direction: column;
 }
@@ -251,7 +250,7 @@ a:focus-visible {
 }
 
 .card-cyan .card-icon-bg {
-	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
+	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
 /* Pink cards (Lens) - Vibrant Magenta/Pink */
@@ -276,7 +275,7 @@ a:focus-visible {
 }
 
 .card-pink .card-icon-bg {
-	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
+	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
 /* Lime cards (Mindset) - Bright Lime/Yellow-Green */
@@ -301,7 +300,7 @@ a:focus-visible {
 }
 
 .card-lime .card-icon-bg {
-	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
+	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
 /* Purple cards (Theory) - Deep Purple/Violet */
@@ -326,7 +325,7 @@ a:focus-visible {
 }
 
 .card-purple .card-icon-bg {
-	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
+	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
 /* Orange cards (Method) - Vibrant Orange/Amber */
@@ -351,12 +350,17 @@ a:focus-visible {
 }
 
 .card-orange .card-icon-bg {
-	@apply border-3 border-white/50 bg-white/25 backdrop-blur;
+	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
 /* Card component parts */
 .card-icon-bg {
-	@apply flex h-12 w-12 items-center justify-center rounded-full shadow-lg;
+	@apply flex items-center justify-center rounded-full shadow-lg;
+	width: 3rem;
+	height: 3rem;
+	min-width: 3rem;
+	min-height: 3rem;
+	border-radius: 50%;
 }
 
 .card-title {
