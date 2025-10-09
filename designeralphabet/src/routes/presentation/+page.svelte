@@ -285,7 +285,10 @@
 	// Dynamically determine available dashboards based on questions in active phase
 	// This is the ONLY source of truth for what charts to display
 	$: activeBoards = (() => {
-		if (!activePhase) return normalizeBoards([]);
+		// Always show default boards if no active phase
+		if (!activePhase) {
+			return normalizeBoards(['phase', 'responses', 'timeline', 'leaderboard']);
+		}
 
 		const phaseQuestions = questionsList.filter(
 			(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
@@ -300,13 +303,19 @@
 			
 			if (Array.isArray(selectedDashboards) && selectedDashboards.length > 0) {
 				selectedDashboards.forEach((d: string) => {
-					// Validate that the dashboard has required data before adding
-					if (!dashboards.includes(d) && isDashboardValid(d, q, responsesList, phaseQuestions)) {
+					// Don't validate - just add all configured dashboards
+					// The charts themselves will handle empty states
+					if (!dashboards.includes(d)) {
 						dashboards.push(d);
 					}
 				});
 			}
 		});
+
+		// If no dashboards configured, provide sensible defaults
+		if (dashboards.length === 0) {
+			dashboards.push('phase', 'responses', 'timeline', 'leaderboard');
+		}
 
 		return normalizeBoards(dashboards);
 	})();
