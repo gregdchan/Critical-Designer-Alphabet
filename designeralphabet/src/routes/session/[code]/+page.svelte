@@ -951,11 +951,11 @@
 																</div>
 																{#if votingEnabled}
 																	<button
-																		class={`inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors ${
-																			hasVoted
-																				? 'border-brand bg-brand/20 text-cyan-100'
-																				: 'border-brand/40 text-cyan-200 hover:border-cyan-300'
-																		}`}
+								class={`inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+									hasVoted
+										? 'border-brand bg-brand/20 text-[hsl(var(--text-on-teal))]'
+										: 'border-line text-ink-2 hover:text-brand hover:border-brand'
+									}`}
 																		on:click={() => toggleVote(response.id)}
 																		disabled={!phaseRemainingMs || isOwnResponse}
 																		title={isOwnResponse ? "Can't vote on your own response" : hasVoted ? 'Remove vote' : 'Vote for this response'}
@@ -964,7 +964,7 @@
 																		{response.votes ?? 0}
 																	</button>
 																{:else}
-																	<span class="inline-flex items-center gap-1 text-secondary text-xs">
+																	<span class="inline-flex items-center gap-1 text-ink-2 text-xs">
 																		<IconThumbUp class="h-3 w-3" />
 																		{response.votes ?? 0}
 																	</span>

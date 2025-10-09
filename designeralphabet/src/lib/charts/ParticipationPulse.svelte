@@ -373,7 +373,7 @@ import { getThemeColors } from '$lib/utils/colors';
 				x={getCenterX()}
 				y={getCenterY()}
 				text-anchor="middle"
-				fill="#ef4444"
+				fill="hsl(var(--accent-critical))"
 				class="chart-text"
 			>
 				Error: {error}

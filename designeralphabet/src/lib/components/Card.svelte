@@ -20,10 +20,10 @@
 </script>
 
 <article
-	style={`--card-accent: ${card.color ?? '#0f172a'}`}
+	style={`--card-accent: ${card.color ?? 'hsl(var(--brand))'}`}
 	class={`group flex h-full flex-col gap-4 rounded-3xl border border-line bg-surface-elevated/80 p-6 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-slate-500 ${
 		selected ? 'ring-2 ring-slate-900 ring-offset-2' : ''
-	} ${disabled ? 'opacity-50 grayscale' : ''}`}
+	} ${disabled ? 'grayscale text-ink-muted cursor-not-allowed' : ''}`}
 >
 	<header class="flex items-start gap-3">
 		<span

@@ -50,7 +50,7 @@
 	$: isInSession = $activePath.includes('/session/');
 </script>
 
-<header class="sticky top-0 z-40 border-b border-surface-accent surface/80 backdrop-blur-md shadow-sm">
+<header class="sticky top-0 z-40 border-b border-line bg-surface/80 backdrop-blur-md shadow-sm">
 	<div class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
 		<a
 			href="/"
@@ -73,7 +73,7 @@
 					href={link.href}
 					class={`rounded-md px-3 py-2 text-sm font-medium transition ${
 						$activePath === link.href
-							? 'bg-blue-600 text-white shadow-sm'
+							? 'bg-brand text-white shadow-sm'
 							: 'text-secondary hover:surface hover:text-primary'
 					}`}
 					aria-current={$activePath === link.href ? 'page' : undefined}
@@ -86,7 +86,7 @@
 		<div class="flex items-center gap-3">
 			{#if isInSession}
 				<button
-					class="flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+					class="flex items-center gap-2 rounded-md bg-accent-critical px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-critical"
 					on:click={emergencyExit}
 					title="Emergency exit from session"
 				>
@@ -95,7 +95,7 @@
 				</button>
 			{:else}
 				<a
-					class="hidden items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 sm:flex"
+					class="hidden items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 sm:flex"
 					href="/session"
 				>
 					<Sparkles class="h-4 w-4" />
@@ -103,7 +103,7 @@
 				</a>
 			{/if}
 			<button
-				class="rounded-md border border-surface-accent surface p-2 text-secondary transition hover:surface md:hidden"
+				class="rounded-md border border-line surface p-2 text-secondary transition hover:surface md:hidden"
 				type="button"
 				aria-expanded={menuOpen}
 				aria-label="Toggle navigation"
@@ -119,14 +119,14 @@
 	</div>
 
 	{#if menuOpen}
-		<div class="border-t border-surface-accent surface px-4 py-4 shadow-sm md:hidden">
+		<div class="border-t border-line surface px-4 py-4 shadow-sm md:hidden">
 			<nav class="flex flex-col gap-2" aria-label="Mobile navigation">
 				{#each links as link}
 					<a
 						href={link.href}
 						class={`rounded-md px-3 py-2 text-sm font-medium transition ${
 							$activePath === link.href
-								? 'bg-blue-600 text-white shadow-sm'
+								? 'bg-brand text-white shadow-sm'
 								: 'text-secondary hover:surface hover:text-primary'
 						}`}
 						aria-current={$activePath === link.href ? 'page' : undefined}
@@ -137,7 +137,7 @@
 				{/each}
 				{#if isInSession}
 					<button
-						class="mt-2 flex items-center gap-2 rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white"
+						class="mt-2 flex items-center gap-2 rounded-md bg-accent-critical px-3 py-2 text-sm font-medium text-white"
 						on:click={() => {
 							closeMenu();
 							emergencyExit();
@@ -148,7 +148,7 @@
 					</button>
 				{:else}
 					<a
-						class="mt-2 flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white"
+						class="mt-2 flex items-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white"
 						href="/session"
 						on:click={closeMenu}
 					>

@@ -1,7 +1,13 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Header from './header.svelte';
 	import Footer from './Footer.svelte';
 	import '../app.css';
+
+	onMount(() => {
+		const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
+		document.documentElement.classList.toggle('dark', !!prefersDark);
+	});
 </script>
 
 <a href="#main-content" class="skip-link">Skip to main content</a>

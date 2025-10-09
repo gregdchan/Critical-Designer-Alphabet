@@ -326,7 +326,7 @@ function resolveLensColor(lens: string) {
 				x={getCenterX()}
 				y={getCenterY()}
 				text-anchor="middle"
-				fill="#ef4444"
+				fill="hsl(var(--accent-critical))"
 				class="chart-text"
 			>
 				Error: {error}

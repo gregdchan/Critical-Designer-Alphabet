@@ -14,6 +14,7 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"fix:theme": "node scripts/semantic-colors-codemod.mjs",
+		"lint:hex": "bash -lc \"! rg --glob '*.svelte' --glob '*.ts' -g '!**/utils/colors.ts' -g '!**/gamification.ts' -n '\\#[0-9A-Fa-f]{3,8}\\b' src/lib\"",
 		"test:integration": "playwright test",
 		"test:unit": "vitest"
 	},

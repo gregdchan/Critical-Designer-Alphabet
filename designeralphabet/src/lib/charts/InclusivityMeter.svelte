@@ -211,7 +211,7 @@ import { getThemeColors } from '$lib/utils/colors';
 		needle
 			.append('circle')
 			.attr('r', 5)
-			.attr('fill', '#ff2aad')
+			.attr('fill', inclusivityColor)
 			.attr('stroke', 'white')
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#neon-glow)');
@@ -344,7 +344,7 @@ function handleResize(newDimensions: ChartDimensions) {
 				x={(dimensions ?? fallbackDimensions).innerWidth / 2}
 				y={(dimensions ?? fallbackDimensions).innerHeight / 2}
 				text-anchor="middle"
-				fill="#ef4444"
+				fill="hsl(var(--accent-critical))"
 				class="chart-text"
 			>
 				Error: {error}
@@ -359,7 +359,7 @@ function handleResize(newDimensions: ChartDimensions) {
 	}
 
 	:global(.inclusivity-meter-chart .gauge-needle) {
-		filter: drop-shadow(0 0 5px #ff2aad);
+	filter: drop-shadow(0 0 5px hsl(var(--accent-critical)));
 	}
 
 	:global(.inclusivity-meter-chart .percentage-text) {

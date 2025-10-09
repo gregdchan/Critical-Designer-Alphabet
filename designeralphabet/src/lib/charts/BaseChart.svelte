@@ -57,8 +57,8 @@ export let theme: 'dark' | 'light' = 'light';
 		};
 	});
 
-	$: bgColor = theme === 'dark' ? '#1f2937' : BACKGROUND_COLORS.card;
-	$: textColor = theme === 'dark' ? '#f8fafc' : '#1f2937';
+	$: bgColor = theme === 'dark' ? 'hsl(var(--surface))' : BACKGROUND_COLORS.card;
+	$: textColor = theme === 'dark' ? 'hsl(var(--text-on-teal))' : 'hsl(var(--text-primary))';
 </script>
 
 <div

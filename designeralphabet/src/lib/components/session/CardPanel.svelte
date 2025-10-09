@@ -29,13 +29,13 @@
 	let isPanelExpanded = true;
 
 	const CATEGORIES = ['theory', 'practice', 'lens', 'mindset', 'method'];
-	const CATEGORY_COLORS: Record<string, string> = {
-		theory: 'text-purple-400 border-purple-400/40',
-		practice: 'text-brand border-cyan-400/40',
-		lens: 'text-pink-400 border-pink-400/40',
-		mindset: 'text-lime-400 border-lime-400/40',
-		method: 'text-brand border-blue-400/40'
-	};
+const CATEGORY_COLORS: Record<string, string> = {
+	theory: 'text-accent-warm border-line',
+	practice: 'text-brand border-line',
+	lens: 'text-accent-critical border-line',
+	mindset: 'text-brand border-line',
+	method: 'text-brand border-line'
+};
 
 	onMount(async () => {
 		try {
@@ -67,9 +67,9 @@
 	}
 
 	function getCategoryColor(category?: string): string {
-		return category
-			? CATEGORY_COLORS[category] || 'text-ink-muted border-slate-400/40'
-			: 'text-ink-muted border-slate-400/40';
+	return category
+		? CATEGORY_COLORS[category] || 'text-ink-muted border-line'
+		: 'text-ink-muted border-line';
 	}
 </script>
 
@@ -173,11 +173,11 @@
 							<button
 								on:click={() => handleCardClick(card)}
 								{disabled}
-								class="group relative rounded-xl border p-3 text-left transition {selected
-									? 'border-cyan-400 bg-brand/10 shadow-lg shadow-cyan-400/20'
-									: disabled
-										? 'border-slate-700 bg-slate-800/50 opacity-50'
-										: 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800'}"
+				class="group relative rounded-xl border p-3 text-left transition {selected
+					? 'border-brand bg-brand/10 shadow-brand'
+					: disabled
+						? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
+						: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
 							>
 								{#if selected}
 									<div
@@ -314,11 +314,11 @@
 							<button
 								on:click={() => handleCardClick(card)}
 								{disabled}
-								class="group relative w-full rounded-lg border p-3 text-left transition {selected
-									? 'border-cyan-400 bg-brand/10 shadow-lg shadow-cyan-400/20'
-									: disabled
-										? 'border-slate-700 bg-slate-800/30 opacity-50 cursor-not-allowed'
-										: 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800'}"
+				class="group relative w-full rounded-lg border p-3 text-left transition {selected
+					? 'border-brand bg-brand/10 shadow-brand'
+					: disabled
+						? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
+						: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
 							>
 								{#if selected}
 									<div
