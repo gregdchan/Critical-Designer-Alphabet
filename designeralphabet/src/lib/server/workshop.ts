@@ -495,6 +495,19 @@ export async function addResponse({
 	text: string;
 	cards: string[];
 }) {
+	// Log the incoming response data for debugging
+	console.log('[addResponse] Creating response:', {
+		code,
+		questionId,
+		participantId,
+		hasText: !!text,
+		cardsCount: cards?.length || 0
+	});
+
+	if (!participantId) {
+		console.warn('[addResponse] WARNING: participant_id is NULL! Response will be anonymous.');
+	}
+
 	const response = await supabaseAdmin
 		.from('responses')
 		.insert({
@@ -508,6 +521,13 @@ export async function addResponse({
 		.single();
 
 	const result = asResponse(ensure(response, 'addResponse'));
+
+	console.log('[addResponse] Response created:', {
+		id: result.id,
+		participant_id: result.participant_id,
+		question_id: result.question_id
+	});
+
 	broadcast(code, { type: 'RESPONSE_ADDED', response: result });
 	return result;
 }

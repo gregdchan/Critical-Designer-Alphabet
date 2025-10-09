@@ -440,7 +440,7 @@
 			// Check for stored profile first
 			const stored = getParticipantProfile(sessionCode);
 
-			if (stored) {
+			if (stored && stored.id) {
 				// Profile exists locally - use it
 				currentParticipant = {
 					...stored,
@@ -452,6 +452,13 @@
 				}
 				currentUser.set(currentParticipant);
 				storeParticipantProfile(sessionCode, currentParticipant);
+
+				console.log('[Ensure Profile] Loaded participant from storage:', {
+					id: currentParticipant.id,
+					name: currentParticipant.name,
+					role: currentParticipant.role
+				});
+
 				sessionLoading = false;
 				return true;
 			}
@@ -462,12 +469,13 @@
 
 			if (data.success && data.participants && data.participants.length > 0) {
 				// User might be returning - show rejoin modal or redirect to join page
-				console.log('Found existing participants, redirecting to join page');
+				console.log('[Ensure Profile] Found existing participants in DB, redirecting to join page');
 				await goto(`/join?code=${sessionCode}`);
 				return false;
 			}
 
 			// No profile found anywhere - redirect to join
+			console.log('[Ensure Profile] No profile found, redirecting to join page');
 			if (activeRole !== 'facilitator') {
 				await goto(`/join?code=${sessionCode}`);
 				return false;
@@ -475,7 +483,7 @@
 			sessionLoading = false;
 			return true;
 		} catch (error) {
-			console.error('Error checking participant profile:', error);
+			console.error('[Ensure Profile] Error checking participant profile:', error);
 			sessionError = 'Failed to load session. Please try refreshing.';
 			sessionLoading = false;
 			return false;
@@ -633,11 +641,30 @@
 
 		if (!selectedQuestionId || !normalizedResponseText) return;
 
+		// CRITICAL: Validate participant exists before submission
+		if (!currentParticipant || !currentParticipant.id) {
+			console.error('[Submit Response] No participant ID found!', {
+				currentParticipant,
+				sessionCode,
+				activeRole
+			});
+			alert('Error: You must join the session with a name before submitting responses. Please refresh and enter your name.');
+			responseModalOpen = false;
+			await goto(`/join?code=${sessionCode}`);
+			return;
+		}
+
 		// Check if we're in an active phase with remaining time
 		if (activePhase && !phaseRemainingMs) {
 			alert('Time is up for this phase. Responses are no longer accepted.');
 			return;
 		}
+
+		console.log('[Submit Response] Submitting with participant:', {
+			participantId: currentParticipant.id,
+			participantName: currentParticipant.name,
+			questionId: selectedQuestionId
+		});
 
 		// Combine selected cards from panel with additional cards from text input - Temporarily hidden - not usable with current exercise
 		// const selectedCardTitles = selectedCards.map((card) => card.title);
@@ -649,7 +676,7 @@
 
 		await apiAddResponse(sessionCode, {
 			questionId: selectedQuestionId,
-			participantId: currentParticipant?.id ?? null,
+			participantId: currentParticipant.id,
 			text: normalizedResponseText,
 			cards: [] // Temporarily empty - cards feature hidden
 		});
@@ -698,8 +725,16 @@
 
 	async function submitChatMessage() {
 		if (!chatMessage.trim()) return;
+
+		// Validate participant before sending chat
+		if (!currentParticipant || !currentParticipant.id) {
+			console.error('[Chat] No participant ID found');
+			alert('Please join the session with a name before chatting.');
+			return;
+		}
+
 		await apiSendChatMessage(sessionCode, {
-			participantId: currentParticipant?.id ?? null,
+			participantId: currentParticipant.id,
 			message: chatMessage.trim()
 		});
 		chatMessage = '';
