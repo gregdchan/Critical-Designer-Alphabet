@@ -296,17 +296,38 @@
 			const question = questionsList.find((q) => q.id === entry.question_id);
 			return question?.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !question?.phase_key);
 		})
-		.map((entry) => {
-			const question = questionsList.find((q) => q.id === entry.question_id);
-			const author = participantsList.find((p) => p.id === entry.participant_id);
-			return {
-				...entry,
-				lens: question?.lens || question?.section || 'Uncategorized',
-				section: question?.section || 'General',
-				participantName: author?.name ?? 'Anonymous',
-				questionText: question?.text || ''
-			};
-		});
+			.map((entry) => {
+				const question = questionsList.find((q) => q.id === entry.question_id);
+				const author = participantsList.find((p) => p.id === entry.participant_id);
+
+				// If this is a landscape/2d question, ensure metadata.x/y/label are present
+				let metadata = entry.metadata ? { ...entry.metadata } : {};
+				const isLandscape = (question?.type === 'landscape' || question?.type === '2d' || question?.chart === 'landscape');
+				if (isLandscape) {
+					// Try to parse from entry.text if not present
+					if (typeof metadata.x !== 'number' || typeof metadata.y !== 'number') {
+						try {
+							const parsed = JSON.parse(entry.text);
+							if (typeof parsed.x === 'number') metadata.x = parsed.x;
+							if (typeof parsed.y === 'number') metadata.y = parsed.y;
+							if (typeof parsed.label === 'string') metadata.label = parsed.label;
+						} catch {}
+					}
+					// Fallback defaults
+					if (typeof metadata.x !== 'number') metadata.x = 5;
+					if (typeof metadata.y !== 'number') metadata.y = 5;
+					if (typeof metadata.label !== 'string') metadata.label = entry.text?.slice(0, 30) || '';
+				}
+
+				return {
+					...entry,
+					metadata,
+					lens: question?.lens || question?.section || 'Uncategorized',
+					section: question?.section || 'General',
+					participantName: author?.name ?? 'Anonymous',
+					questionText: question?.text || ''
+				};
+			});
 
 	$: participantActivity = participantsList
 		.map((participant) => {

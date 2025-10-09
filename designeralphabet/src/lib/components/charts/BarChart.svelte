@@ -56,12 +56,11 @@
 
     const rows = g.append('g').selectAll('g').data(points).join('g');
 
-    // Labels on the left - no truncation if space allows
+    // Labels on the left - wrap long text onto multiple lines using tspans
     rows
       .append('text')
       .attr('x', 4)
       .attr('y', (d) => (y(d.label) ?? 0) + y.bandwidth() / 2)
-      .attr('dy', '0.35em')
       .attr('text-anchor', 'start')
       .attr('fill', 'hsl(var(--text-primary))')
       .style('font-size', '11px')
@@ -69,18 +68,33 @@
       .each(function(d: any) {
         const text = select(this);
         const availableWidth = labelWidth - 8;
-        text.text(d.label);
-
-        // Only truncate if necessary
-        let textLength = (text.node() as any)?.getComputedTextLength() || 0;
-        if (textLength > availableWidth) {
-          let label = d.label;
-          while (textLength > availableWidth && label.length > 0) {
-            label = label.slice(0, -1);
-            text.text(label + '...');
-            textLength = (text.node() as any)?.getComputedTextLength() || 0;
+        const words = d.label.split(/\s+/);
+        let line = '';
+        let lines: string[] = [];
+        for (let i = 0; i < words.length; i++) {
+          const testLine = line ? line + ' ' + words[i] : words[i];
+          // Create a temp tspan to measure width
+          text.text('');
+          const tspan = text.append('tspan').text(testLine);
+          const tspanLength = (tspan.node() as any)?.getComputedTextLength() || 0;
+          tspan.remove();
+          if (tspanLength > availableWidth && line) {
+            lines.push(line);
+            line = words[i];
+          } else {
+            line = testLine;
           }
         }
+        if (line) lines.push(line);
+        text.text('');
+        const lineHeight = 13; // px
+        lines.forEach((l, i) => {
+          text.append('tspan')
+            .attr('x', 4)
+            .attr('y', (y(d.label) ?? 0) + y.bandwidth() / 2 + (i - (lines.length-1)/2) * lineHeight)
+            .attr('dy', '0.35em')
+            .text(l);
+        });
       });
 
     // Bars with gradient colors
