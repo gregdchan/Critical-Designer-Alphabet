@@ -353,6 +353,24 @@
 					/>
 				</div>
 
+				{#if !joinAsFacilitator}
+					<div>
+						<label for="participantEmail" class="block text-sm font-medium text-secondary mb-2">
+							Email (Optional)
+						</label>
+						<input
+							id="participantEmail"
+							type="email"
+							bind:value={participantEmail}
+							placeholder="you@example.com"
+							class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"
+						/>
+						<p class="mt-2 text-xs text-secondary">
+							📧 Optional: Add your email to reconnect if you drop off and track stats across sessions.
+						</p>
+					</div>
+				{/if}
+
 				<div>
 					<label for="sessionCode" class="block text-sm font-medium text-secondary mb-2">
 						Session Code
