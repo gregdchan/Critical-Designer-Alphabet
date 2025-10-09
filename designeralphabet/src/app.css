@@ -212,8 +212,11 @@ a:focus-visible {
 
 /* Base card styles */
 .card {
-	@apply rounded-[2rem] p-6 shadow-xl transition-all duration-300;
-	border: 4px solid;
+	@apply rounded-[2rem] p-5 shadow-xl transition-all duration-300;
+	border: 3px solid;
+	min-height: 320px;
+	display: flex;
+	flex-direction: column;
 }
 
 .card:hover {
@@ -351,23 +354,23 @@ a:focus-visible {
 
 /* Card component parts */
 .card-icon-bg {
-	@apply flex h-14 w-14 items-center justify-center rounded-xl shadow-lg;
+	@apply flex h-12 w-12 items-center justify-center rounded-xl shadow-lg;
 }
 
 .card-title {
-	@apply font-techno text-base font-bold uppercase tracking-[0.2em];
+	@apply font-techno text-[0.7rem] font-bold uppercase tracking-[0.15em] leading-tight;
 }
 
 .card-id {
-	@apply text-[0.6rem] uppercase tracking-[0.35em] font-semibold;
+	@apply text-[0.55rem] uppercase tracking-[0.25em] font-semibold;
 }
 
 .card-description {
-	@apply line-clamp-3 text-sm font-medium leading-relaxed;
+	@apply line-clamp-3 text-[0.7rem] font-medium leading-snug;
 }
 
 .card-tag {
-	@apply rounded-full border-2 border-white/30 bg-surface-elevated/15 backdrop-blur px-3 py-1 text-[0.6rem] uppercase tracking-[0.25em] font-semibold;
+	@apply rounded-full border-2 border-white/30 bg-surface-elevated/15 backdrop-blur px-2.5 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] font-semibold;
 }
 
 .card-action-btn {

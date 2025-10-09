@@ -297,10 +297,10 @@ function variantClass(card: Card | null, role: string): string {
 	</header>
 
 	{#if loading}
-		<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+		<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
 			{#each Array.from({ length: 6 }) as _, index}
 				<div
-					class="animate-pulse rounded-[2rem] border border-white/10 bg-black/40 p-6 shadow-[0_0_30px_rgba(255,255,255,0.04)]"
+					class="animate-pulse rounded-[2rem] border border-white/10 bg-black/40 p-5 shadow-[0_0_30px_rgba(255,255,255,0.04)] min-h-[320px]"
 				>
 					<div class="h-6 w-24 rounded-full bg-surface-elevated/10"></div>
 					<div class="mt-4 h-4 w-full rounded-full bg-surface-elevated/10"></div>
@@ -325,54 +325,56 @@ function variantClass(card: Card | null, role: string): string {
 			No cards match these filters. Try clearing filters or drawing at random.
 		</div>
 	{:else}
-		<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+		<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
 			{#each filteredCards as card, index (card._id)}
 				<div>
 					<article
-						class={`card ${getCardClass(card)} flex flex-col gap-4 ${
+						class={`card ${getCardClass(card)} gap-3 ${
 							selectedCards.some((entry) => entry._id === card._id) ? 'selected' : ''
 						}`}
 					>
-						<div class="flex items-start gap-4">
-							<span class="card-icon-bg font-retro text-sm font-bold uppercase tracking-[0.3em]">
+						<div class="flex items-start gap-3">
+							<span class="card-icon-bg font-retro text-xs font-bold uppercase tracking-[0.25em]">
 								{card.letter ?? '?'}
 							</span>
-							<div class="flex-1 space-y-2">
-								<div class="flex items-center gap-3">
-									<span class="card-title">{card.title}</span>
-									{#if card.category}
-										<span class="card-badge rounded-full px-3 py-1 text-[0.6rem] uppercase tracking-[0.3em]">
-											{card.category}
-										</span>
-									{/if}
+							<div class="flex-1 space-y-1.5 min-w-0">
+								<div class="flex flex-col gap-1.5">
+									<span class="card-title break-words">{card.title}</span>
+									<div class="flex items-center gap-2 flex-wrap">
+										<p class="card-id card-text-secondary">{card.cardID}</p>
+										{#if card.category}
+											<span class="card-badge rounded-full px-2.5 py-0.5 text-[0.55rem] uppercase tracking-[0.25em]">
+												{card.category}
+											</span>
+										{/if}
+									</div>
 								</div>
-								<p class="card-id card-text-secondary">{card.cardID}</p>
 							</div>
+						</div>
+						{#if card.description}
+							<p class="card-description card-text-primary break-words">{card.description}</p>
+						{/if}
+						<div class="flex flex-wrap gap-1.5">
+							{#if card.tags?.length}
+								{#each card.tags.slice(0, 3) as tag}
+									<span class="card-tag card-text-secondary">{tag}</span>
+								{/each}
+								{#if card.tags.length > 3}
+									<span class="card-tag card-text-secondary">+{card.tags.length - 3}</span>
+								{/if}
+							{/if}
+						</div>
+						<div class="mt-auto pt-2 flex gap-2">
 							<button
-								class="card-action-btn card-text-primary"
+								class="flex-1 rounded-full border-2 border-white/40 bg-surface-elevated/20 backdrop-blur px-3 py-2.5 text-[0.6rem] font-bold uppercase tracking-[0.25em] transition-all hover:bg-surface-elevated/40 hover:scale-105 card-text-primary"
 								type="button"
 								aria-label="View details"
 								on:click={() => openDetails(card)}
 							>
-								<ArrowRight class="h-5 w-5" />
+								View
 							</button>
-						</div>
-						{#if card.description}
-							<p class="card-description card-text-primary">{card.description}</p>
-						{/if}
-						<div class="flex flex-wrap gap-2">
-							{#if card.tags?.length}
-								{#each card.tags.slice(0, 4) as tag}
-									<span class="card-tag card-text-secondary">{tag}</span>
-								{/each}
-								{#if card.tags.length > 4}
-									<span class="card-tag card-text-secondary">+{card.tags.length - 4}</span>
-								{/if}
-							{/if}
-						</div>
-						<div class="mt-auto space-y-2">
 							<button
-								class={`card-select-btn card-text-primary ${
+								class={`flex-[2] card-select-btn card-text-primary ${
 									selectedCards.some((entry) => entry._id === card._id) ? 'selected' : ''
 								}`}
 								type="button"
