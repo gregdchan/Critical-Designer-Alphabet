@@ -7,6 +7,15 @@ module.exports = {
 	theme: {
 		extend: {
 					colors: {
+						// Orange-Teal Theme
+						'teal-dark': '#025259',
+						'teal': '#007172',
+						'teal-light': '#00a0a3',
+						'orange': '#F29325',
+						'orange-dark': '#D94F04',
+						'cream': '#F4E2DE',
+						
+						// Semantic tokens
 						brand: 'hsl(var(--brand))',
 						'brand-soft': 'hsl(var(--brand-soft))',
 						surface: 'hsl(var(--surface))',
@@ -14,32 +23,32 @@ module.exports = {
 						'surface-muted': 'hsl(var(--surface-muted))',
 						muted: 'hsl(var(--surface-muted))',
 						'critical-accent': 'hsl(var(--accent-critical))',
-						'neon-pink': '#ec4899',
-						'neon-cyan': '#06b6d4',
-						'neon-lime': '#84cc16',
-						'retro-purple': '#a78bfa',
-						'pastel-orange': '#fdba74',
-						'pastel-green': '#bbf7d0',
-						primary: '#4c6ef5',
-						secondary: '#9b5de5',
-						accent: '#38bdf8',
-						success: '#22a06b',
-						warning: '#f59e0b',
-						error: '#f2645c',
+						
+						// Legacy compat (mapped to new theme)
+						primary: '#007172',
+						secondary: '#F29325',
+						accent: '#D94F04',
+						success: '#007172',
+						warning: '#F29325',
+						error: '#D94F04',
+						
+						// Chart colors (orange-teal palette)
 						chart: {
-							blue: '#4c6ef5',
-							sky: '#38bdf8',
-							teal: '#14b8a6',
-							green: '#22a06b',
-							gold: '#f6b042',
-							coral: '#f7745e',
-							plum: '#9b5de5',
-							rose: '#f472b6',
+							teal: '#007172',
+							orange: '#F29325',
+							'teal-dark': '#025259',
+							'orange-dark': '#D94F04',
+							cream: '#F4E2DE',
+							'teal-light': '#00a0a3',
+							'orange-light': '#ff9f1c',
+							'teal-darker': '#013840',
 						},
-						darkBg: '#eef1f5',
+						
+						// Surface colors
+						darkBg: '#F4E2DE',
 						surfaceBase: '#ffffff',
-						card: '#f1f5f9',
-						midnight: '#dde3ef',
+						card: '#F4E2DE',
+						midnight: '#025259',
 					},
 			fontFamily: {
 				sans: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
@@ -55,13 +64,12 @@ module.exports = {
 				playful: '2.5rem',
 			},
 			boxShadow: {
-				soft: '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
-				medium: '0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -2px rgba(0, 0, 0, 0.06)',
-				card: '0 1px 3px 0 rgba(0, 0, 0, 0.10), 0 1px 2px 0 rgba(0, 0, 0, 0.04)',
-				'neon-pink': '0 4px 14px 0 rgba(236, 72, 153, 0.18)',
-				'neon-cyan': '0 4px 14px 0 rgba(6, 182, 212, 0.18)',
-				'neon-lime': '0 4px 14px 0 rgba(132, 204, 22, 0.18)',
-				'playful': '0 8px 32px 0 rgba(76, 110, 245, 0.10), 0 1.5px 8px 0 rgba(236, 72, 153, 0.10)',
+				soft: '0 4px 6px -1px rgba(2, 82, 89, 0.08), 0 2px 4px -1px rgba(2, 82, 89, 0.04)',
+				medium: '0 10px 15px -3px rgba(2, 82, 89, 0.10), 0 4px 6px -2px rgba(2, 82, 89, 0.06)',
+				card: '0 1px 3px 0 rgba(2, 82, 89, 0.10), 0 1px 2px 0 rgba(2, 82, 89, 0.04)',
+				'teal': '0 4px 14px 0 rgba(0, 113, 114, 0.25)',
+				'orange': '0 4px 14px 0 rgba(242, 147, 37, 0.25)',
+				'playful': '0 8px 32px 0 rgba(0, 113, 114, 0.12), 0 1.5px 8px 0 rgba(242, 147, 37, 0.12)',
 			},
 			keyframes: {
 				'fade-in': {

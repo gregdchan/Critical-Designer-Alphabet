@@ -7,36 +7,47 @@
 
 :root {
 	color-scheme: light;
-	/* Playful, vibrant, and high-contrast palette */
-	--brand: 220 100% 56%; /* Neon blue */
-	--brand-soft: 200 100% 70%; /* Soft cyan */
-	--accent-critical: 340 90% 60%; /* Neon pink */
-	--accent-soft: 50 100% 70%; /* Pastel yellow */
-	--surface: 210 100% 98%; /* Very light blue */
-	--surface-elevated: 0 0% 100%;
-	--surface-muted: 210 80% 94%; /* Soft blue */
-	--surface-subtle: 210 60% 90%; /* Subtle blue */
-	--text-primary: 220 60% 12%; /* Deep navy */
-	--text-secondary: 220 30% 30%;
-	--text-muted: 220 15% 50%;
-	--border-subtle: 210 40% 85%;
-	--border-strong: 220 40% 65%;
-	--ring: 200 100% 60%;
-	--chart-1: #4c6ef5;
-	--chart-2: #38bdf8;
-	--chart-3: #22a06b;
-	--chart-4: #f6b042;
-	--chart-5: #f7745e;
-	--chart-6: #9b5de5;
-	--chart-7: #14b8a6;
-	--chart-8: #f472b6;
-	/* Playful extras */
-	--neon-pink: #ec4899;
-	--neon-cyan: #06b6d4;
-	--neon-lime: #84cc16;
-	--retro-purple: #a78bfa;
-	--pastel-orange: #fdba74;
-	--pastel-green: #bbf7d0;
+	/* Orange-Teal Theme - Solar United Neighbors inspired */
+	/* Base palette */
+	--teal-dark: 184 95% 17%; /* #025259 - Deep teal */
+	--teal: 180 100% 22%; /* #007172 - Primary teal */
+	--orange: 32 88% 54%; /* #F29325 - Vibrant orange */
+	--orange-dark: 21 96% 43%; /* #D94F04 - Deep orange */
+	--cream: 10 50% 91%; /* #F4E2DE - Soft cream */
+	
+	/* Semantic color mapping */
+	--brand: var(--teal); /* Primary brand color */
+	--brand-soft: var(--teal-dark); /* Darker teal variant */
+	--accent-critical: var(--orange-dark); /* Alerts, errors, warnings */
+	--accent-warm: var(--orange); /* Call-to-action, highlights */
+	
+	/* Surface colors */
+	--surface: 10 40% 98%; /* Nearly white with warm tint */
+	--surface-elevated: 0 0% 100%; /* Pure white */
+	--surface-muted: 10 30% 95%; /* Warm light gray */
+	--surface-subtle: 180 20% 95%; /* Cool light gray with teal hint */
+	
+	/* Text colors */
+	--text-primary: 0 0% 10%; /* Near black */
+	--text-secondary: 0 0% 30%; /* Dark gray */
+	--text-muted: 0 0% 50%; /* Medium gray */
+	--text-on-teal: 0 0% 100%; /* White for teal backgrounds */
+	--text-on-orange: 0 0% 10%; /* Black for orange backgrounds */
+	
+	/* Border colors */
+	--border-subtle: 10 20% 88%; /* Light warm gray */
+	--border-strong: 180 30% 40%; /* Teal-gray */
+	--ring: var(--teal); /* Focus ring */
+	
+	/* Chart colors using palette */
+	--chart-1: #007172; /* Teal */
+	--chart-2: #F29325; /* Orange */
+	--chart-3: #025259; /* Teal dark */
+	--chart-4: #D94F04; /* Orange dark */
+	--chart-5: #F4E2DE; /* Cream */
+	--chart-6: #00a0a3; /* Light teal variant */
+	--chart-7: #ff9f1c; /* Light orange variant */
+	--chart-8: #013840; /* Very dark teal */
 }
 
 html {
@@ -46,8 +57,11 @@ html {
 
 body {
 	@apply min-h-screen antialiased;
-	background: linear-gradient(120deg, hsl(var(--surface)) 0%, hsl(var(--surface-muted)) 60%, hsl(var(--surface-subtle)) 100%),
-		repeating-linear-gradient(135deg, hsl(var(--neon-cyan)) 0 2px, transparent 2px 40px);
+	background: linear-gradient(135deg, 
+		hsl(var(--surface)) 0%, 
+		hsl(var(--cream)) 50%, 
+		hsl(var(--surface-subtle)) 100%
+	);
 	color: hsl(var(--text-primary));
 	font-family:
 		'Poppins',
@@ -69,7 +83,7 @@ h1, h2, h3, h4, h5, h6 {
 
 a:hover,
 a:focus-visible {
-	color: hsl(var(--neon-cyan));
+	color: hsl(var(--accent-warm));
 	text-decoration-color: currentColor;
 }
 
@@ -79,7 +93,7 @@ a:focus-visible {
 }
 
 ::selection {
-	background: rgba(59, 130, 246, 0.2);
+	background: hsl(var(--orange) / 0.25);
 	color: hsl(var(--text-primary));
 }
 
@@ -98,9 +112,9 @@ a:focus-visible {
 
 
 .surface {
-	background: linear-gradient(120deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
+	background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
 	border: 2px solid hsl(var(--border-subtle));
-	box-shadow: 0 8px 32px 0 hsl(var(--brand) / 0.08), 0 1.5px 8px 0 hsl(var(--neon-pink) / 0.08);
+	box-shadow: 0 4px 16px 0 hsl(var(--teal-dark) / 0.08);
 	color: hsl(var(--text-secondary));
 	border-radius: 1.5rem;
 }
@@ -119,9 +133,9 @@ a:focus-visible {
 
 
 .panel {
-	background: linear-gradient(120deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
+	background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
 	border: 2px solid hsl(var(--border-subtle));
-	box-shadow: 0 8px 32px 0 hsl(var(--brand) / 0.08), 0 1.5px 8px 0 hsl(var(--neon-pink) / 0.08);
+	box-shadow: 0 4px 16px 0 hsl(var(--teal-dark) / 0.08);
 	color: hsl(var(--text-secondary));
 	border-radius: 1.5rem;
 }
@@ -137,18 +151,19 @@ a:focus-visible {
 
 
 .chip {
-	background: linear-gradient(90deg, hsl(var(--neon-pink) / 0.18), hsl(var(--neon-cyan) / 0.18));
-	border: 1.5px solid hsl(var(--brand) / 0.25);
-	color: hsl(var(--brand));
+	background: hsl(var(--orange) / 0.15);
+	border: 2px solid hsl(var(--orange));
+	color: hsl(var(--orange-dark));
 	font-weight: 700;
 	letter-spacing: 0.04em;
+	text-shadow: 0 1px 2px hsl(var(--orange) / 0.1);
 }
 
 
 .chart-card {
-	background: linear-gradient(120deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
+	background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
 	border: 2px solid hsl(var(--border-subtle));
-	box-shadow: 0 8px 32px 0 hsl(var(--brand) / 0.08), 0 1.5px 8px 0 hsl(var(--neon-cyan) / 0.08);
+	box-shadow: 0 4px 16px 0 hsl(var(--teal-dark) / 0.08);
 	border-radius: 1.25rem;
 }
 
@@ -170,35 +185,35 @@ a:focus-visible {
 	@apply ring-4 ring-white scale-105;
 }
 
-/* Cyan cards (Practice) */
+/* Cyan cards (Practice) - Teal */
 .card-cyan {
-	background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-	border-color: #0891b2;
-	color: #0f172a;
+	background: linear-gradient(135deg, #007172 0%, #025259 100%);
+	border-color: #025259;
+	color: #ffffff;
 }
 
 .card-cyan .card-title,
 .card-cyan .card-text-primary {
-	color: #0f172a;
+	color: #ffffff;
 }
 
 .card-cyan .card-text-secondary {
-	color: #1e293b;
+	color: rgba(255, 255, 255, 0.9);
 }
 
 .card-cyan .card-badge {
-	@apply border-2 border-slate-900/40 bg-slate-900/20 backdrop-blur font-bold;
-	color: #0f172a;
+	@apply border-2 border-white/50 bg-white/25 backdrop-blur font-bold;
+	color: #ffffff;
 }
 
 .card-cyan .card-icon-bg {
 	@apply border-2 border-white/40 bg-white/20 backdrop-blur;
 }
 
-/* Pink cards (Lens) */
+/* Pink cards (Lens) - Orange */
 .card-pink {
-	background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-	border-color: #db2777;
+	background: linear-gradient(135deg, #F29325 0%, #ff9f1c 100%);
+	border-color: #D94F04;
 	color: #0f172a;
 }
 
@@ -212,43 +227,43 @@ a:focus-visible {
 }
 
 .card-pink .card-badge {
-	@apply border-2 border-white/40 bg-white/20 backdrop-blur font-bold;
-	color: #0f172a;
-}
-
-.card-pink .card-icon-bg {
-	@apply border-2 border-white/40 bg-white/20 backdrop-blur;
-}
-
-/* Lime cards (Mindset) */
-.card-lime {
-	background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
-	border-color: #65a30d;
-	color: #0f172a;
-}
-
-.card-lime .card-title,
-.card-lime .card-text-primary {
-	color: #0f172a;
-}
-
-.card-lime .card-text-secondary {
-	color: #1e293b;
-}
-
-.card-lime .card-badge {
 	@apply border-2 border-slate-900/40 bg-slate-900/20 backdrop-blur font-bold;
 	color: #0f172a;
 }
 
-.card-lime .card-icon-bg {
+.card-pink .card-icon-bg {
 	@apply border-2 border-slate-900/40 bg-slate-900/20 backdrop-blur;
 }
 
-/* Purple cards (Theory) */
+/* Lime cards (Mindset) - Light Teal */
+.card-lime {
+	background: linear-gradient(135deg, #00a0a3 0%, #007172 100%);
+	border-color: #007172;
+	color: #ffffff;
+}
+
+.card-lime .card-title,
+.card-lime .card-text-primary {
+	color: #ffffff;
+}
+
+.card-lime .card-text-secondary {
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.card-lime .card-badge {
+	@apply border-2 border-white/50 bg-white/25 backdrop-blur font-bold;
+	color: #ffffff;
+}
+
+.card-lime .card-icon-bg {
+	@apply border-2 border-white/40 bg-white/20 backdrop-blur;
+}
+
+/* Purple cards (Theory) - Dark Teal */
 .card-purple {
-	background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-	border-color: #8b5cf6;
+	background: linear-gradient(135deg, #025259 0%, #013840 100%);
+	border-color: #013840;
 	color: #ffffff;
 }
 
@@ -262,7 +277,7 @@ a:focus-visible {
 }
 
 .card-purple .card-badge {
-	@apply border-2 border-white/40 bg-white/20 backdrop-blur font-bold;
+	@apply border-2 border-white/50 bg-white/25 backdrop-blur font-bold;
 	color: #ffffff;
 }
 
@@ -270,29 +285,29 @@ a:focus-visible {
 	@apply border-2 border-white/40 bg-white/20 backdrop-blur;
 }
 
-/* Orange cards (Method) */
+/* Orange cards (Method) - Deep Orange */
 .card-orange {
-	background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
-	border-color: #fb923c;
-	color: #0f172a;
+	background: linear-gradient(135deg, #D94F04 0%, #bf4304 100%);
+	border-color: #bf4304;
+	color: #ffffff;
 }
 
 .card-orange .card-title,
 .card-orange .card-text-primary {
-	color: #0f172a;
+	color: #ffffff;
 }
 
 .card-orange .card-text-secondary {
-	color: #1e293b;
+	color: rgba(255, 255, 255, 0.9);
 }
 
 .card-orange .card-badge {
-	@apply border-2 border-slate-900/40 bg-slate-900/20 backdrop-blur font-bold;
-	color: #0f172a;
+	@apply border-2 border-white/50 bg-white/25 backdrop-blur font-bold;
+	color: #ffffff;
 }
 
 .card-orange .card-icon-bg {
-	@apply border-2 border-slate-900/40 bg-slate-900/20 backdrop-blur;
+	@apply border-2 border-white/40 bg-white/20 backdrop-blur;
 }
 
 /* Card component parts */
