@@ -36,6 +36,7 @@
 	export let data: { sessionCode: string };
 
 	let selectedPhaseKey: string | null = null;
+	let chartRefreshKey = 0; // Key to force chart re-renders
 
 	let sessionCode = data.sessionCode ?? '';
 	let joinCode = sessionCode;
@@ -447,6 +448,11 @@
 		// Charts will automatically update via reactive statements
 	}
 
+	function refreshCharts() {
+		chartRefreshKey += 1;
+		console.log('[Presentation] Charts refreshed, key:', chartRefreshKey);
+	}
+
 	async function fetchAvailableSessions() {
 		loadingSessions = true;
 		try {
@@ -529,10 +535,21 @@
 					</div>
 				{/if}
 			</div>
-			<form
-				class="flex flex-wrap items-center gap-3"
-				on:submit|preventDefault={handleStartPresentation}
-			>
+			<div class="flex items-center gap-3">
+				{#if activeCode}
+					<button
+						type="button"
+						on:click={refreshCharts}
+						class="rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-200 transition-colors hover:bg-cyan-500/20"
+						title="Refresh all charts to reload updated configurations"
+					>
+						🔄 Refresh Charts
+					</button>
+				{/if}
+				<form
+					class="flex flex-wrap items-center gap-3"
+					on:submit|preventDefault={handleStartPresentation}
+				>
 				<input
 					class="w-48 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-ink-2 focus:border-cyan-400 focus:outline-none"
 					placeholder="Enter session code"
@@ -735,23 +752,27 @@
 				<!-- Phase-based charts for selected phase OR Supercloud -->
 				{#if selectedPhaseKey && browser}
 					{#if selectedPhaseKey === 'supercloud'}
-						<div class="presentation-panel rounded-2xl border border-amber-400/20 bg-slate-900/70 p-8 shadow-[0_0_40px_rgba(251,191,36,0.2)]">
-							<header class="mb-6">
-								<h2 class="text-2xl font-bold text-slate-100">
-									✨ Supercloud
-								</h2>
-								<p class="text-sm text-ink-muted mt-2">
-									All words and responses from the entire session in one view.
-								</p>
-							</header>
-							<div class="w-full h-[700px] overflow-hidden">
-								<WordCloudChart responses={responsesForViz} width={1400} height={700} question="All Session Responses" />
+						{#key chartRefreshKey}
+							<div class="presentation-panel rounded-2xl border border-amber-400/20 bg-slate-900/70 p-8 shadow-[0_0_40px_rgba(251,191,36,0.2)]">
+								<header class="mb-6">
+									<h2 class="text-2xl font-bold text-slate-100">
+										✨ Supercloud
+									</h2>
+									<p class="text-sm text-ink-muted mt-2">
+										All words and responses from the entire session in one view.
+									</p>
+								</header>
+								<div class="w-full h-[700px] overflow-hidden">
+									<WordCloudChart responses={responsesForViz} width={1400} height={700} question="All Session Responses" />
+								</div>
 							</div>
-						</div>
+						{/key}
 					{:else}
-						<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
-							<PhaseCharts phaseKey={selectedPhaseKey} width={1400} height={600} />
-						</div>
+						{#key chartRefreshKey}
+							<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
+								<PhaseCharts phaseKey={selectedPhaseKey} width={1400} height={600} />
+							</div>
+						{/key}
 					{/if}
 				{/if}					<!-- Legacy board types removed - using PhaseCharts instead -->
 					{#each mainBoards as boardId}
