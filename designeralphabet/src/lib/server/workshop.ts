@@ -49,6 +49,8 @@ export interface Participant {
 	color: string;
 	points: number;
 	badges: string[];
+	email?: string | null;
+	device_id?: string | null;
 	created_at: string;
 }
 
@@ -388,20 +390,70 @@ export async function addParticipant({
 	code,
 	name,
 	role,
-	color
+	color,
+	email,
+	deviceId
 }: {
 	code: string;
 	name: string;
 	role: 'facilitator' | 'participant';
 	color: string;
+	email?: string;
+	deviceId?: string;
 }) {
+	console.log('[addParticipant] Creating participant:', { code, name, role, email: email ? '***' : null, deviceId: deviceId ? '***' : null });
+
+	// Check if participant with this email already exists in this session
+	if (email) {
+		const existing = await supabaseAdmin
+			.from('participants')
+			.select('*')
+			.eq('room_code', code)
+			.eq('email', email)
+			.maybeSingle();
+
+		if (existing.data) {
+			console.log('[addParticipant] Found existing participant by email, returning:', existing.data.id);
+			const participants = await getParticipants(code);
+			broadcast(code, { type: 'PRESENCE', participants });
+			return asParticipant(existing.data);
+		}
+	}
+
+	// Check by device_id as fallback
+	if (deviceId) {
+		const existing = await supabaseAdmin
+			.from('participants')
+			.select('*')
+			.eq('room_code', code)
+			.eq('device_id', deviceId)
+			.maybeSingle();
+
+		if (existing.data) {
+			console.log('[addParticipant] Found existing participant by device_id, returning:', existing.data.id);
+			const participants = await getParticipants(code);
+			broadcast(code, { type: 'PRESENCE', participants });
+			return asParticipant(existing.data);
+		}
+	}
+
+	// Create new participant
 	const response = await supabaseAdmin
 		.from('participants')
-		.insert({ room_code: code, name, role, color })
+		.insert({
+			room_code: code,
+			name,
+			role,
+			color,
+			email: email || null,
+			device_id: deviceId || null
+		})
 		.select()
 		.single();
 
 	const participant = asParticipant(ensure(response, 'addParticipant'));
+	console.log('[addParticipant] Created new participant:', participant.id);
+
 	const participants = await getParticipants(code);
 	broadcast(code, { type: 'PRESENCE', participants });
 	return participants.find((p) => p.id === participant.id);

@@ -6,6 +6,8 @@ export interface Participant {
 	color: string;
 	points: number;
 	badges: string[];
+	email?: string | null;
+	device_id?: string | null;
 	created_at: string;
 }
 

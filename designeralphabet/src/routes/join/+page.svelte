@@ -11,10 +11,12 @@
 	import { currentUser } from '$lib/stores/user';
 	import sanityClient from '$lib/sanity';
 	import { storeParticipantProfile } from '$lib/realtime';
+	import { getOrCreateDeviceId } from '$lib/utils/device';
 
 	export let data: { code: string };
 
 	let participantName = '';
+	let participantEmail = '';
 	let sessionCode = '';
 	let selectedColor = '#00ffff'; // Default to neon cyan
 	let loading = false;
@@ -260,6 +262,8 @@
 					storeParticipantProfile(uppercaseCode, profile);
 				}
 			} else {
+				const deviceId = getOrCreateDeviceId();
+
 				const response = await fetch('/api/participants/join', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -267,7 +271,9 @@
 						code: uppercaseCode,
 						name: participantName,
 						role: 'participant',
-						color: selectedColor
+						color: selectedColor,
+						email: participantEmail.trim() || undefined,
+						deviceId: deviceId || undefined
 					})
 				});
 
@@ -282,8 +288,10 @@
 						participantId: data.participant.id as string,
 						sessionCode: uppercaseCode,
 						name: participantName,
+						email: participantEmail.trim() || undefined,
 						role: 'participant' as const,
-						color: selectedColor
+						color: selectedColor,
+						deviceId: deviceId || undefined
 					};
 					currentUser.set(profile);
 					storeParticipantProfile(uppercaseCode, profile);
