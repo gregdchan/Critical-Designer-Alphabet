@@ -14,14 +14,13 @@
 		stopRealtimeSession
 	} from '$lib/realtime';
 	import { CHART_REGISTRY } from '$lib/charts';
-	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
+    import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import PieChart from '$lib/components/charts/PieChart.svelte';
 	import LineChart from '$lib/components/charts/LineChart.svelte';
-	import RealtimeBarChart from '$lib/components/charts/RealtimeBarChart.svelte';
-	import RealtimePieChart from '$lib/components/charts/RealtimePieChart.svelte';
+    import { tallyByOption } from '$lib/selectors/aggregate';
 	import RealtimeLineChart from '$lib/components/charts/RealtimeLineChart.svelte';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
 	import MaturityDial from '$lib/charts/MaturityDial.svelte';
@@ -775,12 +774,17 @@
 													<div class="flex items-center justify-between mb-2">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
 													</div>
-													<RealtimeBarChart
-														roomCode={activeCode}
-														questionId={question.id}
-														width={1400}
-														height={Math.max(250, (question.options?.length || 3) * 70)}
-													/>
+                                {#key responsesList}
+                                    {@const qRows = responsesList.filter(r => r.question_id === question.id)}
+                                    {@const chart = tallyByOption(qRows, question.text)}
+                                    {#if chart.series[0].points.length}
+                                        <div style="width:100%;height: min(700px, calc(70px*{Math.max(3, chart.series[0].points.length)}));">
+                                            <BarChart data={chart} title={question.text} />
+                                        </div>
+                                    {:else}
+                                        <div class="text-ink-muted text-sm">No data yet.</div>
+                                    {/if}
+                                {/key}
 												</div>
 											{/each}
 										</div>
@@ -810,13 +814,17 @@
 													<div class="flex items-center justify-between">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
 													</div>
-													<RealtimePieChart
-														roomCode={activeCode}
-														questionId={question.id}
-														width={1200}
-														height={500}
-														showLegend={true}
-													/>
+                                {#key responsesList}
+                                    {@const qRows = responsesList.filter(r => r.question_id === question.id)}
+                                    {@const chart = tallyByOption(qRows, question.text)}
+                                    {#if chart.series[0].points.length}
+                                        <div style="width:100%;height:500px;">
+                                            <PieChart data={chart} title={question.text} />
+                                        </div>
+                                    {:else}
+                                        <div class="text-ink-muted text-sm">No data yet.</div>
+                                    {/if}
+                                {/key}
 												</div>
 											{/each}
 										</div>
