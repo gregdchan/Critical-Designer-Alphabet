@@ -243,7 +243,10 @@
 			questions: questionsList.length,
 			responses: responsesList.length,
 			phases: phasesList.length,
-			activeBoards: activeBoards.length
+			activePhase: activePhase?.phase_key || activePhase?.id,
+			selectedPhaseKey,
+			activeBoards: activeBoards.length,
+			activeBoardsList: activeBoards
 		});
 	}
 
@@ -321,15 +324,13 @@
 
 		const dashboards: string[] = [];
 
-		// Collect dashboards ONLY from manually selected dashboards in Sanity
+		// Collect dashboards from manually selected dashboards in Sanity
 		phaseQuestions.forEach((q) => {
 			// Check for field (supports both snake_case from DB and camelCase from Sanity)
 			const selectedDashboards = q.recommendedDashboards || q.recommended_dashboards;
 			
 			if (Array.isArray(selectedDashboards) && selectedDashboards.length > 0) {
 				selectedDashboards.forEach((d: string) => {
-					// Don't validate - just add all configured dashboards
-					// The charts themselves will handle empty states
 					if (!dashboards.includes(d)) {
 						dashboards.push(d);
 					}
@@ -337,9 +338,36 @@
 			}
 		});
 
-		// If no dashboards configured, provide sensible defaults
+		// If no dashboards explicitly configured, auto-detect based on question types
+		if (dashboards.length === 0 && phaseQuestions.length > 0) {
+			// Always add phase info board
+			dashboards.push('phase');
+			
+			// Add chart types based on response types
+			phaseQuestions.forEach((q) => {
+				const responseType = q.response_type || 'written';
+				
+				if (['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect'].includes(responseType)) {
+					if (!dashboards.includes('barChart')) dashboards.push('barChart');
+					if (!dashboards.includes('pieChart')) dashboards.push('pieChart');
+				} else if (responseType === 'scale') {
+					if (!dashboards.includes('lineChart')) dashboards.push('lineChart');
+				} else if (responseType === 'written' || responseType === 'text') {
+					if (!dashboards.includes('heatmap')) dashboards.push('heatmap');
+					if (!dashboards.includes('quadBubbles')) dashboards.push('quadBubbles');
+				} else if (responseType === 'landscape' || q.map_type === 'landscape') {
+					// Landscape charts will be in PhaseCharts
+				}
+			});
+			
+			// Always add engagement boards
+			if (!dashboards.includes('leaderboard')) dashboards.push('leaderboard');
+			if (!dashboards.includes('timeline')) dashboards.push('timeline');
+		}
+
+		// Absolute fallback if still empty
 		if (dashboards.length === 0) {
-			dashboards.push('phase', 'responses', 'timeline', 'leaderboard');
+			dashboards.push('phase', 'timeline', 'leaderboard');
 		}
 
 		return normalizeBoards(dashboards);
@@ -665,11 +693,22 @@
 
 			{#if activeBoards.length === 0}
 				<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-10 text-center">
-					<div class="space-y-3">
+					<div class="space-y-4">
 						<h3 class="text-lg font-semibold text-slate-200">Waiting for content...</h3>
-						<p class="text-sm text-ink-muted">
-							Charts will automatically appear when questions have dashboards configured and responses arrive.
-						</p>
+						<div class="space-y-2 text-sm text-ink-muted">
+							<p>
+								Charts will appear when:
+							</p>
+							<ul class="list-disc list-inside space-y-1 text-left max-w-md mx-auto">
+								<li>Questions are added to the session</li>
+								<li>Phases are created and activated</li>
+								<li>Participants submit responses</li>
+							</ul>
+							<p class="mt-4 text-xs">
+								Debug: {questionsList.length} questions, {responsesList.length} responses, 
+								{phasesList.length} phases, activePhase: {activePhase?.title || 'none'}
+							</p>
+						</div>
 					</div>
 				</div>
 			{:else}
