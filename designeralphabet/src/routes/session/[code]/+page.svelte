@@ -1022,7 +1022,7 @@
 							<div class="flex flex-wrap items-center gap-2">
 								{#each sessionStatuses as status}
 									<button
-										class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-brand text-primary shadow' : 'border border-brand/40 text-cyan-200 hover:border-cyan-300'}`}
+										class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-brand text-white shadow' : 'border border-brand/40 text-cyan-200 hover:border-cyan-300'}`}
 										on:click={() => changeStatus(status)}
 										disabled={statusUpdating || sessionInfo?.status === status}
 									>
