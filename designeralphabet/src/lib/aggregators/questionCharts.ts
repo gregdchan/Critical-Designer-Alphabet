@@ -59,7 +59,7 @@ export function inferQuestionType(question: Question, responses: Response[]): In
   if (explicit) {
     // Normalize common values into our set
     const norm = explicit.toLowerCase();
-    if (['multiple_choice', 'multiselect', 'singlechoice', 'choice'].includes(norm)) return 'multipleChoice';
+    if (['multiple_choice', 'multiselect', 'singlechoice', 'singlechoice', 'choice'].includes(norm)) return 'multipleChoice';
     if (['scale', 'rating', 'number', 'numeric'].includes(norm)) return 'rating';
     if (['boolean', 'yesno', 'yes_no'].includes(norm)) return 'boolean';
     if (['voting', 'vote'].includes(norm)) return 'voting';
@@ -101,14 +101,31 @@ export function buildChartForQuestion(
     case 'multipleChoice': {
       const options = getOptionsFromConfig(question);
       const counts = new Map<string, number>();
+
+      // Initialize counts for all configured options
       if (options.length > 0) {
         for (const opt of options) counts.set(opt, 0);
       }
+
+      // Check if this is a multiSelect question (can have comma-separated values)
+      const isMultiSelect = ((question as any)?.response_type ?? '').toLowerCase() === 'multiselect';
+
       for (const r of responses ?? []) {
         const raw = (r?.text ?? '').toString().trim();
         if (!raw) continue;
-        counts.set(raw, (counts.get(raw) ?? 0) + 1);
+
+        if (isMultiSelect) {
+          // Split comma-separated values and count each individually
+          const selections = raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+          for (const selection of selections) {
+            counts.set(selection, (counts.get(selection) ?? 0) + 1);
+          }
+        } else {
+          // Single selection - count as-is
+          counts.set(raw, (counts.get(raw) ?? 0) + 1);
+        }
       }
+
       const points: ChartPoint[] = Array.from(counts.entries())
         .map(([label, value]) => ({ id: label, label, value: Number(value) || 0 }))
         .filter((p) => Number.isFinite(p.value) && p.value >= 0)
@@ -137,13 +154,24 @@ export function buildChartForQuestion(
         .map(([label, value]) => ({ id: label, label, value: Number(value) || 0 }))
         .sort((a, b) => Number(a.label) - Number(b.label));
       const total = points.reduce((s, p) => s + (Number.isFinite(p.value) ? p.value : 0), 0);
+
+      // Extract scale settings from question config if available
+      const cfg = (question?.config ?? {}) as Record<string, unknown>;
+      const scale = cfg.scale as any;
+      const scaleSettings = scale ? {
+        min: scale.min ?? 0,
+        max: scale.max ?? 10,
+        minLabel: scale.minLabel ?? 'Min',
+        maxLabel: scale.maxLabel ?? 'Max'
+      } : { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
+
       return {
         type,
         data: {
           title: question?.text ?? 'Rating',
           series: [{ id: question.id, points }],
           total,
-          meta: { kind: 'rating' }
+          meta: { kind: 'rating', scaleSettings }
         }
       };
     }
@@ -151,14 +179,16 @@ export function buildChartForQuestion(
       let yes = 0;
       let no = 0;
       for (const r of responses ?? []) {
-        const t = (r?.text ?? '').toString();
+        const t = (r?.text ?? '').toString().trim();
+        if (!t) continue;
         if (isTruthyBooleanWord(t)) yes += 1;
         else if (isFalseyBooleanWord(t)) no += 1;
+        // Note: responses that don't match yes/no patterns are ignored
       }
       const points: ChartPoint[] = [
         { id: 'yes', label: 'Yes', value: yes },
         { id: 'no', label: 'No', value: no }
-      ];
+      ].filter(p => p.value > 0 || yes + no === 0); // Show both if at least one has data
       const total = yes + no;
       return {
         type,
