@@ -10,8 +10,15 @@ import {
 	getSessionPhases
 } from '$lib/server/workshop';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, setHeaders }) => {
 	try {
+		// Prevent caching to ensure fresh data from Supabase
+		setHeaders({
+			'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+			'Pragma': 'no-cache',
+			'Expires': '0'
+		});
+
 		const session = await getSession(params.code);
 		if (!session) {
 			return json({ success: false, error: 'Session not found' }, { status: 404 });

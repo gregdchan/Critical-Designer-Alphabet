@@ -19,19 +19,9 @@
     if (!currentData || !currentData.series?.[0]?.points?.length) return;
     const points = currentData.series[0].points;
 
-    // Calculate max label width dynamically
-    const tempText = g.append('text').style('font-size', '11px').style('font-weight', '500');
-    const maxLabelWidth = Math.max(
-      ...points.map((d) => {
-        tempText.text(d.label);
-        return (tempText.node() as any)?.getComputedTextLength() || 0;
-      }),
-      80 // minimum
-    );
-    tempText.remove();
-
-    // Reserve space for labels and values
-    const labelWidth = Math.min(maxLabelWidth + 16, innerWidth * 0.3); // Max 30% of width
+    // Hide labels on mobile/small screens
+    const isMobile = innerWidth < 500;
+    const labelWidth = isMobile ? 0 : Math.min(120, innerWidth * 0.3); // No labels on mobile
     const valueWidth = 40; // Space for right value labels
     const barAreaWidth = Math.max(50, innerWidth - labelWidth - valueWidth);
 
@@ -57,46 +47,48 @@
 
     const rows = g.append('g').selectAll('g').data(points).join('g');
 
-    // Labels on the left - wrap long text onto multiple lines using tspans
-    rows
-      .append('text')
-      .attr('x', 4)
-      .attr('y', (d) => (y(d.label) ?? 0) + y.bandwidth() / 2)
-      .attr('text-anchor', 'start')
-      .attr('fill', 'hsl(var(--text-primary))')
-      .style('font-size', '11px')
-      .style('font-weight', '500')
-      .each(function(d: any) {
-        const text = select(this);
-        const availableWidth = labelWidth - 8;
-        const words = d.label.split(/\s+/);
-        let line = '';
-        let lines: string[] = [];
-        for (let i = 0; i < words.length; i++) {
-          const testLine = line ? line + ' ' + words[i] : words[i];
-          // Create a temp tspan to measure width
-          text.text('');
-          const tspan = text.append('tspan').text(testLine);
-          const tspanLength = (tspan.node() as any)?.getComputedTextLength() || 0;
-          tspan.remove();
-          if (tspanLength > availableWidth && line) {
-            lines.push(line);
-            line = words[i];
-          } else {
-            line = testLine;
+    // Labels on the left - only show on larger screens
+    if (!isMobile) {
+      rows
+        .append('text')
+        .attr('x', 4)
+        .attr('y', (d) => (y(d.label) ?? 0) + y.bandwidth() / 2)
+        .attr('text-anchor', 'start')
+        .attr('fill', 'hsl(var(--text-primary))')
+        .style('font-size', '11px')
+        .style('font-weight', '500')
+        .each(function(d: any) {
+          const text = select(this);
+          const availableWidth = labelWidth - 8;
+          const words = d.label.split(/\s+/);
+          let line = '';
+          let lines: string[] = [];
+          for (let i = 0; i < words.length; i++) {
+            const testLine = line ? line + ' ' + words[i] : words[i];
+            // Create a temp tspan to measure width
+            text.text('');
+            const tspan = text.append('tspan').text(testLine);
+            const tspanLength = (tspan.node() as any)?.getComputedTextLength() || 0;
+            tspan.remove();
+            if (tspanLength > availableWidth && line) {
+              lines.push(line);
+              line = words[i];
+            } else {
+              line = testLine;
+            }
           }
-        }
-        if (line) lines.push(line);
-        text.text('');
-        const lineHeight = 13; // px
-        lines.forEach((l, i) => {
-          text.append('tspan')
-            .attr('x', 4)
-            .attr('y', (y(d.label) ?? 0) + y.bandwidth() / 2 + (i - (lines.length-1)/2) * lineHeight)
-            .attr('dy', '0.35em')
-            .text(l);
+          if (line) lines.push(line);
+          text.text('');
+          const lineHeight = 13; // px
+          lines.forEach((l, i) => {
+            text.append('tspan')
+              .attr('x', 4)
+              .attr('y', (y(d.label) ?? 0) + y.bandwidth() / 2 + (i - (lines.length-1)/2) * lineHeight)
+              .attr('dy', '0.35em')
+              .text(l);
+          });
         });
-      });
+    }
 
     // Bars with gradient colors
     rows
@@ -181,7 +173,7 @@
     </div>
   {:else}
     <div class="rounded-xl border-2 border-slate-200 bg-slate-50 p-4 text-center">
-      <p class="text-slate-500 text-sm">Click on a bar to view details</p>
+      <p class="text-slate-500 text-sm">Click or tap on a bar to see the full label and details</p>
     </div>
   {/if}
 </div>

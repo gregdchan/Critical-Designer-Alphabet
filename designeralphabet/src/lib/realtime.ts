@@ -93,7 +93,10 @@ let isRealtimeEnabled = false;
 async function fetchBundle(code: string) {
 	try {
 		console.log(`[Realtime] Fetching bundle for session: ${code}`);
-		const res = await fetch(`/api/session/${code}`);
+		// Add timestamp to prevent caching
+		const res = await fetch(`/api/session/${code}?t=${Date.now()}`, {
+			cache: 'no-store'
+		});
 		const data = await res.json();
 		if (!data.success) {
 			console.warn('[Realtime] Bundle fetch failed:', data.error);
@@ -106,6 +109,10 @@ async function fetchBundle(code: string) {
 			responses: data.responses?.length || 0,
 			phases: data.phases?.length || 0
 		});
+		console.log('[Realtime] Questions dashboards:', data.questions?.map((q: any) => ({
+			text: q.text?.substring(0, 40),
+			recommended_dashboards: q.recommended_dashboards
+		})));
 		sessionDetails.set(data.session);
 		participants.set(data.participants ?? []);
 		questions.set(data.questions ?? []);

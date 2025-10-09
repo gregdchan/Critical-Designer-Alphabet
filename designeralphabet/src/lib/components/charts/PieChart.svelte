@@ -118,7 +118,7 @@
     </div>
   {:else}
     <div class="rounded-xl border-2 border-slate-200 bg-slate-50 p-4 text-center">
-      <p class="text-slate-500 text-sm">Click on a slice to view details</p>
+      <p class="text-slate-500 text-sm">Click or tap on a slice to see the full label and details</p>
     </div>
   {/if}
 </div>

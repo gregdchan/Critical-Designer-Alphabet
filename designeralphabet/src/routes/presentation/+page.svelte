@@ -858,9 +858,10 @@
 							{:else if boardId === 'barChart'}
 								{@const choiceQuestions = phaseQuestions.filter(q => {
 									const recommended = q.recommended_dashboards || [];
-									// Show in bar chart if: explicitly set to bar/barchart OR if it's a choice question without explicit dashboard preference
-									return (Array.isArray(recommended) && (recommended.some(d => ['bar', 'barchart', 'barChart'].includes(d)))) ||
+									const isBarChart = (Array.isArray(recommended) && (recommended.some(d => ['bar', 'barchart', 'barChart'].includes(d)))) ||
 										   (!recommended.length && ['singleChoice', 'multiSelect'].includes(q.response_type || ''));
+									console.log('[BarChart Filter]', q.text?.substring(0, 50), { recommended, isBarChart, responseType: q.response_type });
+									return isBarChart;
 								})}
 								{#if choiceQuestions.length > 0}
 									<div
@@ -902,8 +903,9 @@
 							{:else if boardId === 'pieChart'}
 								{@const choiceQuestions = phaseQuestions.filter(q => {
 									const recommended = q.recommended_dashboards || [];
-									// Show in pie chart if: explicitly set to pie/piechart
-									return Array.isArray(recommended) && recommended.some(d => ['pie', 'piechart', 'pieChart'].includes(d));
+									const isPieChart = Array.isArray(recommended) && recommended.some(d => ['pie', 'piechart', 'pieChart'].includes(d));
+									console.log('[PieChart Filter]', q.text?.substring(0, 50), { recommended, isPieChart, responseType: q.response_type });
+									return isPieChart;
 								})}
 								{#if choiceQuestions.length > 0}
 									<div
