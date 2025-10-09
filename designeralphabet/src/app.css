@@ -4,82 +4,115 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
-	color-scheme: light;
-	/* Orange-Teal Theme - Solar United Neighbors inspired */
-	/* Base palette */
-	--teal-dark: 184 95% 17%; /* #025259 - Deep teal */
-	--teal: 180 100% 22%; /* #007172 - Primary teal */
-	--orange: 32 88% 54%; /* #F29325 - Vibrant orange */
-	--orange-dark: 21 96% 43%; /* #D94F04 - Deep orange */
-	--cream: 10 50% 91%; /* #F4E2DE - Soft cream */
-	
-	/* Semantic color mapping */
-	--brand: var(--teal); /* Primary brand color */
-	--brand-soft: var(--teal-dark); /* Darker teal variant */
-	--accent-critical: var(--orange-dark); /* Alerts, errors, warnings */
-	--accent-warm: var(--orange); /* Call-to-action, highlights */
-	
-	/* Surface colors */
-	--surface: 10 40% 98%; /* Nearly white with warm tint */
-	--surface-elevated: 0 0% 100%; /* Pure white */
-	--surface-muted: 10 30% 95%; /* Warm light gray */
-	--surface-subtle: 180 20% 95%; /* Cool light gray with teal hint */
-	
-	/* Text colors */
-	--text-primary: 0 0% 10%; /* Near black */
-	--text-secondary: 0 0% 30%; /* Dark gray */
-	--text-muted: 0 0% 50%; /* Medium gray */
-	--text-on-teal: 0 0% 100%; /* White for teal backgrounds */
-	--text-on-orange: 0 0% 10%; /* Black for orange backgrounds */
-	
-	/* Border colors */
-	--border-subtle: 10 20% 88%; /* Light warm gray */
-	--border-strong: 180 30% 40%; /* Teal-gray */
-	--ring: var(--teal); /* Focus ring */
-	
-	/* Chart colors using palette */
-	--chart-1: #007172; /* Teal */
-	--chart-2: #F29325; /* Orange */
-	--chart-3: #025259; /* Teal dark */
-	--chart-4: #D94F04; /* Orange dark */
-	--chart-5: #F4E2DE; /* Cream */
-	--chart-6: #00a0a3; /* Light teal variant */
-	--chart-7: #ff9f1c; /* Light orange variant */
-	--chart-8: #013840; /* Very dark teal */
+  color-scheme: light;
+
+  /* Brand palette (HSL triplets, so we can use / <alpha>) */
+  --teal-dark: 184 95% 17%;
+  --teal:      180 100% 22%;
+  --teal-lite: 180 100% 35%;
+  --orange:    32  88% 54%;
+  --orange-dk: 21  96% 43%;
+  --cream:     10  50% 91%;
+
+  /* Semantic tokens */
+  --brand:        var(--teal);
+  --brand-soft:   var(--teal-dark);
+  --accent-warm:  var(--orange);
+  --accent-critical: var(--orange-dk);
+
+  /* Surfaces */
+  --surface:           10 40% 98%;
+  --surface-elevated:   0  0% 100%;
+  --surface-muted:     10 30% 95%;
+  --surface-subtle:   180 20% 95%;
+
+  /* Text (targets WCAG AA/AAA) */
+  --text-primary:   210 15% 12%;
+  --text-secondary: 210 10% 28%;
+  --text-muted:     210  8% 43%;
+  --text-on-teal:     0  0% 100%;
+  --text-on-orange:   0  0% 10%;
+
+  /* Borders / focus */
+  --border-subtle:  12 14% 85%;
+  --border-strong: 180 30% 40%;
+  --ring:          var(--teal);
+
+  /* Chart tokens */
+  --chart-1: #007172;
+  --chart-2: #F29325;
+  --chart-3: #025259;
+  --chart-4: #D94F04;
+  --chart-5: #F4E2DE;
+  --chart-6: #00a0a3;
+  --chart-7: #ff9f1c;
+  --chart-8: #013840;
+
+  /* Risk & Maturity */
+  --risk-low:      #22a06b;
+  --risk-medium:   #f6b042;
+  --risk-high:     #f7745e;
+  --risk-critical: #d63f5c;
+
+  --maturity-1: #94a3b8;
+  --maturity-2: #4c6ef5;
+  --maturity-3: #22a06b;
+  --maturity-4: #f6b042;
+  --maturity-5: #9b5de5;
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  --surface:          210 20% 12%;
+  --surface-elevated: 210 18% 16%;
+  --surface-muted:    210 16% 18%;
+  --surface-subtle:   210 16% 20%;
+
+  --text-primary:   0 0% 98%;
+  --text-secondary: 0 0% 85%;
+  --text-muted:     0 0% 70%;
+
+  --brand:      180 100% 35%;
+  --brand-soft: 184 95% 25%;
+
+  --border-subtle: 210 12% 28%;
+  --border-strong: 180 25% 70%;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border-subtle: 210 10% 65%;
+  }
+  *:focus-visible {
+    outline: 3px solid hsl(var(--brand));
+    outline-offset: 3px;
+  }
 }
 
 html {
 	scroll-behavior: smooth;
 }
 
-
 body {
-	@apply min-h-screen antialiased;
-	background: linear-gradient(135deg, 
-		hsl(var(--surface)) 0%, 
-		hsl(var(--cream)) 50%, 
-		hsl(var(--surface-subtle)) 100%
-	);
-	color: hsl(var(--text-primary));
-	font-family:
-		'Poppins',
-		system-ui,
-		-apple-system,
-		sans-serif;
+  @apply min-h-screen antialiased;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--surface)) 0%,
+    hsl(var(--cream)) 50%,
+    hsl(var(--surface-subtle)) 100%
+  );
+  color: hsl(var(--text-primary));
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
 }
-
 
 h1, h2, h3, h4, h5, h6 {
-	font-family: 'Orbitron', 'Poppins', sans-serif;
-	font-weight: 800;
-	letter-spacing: 0.01em;
-	color: hsl(var(--teal-dark));
-	text-shadow: none;
+  font-family: 'Orbitron', 'Poppins', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: hsl(var(--text-primary));
 }
-
-
 
 a:hover,
 a:focus-visible {
@@ -149,14 +182,20 @@ a:focus-visible {
 	color: hsl(var(--text-primary));
 }
 
-
 .chip {
-	background: hsl(var(--orange) / 0.15);
-	border: 2px solid hsl(var(--orange));
-	color: hsl(var(--orange-dark));
-	font-weight: 700;
-	letter-spacing: 0.04em;
-	text-shadow: 0 1px 2px hsl(var(--orange) / 0.1);
+  background: hsl(var(--accent-warm) / 0.15);
+  border: 2px solid hsl(var(--accent-warm));
+  color: hsl(var(--orange-dk));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 2px hsl(var(--accent-warm) / 0.1);
+}
+
+.chart-card {
+  background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
+  border: 2px solid hsl(var(--border-subtle));
+  box-shadow: 0 4px 16px 0 hsl(var(--brand-soft) / 0.12);
+  border-radius: 1.25rem;
 }
 
 

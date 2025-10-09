@@ -6,50 +6,59 @@ module.exports = {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
 		extend: {
-					colors: {
-						// Orange-Teal Theme
-						'teal-dark': '#025259',
-						'teal': '#007172',
-						'teal-light': '#00a0a3',
-						'orange': '#F29325',
-						'orange-dark': '#D94F04',
-						'cream': '#F4E2DE',
-						
-						// Semantic tokens
-						brand: 'hsl(var(--brand))',
-						'brand-soft': 'hsl(var(--brand-soft))',
-						surface: 'hsl(var(--surface))',
-						'surface-elevated': 'hsl(var(--surface-elevated))',
-						'surface-muted': 'hsl(var(--surface-muted))',
-						muted: 'hsl(var(--surface-muted))',
-						'critical-accent': 'hsl(var(--accent-critical))',
-						
-						// Legacy compat (mapped to new theme)
-						primary: '#007172',
-						secondary: '#F29325',
-						accent: '#D94F04',
-						success: '#007172',
-						warning: '#F29325',
-						error: '#D94F04',
-						
-						// Chart colors (orange-teal palette)
-						chart: {
-							teal: '#007172',
-							orange: '#F29325',
-							'teal-dark': '#025259',
-							'orange-dark': '#D94F04',
-							cream: '#F4E2DE',
-							'teal-light': '#00a0a3',
-							'orange-light': '#ff9f1c',
-							'teal-darker': '#013840',
-						},
-						
-						// Surface colors
-						darkBg: '#F4E2DE',
-						surfaceBase: '#ffffff',
-						card: '#F4E2DE',
-						midnight: '#025259',
-					},
+			colors: {
+				/* Brand & surfaces from CSS vars */
+				brand: 'hsl(var(--brand))',
+				'brand-soft': 'hsl(var(--brand-soft))',
+
+				surface: 'hsl(var(--surface))',
+				'surface-elevated': 'hsl(var(--surface-elevated))',
+				'surface-muted': 'hsl(var(--surface-muted))',
+
+				ink: 'hsl(var(--text-primary))',
+				'ink-2': 'hsl(var(--text-secondary))',
+				'ink-muted': 'hsl(var(--text-muted))',
+
+				line: 'hsl(var(--border-subtle))',
+				'line-strong': 'hsl(var(--border-strong))',
+				ring: 'hsl(var(--ring))',
+
+				'accent-warm': 'hsl(var(--accent-warm))',
+				'accent-critical': 'hsl(var(--accent-critical))',
+
+				chart: {
+					1: 'var(--chart-1)',
+					2: 'var(--chart-2)',
+					3: 'var(--chart-3)',
+					4: 'var(--chart-4)',
+					5: 'var(--chart-5)',
+					6: 'var(--chart-6)',
+					7: 'var(--chart-7)',
+					8: 'var(--chart-8)',
+				},
+
+				/* Legacy aliases to avoid breakage */
+				'teal-dark': '#025259',
+				teal: '#007172',
+				'teal-light': '#00a0a3',
+				orange: '#F29325',
+				'orange-dark': '#D94F04',
+				cream: '#F4E2DE',
+
+				'neon-cyan': 'hsl(var(--brand))',
+
+				primary: 'hsl(var(--brand))',
+				secondary: 'hsl(var(--accent-warm))',
+				accent: 'hsl(var(--accent-critical))',
+				success: 'hsl(var(--teal-lite))',
+				warning: 'hsl(var(--accent-warm))',
+				error: 'hsl(var(--accent-critical))',
+
+				darkBg: 'hsl(var(--surface-muted))',
+				surfaceBase: 'hsl(var(--surface-elevated))',
+				card: 'hsl(var(--surface-elevated))',
+				midnight: 'hsl(var(--brand-soft))',
+			},
 			fontFamily: {
 				sans: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
 				mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
