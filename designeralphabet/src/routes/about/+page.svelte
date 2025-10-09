@@ -170,51 +170,51 @@
 </svelte:head>
 
 <div class="space-y-12">
-	<div class="text-center space-y-4">
-		<h1 class="text-4xl font-bold text-slate-100">{heroTitle}</h1>
-		<p class="text-lg text-slate-400 max-w-3xl mx-auto">{heroSubtitle}</p>
-		{#if summaryParagraphs.length}
-			<div class="max-w-3xl mx-auto space-y-2 text-slate-300">
-				{#each summaryParagraphs as paragraph}
-					<p>{paragraph}</p>
-				{/each}
-			</div>
-		{:else if data.error}
-			<p class="text-sm text-amber-300">{data.error}</p>
-		{/if}
-	</div>
+   <div class="text-center space-y-4">
+	   <h1 class="text-4xl font-bold text-primary">{heroTitle}</h1>
+	   <p class="text-lg text-secondary max-w-3xl mx-auto">{heroSubtitle}</p>
+	   {#if summaryParagraphs.length}
+		   <div class="max-w-3xl mx-auto space-y-2 text-secondary">
+			   {#each summaryParagraphs as paragraph}
+				   <p>{paragraph}</p>
+			   {/each}
+		   </div>
+	   {:else if data.error}
+		   <p class="text-sm text-amber-300">{data.error}</p>
+	   {/if}
+   </div>
 
-	{#each sections as section, index}
-		<section
-			class={`bg-slate-800 rounded-lg border border-slate-600 p-8 ${section.styles?.border ?? ''}`}
-		>
-			<div class="flex items-start gap-4 mb-6">
-				<div
-					class={`flex h-12 w-12 items-center justify-center rounded-lg ${section.styles?.header ?? 'bg-blue-600/20 text-blue-300'}`}
-				>
-					<svelte:component this={section.icon ?? icons[index % icons.length]} class="h-6 w-6" />
-				</div>
-				<div>
-					<h2 class="text-2xl font-semibold text-slate-100 mb-2">{section.title}</h2>
-					{#if section.subtitle}
-						<p class="text-slate-400">{section.subtitle}</p>
-					{/if}
-				</div>
-			</div>
+   {#each sections as section, index}
+	   <section
+		   class={`panel p-8 ${section.styles?.border ?? ''}`}
+	   >
+		   <div class="flex items-start gap-4 mb-6">
+			   <div
+				   class={`flex h-12 w-12 items-center justify-center rounded-lg ${section.styles?.header ?? 'bg-neon-cyan/20 text-neon-cyan'}`}
+			   >
+				   <svelte:component this={section.icon ?? icons[index % icons.length]} class="h-6 w-6" />
+			   </div>
+			   <div>
+				   <h2 class="text-2xl font-semibold text-primary mb-2">{section.title}</h2>
+				   {#if section.subtitle}
+					   <p class="text-secondary">{section.subtitle}</p>
+				   {/if}
+			   </div>
+		   </div>
 
-			<div class="space-y-4 text-slate-300">
-				{#each section.body as paragraph}
-					<p>{paragraph}</p>
-				{/each}
+		   <div class="space-y-4 text-secondary">
+			   {#each section.body as paragraph}
+				   <p>{paragraph}</p>
+			   {/each}
 
-				{#if section.bullets?.length}
-					<ul class="list-disc list-inside space-y-2 ml-4 text-slate-300">
-						{#each section.bullets as bullet}
-							<li>{bullet}</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
-		</section>
-	{/each}
+			   {#if section.bullets?.length}
+				   <ul class="list-disc list-inside space-y-2 ml-4 text-secondary">
+					   {#each section.bullets as bullet}
+						   <li>{bullet}</li>
+					   {/each}
+				   </ul>
+			   {/if}
+		   </div>
+	   </section>
+   {/each}
 </div>
