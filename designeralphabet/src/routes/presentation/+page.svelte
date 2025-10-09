@@ -28,7 +28,7 @@
 	import ParticipationPulse from '$lib/charts/ParticipationPulse.svelte';
 	import InclusivityMeter from '$lib/charts/InclusivityMeter.svelte';
 	import RiskImpactMatrix from '$lib/charts/RiskImpactMatrix.svelte';
-	import { IconUsers, IconClock, IconAdjustments, IconSparkles, IconStar } from '@tabler/icons-svelte';
+	import { IconUsers, IconClock, IconSparkles, IconStar } from '@tabler/icons-svelte';
 	import type { ComponentType } from 'svelte';
 
 	export let data: { sessionCode: string };
@@ -37,7 +37,6 @@
 	let joinCode = sessionCode;
 	let activeCode = '';
 	let ready = false;
-	let userCustomizedBoards = false;
 	let availableSessions: any[] = [];
 	let loadingSessions = false;
 
@@ -283,19 +282,16 @@
 		return BOARD_SEQUENCE.filter((id) => unique.includes(id));
 	}
 
-	function arraysEqual(a: BoardId[], b: BoardId[]): boolean {
-		return a.length === b.length && a.every((value, index) => value === b[index]);
-	}
-
 	// Dynamically determine available dashboards based on questions in active phase
-	$: recommendedBoards = (() => {
+	// This is the ONLY source of truth for what charts to display
+	$: activeBoards = (() => {
 		if (!activePhase) return normalizeBoards([]);
 
 		const phaseQuestions = questionsList.filter(
 			(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
 		);
 
-		const dashboards: string[] = ['phase'];
+		const dashboards: string[] = [];
 
 		// Collect dashboards ONLY from manually selected dashboards in Sanity
 		phaseQuestions.forEach((q) => {
@@ -358,49 +354,9 @@
 		
 		return true; // Default to showing if unknown type
 	}
-	
-	// Filter fallback boards to only show those with valid data
-	$: fallbackBoards = (() => {
-		if (!activePhase) return normalizeBoards(['phase']); // Only show phase when no active phase
-		
-		const phaseQuestions = questionsList.filter(
-			(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
-		);
-		
-		// Filter default boards to only include those with valid data
-		const validBoards = DEFAULT_ACTIVE_BOARDS.filter((boardId) => {
-			// Always show phase, timeline, and chat
-			if (['phase', 'timeline', 'chat'].includes(boardId)) return true;
-			
-			// For data-dependent boards, check if ANY question validates this board
-			return phaseQuestions.some(q => isDashboardValid(boardId, q, responsesList, phaseQuestions));
-		});
-		
-		return normalizeBoards(validBoards);
-	})();
-
-	$: if (!userCustomizedBoards) {
-		const combined = normalizeBoards([...recommendedBoards, ...fallbackBoards]);
-		if (!arraysEqual(combined, activeBoards)) {
-			activeBoards = combined;
-		}
-	}
 
 	$: mainBoards = activeBoards.filter((id) => BOARD_DEFINITIONS[id].layout === 'main');
 	$: sideBoards = activeBoards.filter((id) => BOARD_DEFINITIONS[id].layout === 'side');
-
-	function toggleBoard(boardId: BoardId) {
-		userCustomizedBoards = true;
-		if (activeBoards.includes(boardId)) {
-			activeBoards = activeBoards.filter((id) => id !== boardId);
-		} else {
-			activeBoards = normalizeBoards([...activeBoards, boardId]);
-		}
-	}
-
-	function boardIsRecommended(boardId: BoardId) {
-		return recommendedBoards.includes(boardId);
-	}
 
 	function formatTimestamp(value: string | null) {
 		if (!value) return '';
@@ -411,11 +367,8 @@
 
 	async function loadSession(code: string) {
 		if (!code) return;
-		// await stopRealtimeSession();
-		// await startRealtimeSession(code);
 		activeCode = code;
-		userCustomizedBoards = false;
-		activeBoards = [];
+		// Charts will automatically update via reactive statements
 	}
 
 	async function fetchAvailableSessions() {
@@ -460,8 +413,8 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
-	<header class="border-b border-cyan-400/20 bg-slate-950/80 px-10 py-6 backdrop-blur">
+<div class="presentation-shell min-h-screen text-slate-800">
+	<header class="presentation-header border-b px-10 py-6 backdrop-blur">
 		<div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 			<div class="space-y-2">
 				<p class="text-xs uppercase tracking-[0.4em] text-cyan-300">Session Broadcast</p>
@@ -523,40 +476,9 @@
 				>
 			</div>
 		</div>
-
-		<div class="mt-6 rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-4">
-			<div class="flex flex-wrap items-center justify-between gap-4">
-				<div class="flex items-center gap-2 text-sm font-semibold text-cyan-200 uppercase tracking-[0.25em]">
-					<IconAdjustments class="h-4 w-4" />
-					Live Layout Controls
-				</div>
-				<div class="flex flex-wrap gap-2">
-					{#each BOARD_SEQUENCE as boardId}
-						{#if BOARD_DEFINITIONS[boardId]}
-							<button
-								type="button"
-								class={`rounded-full border px-3 py-1 text-xs transition ${
-									activeBoards.includes(boardId)
-										? 'border-cyan-300 bg-cyan-500/20 text-cyan-100'
-										: 'border-slate-700 text-slate-400 hover:border-cyan-400/40 hover:text-cyan-200'
-								} ${boardIsRecommended(boardId) ? 'shadow-[0_0_20px_rgba(45,212,191,0.25)]' : ''}`}
-								on:click={() => toggleBoard(boardId)}
-							>
-								{BOARD_DEFINITIONS[boardId].label}
-								{#if boardIsRecommended(boardId)}
-									<span class="ml-2 rounded bg-cyan-400/20 px-1.5 py-0.5 text-[10px] text-cyan-100"
-										>phase</span
-									>
-								{/if}
-							</button>
-						{/if}
-					{/each}
-				</div>
-			</div>
-		</div>
 	</header>
 
-	{#if !activeCode && ready}
+{#if !activeCode && ready}
 		<div class="flex min-h-[60vh] items-center justify-center px-6">
 			<div class="max-w-4xl w-full space-y-6">
 				<div class="text-center space-y-4">
@@ -576,7 +498,7 @@
 							<button
 								type="button"
 								on:click={() => selectSession(session.code)}
-								class="group rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 text-left transition hover:border-cyan-400/60 hover:bg-slate-900"
+								class="group presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 text-left transition hover:border-cyan-400/60 hover:bg-slate-900"
 							>
 								<div class="flex items-center justify-between mb-3">
 									<span class="font-mono text-lg font-semibold text-cyan-300">{session.code}</span>
@@ -600,7 +522,7 @@
 						{/each}
 					</div>
 				{:else}
-					<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-8 text-center">
+					<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-8 text-center">
 						<p class="text-slate-400">No active sessions found. Enter a code manually below.</p>
 					</div>
 				{/if}
@@ -630,8 +552,13 @@
 	{:else}
 		<main class="mx-auto px-4 md:px-6 py-8" style="max-width: 95vw;">
 			{#if activeBoards.length === 0}
-				<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-10 text-center text-sm text-slate-300">
-					Choose at least one board from the controls above to start the broadcast layout.
+				<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-10 text-center">
+					<div class="space-y-3">
+						<h3 class="text-lg font-semibold text-slate-200">Waiting for content...</h3>
+						<p class="text-sm text-slate-400">
+							Charts will automatically appear when questions have dashboards configured and responses arrive.
+						</p>
+					</div>
 				</div>
 			{:else}
 				<div class="grid gap-6 lg:grid-cols-[2.5fr_1fr]">
@@ -639,7 +566,7 @@
 						{#each mainBoards as boardId}
 							{#if boardId === 'responses'}
 								<div
-									class="rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(6,182,212,0.2)]"
+									class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(6,182,212,0.2)]"
 								>
 									<header class="mb-4 flex items-center justify-between">
 										<div>
@@ -660,7 +587,7 @@
 								</div>
 							{:else if boardId === 'heatmap'}
 								<div
-									class="rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
+									class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
 								>
 									<header class="mb-4">
 										<h2 class="text-xl font-semibold text-slate-100">
@@ -676,7 +603,7 @@
 								</div>
 							{:else if boardId === 'roadmap'}
 								<div
-									class="rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+									class="presentation-panel rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
 								>
 									<header class="mb-4">
 										<h2 class="text-xl font-semibold text-slate-100">
@@ -694,7 +621,7 @@
 								{@const choiceQuestions = phaseQuestions.filter(q => ['singleChoice', 'multiSelect'].includes(q.response_type || ''))}
 								{#if choiceQuestions.length > 0}
 									<div
-										class="rounded-2xl border border-blue-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(59,130,246,0.2)]"
+										class="presentation-panel rounded-2xl border border-blue-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(59,130,246,0.2)]"
 									>
 										<header class="mb-4">
 											<h2 class="text-xl font-semibold text-slate-100">
@@ -721,7 +648,7 @@
 										</div>
 									</div>
 								{:else}
-									<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
 										No choice-based questions in this phase.
 									</div>
 								{/if}
@@ -729,7 +656,7 @@
 								{@const choiceQuestions = phaseQuestions.filter(q => ['singleChoice', 'multiSelect'].includes(q.response_type || ''))}
 								{#if choiceQuestions.length > 0}
 									<div
-										class="rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
+										class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
 									>
 										<header class="mb-4">
 											<h2 class="text-xl font-semibold text-slate-100">
@@ -757,7 +684,7 @@
 										</div>
 									</div>
 								{:else}
-									<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
 										No choice-based questions in this phase.
 									</div>
 								{/if}
@@ -765,7 +692,7 @@
 								{@const scaleQuestions = phaseQuestions.filter(q => q.response_type === 'scale')}
 								{#if scaleQuestions.length > 0}
 									<div
-										class="rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+										class="presentation-panel rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
 									>
 										<header class="mb-4">
 											<h2 class="text-xl font-semibold text-slate-100">
@@ -792,7 +719,7 @@
 										</div>
 									</div>
 								{:else}
-									<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
 										No scale questions in this phase.
 									</div>
 								{/if}
@@ -801,7 +728,7 @@
 										{@const component = boardChartComponents[boardId]}
 										{@const dimensions =
 											boardChartDimensions[boardId] ?? { width: 1200, height: 600 }}
-										<div class="rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
+										<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
 											<header class="mb-4">
 												<h2 class="text-xl font-semibold text-slate-100">
 													{BOARD_DEFINITIONS[boardId].label}
@@ -826,7 +753,7 @@
 											{/if}
 										</div>
 									{:else}
-										<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
+										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
 											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
 										</div>
 									{/if}
@@ -836,7 +763,7 @@
 										{@const component = boardChartComponents[boardId]}
 										{@const dimensions =
 											boardChartDimensions[boardId] ?? { width: 420, height: 420 }}
-										<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
 											<header class="mb-4">
 												<h2 class="text-xl font-semibold text-slate-100">
 													{BOARD_DEFINITIONS[boardId].label}
@@ -861,7 +788,7 @@
 											{/if}
 										</div>
 									{:else}
-										<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
+										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
 											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
 										</div>
 								{/if}
@@ -870,7 +797,7 @@
 					</section>
 
 					<aside class="space-y-8">
-						<div class="rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
+						<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
 							<h3 class="text-lg font-semibold text-white">Session Dashboard</h3>
 							<p class="text-sm text-slate-400">
 								View detailed analytics and controls for this session.
@@ -888,7 +815,7 @@
 
 						{#each sideBoards as boardId}
 							{#if boardId === 'phase'}
-								<div class="rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 space-y-4">
+								<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 space-y-4">
 									<header class="flex items-center justify-between">
 										<h3 class="text-lg font-semibold text-white">
 											{BOARD_DEFINITIONS[boardId].label}
@@ -971,7 +898,7 @@
 									{/if}
 								</div>
 							{:else if boardId === 'leaderboard'}
-								<div class="rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
+								<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
 									<header class="mb-4 flex items-center justify-between">
 										<h3 class="text-lg font-semibold text-white">
 											{BOARD_DEFINITIONS[boardId].label}
@@ -997,7 +924,7 @@
 									{/if}
 								</div>
 							{:else if boardId === 'timeline'}
-								<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+								<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
 									<h3 class="text-lg font-semibold text-white">
 										{BOARD_DEFINITIONS[boardId].label}
 									</h3>
@@ -1024,7 +951,7 @@
 									</div>
 								</div>
 							{:else if boardId === 'chat'}
-								<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+								<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
 									<h3 class="text-lg font-semibold text-white">
 										{BOARD_DEFINITIONS[boardId].label}
 									</h3>
@@ -1052,7 +979,7 @@
 										{@const component = boardChartComponents[boardId]}
 										{@const dimensions =
 											boardChartDimensions[boardId] ?? { width: 360, height: 360 }}
-										<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
 											<header class="mb-4">
 												<h3 class="text-lg font-semibold text-white">
 													{BOARD_DEFINITIONS[boardId].label}
@@ -1077,7 +1004,7 @@
 											{/if}
 										</div>
 									{:else}
-										<div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
+										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
 											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
 										</div>
 									{/if}
@@ -1088,4 +1015,78 @@
 			{/if}
 		</main>
 	{/if}
-</div>
+	</div>
+
+<style>
+	.presentation-shell {
+		background: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-elevated)) 50%, #ffffff 100%);
+		color: hsl(var(--text-secondary));
+	}
+
+	.presentation-header {
+		background: hsl(var(--surface-elevated) / 0.92);
+		border-color: hsl(var(--border-subtle));
+		box-shadow: 0 12px 45px rgba(15, 23, 42, 0.08);
+		color: inherit;
+	}
+
+	.presentation-header h1,
+	.presentation-header p,
+	.presentation-header span {
+		color: hsl(var(--text-primary));
+	}
+
+	.presentation-shell :global(.presentation-panel) {
+		background: hsl(var(--surface-elevated));
+		border-color: hsl(var(--border-subtle));
+		box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
+		color: hsl(var(--text-secondary));
+	}
+
+	.presentation-shell :global(.presentation-panel h2),
+	.presentation-shell :global(.presentation-panel h3),
+	.presentation-shell :global(.presentation-panel h4) {
+		color: hsl(var(--text-primary));
+	}
+
+	.presentation-shell :global(.presentation-panel p),
+	.presentation-shell :global(.presentation-panel span),
+	.presentation-shell :global(.presentation-panel li) {
+		color: hsl(var(--text-secondary));
+	}
+
+	.presentation-shell input,
+	.presentation-shell textarea,
+	.presentation-shell select {
+		background: hsl(var(--surface-elevated));
+		border: 1px solid hsl(var(--border-subtle));
+		box-shadow: 0 12px 32px rgba(15, 23, 42, 0.07);
+		color: hsl(var(--text-primary));
+	}
+
+	.presentation-shell input::placeholder,
+	.presentation-shell textarea::placeholder {
+		color: hsl(var(--text-muted));
+	}
+
+	.presentation-shell :global(.bg-slate-900\/80),
+	.presentation-shell :global(.bg-slate-900\/70),
+	.presentation-shell :global(.bg-slate-900\/60),
+	.presentation-shell :global(.bg-slate-900\/50),
+	.presentation-shell :global(.bg-slate-900\/40) {
+		background: hsl(var(--surface-elevated) / 0.95) !important;
+		color: hsl(var(--text-secondary)) !important;
+	}
+
+	.presentation-shell :global(.bg-slate-800\/60),
+	.presentation-shell :global(.bg-slate-800\/50) {
+		background: hsl(var(--surface-muted) / 0.9) !important;
+		color: hsl(var(--text-secondary)) !important;
+	}
+
+	.presentation-shell :global(.border-slate-800),
+	.presentation-shell :global(.border-slate-700),
+	.presentation-shell :global(.border-slate-600) {
+		border-color: hsl(var(--border-subtle)) !important;
+	}
+</style>

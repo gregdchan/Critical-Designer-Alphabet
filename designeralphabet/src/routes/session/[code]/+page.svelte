@@ -770,6 +770,7 @@
 	}
 </script>
 
+<div class="session-shell">
 {#if sessionLoading}
 	<div
 		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white flex items-center justify-center"
@@ -2019,7 +2020,65 @@
 		</div>
 	</div>
 {/if}
+</div>
 
+<style>
+	.session-shell {
+		background: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-elevated)) 60%, #ffffff 100%);
+		color: hsl(var(--text-secondary));
+	}
+
+	.session-shell :global(.bg-slate-900\/80),
+	.session-shell :global(.bg-slate-900\/70),
+	.session-shell :global(.bg-slate-900\/60),
+	.session-shell :global(.bg-slate-900\/50),
+	.session-shell :global(.bg-slate-900\/40),
+	.session-shell :global(.bg-slate-900\/30) {
+		background: hsl(var(--surface-elevated) / 0.95) !important;
+		color: hsl(var(--text-secondary)) !important;
+		box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
+	}
+
+	.session-shell :global(.bg-slate-800\/60),
+	.session-shell :global(.bg-slate-800\/50),
+	.session-shell :global(.bg-slate-800\/40),
+	.session-shell :global(.bg-slate-800\/30),
+	.session-shell :global(.bg-slate-700) {
+		background: hsl(var(--surface-elevated)) !important;
+		color: hsl(var(--text-secondary)) !important;
+	}
+
+	.session-shell :global(.border-slate-800),
+	.session-shell :global(.border-slate-700),
+	.session-shell :global(.border-slate-600) {
+		border-color: hsl(var(--border-subtle)) !important;
+	}
+
+	.session-shell input,
+	.session-shell textarea,
+	.session-shell select {
+		background: hsl(var(--surface-elevated));
+		border: 1px solid hsl(var(--border-subtle));
+		color: hsl(var(--text-primary));
+		box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+	}
+
+	.session-shell input::placeholder,
+	.session-shell textarea::placeholder {
+		color: hsl(var(--text-muted));
+	}
+
+	.session-shell :global(.text-slate-300),
+	.session-shell :global(.text-slate-400),
+	.session-shell :global(.text-slate-500) {
+		color: hsl(var(--text-secondary)) !important;
+	}
+
+	.session-shell :global(.text-white),
+	.session-shell :global(.text-slate-100) {
+		color: hsl(var(--text-primary)) !important;
+	}
+</style>
 {#if responseModalOpen}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur">
 		<div class="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900/90 p-6">

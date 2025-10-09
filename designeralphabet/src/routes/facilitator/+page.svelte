@@ -454,7 +454,7 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white p-6">
+<div class="facilitator-shell min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white p-6">
 	{#if currentView === 'launching'}
 		<div class="flex items-center justify-center min-h-screen">
 			<div class="text-center">
@@ -1162,3 +1162,53 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.facilitator-shell {
+		color: hsl(var(--text-secondary));
+	}
+
+	.facilitator-shell :global(.bg-slate-800\/50),
+	.facilitator-shell :global(.bg-slate-800\/40),
+	.facilitator-shell :global(.bg-slate-800\/30),
+	.facilitator-shell :global(.bg-slate-900\/70),
+	.facilitator-shell :global(.bg-slate-900\/60),
+	.facilitator-shell :global(.bg-slate-900\/50) {
+		background: hsl(var(--surface-elevated) / 0.95) !important;
+		color: hsl(var(--text-secondary)) !important;
+		box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
+		border-color: hsl(var(--border-subtle)) !important;
+	}
+
+	.facilitator-shell :global(.bg-slate-700),
+	.facilitator-shell :global(.bg-slate-700\/80),
+	.facilitator-shell :global(.bg-slate-700\/60) {
+		background: hsl(var(--surface-elevated)) !important;
+		color: hsl(var(--text-primary)) !important;
+	}
+
+	.facilitator-shell :global(.border-slate-800),
+	.facilitator-shell :global(.border-slate-700),
+	.facilitator-shell :global(.border-slate-600) {
+		border-color: hsl(var(--border-subtle)) !important;
+	}
+
+	.facilitator-shell input,
+	.facilitator-shell textarea,
+	.facilitator-shell select {
+		background: hsl(var(--surface-elevated));
+		border: 1px solid hsl(var(--border-subtle));
+		color: hsl(var(--text-primary));
+		box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+	}
+
+	.facilitator-shell input::placeholder,
+	.facilitator-shell textarea::placeholder {
+		color: hsl(var(--text-muted));
+	}
+
+	.facilitator-shell :global(.text-slate-300),
+	.facilitator-shell :global(.text-slate-400) {
+		color: hsl(var(--text-secondary)) !important;
+	}
+</style>
