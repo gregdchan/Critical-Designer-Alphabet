@@ -712,17 +712,17 @@
 					</div>
 				</div>
 			{:else}
-				<div class="grid gap-6 lg:grid-cols-[2.5fr_1fr]">
-					<section class="space-y-8">
-						<!-- Phase-based charts for selected phase -->
-						{#if selectedPhaseKey && browser}
-							<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
-								<PhaseCharts phaseKey={selectedPhaseKey} width={1200} height={520} />
-							</div>
-						{/if}
+				<!-- Single column layout for better visibility -->
+				<div class="space-y-6">
+					<!-- Phase-based charts for selected phase -->
+					{#if selectedPhaseKey && browser}
+						<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
+							<PhaseCharts phaseKey={selectedPhaseKey} width={1400} height={600} />
+						</div>
+					{/if}
 
-						<!-- Legacy board types removed - using PhaseCharts instead -->
-						{#each mainBoards as boardId}
+					<!-- Legacy board types removed - using PhaseCharts instead -->
+					{#each mainBoards as boardId}
 							{#if boardId === 'heatmap'}
 								<div
 									class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
@@ -735,8 +735,8 @@
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
-									<div class="w-full h-[560px] overflow-hidden">
-										<HeatmapChart responses={responsesForViz} width={1200} height={560} />
+									<div class="w-full h-[600px] overflow-hidden">
+										<HeatmapChart responses={responsesForViz} width={1400} height={600} />
 									</div>
 								</div>
 							{:else if boardId === 'roadmap'}
@@ -751,8 +751,8 @@
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
-									<div class="w-full h-[580px] overflow-hidden">
-										<RoadmapChart responses={responsesForViz} width={1200} height={580} />
+									<div class="w-full h-[600px] overflow-hidden">
+										<RoadmapChart responses={responsesForViz} width={1400} height={600} />
 									</div>
 								</div>
 							{:else if boardId === 'barChart'}
@@ -778,8 +778,8 @@
 													<RealtimeBarChart
 														roomCode={activeCode}
 														questionId={question.id}
-														width={1200}
-														height={Math.max(200, (question.options?.length || 3) * 60)}
+														width={1400}
+														height={Math.max(250, (question.options?.length || 3) * 70)}
 													/>
 												</div>
 											{/each}
@@ -804,7 +804,7 @@
 												{BOARD_DEFINITIONS[boardId].description}
 											</p>
 										</header>
-										<div class="space-y-8">
+										<div class="space-y-6">
 											{#each choiceQuestions as question}
 												<div class="space-y-4">
 													<div class="flex items-center justify-between">
@@ -813,8 +813,8 @@
 													<RealtimePieChart
 														roomCode={activeCode}
 														questionId={question.id}
-														width={1000}
-														height={400}
+														width={1200}
+														height={500}
 														showLegend={true}
 													/>
 												</div>
@@ -840,7 +840,7 @@
 												{BOARD_DEFINITIONS[boardId].description}
 											</p>
 										</header>
-										<div class="space-y-8">
+										<div class="space-y-6">
 											{#each scaleQuestions as question}
 												<div class="space-y-4">
 													<div class="flex items-center justify-between">
@@ -849,8 +849,8 @@
 													<RealtimeLineChart
 														roomCode={activeCode}
 														questionId={question.id}
-														width={1200}
-														height={400}
+														width={1400}
+														height={450}
 													/>
 												</div>
 											{/each}
@@ -865,7 +865,7 @@
 									{#if activeCode}
 										{@const component = boardChartComponents[boardId]}
 										{@const dimensions =
-											boardChartDimensions[boardId] ?? { width: 1200, height: 600 }}
+											boardChartDimensions[boardId] ?? { width: 1400, height: 700 }}
 										<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
 											<header class="mb-4">
 												<h2 class="text-xl font-semibold text-slate-100">
@@ -931,27 +931,10 @@
 										</div>
 								{/if}
 							{/if}
-						{/each}
-					</section>
+					{/each}
 
-					<aside class="space-y-8">
-						<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
-							<h3 class="text-lg font-semibold text-white">Session Dashboard</h3>
-							<p class="text-sm text-ink-muted">
-								View detailed analytics and controls for this session.
-							</p>
-							<div class="mt-6 flex justify-center">
-								<a
-									href="/dashboard"
-									class="w-full rounded-lg bg-brand px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand"
-								>
-									Go to Dashboard
-								</a>
-							</div>
-							<p class="mt-3 text-center text-sm font-semibold text-cyan-200">Code: {activeCode}</p>
-						</div>
-
-						{#each sideBoards as boardId}
+					<!-- Engagement boards (previously in sidebar) -->
+					{#each sideBoards as boardId}
 							{#if boardId === 'phase'}
 								<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 space-y-4">
 									<header class="flex items-center justify-between">
@@ -1147,8 +1130,8 @@
 										</div>
 									{/if}
 								{/if}
-							{/each}
-						</aside>
+							{/if}
+						{/each}
 				</div>
 			{/if}
 		</main>
