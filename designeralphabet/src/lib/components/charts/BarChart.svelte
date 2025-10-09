@@ -87,11 +87,14 @@
 </script>
 
 <ChartFrame {title} {ariaLabel}>
-  {#key data}
-    <g slot="default" let:innerWidth let:innerHeight bind:this={rootEl}>
-      {@html (render(rootEl, innerWidth, innerHeight), '')}
-    </g>
-  {/key}
-  <div slot="tooltip" bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
+  {#snippet children({ innerWidth, innerHeight })}
+    {#key data}
+      <g bind:this={rootEl}>
+        {@html (render(rootEl, innerWidth, innerHeight), '')}
+      </g>
+    {/key}
+  {/snippet}
+  {#snippet tooltip()}
+    <div bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
+  {/snippet}
 </ChartFrame>
-
