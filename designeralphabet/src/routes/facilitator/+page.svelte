@@ -619,6 +619,7 @@
 						<p class="text-secondary text-center py-8">
 							No templates found. Add planning templates in Sanity Studio.
 						</p>
+					{:else}
 						<div class="space-y-4">
 							{#each templates as template}
 								<button

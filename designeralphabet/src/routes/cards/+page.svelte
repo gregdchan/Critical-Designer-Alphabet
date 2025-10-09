@@ -19,64 +19,20 @@
 	const MIN_RANDOM = 3;
 	const CATEGORIES = ['theory', 'practice', 'lens', 'mindset', 'method'];
 
-	type VariantName = 'cyan' | 'pink' | 'lime' | 'purple';
+	type CategoryType = 'theory' | 'practice' | 'lens' | 'mindset' | 'method';
+	type VariantName = 'cyan' | 'pink' | 'lime' | 'purple' | 'orange';
 
-	const CATEGORY_VARIANTS: Record<string, VariantName> = {
+	const CATEGORY_VARIANTS: Record<CategoryType, VariantName> = {
 		theory: 'purple',
 		practice: 'cyan',
 		lens: 'pink',
 		mindset: 'lime',
-		method: 'cyan'
+		method: 'orange'
 	};
 
-	const NEON_VARIANTS = {
-		cyan: {
-			border: 'border-neon-cyan/60',
-			glow: 'shadow-neon-cyan',
-			accent: 'text-neon-cyan',
-			chip: 'border-neon-cyan/40 bg-neon-cyan/20 text-white',
-			cardBg: 'bg-gradient-to-br from-neon-cyan/90 to-neon-cyan/70',
-			textPrimary: 'text-slate-900',
-			textSecondary: 'text-slate-800'
-		},
-		pink: {
-			border: 'border-neon-pink/60',
-			glow: 'shadow-neon-pink',
-			accent: 'text-neon-pink',
-			chip: 'border-neon-pink/40 bg-neon-pink/20 text-white',
-			cardBg: 'bg-gradient-to-br from-neon-pink/90 to-neon-pink/70',
-			textPrimary: 'text-slate-900',
-			textSecondary: 'text-slate-800'
-		},
-		lime: {
-			border: 'border-neon-lime/60',
-			glow: 'shadow-neon-lime',
-			accent: 'text-neon-lime',
-			chip: 'border-neon-lime/40 bg-neon-lime/20 text-slate-900',
-			cardBg: 'bg-gradient-to-br from-neon-lime/90 to-neon-lime/70',
-			textPrimary: 'text-slate-900',
-			textSecondary: 'text-slate-800'
-		},
-		purple: {
-			border: 'border-retro-purple/60',
-			glow: 'shadow-neon-pink',
-			accent: 'text-retro-purple',
-			chip: 'border-retro-purple/40 bg-retro-purple/20 text-white',
-			cardBg: 'bg-gradient-to-br from-retro-purple/90 to-retro-purple/70',
-			textPrimary: 'text-white',
-			textSecondary: 'text-white/90'
-		}
-	} as const;
-
-	type VariantAttr = keyof (typeof NEON_VARIANTS)[VariantName];
-
-	function getVariant(card: Card): VariantName {
-		const neonKey = card.category ? CATEGORY_VARIANTS[card.category] : undefined;
-		return neonKey ?? 'cyan';
-	}
-
-	function variantClass(card: Card, key: VariantAttr) {
-		return NEON_VARIANTS[getVariant(card)][key];
+	function getCardClass(card: Card): string {
+		const variant = card.category ? CATEGORY_VARIANTS[card.category as CategoryType] : 'cyan';
+		return `card-${variant}`;
 	}
 
 	let cards: Card[] = [];
@@ -367,67 +323,51 @@
 			{#each filteredCards as card, index (card._id)}
 				<div>
 					<article
-						class={`group flex h-full flex-col gap-4 rounded-[2rem] border ${variantClass(card, 'border')} bg-black/60 p-6 shadow-[0_0_25px_rgba(255,255,255,0.05)] transition hover:-translate-y-1 ${variantClass(card, 'glow')} ${
-							selectedCards.some((entry) => entry._id === card._id)
-								? 'ring-2 ring-neonCyan/80 shadow-neon-cyan'
-								: 'hover:shadow-[0_0_40px_rgba(0,255,247,0.12)]'
+						class={`card ${getCardClass(card)} flex flex-col gap-4 ${
+							selectedCards.some((entry) => entry._id === card._id) ? 'selected' : ''
 						}`}
 					>
 						<div class="flex items-start gap-4">
-							<span
-								class="flex h-12 w-12 items-center justify-center rounded-xl border border-white/15 bg-black/40 font-retro text-xs uppercase tracking-[0.3em] text-white shadow-[0_0_18px_rgba(255,255,255,0.08)]"
-								style={`box-shadow: 0 0 20px ${card.styleMeta?.neonColor ?? 'rgba(0,255,247,0.25)'} inset;`}
-							>
+							<span class="card-icon-bg font-retro text-sm font-bold uppercase tracking-[0.3em]">
 								{card.letter ?? '?'}
 							</span>
 							<div class="flex-1 space-y-2">
 								<div class="flex items-center gap-3">
-									<span class="font-techno text-sm uppercase tracking-[0.2em] text-white"
-										>{card.title}</span
-									>
+									<span class="card-title">{card.title}</span>
 									{#if card.category}
-										<span
-											class={`rounded-full border px-3 py-1 text-[0.6rem] uppercase tracking-[0.3em] ${variantClass(card, 'chip')}`}
-										>
+										<span class="card-badge rounded-full px-3 py-1 text-[0.6rem] uppercase tracking-[0.3em]">
 											{card.category}
 										</span>
 									{/if}
 								</div>
-								<p class="text-[0.6rem] uppercase tracking-[0.35em] text-white/75">{card.cardID}</p>
+								<p class="card-id card-text-secondary">{card.cardID}</p>
 							</div>
 							<button
-								class="rounded-full border border-white/15 bg-black/50 p-2 text-white/85 transition hover:border-neonCyan/60 hover:text-neonCyan"
+								class="card-action-btn card-text-primary"
 								type="button"
 								aria-label="View details"
 								on:click={() => openDetails(card)}
 							>
-								<ArrowRight class="h-4 w-4" />
+								<ArrowRight class="h-5 w-5" />
 							</button>
 						</div>
 						{#if card.description}
-							<p class="line-clamp-3 text-sm text-white/85">{card.description}</p>
+							<p class="card-description card-text-primary">{card.description}</p>
 						{/if}
-						<div
-							class="flex flex-wrap gap-2 text-[0.6rem] uppercase tracking-[0.25em] text-white/80"
-						>
+						<div class="flex flex-wrap gap-2">
 							{#if card.tags?.length}
 								{#each card.tags.slice(0, 4) as tag}
-									<span class="rounded-full border border-white/15 bg-white/5 px-3 py-1">{tag}</span
-									>
+									<span class="card-tag card-text-secondary">{tag}</span>
 								{/each}
 								{#if card.tags.length > 4}
-									<span class="rounded-full border border-white/15 bg-white/5 px-3 py-1"
-										>+{card.tags.length - 4}</span
-									>
+									<span class="card-tag card-text-secondary">+{card.tags.length - 4}</span>
 								{/if}
 							{/if}
 						</div>
 						<div class="mt-auto space-y-2">
 							<button
-								class={`w-full rounded-full border px-4 py-2 text-xs uppercase tracking-[0.3em] transition ${
-									selectedCards.some((entry) => entry._id === card._id)
-										? 'border-neonCyan/60 bg-neonCyan/25 text-neonCyan shadow-neon-cyan'
-										: 'border-white/15 bg-black/40 text-white/85 hover:border-neonCyan/40 hover:text-neonCyan'
+								class={`card-select-btn card-text-primary ${
+									selectedCards.some((entry) => entry._id === card._id) ? 'selected' : ''
 								}`}
 								type="button"
 								on:click={() => toggleCard(card)}
@@ -439,7 +379,7 @@
 				</div>
 			{/each}
 		</div>
-	{/if}
+	{:else}
 
 	{#if statusMessage}
 		<p class="text-[0.65rem] uppercase tracking-[0.3em] text-white/80">{statusMessage}</p>
