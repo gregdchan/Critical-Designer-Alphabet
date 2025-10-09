@@ -120,52 +120,22 @@ async function handleWebhook(payload: any) {
 			: (question.recommended_dashboards || [])
 	};
 
-	// Check if question already exists in Supabase
-	const { data: existing } = await supabaseAdmin
-		.from('questions')
-		.select('id')
-		.eq('room_code', sessionCode)
-		.eq('text', questionData.text)
-		.maybeSingle();
+       // Always upsert (insert or update) the question to ensure config/options are synced
+       const { data, error } = await supabaseAdmin
+	       .from('questions')
+	       .upsert([questionData], { onConflict: 'room_code,text' })
+	       .select('id')
+	       .maybeSingle();
 
-	if (existing) {
-		// Update existing question
-		console.log('[Sanity Webhook] Updating question:', existing.id);
-		const { error } = await supabaseAdmin
-			.from('questions')
-			.update(questionData)
-			.eq('id', existing.id);
+       if (error) {
+	       console.error('[Sanity Webhook] Upsert failed:', error);
+	       return json({ success: false, error: error.message }, { status: 500 });
+       }
 
-		if (error) {
-			console.error('[Sanity Webhook] Update failed:', error);
-			return json({ success: false, error: error.message }, { status: 500 });
-		}
-
-		console.log('[Sanity Webhook] Question updated successfully');
-		return json({
-			success: true,
-			message: 'Question updated',
-			questionId: existing.id
-		});
-	} else {
-		// Insert new question
-		console.log('[Sanity Webhook] Creating new question');
-		const { data, error } = await supabaseAdmin
-			.from('questions')
-			.insert(questionData)
-			.select('id')
-			.single();
-
-		if (error) {
-			console.error('[Sanity Webhook] Insert failed:', error);
-			return json({ success: false, error: error.message }, { status: 500 });
-		}
-
-		console.log('[Sanity Webhook] Question created successfully');
-		return json({
-			success: true,
-			message: 'Question created',
-			questionId: data.id
-		});
-	}
+       console.log('[Sanity Webhook] Question upserted successfully');
+       return json({
+	       success: true,
+	       message: 'Question upserted',
+	       questionId: data?.id
+       });
 }

@@ -1146,19 +1146,6 @@
 
 <style>
    .presentation-shell {
-	   /* Fallbacks for critical chart variables */
-	   --text-primary: 220 15% 96%; /* near-white */
-	   --text-secondary: 220 10% 70%;
-	   --text-muted: 220 10% 55%;
-	   --brand: 190 100% 45%;
-	   --surface: 220 16% 18%;
-	   --surface-elevated: 220 16% 22%;
-	   --surface-muted: 220 16% 28%;
-	   --border-subtle: 220 10% 40%;
-	   --border-strong: 220 10% 60%;
-	   --accent-critical: 0 80% 60%;
-	   --accent-warm: 40 90% 55%;
-	   --brand-soft: 190 100% 85%;
 	   color: hsl(var(--text-secondary));
 	   background: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-elevated)) 50%, #ffffff 100%);
    }

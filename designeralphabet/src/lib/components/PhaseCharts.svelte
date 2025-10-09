@@ -147,7 +147,7 @@ function enrichResponses(responses: any[]) {
                         {type}
                     </span>
                     <span class="text-xs text-secondary">
-                        {data?.meta?.totalResponses || 0} responses
+                        {data?.meta?.totalResponses ?? $responses.filter(r => r.question_id === question.id).length} responses
                     </span>
                 </div>
             </div>
