@@ -231,6 +231,9 @@
 	// Calculate leaderboard with actual points from responses
 	$: leaderboardList = getLeaderboard(participantsList, responsesList, timelineList);
 	$: phasesList = $phasesStore ?? [];
+	$: isSessionLive = sessionInfo?.status === 'live';
+	$: isSessionEnded = sessionInfo?.status === 'done';
+	$: isSessionPlanned = sessionInfo?.status === 'planned';
 
 	// Debug logging
 	$: if (browser && activeCode) {
@@ -510,9 +513,21 @@
 				<span class="inline-flex items-center gap-2"
 					><IconUsers class="h-5 w-5" /> {participantsList.length} participants</span
 				>
-				<span class="inline-flex items-center gap-2"
-					><IconClock class="h-5 w-5" /> {sessionInfo?.status ?? 'waiting'}</span
-				>
+				<span class="inline-flex items-center gap-2">
+					<IconClock class="h-5 w-5" />
+					{#if isSessionLive}
+						<span class="inline-flex items-center gap-2">
+							<span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+							<span class="text-green-400 font-semibold">Live</span>
+						</span>
+					{:else if isSessionEnded}
+						<span class="text-slate-400">Session Ended</span>
+					{:else if isSessionPlanned}
+						<span class="text-cyan-400">Planned</span>
+					{:else}
+						<span>{sessionInfo?.status ?? 'waiting'}</span>
+					{/if}
+				</span>
 			</div>
 		</div>
 	</header>
@@ -590,6 +605,45 @@
 		</div>
 	{:else}
 		<main class="mx-auto px-4 md:px-6 py-8" style="max-width: 95vw;">
+			<!-- Session Status Notice -->
+			{#if isSessionEnded}
+				<div class="mb-6 rounded-xl border border-slate-700 bg-slate-900/80 p-4 shadow-lg">
+					<div class="flex items-center gap-3">
+						<div class="rounded-full bg-slate-800 p-2">
+							<IconClock class="h-5 w-5 text-slate-400" />
+						</div>
+						<div>
+							<h3 class="text-sm font-semibold text-slate-200">Session Ended</h3>
+							<p class="text-xs text-slate-400">Showing final results from Supabase. Data is no longer updating in real-time.</p>
+						</div>
+					</div>
+				</div>
+			{:else if isSessionPlanned}
+				<div class="mb-6 rounded-xl border border-cyan-400/30 bg-slate-900/80 p-4 shadow-lg">
+					<div class="flex items-center gap-3">
+						<div class="rounded-full bg-cyan-900/30 p-2">
+							<IconClock class="h-5 w-5 text-cyan-400" />
+						</div>
+						<div>
+							<h3 class="text-sm font-semibold text-cyan-200">Planned Session</h3>
+							<p class="text-xs text-cyan-300/80">This session hasn't started yet. Data will update in real-time once the session goes live.</p>
+						</div>
+					</div>
+				</div>
+			{:else if isSessionLive}
+				<div class="mb-6 rounded-xl border border-green-400/30 bg-slate-900/80 p-4 shadow-lg">
+					<div class="flex items-center gap-3">
+						<div class="rounded-full bg-green-900/30 p-2">
+							<span class="h-2 w-2 rounded-full bg-green-400 animate-pulse inline-block"></span>
+						</div>
+						<div>
+							<h3 class="text-sm font-semibold text-green-200">Live Session</h3>
+							<p class="text-xs text-green-300/80">Data is updating in real-time as participants engage.</p>
+						</div>
+					</div>
+				</div>
+			{/if}
+
 			<!-- Phase Navigation -->
 			{#if phasesList.length > 0}
 				<nav class="mb-6 flex flex-wrap gap-2">

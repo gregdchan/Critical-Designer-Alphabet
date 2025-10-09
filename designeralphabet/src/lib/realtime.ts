@@ -87,6 +87,8 @@ let activeCode: string | null = null;
 let ws: WebSocket | null = null;
 let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 let supabaseChannel: ReturnType<typeof supabase.channel> | null = null;
+let sessionStatusChannel: ReturnType<typeof supabase.channel> | null = null;
+let isRealtimeEnabled = false;
 
 async function fetchBundle(code: string) {
 	try {
@@ -121,6 +123,7 @@ function connectWebSocket(code: string) {
 
 	// WebSocket is completely disabled - use Supabase Realtime instead
 	console.log('[WS] WebSocket disabled - all realtime functionality uses Supabase');
+	/* Disabled WebSocket code - keeping for reference
 	return;
 
 	// Clean up existing connection
@@ -134,15 +137,16 @@ function connectWebSocket(code: string) {
 	const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 	const wsUrl = explicitWsUrl.length > 0 ? explicitWsUrl : `${protocol}//${window.location.host}/ws`;
 
-	ws = new WebSocket(wsUrl);
+	const newWs = new WebSocket(wsUrl);
+	ws = newWs;
 
-	ws.onopen = () => {
+	newWs.onopen = () => {
 		console.log('[WS] Connected to session:', code);
 		// Send HELLO message to register with session
-		ws?.send(JSON.stringify({ type: 'HELLO', code }));
+		newWs.send(JSON.stringify({ type: 'HELLO', code }));
 	};
 
-	ws.onmessage = (event) => {
+	newWs.onmessage = (event) => {
 		try {
 			const message = JSON.parse(event.data);
 			handleWebSocketMessage(message, code);
@@ -151,11 +155,11 @@ function connectWebSocket(code: string) {
 		}
 	};
 
-	ws.onerror = (error) => {
+	newWs.onerror = (error) => {
 		console.error('[WS] Error:', error);
 	};
 
-	ws.onclose = () => {
+	newWs.onclose = () => {
 		console.log('[WS] Disconnected from session:', code);
 		ws = null;
 
@@ -167,6 +171,7 @@ function connectWebSocket(code: string) {
 			}, 3000);
 		}
 	};
+	*/
 }
 
 function handleWebSocketMessage(message: any, code: string) {
@@ -254,29 +259,12 @@ function handleWebSocketMessage(message: any, code: string) {
 	}
 }
 
-export async function startRealtimeSession(code: string) {
+function setupDataSubscriptions(code: string) {
 	if (!browser) return;
-	if (!code) return;
-
-	if (activeCode === code && supabaseChannel) {
-		return;
-	}
-
-	stopRealtimeSession();
-	activeCode = code;
-	await fetchBundle(code);
-
-	// Set up Supabase Realtime subscriptions
+	
+	// Set up Supabase Realtime subscriptions for all data tables
 	supabaseChannel = supabase
 		.channel(`session:${code}`)
-		.on(
-			'postgres_changes',
-			{ event: '*', schema: 'public', table: 'sessions', filter: `code=eq.${code}` },
-			async () => {
-				console.log('[Realtime] Session updated');
-				await fetchBundle(code);
-			}
-		)
 		.on(
 			'postgres_changes',
 			{ event: '*', schema: 'public', table: 'participants', filter: `room_code=eq.${code}` },
@@ -326,11 +314,90 @@ export async function startRealtimeSession(code: string) {
 			}
 		)
 		.subscribe((status) => {
-			console.log(`[Realtime] Subscription status: ${status}`);
+			console.log(`[Realtime] Data subscription status: ${status}`);
 		});
+}
 
-	// Keep polling as fallback (less frequent now that we have realtime)
-	pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 6); // 30 seconds
+function setupSessionStatusSubscription(code: string) {
+	if (!browser) return;
+	
+	// Separate subscription to watch for session status changes
+	sessionStatusChannel = supabase
+		.channel(`session-status:${code}`)
+		.on(
+			'postgres_changes',
+			{ event: 'UPDATE', schema: 'public', table: 'sessions', filter: `code=eq.${code}` },
+			async (payload) => {
+				console.log('[Realtime] Session status updated', payload);
+				const newSession = payload.new as Session;
+				await fetchBundle(code);
+				
+				// Dynamically adjust realtime behavior based on new status
+				if (newSession.status === 'live' && !isRealtimeEnabled) {
+					console.log('[Realtime] Session went live - enabling realtime subscriptions');
+					setupDataSubscriptions(code);
+					isRealtimeEnabled = true;
+					// Set up more frequent polling for live sessions
+					if (pollHandle) clearInterval(pollHandle);
+					pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 6); // 30 seconds
+				} else if (newSession.status !== 'live' && isRealtimeEnabled) {
+					console.log('[Realtime] Session ended - disabling realtime subscriptions');
+					if (supabaseChannel) {
+						supabase.removeChannel(supabaseChannel);
+						supabaseChannel = null;
+					}
+					isRealtimeEnabled = false;
+					// Use less frequent polling for ended/planned sessions
+					if (pollHandle) clearInterval(pollHandle);
+					pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 30); // 2.5 minutes
+				}
+			}
+		)
+		.subscribe((status) => {
+			console.log(`[Realtime] Session status subscription: ${status}`);
+		});
+}
+
+export async function startRealtimeSession(code: string) {
+	if (!browser) return;
+	if (!code) return;
+
+	if (activeCode === code && sessionStatusChannel) {
+		return;
+	}
+
+	stopRealtimeSession();
+	activeCode = code;
+	await fetchBundle(code);
+
+	// Get current session status to determine realtime behavior
+	const currentSession = await (async () => {
+		try {
+			const res = await fetch(`/api/session/${code}`);
+			const data = await res.json();
+			return data.session as Session | null;
+		} catch (error) {
+			console.error('[Realtime] Failed to fetch session status', error);
+			return null;
+		}
+	})();
+
+	// Always subscribe to session status changes
+	setupSessionStatusSubscription(code);
+
+	// Only enable realtime subscriptions if session is live
+	if (currentSession?.status === 'live') {
+		console.log('[Realtime] Session is live - enabling realtime subscriptions');
+		setupDataSubscriptions(code);
+		isRealtimeEnabled = true;
+		// More frequent polling for live sessions
+		pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 6); // 30 seconds
+	} else {
+		console.log(`[Realtime] Session is ${currentSession?.status || 'unknown'} - using polling only`);
+		isRealtimeEnabled = false;
+		// Less frequent polling for non-live sessions
+		pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 30); // 2.5 minutes
+	}
 }
 
 export async function refreshSession(code: string) {
@@ -359,7 +426,13 @@ export function stopRealtimeSession() {
 		supabaseChannel = null;
 	}
 
+	if (sessionStatusChannel) {
+		supabase.removeChannel(sessionStatusChannel);
+		sessionStatusChannel = null;
+	}
+
 	activeCode = null;
+	isRealtimeEnabled = false;
 }
 
 export async function addResponse(
