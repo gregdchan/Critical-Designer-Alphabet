@@ -28,10 +28,14 @@
 	import ParticipationPulse from '$lib/charts/ParticipationPulse.svelte';
 	import InclusivityMeter from '$lib/charts/InclusivityMeter.svelte';
 	import RiskImpactMatrix from '$lib/charts/RiskImpactMatrix.svelte';
+	import PhaseCharts from '$lib/components/PhaseCharts.svelte';
 	import { IconUsers, IconClock, IconSparkles, IconStar } from '@tabler/icons-svelte';
 	import type { ComponentType } from 'svelte';
+	import { getLeaderboard } from '$lib/gamification';
 
 	export let data: { sessionCode: string };
+
+	let selectedPhaseKey: string | null = null;
 
 	let sessionCode = data.sessionCode ?? '';
 	let joinCode = sessionCode;
@@ -224,7 +228,8 @@
 	$: responsesList = $responses ?? [];
 	$: timelineList = $timeline ?? [];
 	$: chatList = $chat ?? [];
-	$: leaderboardList = $leaderboard ?? [];
+	// Calculate leaderboard with actual points from responses
+	$: leaderboardList = getLeaderboard(participantsList, responsesList, timelineList);
 	$: phasesList = $phasesStore ?? [];
 
 	$: activePhase = (() => {
@@ -233,6 +238,11 @@
 			: null;
 		return keyed ?? phasesList.find((phase) => phase.status === 'active');
 	})();
+
+	// Auto-select active phase or first phase
+	$: if (!selectedPhaseKey && (activePhase || phasesList.length > 0)) {
+		selectedPhaseKey = activePhase?.phase_key || activePhase?.id || phasesList[0]?.phase_key || phasesList[0]?.id || null;
+	}
 
 	const phaseStatusLabels: Record<'pending' | 'active' | 'completed', string> = {
 		pending: 'Pending',
@@ -471,7 +481,7 @@
 				/>
 				<button
 					type="submit"
-					class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-brand"
+					class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand"
 				>
 					{activeCode ? 'Switch session' : 'Start presentation'}
 				</button>
@@ -560,6 +570,25 @@
 		</div>
 	{:else}
 		<main class="mx-auto px-4 md:px-6 py-8" style="max-width: 95vw;">
+			<!-- Phase Navigation -->
+			{#if phasesList.length > 0}
+				<nav class="mb-6 flex flex-wrap gap-2">
+					{#each phasesList as phase}
+						<button
+							on:click={() => (selectedPhaseKey = phase.phase_key || phase.id)}
+							class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {selectedPhaseKey === (phase.phase_key || phase.id)
+								? 'bg-brand text-white'
+								: 'bg-surface-muted text-secondary hover:bg-surface-elevated'}"
+						>
+							{phase.title || phase.phase_key || 'Phase'}
+							{#if phase.status === 'active'}
+								<span class="ml-2 inline-block h-2 w-2 rounded-full bg-green-400"></span>
+							{/if}
+						</button>
+					{/each}
+				</nav>
+			{/if}
+
 			{#if activeBoards.length === 0}
 				<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-10 text-center">
 					<div class="space-y-3">
@@ -572,29 +601,16 @@
 			{:else}
 				<div class="grid gap-6 lg:grid-cols-[2.5fr_1fr]">
 					<section class="space-y-8">
+						<!-- Phase-based charts for selected phase -->
+						{#if selectedPhaseKey && browser}
+							<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
+								<PhaseCharts phaseKey={selectedPhaseKey} width={1200} height={520} />
+							</div>
+						{/if}
+
+						<!-- Legacy board types removed - using PhaseCharts instead -->
 						{#each mainBoards as boardId}
-							{#if boardId === 'responses'}
-								<div
-									class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(6,182,212,0.2)]"
-								>
-									<header class="mb-4 flex items-center justify-between">
-										<div>
-											<h2 class="text-xl font-semibold text-slate-100">
-												{BOARD_DEFINITIONS[boardId].label}
-											</h2>
-											<p class="text-sm text-ink-muted">
-												{BOARD_DEFINITIONS[boardId].description}
-											</p>
-										</div>
-										<span class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200">
-											{responsesList.length} responses
-										</span>
-									</header>
-									<div class="w-full h-[600px] overflow-hidden">
-										<QuadBubbleChart responses={responsesForViz} width={1200} height={600} />
-									</div>
-								</div>
-							{:else if boardId === 'heatmap'}
+							{#if boardId === 'heatmap'}
 								<div
 									class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
 								>
@@ -814,7 +830,7 @@
 							<div class="mt-6 flex justify-center">
 								<a
 									href="/dashboard"
-									class="w-full rounded-lg bg-brand px-6 py-3 text-center text-sm font-semibold text-ink transition-colors hover:bg-brand"
+									class="w-full rounded-lg bg-brand px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand"
 								>
 									Go to Dashboard
 								</a>
