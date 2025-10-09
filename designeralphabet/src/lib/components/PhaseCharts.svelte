@@ -43,12 +43,12 @@
 				<p class="text-secondary">No questions or responses for this phase yet.</p>
 			</div>
 		{:else}
-			<div class="charts-grid grid gap-6 md:grid-cols-2">
+			<div class="charts-list space-y-8">
 				{#each chartEntries as { question, chartData, chartType }}
 					<div class="chart-card panel p-6">
 						<!-- Question Title -->
 						<div class="mb-4">
-							<h3 class="text-sm font-semibold text-primary">
+							<h3 class="text-base font-semibold text-primary">
 								{question.text || question.section || 'Question'}
 							</h3>
 							{#if question.section && question.section !== question.text}
@@ -115,12 +115,12 @@
 		width: 100%;
 	}
 
-	.charts-grid {
+	.charts-list {
 		width: 100%;
 	}
 
 	.chart-card {
-		min-height: 400px;
+		min-height: 450px;
 		display: flex;
 		flex-direction: column;
 	}
