@@ -54,7 +54,17 @@ function getOptionsFromConfig(question: Question): string[] {
 }
 
 export function inferQuestionType(question: Question, responses: Response[]): InferredQuestionType {
-  // If explicit type exists on the record, honor it
+  // Priority 1: Check recommended_dashboards (explicitly set chart type)
+  const recommended = (question as any)?.recommended_dashboards;
+  if (Array.isArray(recommended) && recommended.length > 0) {
+    const chart = recommended[0].toLowerCase();
+    if (chart === 'line' || chart === 'linechart') return 'rating';
+    if (chart === 'pie' || chart === 'piechart') return 'multipleChoice';
+    if (chart === 'bar' || chart === 'barchart') return 'multipleChoice';
+    if (chart === 'wordcloud' || chart === 'word cloud') return 'openText';
+  }
+
+  // Priority 2: If explicit type exists on the record, honor it
   const explicit: string | null = (question as any)?.type ?? question?.response_type ?? null;
   if (explicit) {
     // Normalize common values into our set
