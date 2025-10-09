@@ -17,6 +17,7 @@
     import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
+	import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import PieChart from '$lib/components/charts/PieChart.svelte';
 	import LineChart from '$lib/components/charts/LineChart.svelte';
@@ -48,6 +49,7 @@
 		| 'responses'
 		| 'heatmap'
 		| 'roadmap'
+		| 'supercloud'
 		| 'barChart'
 		| 'pieChart'
 		| 'lineChart'
@@ -90,6 +92,12 @@
 			id: 'roadmap',
 			label: 'Roadmap Swimlanes',
 			description: 'Now / Next / Later commitments shaped in session.',
+			layout: 'main'
+		},
+		supercloud: {
+			id: 'supercloud',
+			label: 'Supercloud',
+			description: 'All words and responses from the entire session in one view.',
 			layout: 'main'
 		},
 		barChart: {
@@ -165,6 +173,7 @@
 		'responses',
 		'timeline',
 		'leaderboard',
+		'supercloud',
 		'barChart',
 		'pieChart',
 		'lineChart',
@@ -688,6 +697,15 @@
 							{/if}
 						</button>
 					{/each}
+					<!-- Supercloud Tab -->
+					<button
+						on:click={() => (selectedPhaseKey = 'supercloud')}
+						class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {selectedPhaseKey === 'supercloud'
+							? 'bg-amber-500 text-white'
+							: 'bg-surface-muted text-secondary hover:bg-surface-elevated'}"
+					>
+						✨ Supercloud
+					</button>
 				</nav>
 			{/if}
 
@@ -712,16 +730,30 @@
 					</div>
 				</div>
 			{:else}
-				<!-- Single column layout for better visibility -->
-				<div class="max-w-[1600px] mx-auto space-y-6 px-4">
-					<!-- Phase-based charts for selected phase -->
-					{#if selectedPhaseKey && browser}
+			<!-- Single column layout for better visibility -->
+			<div class="max-w-[1600px] mx-auto space-y-6 px-4">
+				<!-- Phase-based charts for selected phase OR Supercloud -->
+				{#if selectedPhaseKey && browser}
+					{#if selectedPhaseKey === 'supercloud'}
+						<div class="presentation-panel rounded-2xl border border-amber-400/20 bg-slate-900/70 p-8 shadow-[0_0_40px_rgba(251,191,36,0.2)]">
+							<header class="mb-6">
+								<h2 class="text-2xl font-bold text-slate-100">
+									✨ Supercloud
+								</h2>
+								<p class="text-sm text-ink-muted mt-2">
+									All words and responses from the entire session in one view.
+								</p>
+							</header>
+							<div class="w-full h-[700px] overflow-hidden">
+								<WordCloudChart responses={responsesForViz} width={1400} height={700} question="All Session Responses" />
+							</div>
+						</div>
+					{:else}
 						<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
 							<PhaseCharts phaseKey={selectedPhaseKey} width={1400} height={600} />
 						</div>
 					{/if}
-
-					<!-- Legacy board types removed - using PhaseCharts instead -->
+				{/if}					<!-- Legacy board types removed - using PhaseCharts instead -->
 					{#each mainBoards as boardId}
 							{#if boardId === 'heatmap'}
 								<div
