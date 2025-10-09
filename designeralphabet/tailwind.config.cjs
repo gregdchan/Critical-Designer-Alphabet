@@ -26,6 +26,20 @@ module.exports = {
 				'accent-warm': 'hsl(var(--accent-warm))',
 				'accent-critical': 'hsl(var(--accent-critical))',
 
+				/* Override cyan colors for high contrast */
+				cyan: {
+					50: '#1a2332',
+					100: '#1a2332',
+					200: '#1a2332',
+					300: '#1a2332',
+					400: '#025259',
+					500: '#007172',
+					600: '#007172',
+					700: '#025259',
+					800: '#025259',
+					900: '#013840',
+				},
+
 				chart: {
 					1: 'var(--chart-1)',
 					2: 'var(--chart-2)',
