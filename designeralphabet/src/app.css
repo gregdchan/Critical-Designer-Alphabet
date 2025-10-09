@@ -65,14 +65,6 @@ h1, h2, h3, h4, h5, h6 {
 	text-shadow: 0 2px 12px hsl(var(--brand-soft) / 0.12);
 }
 
-}
-	color: hsl(var(--neon-pink));
-	transition: color 150ms ease, text-decoration-color 150ms ease;
-	text-decoration: underline;
-	text-decoration-color: transparent;
-	text-decoration-thickness: 2px;
-	text-underline-offset: 4px;
-}
 
 
 a:hover,
