@@ -321,7 +321,7 @@ a:focus-visible {
 }
 
 .card-select-btn {
-	@apply w-full rounded-full border-3 px-4 py-3 text-xs font-bold uppercase tracking-[0.3em] transition-all hover:scale-105;
+	@apply w-full rounded-full border-[3px] px-4 py-3 text-xs font-bold uppercase tracking-[0.3em] transition-all hover:scale-105;
 }
 
 .card-select-btn.selected {

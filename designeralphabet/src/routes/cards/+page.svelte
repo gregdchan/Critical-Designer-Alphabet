@@ -379,7 +379,7 @@
 				</div>
 			{/each}
 		</div>
-	{:else}
+	{/if}
 
 	{#if statusMessage}
 		<p class="text-[0.65rem] uppercase tracking-[0.3em] text-white/80">{statusMessage}</p>
