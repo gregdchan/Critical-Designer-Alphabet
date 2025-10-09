@@ -31,28 +31,40 @@
 
 	const NEON_VARIANTS = {
 		cyan: {
-			border: 'border-neonCyan/40',
+			border: 'border-neon-cyan/60',
 			glow: 'shadow-neon-cyan',
-			accent: 'text-neonCyan',
-			chip: 'border-neonCyan/40 bg-neonCyan/10 text-neonCyan'
+			accent: 'text-neon-cyan',
+			chip: 'border-neon-cyan/40 bg-neon-cyan/20 text-white',
+			cardBg: 'bg-gradient-to-br from-neon-cyan/90 to-neon-cyan/70',
+			textPrimary: 'text-slate-900',
+			textSecondary: 'text-slate-800'
 		},
 		pink: {
-			border: 'border-neonPink/40',
+			border: 'border-neon-pink/60',
 			glow: 'shadow-neon-pink',
-			accent: 'text-neonPink',
-			chip: 'border-neonPink/40 bg-neonPink/10 text-neonPink'
+			accent: 'text-neon-pink',
+			chip: 'border-neon-pink/40 bg-neon-pink/20 text-white',
+			cardBg: 'bg-gradient-to-br from-neon-pink/90 to-neon-pink/70',
+			textPrimary: 'text-slate-900',
+			textSecondary: 'text-slate-800'
 		},
 		lime: {
-			border: 'border-neonLime/40',
+			border: 'border-neon-lime/60',
 			glow: 'shadow-neon-lime',
-			accent: 'text-neonLime',
-			chip: 'border-neonLime/40 bg-neonLime/10 text-neonLime'
+			accent: 'text-neon-lime',
+			chip: 'border-neon-lime/40 bg-neon-lime/20 text-slate-900',
+			cardBg: 'bg-gradient-to-br from-neon-lime/90 to-neon-lime/70',
+			textPrimary: 'text-slate-900',
+			textSecondary: 'text-slate-800'
 		},
 		purple: {
-			border: 'border-retroPurple/40',
+			border: 'border-retro-purple/60',
 			glow: 'shadow-neon-pink',
-			accent: 'text-retroPurple',
-			chip: 'border-retroPurple/40 bg-retroPurple/10 text-retroPurple'
+			accent: 'text-retro-purple',
+			chip: 'border-retro-purple/40 bg-retro-purple/20 text-white',
+			cardBg: 'bg-gradient-to-br from-retro-purple/90 to-retro-purple/70',
+			textPrimary: 'text-white',
+			textSecondary: 'text-white/90'
 		}
 	} as const;
 
@@ -205,21 +217,21 @@
 		<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 			<div class="space-y-3">
 				<p
-					class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-white/70"
+					class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-white/85"
 				>
 					<Sparkles class="h-4 w-4 text-neonCyan" /> Retro Card Library
 				</p>
 				<h1 class="font-retro text-2xl uppercase tracking-[0.45em] text-white sm:text-3xl">
 					Build inclusive decks with neon precision
 				</h1>
-				<p class="max-w-3xl text-sm text-white/70">
+				<p class="max-w-3xl text-sm text-white/85">
 					Filter by lens, remix prompts, and stage up to five cards. Every selection syncs to live
 					sessions so your team can explore justice-centered design moves together.
 				</p>
 			</div>
 			<div class="flex flex-wrap items-center gap-3">
 				<button
-					class="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/60 transition hover:border-neonCyan/60 hover:text-neonCyan"
+					class="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/80 transition hover:border-neonCyan/60 hover:text-neonCyan"
 					type="button"
 					on:click={clearFilters}
 					aria-label="Clear all filters"
@@ -265,11 +277,11 @@
 					<div class="absolute inset-0 rounded-2xl border border-neonCyan/40" aria-hidden="true" />
 				</div>
 			</label>
-			<div class="flex items-center justify-end text-xs uppercase tracking-[0.3em] text-white/50">
+			<div class="flex items-center justify-end text-xs uppercase tracking-[0.3em] text-white/75">
 				{filteredCards.length} of {cards.length} cards visible
 			</div>
 		</div>
-		<div class="flex flex-col gap-4 text-[0.7rem] uppercase tracking-[0.25em] text-white/60">
+		<div class="flex flex-col gap-4 text-[0.7rem] uppercase tracking-[0.25em] text-white/80">
 			<div class="flex flex-wrap items-center gap-2">
 				{#each CATEGORIES as category}
 					<button
@@ -293,7 +305,7 @@
 							class={`rounded-full px-3 py-1 transition ${
 								letterFilter === letter
 									? 'border border-neonPink/50 bg-neonPink/20 text-neonPink shadow-neon-pink'
-									: 'border border-white/15 bg-black/40 text-white/60 hover:border-neonPink/40 hover:text-neonPink'
+									: 'border border-white/15 bg-black/40 text-white/80 hover:border-neonPink/40 hover:text-neonPink'
 							}`}
 							on:click={() => (letterFilter = letterFilter === letter ? null : letter)}
 						>
@@ -310,7 +322,7 @@
 							class={`rounded-full border px-3 py-1 transition ${
 								tagFilter.includes(tag)
 									? 'border-neonLime/60 bg-neonLime/20 text-neonLime shadow-neon-lime'
-									: 'border-white/15 bg-black/40 text-white/60 hover:border-neonLime/40 hover:text-neonLime'
+									: 'border-white/15 bg-black/40 text-white/80 hover:border-neonLime/40 hover:text-neonLime'
 							}`}
 							on:click={() => toggleTag(tag)}
 						>
@@ -343,11 +355,11 @@
 			</p>
 		</div>
 	{:else if !cards.length}
-		<div class="rounded-[2rem] border border-white/15 bg-black/50 p-6 text-sm text-white/70">
+		<div class="rounded-[2rem] border border-white/15 bg-black/50 p-6 text-sm text-white/85">
 			{statusMessage}
 		</div>
 	{:else if !filteredCards.length}
-		<div class="rounded-[2rem] border border-white/15 bg-black/50 p-6 text-sm text-white/70">
+		<div class="rounded-[2rem] border border-white/15 bg-black/50 p-6 text-sm text-white/85">
 			No cards match these filters. Try clearing filters or drawing at random.
 		</div>
 	{:else}
@@ -381,10 +393,10 @@
 										</span>
 									{/if}
 								</div>
-								<p class="text-[0.6rem] uppercase tracking-[0.35em] text-white/50">{card.cardID}</p>
+								<p class="text-[0.6rem] uppercase tracking-[0.35em] text-white/75">{card.cardID}</p>
 							</div>
 							<button
-								class="rounded-full border border-white/15 bg-black/50 p-2 text-white/70 transition hover:border-neonCyan/60 hover:text-neonCyan"
+								class="rounded-full border border-white/15 bg-black/50 p-2 text-white/85 transition hover:border-neonCyan/60 hover:text-neonCyan"
 								type="button"
 								aria-label="View details"
 								on:click={() => openDetails(card)}
@@ -393,10 +405,10 @@
 							</button>
 						</div>
 						{#if card.description}
-							<p class="line-clamp-3 text-sm text-white/70">{card.description}</p>
+							<p class="line-clamp-3 text-sm text-white/85">{card.description}</p>
 						{/if}
 						<div
-							class="flex flex-wrap gap-2 text-[0.6rem] uppercase tracking-[0.25em] text-white/60"
+							class="flex flex-wrap gap-2 text-[0.6rem] uppercase tracking-[0.25em] text-white/80"
 						>
 							{#if card.tags?.length}
 								{#each card.tags.slice(0, 4) as tag}
@@ -415,7 +427,7 @@
 								class={`w-full rounded-full border px-4 py-2 text-xs uppercase tracking-[0.3em] transition ${
 									selectedCards.some((entry) => entry._id === card._id)
 										? 'border-neonCyan/60 bg-neonCyan/25 text-neonCyan shadow-neon-cyan'
-										: 'border-white/15 bg-black/40 text-white/70 hover:border-neonCyan/40 hover:text-neonCyan'
+										: 'border-white/15 bg-black/40 text-white/85 hover:border-neonCyan/40 hover:text-neonCyan'
 								}`}
 								type="button"
 								on:click={() => toggleCard(card)}
@@ -430,7 +442,7 @@
 	{/if}
 
 	{#if statusMessage}
-		<p class="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">{statusMessage}</p>
+		<p class="text-[0.65rem] uppercase tracking-[0.3em] text-white/80">{statusMessage}</p>
 	{/if}
 </section>
 
@@ -444,13 +456,13 @@
 					<p class="font-retro text-xs uppercase tracking-[0.35em] text-neonCyan">
 						{selectedCards.length} card{selectedCards.length === 1 ? '' : 's'} staged
 					</p>
-					<p class="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">
+					<p class="text-[0.65rem] uppercase tracking-[0.3em] text-white/80">
 						{selectedCards.map((card) => `${card.letter ?? '?'} · ${card.cardID}`).join(', ')}
 					</p>
 				</div>
 				<div class="flex flex-wrap items-center gap-2">
 					<button
-						class="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/70 transition hover:border-neonCyan/40 hover:text-neonCyan"
+						class="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/85 transition hover:border-neonCyan/40 hover:text-neonCyan"
 						type="button"
 						on:click={randomDraw}
 					>
@@ -477,7 +489,7 @@
 			<header class="flex items-start justify-between gap-4">
 				<div class="space-y-3">
 					<div
-						class="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-white/60"
+						class="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-white/80"
 					>
 						{#if activeCard.category}
 							<span class={`rounded-full border px-3 py-1 ${variantClass(activeCard, 'chip')}`}>
@@ -487,12 +499,12 @@
 						<span class="rounded-full border border-white/15 px-3 py-1">{activeCard.cardID}</span>
 					</div>
 					<h2 class="font-retro text-xl uppercase tracking-[0.4em]">{activeCard.title}</h2>
-					<p class="text-xs uppercase tracking-[0.35em] text-white/60">
+					<p class="text-xs uppercase tracking-[0.35em] text-white/80">
 						Letter {activeCard.letter}
 					</p>
 				</div>
 				<button
-					class="rounded-full border border-white/15 bg-black/50 p-2 text-white/70 transition hover:border-neonCyan/40 hover:text-neonCyan"
+					class="rounded-full border border-white/15 bg-black/50 p-2 text-white/85 transition hover:border-neonCyan/40 hover:text-neonCyan"
 					type="button"
 					on:click={closeDetails}
 					aria-label="Close"
@@ -566,7 +578,7 @@
 					</ul>
 				</section>
 			{/if}
-			<footer class="mt-auto space-y-3 text-xs text-white/60">
+			<footer class="mt-auto space-y-3 text-xs text-white/80">
 				<button
 					class="w-full rounded-full border border-neonCyan/40 bg-neonCyan/20 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neonCyan shadow-neon-cyan transition hover:bg-neonCyan/30"
 					type="button"
