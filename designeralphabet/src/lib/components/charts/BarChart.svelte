@@ -4,12 +4,29 @@
 	import { max } from 'd3-array';
 	import { onMount, afterUpdate } from 'svelte';
 	import { getThemeColors } from '$lib/utils/colors';
+	import type { ChartData, ChartPoint } from '$lib/types/charts';
+	import { browser } from '$app/environment';
 
-	export let data: Array<{ label: string; value: number; percentage: number }> = [];
+	// Unified ChartData type (new approach)
+	export let chartData: ChartData | null = null;
+
+	// Legacy data props (backward compatible)
+	export let data: Array<{ label: string; value: number; percentage?: number }> = [];
 	export let width = 800;
 	export let height = 400;
 	export let question = '';
 	export let totalResponses = 0;
+	export let ariaLabel = 'Bar chart showing response distribution';
+
+	// Convert chartData to internal format
+	$: normalizedData = chartData
+		? chartData.series[0]?.points.map((p: ChartPoint) => ({
+				label: p.label,
+				value: p.value,
+				percentage: totalResponses > 0 ? (p.value / totalResponses) * 100 : 0,
+				color: p.color
+			})) || []
+		: data.map(d => ({ ...d, percentage: d.percentage || 0 }));
 
 	let svgElement: SVGSVGElement;
 	let chartGroup: SVGGElement;
@@ -19,7 +36,7 @@
 	$: innerHeight = height - margin.top - margin.bottom;
 
 	function updateChart() {
-		if (!svgElement || !data.length) return;
+		if (!browser || !svgElement || !normalizedData.length) return;
 
 		const chart = select(chartGroup);
 		const theme = getThemeColors();
@@ -27,18 +44,18 @@
 
 		// Scales
 		const yScale = scaleBand()
-			.domain(data.map((d) => d.label))
+			.domain(normalizedData.map((d) => d.label))
 			.range([0, innerHeight])
 			.padding(0.2);
 
 		const xScale = scaleLinear()
-			.domain([0, max(data, (d) => d.value) || 1])
+			.domain([0, max(normalizedData, (d) => d.value) || 1])
 			.range([0, innerWidth]);
 
 		// Bars
 		const bars = chart
 			.selectAll('.bar')
-			.data(data)
+			.data(normalizedData)
 			.enter()
 			.append('g')
 			.attr('class', 'bar-group');
@@ -112,7 +129,7 @@
 		// Y-axis labels (option names)
 		chart
 			.selectAll('.y-label')
-			.data(data)
+			.data(normalizedData)
 			.enter()
 			.append('text')
 			.attr('class', 'y-label')
@@ -145,18 +162,18 @@
 	});
 
 	afterUpdate(() => {
-		if (data.length > 0) {
+		if (normalizedData.length > 0) {
 			updateChart();
 		}
 	});
 
-	$: if (svgElement && chartGroup && data) {
+	$: if (svgElement && chartGroup && normalizedData) {
 		updateChart();
 	}
 </script>
 
 <div class="bar-chart-container">
-	<svg bind:this={svgElement} {width} {height} class="bar-chart">
+	<svg bind:this={svgElement} {width} {height} class="bar-chart" role="img" aria-label={chartData?.title || ariaLabel}>
 		<defs>
 			<linearGradient id="bar-gradient" x1="0" x2="1">
 				<stop offset="0%" stop-color="hsl(var(--brand-soft))" stop-opacity="0.9" />
@@ -173,7 +190,7 @@
 		<g bind:this={chartGroup} transform="translate({margin.left}, {margin.top})" />
 	</svg>
 
-	{#if data.length === 0}
+	{#if normalizedData.length === 0}
 		<div class="overlay">
 			<div class="empty-text">No responses yet</div>
 		</div>

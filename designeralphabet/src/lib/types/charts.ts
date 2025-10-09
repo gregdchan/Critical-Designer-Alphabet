@@ -95,3 +95,95 @@ export interface ChartDimensions {
 	innerHeight: number;
 	margins: ChartMargins;
 }
+
+// ===== Unified Chart Data Types =====
+// For consistent rendering across facilitator and presentation pages
+
+export type ChartPoint = {
+	label: string;
+	value: number;
+	color?: string;
+	metadata?: Record<string, unknown>;
+};
+
+export type ChartSeries = {
+	id: string;
+	label?: string;
+	points: ChartPoint[];
+	color?: string;
+};
+
+export type ChartData = {
+	title: string;
+	series: ChartSeries[];
+	meta?: Record<string, unknown>;
+};
+
+export type QuestionOption = {
+	id: string;
+	label: string;
+	color?: string;
+};
+
+export type Question = {
+	id: string;
+	title: string;
+	section?: string;
+	type?: 'multiple_choice' | 'scale' | 'text' | 'landscape';
+	options?: QuestionOption[];
+	metadata?: Record<string, unknown>;
+};
+
+export type Response = {
+	id: string;
+	session_code: string;
+	question_id: string;
+	participant_id: string;
+	response_text?: string;
+	option_id?: string;
+	scale_value?: number;
+	landscape_x?: number;
+	landscape_y?: number;
+	votes?: number;
+	created_at: string;
+};
+
+export type SessionState = {
+	code: string;
+	status?: string;
+	phase?: string;
+	questions: Question[];
+	responses: Response[];
+	responseCounts: Record<string, number>; // question_id:option_id -> count
+	updatedAt: number;
+};
+
+// Chart-specific data structures
+export type WordCloudData = {
+	text: string;
+	value: number;
+	color?: string;
+}[];
+
+export type LandscapePoint = {
+	x: number;
+	y: number;
+	label: string;
+	color?: string;
+	metadata?: Record<string, unknown>;
+};
+
+export type RoadmapItem = {
+	label: string;
+	category: string;
+	position: number;
+	color?: string;
+};
+
+export type HeatmapData = {
+	x: number;
+	y: number;
+	value: number;
+	label?: string;
+	color?: string;
+}[];
