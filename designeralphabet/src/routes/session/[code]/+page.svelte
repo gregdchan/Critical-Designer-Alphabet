@@ -10,8 +10,8 @@
 		timeline,
 		chat,
 		leaderboard,
-		// startRealtimeSession,
-		// stopRealtimeSession,
+		startRealtimeSession,
+		stopRealtimeSession,
 		addResponse as apiAddResponse,
 		voteResponse as apiVoteResponse,
 		addTimelineEntry as apiAddTimelineEntry,
@@ -577,7 +577,7 @@
 		(async () => {
 			const ready = await ensureProfile();
 			if (ready) {
-				await refreshSession(sessionCode);
+				await startRealtimeSession(sessionCode);
 			}
 		})();
 
@@ -620,7 +620,7 @@
 	});
 
 	onDestroy(() => {
-		// stopRealtimeSession();
+		stopRealtimeSession();
 		if (phaseTimer) {
 			clearInterval(phaseTimer);
 			phaseTimer = null;

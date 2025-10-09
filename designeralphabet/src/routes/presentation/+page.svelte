@@ -10,8 +10,8 @@
 		chat,
 		leaderboard,
 		phases as phasesStore,
-		// startRealtimeSession,
-		// stopRealtimeSession
+		startRealtimeSession,
+		stopRealtimeSession
 	} from '$lib/realtime';
 	import { CHART_REGISTRY } from '$lib/charts';
 	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
@@ -232,6 +232,18 @@
 	$: leaderboardList = getLeaderboard(participantsList, responsesList, timelineList);
 	$: phasesList = $phasesStore ?? [];
 
+	// Debug logging
+	$: if (browser && activeCode) {
+		console.log('[Presentation Data]', {
+			sessionInfo,
+			participants: participantsList.length,
+			questions: questionsList.length,
+			responses: responsesList.length,
+			phases: phasesList.length,
+			activeBoards: activeBoards.length
+		});
+	}
+
 	$: activePhase = (() => {
 		const keyed = sessionInfo?.active_phase_key
 			? phasesList.find((phase) => phase.phase_key === sessionInfo.active_phase_key)
@@ -386,7 +398,12 @@
 
 	async function loadSession(code: string) {
 		if (!code) return;
+		console.log('[Presentation] loadSession called with code:', code);
 		activeCode = code;
+		console.log('[Presentation] activeCode set to:', activeCode);
+		console.log('[Presentation] Starting realtime session...');
+		await startRealtimeSession(code);
+		console.log('[Presentation] Realtime session started');
 		// Charts will automatically update via reactive statements
 	}
 
@@ -412,16 +429,19 @@
 	}
 
 	onMount(async () => {
+		console.log('[Presentation] Mounting with sessionCode:', sessionCode);
 		ready = true;
 		if (sessionCode) {
+			console.log('[Presentation] Loading session:', sessionCode);
 			await loadSession(sessionCode);
 		} else {
+			console.log('[Presentation] No session code, fetching available sessions');
 			await fetchAvailableSessions();
 		}
 	});
 
 	onDestroy(() => {
-		// stopRealtimeSession();
+		stopRealtimeSession();
 	});
 
 	async function handleStartPresentation(event: Event) {
