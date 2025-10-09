@@ -789,10 +789,10 @@
 	>
 		<div class="text-center space-y-4">
 			<div
-				class="w-16 h-16 border-4 border-neon-cyan border-t-transparent rounded-full animate-spin mx-auto"
+				class="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"
 			></div>
 			<p class="text-xl text-cyan-300">Loading session...</p>
-			<p class="text-sm text-secondary">Code: {sessionCode.toUpperCase()}</p>
+			<p class="text-sm text-slate-400">Code: {sessionCode.toUpperCase()}</p>
 		</div>
 	</div>
 {:else if sessionError}
@@ -811,18 +811,18 @@
 				</svg>
 			</div>
 			<div>
-				<h2 class="text-2xl font-bold text-primary mb-2">Session Error</h2>
-				<p class="text-secondary">{sessionError}</p>
+				<h2 class="text-2xl font-bold text-white mb-2">Session Error</h2>
+				<p class="text-slate-300">{sessionError}</p>
 			</div>
 			<div class="flex gap-3 justify-center">
 				<button
-					class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-primary rounded-lg transition"
+					class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition"
 					on:click={() => window.location.reload()}
 				>
 					Retry
 				</button>
 				<button
-					class="px-6 py-3 surface-input hover:bg-surface-muted text-primary rounded-lg transition"
+					class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
 					on:click={() => goto('/join?code=' + sessionCode)}
 				>
 					Join Session
@@ -832,13 +832,13 @@
 	</div>
 {:else if sessionInfo}
 	<div
-		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white text-primary {isMobile
+		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white text-slate-100 {isMobile
 			? ''
 			: 'flex'}"
 	>
 		<!-- Main Content Area -->
 		<div class={isMobile ? 'w-full' : 'flex-1 overflow-auto'}>
-			<header class="sticky top-0 z-40 border-b border-neon-cyan/20 panel backdrop-blur">
+			<header class="sticky top-0 z-40 border-b border-cyan-400/20 bg-slate-900/70 backdrop-blur">
 				<div class="mx-auto max-w-7xl px-4 md:px-6 py-3 md:py-4">
 					<div class="flex flex-col gap-2">
 						<div class="flex items-start justify-between gap-4">
@@ -846,20 +846,20 @@
 								<p class="text-[10px] md:text-xs uppercase tracking-[0.35em] text-cyan-300">
 									Inclusive Planning
 								</p>
-								<h1 class="text-lg md:text-2xl font-semibold text-primary flex flex-wrap items-center gap-2">
+								<h1 class="text-lg md:text-2xl font-semibold text-white flex flex-wrap items-center gap-2">
 									<span class="truncate">{sessionInfo.title ?? 'Untitled Session'}</span>
 									<span
-										class="rounded-full border border-neon-cyan/30 px-2 md:px-3 py-0.5 md:py-1 text-[10px] md:text-xs uppercase tracking-[0.2em] text-cyan-200 whitespace-nowrap"
+										class="rounded-full border border-cyan-400/30 px-2 md:px-3 py-0.5 md:py-1 text-[10px] md:text-xs uppercase tracking-[0.2em] text-cyan-200 whitespace-nowrap"
 									>
 										{sessionCode}
 									</span>
 								</h1>
 								{#if sessionInfo.challenge && !isMobile}
-									<div class="mt-2 text-sm text-secondary max-w-2xl line-clamp-3">
+									<div class="mt-2 text-sm text-slate-600 max-w-2xl line-clamp-3">
 										<PortableText value={sessionInfo.challenge} styleClass="prose-sm prose-slate" />
 									</div>
 								{/if}
-								<p class="mt-1 text-xs md:text-sm text-secondary truncate">
+								<p class="mt-1 text-xs md:text-sm text-slate-300 truncate">
 									{currentParticipant?.name ?? 'Anonymous'} · {currentParticipant?.role ?? activeRole}
 								</p>
 							</div>
@@ -871,15 +871,15 @@
 			<main class="mx-auto max-w-full space-y-6 md:space-y-8 px-4 md:px-6 py-6 md:py-8">
 				<!-- Participant View: Show active phase info only -->
 				{#if !isFacilitator() && activePhase}
-					<section class="rounded-2xl border border-neon-cyan/30 panel p-4 md:p-6">
+					<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-4 md:p-6">
 						<div class="flex items-center justify-between mb-4">
 							<div>
 								<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Current Phase</p>
-								<h3 class="text-lg md:text-xl font-semibold text-primary">
+								<h3 class="text-lg md:text-xl font-semibold text-white">
 									{activePhase.title ?? activePhase.phase_key ?? 'Active Phase'}
 								</h3>
 								{#if activePhase.description}
-									<p class="text-sm text-secondary mt-1">{activePhase.description}</p>
+									<p class="text-sm text-slate-300 mt-1">{activePhase.description}</p>
 								{/if}
 							</div>
 							{#if phaseCountdownLabel}
@@ -901,7 +901,7 @@
 										Questions
 									</h4>
 									<button
-										class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-4 py-2 text-sm font-medium text-primary hover:from-neon-cyan hover:to-purple-500 transition-colors"
+										class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-cyan-400 hover:to-purple-500 transition-colors"
 										on:click={() => openResponseModal(null)}
 										disabled={!phaseRemainingMs}
 									>
@@ -911,16 +911,16 @@
 
 								<div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
 									{#each phaseQuestions as question}
-										<div class="rounded-lg border border-surface-accent panel p-4">
+										<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
 											<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
 												<div class="flex-1 min-w-0">
 													<span class="text-xs uppercase tracking-[0.3em] text-cyan-200">
 														{question.section}
 													</span>
-													<h5 class="text-sm font-semibold text-primary mt-1 break-words">{question.text}</h5>
+													<h5 class="text-sm font-semibold text-white mt-1 break-words">{question.text}</h5>
 												</div>
 												<button
-													class="rounded-lg border border-neon-cyan/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-300 transition-colors whitespace-nowrap flex-shrink-0 self-start"
+													class="rounded-lg border border-cyan-400/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-300 transition-colors whitespace-nowrap flex-shrink-0 self-start"
 													on:click={() => openResponseModal(question.id)}
 													disabled={!phaseRemainingMs}
 												>
@@ -938,8 +938,8 @@
 														{@const hasVoted = userVotes.has(response.id)}
 														{@const isOwnResponse = response.participant_id === currentParticipant?.id}
 														{@const votingEnabled = question.enable_voting ?? true}
-														<div class="rounded border border-surface-accent panel p-3 text-xs">
-															<div class="flex items-center justify-between text-secondary mb-1">
+														<div class="rounded border border-slate-800 bg-slate-900/70 p-3 text-xs">
+															<div class="flex items-center justify-between text-slate-400 mb-1">
 																<div class="flex items-center gap-2">
 																	<span
 																		>{participantsList.find((p) => p.id === response.participant_id)
@@ -953,8 +953,8 @@
 																	<button
 																		class={`inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors ${
 																			hasVoted
-																				? 'border-neon-cyan bg-neon-cyan/20 text-cyan-100'
-																				: 'border-neon-cyan/40 text-cyan-200 hover:border-cyan-300'
+																				? 'border-cyan-400 bg-cyan-400/20 text-cyan-100'
+																				: 'border-cyan-400/40 text-cyan-200 hover:border-cyan-300'
 																		}`}
 																		on:click={() => toggleVote(response.id)}
 																		disabled={!phaseRemainingMs || isOwnResponse}
@@ -964,18 +964,18 @@
 																		{response.votes ?? 0}
 																	</button>
 																{:else}
-																	<span class="inline-flex items-center gap-1 text-secondary text-xs">
+																	<span class="inline-flex items-center gap-1 text-slate-500 text-xs">
 																		<IconThumbUp class="h-3 w-3" />
 																		{response.votes ?? 0}
 																	</span>
 																{/if}
 															</div>
-															<p class="text-secondary">{response.text}</p>
+															<p class="text-slate-200">{response.text}</p>
 															<!-- Temporarily hidden - not usable with current exercise -->
 															<!-- {#if response.cards?.length}
 																<div class="mt-2 flex flex-wrap gap-1">
 																	{#each response.cards as card}
-																		<span class="px-1.5 py-0.5 text-xs rounded bg-neon-cyan/20 text-cyan-300"
+																		<span class="px-1.5 py-0.5 text-xs rounded bg-cyan-400/20 text-cyan-300"
 																			>{card}</span
 																		>
 																	{/each}
@@ -985,15 +985,15 @@
 													{/each}
 												</div>
 											{:else}
-												<p class="text-xs text-secondary italic mt-2">No responses yet. Be the first!</p>
+												<p class="text-xs text-slate-500 italic mt-2">No responses yet. Be the first!</p>
 											{/if}
 										</div>
 									{/each}
 								</div>
 							</div>
 						{:else}
-							<div class="mt-6 rounded-lg border border-surface-accent surface-muted p-6 text-center">
-								<p class="text-sm text-secondary">
+							<div class="mt-6 rounded-lg border border-slate-700 bg-slate-800/50 p-6 text-center">
+								<p class="text-sm text-slate-400">
 									No questions available for this phase yet. The facilitator will add questions soon.
 								</p>
 							</div>
@@ -1001,9 +1001,9 @@
 					</section>
 				{:else if !isFacilitator()}
 					<!-- No active phase message for participants -->
-					<section class="rounded-2xl border border-surface-accent panel p-8 text-center">
-						<h3 class="text-lg font-semibold text-primary mb-2">Session Starting Soon</h3>
-						<p class="text-sm text-secondary">
+					<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-8 text-center">
+						<h3 class="text-lg font-semibold text-white mb-2">Session Starting Soon</h3>
+						<p class="text-sm text-slate-400">
 							The facilitator hasn't started a phase yet. Please wait while they set up the session.
 						</p>
 					</section>
@@ -1011,18 +1011,18 @@
 
 				<!-- Facilitator View: Full controls -->
 				{#if isFacilitator()}
-					<section class="rounded-2xl border border-neon-cyan/30 panel p-6 space-y-6">
+					<section class="rounded-2xl border border-cyan-400/30 bg-slate-900/70 p-6 space-y-6">
 						<div class="flex flex-wrap items-center justify-between gap-4">
 							<div>
-								<h2 class="text-lg font-semibold text-primary">Session Progress</h2>
-								<p class="text-sm text-secondary">
+								<h2 class="text-lg font-semibold text-white">Session Progress</h2>
+								<p class="text-sm text-slate-400">
 									Activate phases, manage timers, and advance the agenda.
 								</p>
 							</div>
 							<div class="flex flex-wrap items-center gap-2">
 								{#each sessionStatuses as status}
 									<button
-										class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-primary shadow' : 'border border-neon-cyan/40 text-cyan-200 hover:border-cyan-300'}`}
+										class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-slate-900 shadow' : 'border border-cyan-400/40 text-cyan-200 hover:border-cyan-300'}`}
 										on:click={() => changeStatus(status)}
 										disabled={statusUpdating || sessionInfo?.status === status}
 									>
@@ -1030,7 +1030,7 @@
 									</button>
 								{/each}
 								<button
-									class="rounded-lg bg-red-600/80 px-3 py-2 text-sm font-semibold text-primary hover:bg-red-500 transition"
+									class="rounded-lg bg-red-600/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 transition"
 									on:click={() => changeStatus('done')}
 									disabled={statusUpdating || sessionInfo?.status === 'done'}
 								>
@@ -1039,16 +1039,16 @@
 							</div>
 						</div>
 
-						<div class="rounded-xl border border-neon-cyan/20 panel p-4">
+						<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4">
 							{#if activePhase}
 								<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 									<div class="space-y-1">
 										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Current Phase</p>
-										<h3 class="text-base font-semibold text-primary">
+										<h3 class="text-base font-semibold text-white">
 											{activePhase.title ?? activePhase.phase_key ?? 'Phase'}
 										</h3>
 										{#if activePhase.description}
-											<p class="text-sm text-secondary leading-relaxed">
+											<p class="text-sm text-slate-300 leading-relaxed">
 												{activePhase.description}
 											</p>
 										{/if}
@@ -1058,18 +1058,18 @@
 											<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Time Remaining</p>
 											<p class="text-lg font-mono text-cyan-100">{phaseCountdownLabel}</p>
 										{:else if activePhase.duration_minutes}
-											<p class="text-xs text-secondary">
+											<p class="text-xs text-slate-400">
 												Duration: {activePhase.duration_minutes} min
 											</p>
 										{/if}
-										<p class="text-xs text-secondary">
+										<p class="text-xs text-slate-500">
 											{getPhaseStatusLabel(activePhase.status)}{#if activePhase.started_at}
 												• Started {new Date(activePhase.started_at).toLocaleTimeString()}{/if}
 										</p>
 									</div>
 								</div>
 							{:else}
-								<p class="text-sm text-secondary">
+								<p class="text-sm text-slate-400">
 									No active phase. Start the first phase to begin the journey.
 								</p>
 							{/if}
@@ -1077,7 +1077,7 @@
 
 						<div class="space-y-4">
 							{#if phasesList.length === 0}
-								<p class="text-sm text-secondary">
+								<p class="text-sm text-slate-400">
 									This session was created without phases. Update the Sanity template to design a
 									structured flow.
 								</p>
@@ -1088,15 +1088,15 @@
 											phase.status === 'completed'
 												? 'border-emerald-400/30 bg-emerald-500/10'
 												: phase.status === 'active'
-													? 'border-neon-cyan/40 bg-cyan-500/10'
-													: 'border-surface-accent panel hover:border-neon-cyan/30'
+													? 'border-cyan-400/40 bg-cyan-500/10'
+													: 'border-slate-700 bg-slate-900/70 hover:border-cyan-400/30'
 										}`}
 									>
 										<!-- Phase Header -->
 										<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 											<div class="flex-1">
 												<div class="flex items-center gap-3 mb-2">
-													<p class="text-xs uppercase tracking-[0.3em] text-secondary">
+													<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
 														{getPhaseStatusLabel(phase.status)}
 													</p>
 													{#if phase.duration_minutes}
@@ -1105,11 +1105,11 @@
 														>
 													{/if}
 												</div>
-												<h3 class="text-lg font-semibold text-primary mb-2">
+												<h3 class="text-lg font-semibold text-white mb-2">
 													{phase.title ?? phase.phase_key ?? 'Phase'}
 												</h3>
 												{#if phase.description}
-													<p class="text-sm text-secondary leading-relaxed">{phase.description}</p>
+													<p class="text-sm text-slate-300 leading-relaxed">{phase.description}</p>
 												{/if}
 											</div>
 
@@ -1125,7 +1125,7 @@
 														</div>
 													{/if}
 													<button
-														class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-amber-400 transition"
+														class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-amber-400 transition"
 														on:click={() => resetPhaseTimer(phase)}
 													>
 														Reset Timer
@@ -1139,7 +1139,7 @@
 											<div class="mt-4 flex flex-wrap items-center gap-2">
 												{#if phase.status === 'pending'}
 													<button
-														class="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-neon-cyan transition disabled:opacity-50"
+														class="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-cyan-400 transition disabled:opacity-50"
 														on:click={() => activatePhase(phase)}
 														disabled={phaseUpdating}
 													>
@@ -1147,7 +1147,7 @@
 													</button>
 												{:else if phase.status === 'active'}
 													<button
-														class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-emerald-400 transition disabled:opacity-50"
+														class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-400 transition disabled:opacity-50"
 														on:click={() => finishPhase(phase)}
 														disabled={phaseUpdating}
 													>
@@ -1155,7 +1155,7 @@
 													</button>
 												{:else}
 													<button
-														class="rounded-lg border border-surface-accent px-3 py-1.5 text-xs text-secondary hover:border-neon-cyan/40 transition"
+														class="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:border-cyan-400/40 transition"
 														on:click={() => activatePhase(phase)}
 														disabled={phaseUpdating}
 													>
@@ -1168,16 +1168,16 @@
 										<!-- Phase Cards (if associated with this phase) -->
 										{#if phase.cards?.length}
 											<div class="mt-6">
-												<p class="text-xs uppercase tracking-[0.3em] text-secondary mb-3">
+												<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-3">
 													Phase Cards
 												</p>
 												<div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
 													{#each phase.cards as card}
-														<div class="rounded-lg border border-surface-accent panel p-3">
+														<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
 															<div class="flex items-center gap-2 mb-2">
 																{#if card.letter}
 																	<span
-																		class="flex h-6 w-6 items-center justify-center rounded border border-neon-cyan/40 text-xs font-bold text-neon-cyan"
+																		class="flex h-6 w-6 items-center justify-center rounded border border-cyan-400/40 text-xs font-bold text-cyan-400"
 																	>
 																		{card.letter}
 																	</span>
@@ -1187,7 +1187,7 @@
 																</h4>
 															</div>
 															{#if card.description}
-																<p class="text-xs text-secondary mt-1">{card.description}</p>
+																<p class="text-xs text-slate-300 mt-1">{card.description}</p>
 															{/if}
 														</div>
 													{/each}
@@ -1211,7 +1211,7 @@
 													</h4>
 													{#if phase.status === 'active' && !isFacilitator()}
 														<button
-															class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-3 py-1.5 text-xs font-medium text-primary hover:from-neon-cyan hover:to-purple-500 transition-colors"
+															class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:from-cyan-400 hover:to-purple-500 transition-colors"
 															on:click={() => openResponseModal(null)}
 															disabled={!phaseRemainingMs}
 														>
@@ -1223,7 +1223,7 @@
 												<div class="space-y-4">
 													{#each phaseQuestions as question}
 														<div
-															class="rounded-lg border border-surface-accent panel p-4 space-y-3"
+															class="rounded-lg border border-slate-700 bg-slate-900/60 p-4 space-y-3"
 														>
 															<div class="flex items-start justify-between gap-3">
 																<div class="flex-1">
@@ -1239,11 +1239,11 @@
 																			</span>
 																		{/if}
 																	</div>
-																	<h5 class="text-sm font-semibold text-primary">{question.text}</h5>
+																	<h5 class="text-sm font-semibold text-white">{question.text}</h5>
 																</div>
 																{#if phase.status === 'active' && !isFacilitator()}
 																	<button
-																		class="rounded-lg border border-neon-cyan/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"
+																		class="rounded-lg border border-cyan-400/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"
 																		on:click={() => openResponseModal(question.id)}
 																		disabled={!phaseRemainingMs}
 																	>
@@ -1269,7 +1269,7 @@
 																<!-- Vote Summary -->
 																{#if totalVotes > 0 && votingEnabled}
 																	<div
-																		class="mb-3 p-2 rounded bg-neon-cyan/10 border border-neon-cyan/30"
+																		class="mb-3 p-2 rounded bg-cyan-400/10 border border-cyan-400/30"
 																	>
 																		<p class="text-xs font-medium text-cyan-200 mb-2">
 																			Community Insights (Total votes: {totalVotes})
@@ -1278,7 +1278,7 @@
 																			{#each sortedByVotes.slice(0, 3) as topResponse}
 																				{#if topResponse.votes && topResponse.votes > 0}
 																					<div class="flex items-center justify-between text-xs">
-																						<span class="text-secondary flex-1 pr-2"
+																						<span class="text-slate-300 flex-1 pr-2"
 																							>{topResponse.text.slice(0, 50)}...</span
 																						>
 																						<div class="flex items-center gap-1 text-cyan-200">
@@ -1296,10 +1296,10 @@
 																<div class="space-y-2 max-h-40 overflow-y-auto">
 																	{#each sortedByVotes as response}
 																		<div
-																			class="rounded border border-surface-accent panel p-2 text-xs"
+																			class="rounded border border-slate-800 bg-slate-900/70 p-2 text-xs"
 																		>
 																			<div
-																				class="flex items-center justify-between text-secondary mb-1"
+																				class="flex items-center justify-between text-slate-400 mb-1"
 																			>
 																				<span
 																					>{participantsList.find(
@@ -1308,7 +1308,7 @@
 																				>
 																				{#if votingEnabled}
 																					<button
-																						class="inline-flex items-center gap-1 rounded border border-neon-cyan/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
+																						class="inline-flex items-center gap-1 rounded border border-cyan-400/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
 																						on:click={() => toggleVote(response.id)}
 																						disabled={activePhase && !phaseRemainingMs}
 																					>
@@ -1316,18 +1316,18 @@
 																						{response.votes ?? 0}
 																					</button>
 																				{:else}
-																					<span class="inline-flex items-center gap-1 text-secondary text-xs">
+																					<span class="inline-flex items-center gap-1 text-slate-500 text-xs">
 																						<IconThumbUp class="h-3 w-3" />
 																						{response.votes ?? 0}
 																					</span>
 																				{/if}
 																			</div>
-																			<p class="text-secondary">{response.text}</p>
+																			<p class="text-slate-200">{response.text}</p>
 																			{#if response.cards?.length}
 																				<div class="mt-1 flex flex-wrap gap-1">
 																					{#each response.cards as card}
 																						<span
-																							class="px-1 py-0.5 text-xs rounded bg-neon-cyan/20 text-cyan-300"
+																							class="px-1 py-0.5 text-xs rounded bg-cyan-400/20 text-cyan-300"
 																							>{card}</span
 																						>
 																					{/each}
@@ -1345,13 +1345,13 @@
 
 										{#if Array.isArray(phase.dashboards) && phase.dashboards.length}
 											<div class="mt-6">
-												<p class="text-xs uppercase tracking-[0.3em] text-secondary mb-2">
+												<p class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-2">
 													Recommended dashboards
 												</p>
 												<div class="flex flex-wrap gap-2">
 													{#each phase.dashboards as dashboard}
 														<span
-															class="rounded-full border border-neon-cyan/30 px-3 py-1 text-xs text-cyan-200"
+															class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200"
 															>{dashboardLabels[dashboard] ?? dashboard}</span
 														>
 													{/each}
@@ -1364,14 +1364,14 @@
 						</div>
 
 						<div class="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-							<div class="rounded-xl border border-neon-cyan/20 panel p-4 space-y-4">
+							<div class="rounded-xl border border-cyan-400/20 bg-slate-900/60 p-4 space-y-4">
 								<div class="flex items-center justify-between">
 									<h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
 										Breakout Rounds
 									</h3>
 									{#if sessionInfo?.active_round}
 										<button
-											class="text-xs rounded-lg border border-neon-cyan/40 px-3 py-1 text-cyan-200 hover:border-cyan-300 transition"
+											class="text-xs rounded-lg border border-cyan-400/40 px-3 py-1 text-cyan-200 hover:border-cyan-300 transition"
 											on:click={clearActiveRound}
 											disabled={roundUpdating}
 										>
@@ -1380,9 +1380,9 @@
 									{/if}
 								</div>
 								{#if sessionInfo?.active_round}
-									<div class="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 p-3">
+									<div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
 										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Active Round</p>
-										<p class="mt-2 text-sm font-semibold text-primary">
+										<p class="mt-2 text-sm font-semibold text-slate-100">
 											{sessionInfo.active_round}
 										</p>
 										{#if roundCountdownLabel}
@@ -1392,51 +1392,51 @@
 										{/if}
 									</div>
 								{:else}
-									<p class="text-sm text-secondary">No active breakout round.</p>
+									<p class="text-sm text-slate-400">No active breakout round.</p>
 								{/if}
 								<div class="max-h-48 space-y-2 overflow-y-auto pr-1">
 									{#if templateLoading}
-										<p class="text-sm text-secondary">Loading template rounds…</p>
+										<p class="text-sm text-slate-400">Loading template rounds…</p>
 									{:else if templateError}
 										<p class="text-sm text-rose-300">{templateError}</p>
 									{:else if templateRounds.length}
 										{#each templateRounds as round}
 											<button
-												class="w-full rounded-lg border border-neon-cyan/30 px-3 py-2 text-left text-sm text-cyan-100 hover:border-cyan-300 transition"
+												class="w-full rounded-lg border border-cyan-400/30 px-3 py-2 text-left text-sm text-cyan-100 hover:border-cyan-300 transition"
 												on:click={() => startTemplateRound(round)}
 												disabled={roundUpdating ||
 													sessionInfo?.active_round === (round.name ?? round.key)}
 											>
-												<span class="font-semibold text-primary"
+												<span class="font-semibold text-slate-100"
 													>{round.name ?? round.key ?? 'Round'}</span
 												>
 												<span class="ml-2 text-xs text-cyan-200">{round.minutes ?? '?'} min</span>
 											</button>
 										{/each}
 									{:else}
-										<p class="text-sm text-secondary">
+										<p class="text-sm text-slate-400">
 											This template does not define breakout rounds.
 										</p>
 									{/if}
 								</div>
 							</div>
 
-							<div class="rounded-xl border border-retro-purple/20 panel p-4 space-y-3">
+							<div class="rounded-xl border border-purple-400/20 bg-slate-900/60 p-4 space-y-3">
 								<h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-purple-200">
 									Custom Timer
 								</h3>
-								<label class="flex flex-col gap-2 text-xs text-secondary">
+								<label class="flex flex-col gap-2 text-xs text-slate-300">
 									Label
 									<input
-										class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
+										class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-purple-400 focus:outline-none"
 										placeholder="e.g., Reflection Sprint"
 										bind:value={customLabel}
 									/>
 								</label>
-								<label class="flex flex-col gap-2 text-xs text-secondary">
+								<label class="flex flex-col gap-2 text-xs text-slate-300">
 									Minutes
 									<input
-										class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
+										class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-purple-400 focus:outline-none"
 										type="number"
 										min="1"
 										step="1"
@@ -1445,7 +1445,7 @@
 									/>
 								</label>
 								<button
-									class="w-full rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-primary hover:from-retro-purple hover:to-neon-cyan transition"
+									class="w-full rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:from-purple-400 hover:to-cyan-400 transition"
 									on:click={startCustomRound}
 									disabled={roundUpdating}
 								>
@@ -1458,9 +1458,9 @@
 
 				<section class="grid gap-6 md:grid-cols-3">
 					{#if sessionInfo.challenge}
-						<div class="md:col-span-3 rounded-xl border border-neon-cyan/30 bg-neon-cyan/10 p-4">
+						<div class="md:col-span-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4">
 							<p class="text-xs uppercase tracking-[0.3em] text-cyan-100 mb-2">Challenge Focus</p>
-							<div class="text-base text-primary">
+							<div class="text-base text-slate-100">
 								<PortableText value={sessionInfo.challenge} styleClass="prose prose-slate" />
 							</div>
 							<p class="mt-3 text-xs text-cyan-100/80">
@@ -1469,10 +1469,10 @@
 						</div>
 					{/if}
 					{#if sessionInfo.active_round}
-						<div class="md:col-span-3 rounded-xl border border-retro-purple/30 bg-purple-500/10 p-4">
+						<div class="md:col-span-3 rounded-xl border border-purple-400/30 bg-purple-500/10 p-4">
 							<p class="text-xs uppercase tracking-[0.3em] text-purple-200">Active Round</p>
 							<div class="mt-2 flex flex-wrap items-center gap-3">
-								<span class="text-sm font-semibold text-primary">{sessionInfo.active_round}</span>
+								<span class="text-sm font-semibold text-white">{sessionInfo.active_round}</span>
 								{#if roundCountdownLabel}
 									<span
 										class="rounded-full border border-purple-300/40 px-3 py-1 text-xs text-purple-100"
@@ -1486,24 +1486,24 @@
 							</p>
 						</div>
 					{/if}
-					<div class="rounded-xl border border-surface-accent panel p-4">
-						<p class="text-xs uppercase tracking-[0.3em] text-secondary">Current Step</p>
-						<p class="mt-2 text-lg font-semibold text-primary">{sessionInfo.status ?? 'planned'}</p>
-						<p class="text-sm text-secondary mt-1">
+					<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+						<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Current Step</p>
+						<p class="mt-2 text-lg font-semibold text-white">{sessionInfo.status ?? 'planned'}</p>
+						<p class="text-sm text-slate-400 mt-1">
 							The facilitator will cue the next collaborative activity for the group.
 						</p>
 					</div>
-					<div class="rounded-xl border border-surface-accent panel p-4">
-						<p class="text-xs uppercase tracking-[0.3em] text-secondary">Active Questions</p>
-						<p class="mt-2 text-lg font-semibold text-primary">{questionsList.length}</p>
-						<p class="text-sm text-secondary mt-1">
+					<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+						<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Active Questions</p>
+						<p class="mt-2 text-lg font-semibold text-white">{questionsList.length}</p>
+						<p class="text-sm text-slate-400 mt-1">
 							Reflect across the lenses defined in your session blueprint.
 						</p>
 					</div>
-					<div class="rounded-xl border border-surface-accent panel p-4">
-						<p class="text-xs uppercase tracking-[0.3em] text-secondary">Ideas Shared</p>
-						<p class="mt-2 text-lg font-semibold text-primary">{responsesList.length}</p>
-						<p class="text-sm text-secondary mt-1">
+					<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+						<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Ideas Shared</p>
+						<p class="mt-2 text-lg font-semibold text-white">{responsesList.length}</p>
+						<p class="text-sm text-slate-400 mt-1">
 							Vote on responses that advance equity-centered planning.
 						</p>
 					</div>
@@ -1511,11 +1511,11 @@
 
 				<!-- Dashboard Section: Facilitator Only -->
 				{#if isFacilitator()}
-					<section class="rounded-2xl border border-surface-accent panel p-4 md:p-6">
+					<section class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 md:p-6">
 						<nav class="flex gap-2 md:gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
 						{#if availableDashboards.includes('roadmap')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'roadmap')}
 							>
 								<IconMap class="h-4 w-4 flex-shrink-0" />
@@ -1524,7 +1524,7 @@
 						{/if}
 						{#if availableDashboards.includes('wordcloud')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'wordcloud' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'wordcloud' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'wordcloud')}
 							>
 								<IconCloud class="h-4 w-4 flex-shrink-0" />
@@ -1534,7 +1534,7 @@
 						{/if}
 						{#if availableDashboards.includes('response-landscape')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'response-landscape' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'response-landscape' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'response-landscape')}
 							>
 								<IconChartDots3 class="h-4 w-4 flex-shrink-0" />
@@ -1542,14 +1542,14 @@
 							</button>
 						{/if}
 						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'timeline' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'timeline' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'timeline')}
 						>
 							<IconFlame class="h-4 w-4 flex-shrink-0" />
 							Timeline
 						</button>
 						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'chat' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'chat' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'chat')}
 						>
 							<IconMessage class="h-4 w-4 flex-shrink-0" />
@@ -1558,7 +1558,7 @@
 						</button>
 						{#if isFacilitator()}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-cyan-500 text-slate-900 font-semibold' : 'border border-slate-700 text-slate-300 hover:border-cyan-400/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'participants')}
 							>
 								<IconUsers class="h-4 w-4 flex-shrink-0" />
@@ -1574,13 +1574,13 @@
 							<div class="space-y-6">
 								<!-- Top Row: Two Smaller Charts Side by Side -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-4 h-80">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-80">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Participation Pulse</h3>
 										<div class="w-full h-60">
 											<ParticipationPulse roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
 										</div>
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-4 h-80">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4 h-80">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Inclusivity Meter</h3>
 										<div class="w-full h-60">
 											<InclusivityMeter roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
@@ -1589,19 +1589,19 @@
 								</div>
 
 								<!-- Main Chart Area: Full Width Below -->
-								<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-6">
+								<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-6">
 									{#if activeTab === 'roadmap'}
-										<h3 class="text-lg font-semibold text-primary mb-4">Roadmap Timeline</h3>
+										<h3 class="text-lg font-semibold text-white mb-4">Roadmap Timeline</h3>
 										<div class="w-full h-[520px] overflow-hidden">
 											<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
 										</div>
 									{:else if activeTab === 'wordcloud'}
-										<h3 class="text-lg font-semibold text-primary mb-4">Response Word Cloud</h3>
+										<h3 class="text-lg font-semibold text-white mb-4">Response Word Cloud</h3>
 										<div class="w-full h-[520px] overflow-hidden">
 											<WordCloudChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
 										</div>
 									{:else if activeTab === 'response-landscape'}
-										<h3 class="text-lg font-semibold text-primary mb-4">Response Landscape</h3>
+										<h3 class="text-lg font-semibold text-white mb-4">Response Landscape</h3>
 										<div class="w-full h-[520px] overflow-hidden">
 											<LandscapeChart
 												responses={responsesForViz}
@@ -1616,7 +1616,7 @@
 											/>
 										</div>
 									{:else if activeTab === 'participants'}
-										<h3 class="text-lg font-semibold text-primary mb-4">Advanced Analytics</h3>
+										<h3 class="text-lg font-semibold text-white mb-4">Advanced Analytics</h3>
 										<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 											<div class="h-[400px] overflow-hidden">
 												<h4 class="text-sm font-semibold text-cyan-200 mb-3">Quad Bubbles</h4>
@@ -1642,25 +1642,25 @@
 
 								<!-- Bottom Row: Leaderboard and Chat Side by Side -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-4">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Live Leaderboard</h3>
 										<div class="space-y-2 max-h-64 overflow-y-auto">
 											{#if leaderboardList.length > 0}
 												{#each leaderboardList.slice(0, 8) as participant, index}
-													<div class="flex items-center justify-between py-2 border-b border-surface-accent/50 last:border-0">
+													<div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
 														<div class="flex items-center gap-2">
 															<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
-															<span class="text-sm text-primary truncate">{participant.name}</span>
+															<span class="text-sm text-white truncate">{participant.name}</span>
 														</div>
 														<span class="text-xs text-cyan-200">{participant.points}pts</span>
 													</div>
 												{/each}
 											{:else}
-												<p class="text-xs text-secondary">No participants yet</p>
+												<p class="text-xs text-slate-400">No participants yet</p>
 											{/if}
 										</div>
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-4">
+									<div class="bg-slate-900/80 rounded-xl border border-cyan-400/20 p-4">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Quick Chat</h3>
 										<div class="h-48 overflow-y-auto mb-3 space-y-2">
 											{#if chatList.length > 0}
@@ -1668,11 +1668,11 @@
 													{@const participantName = participantsList.find((p) => p.id === message.participant_id)?.name ?? 'Guest'}
 													<div class="text-xs">
 														<span class="text-cyan-300 font-semibold">{participantName}:</span>
-														<span class="text-secondary">{message.message}</span>
+														<span class="text-slate-300">{message.message}</span>
 													</div>
 												{/each}
 											{:else}
-												<p class="text-xs text-secondary">No messages yet</p>
+												<p class="text-xs text-slate-400">No messages yet</p>
 											{/if}
 										</div>
 										<div class="flex gap-2">
@@ -1680,11 +1680,11 @@
 												bind:value={chatMessage}
 												on:keydown={(e) => e.key === 'Enter' && submitChatMessage()}
 												placeholder="Type message..."
-												class="flex-1 surface-muted border border-surface-accent rounded px-3 py-2 text-sm text-primary placeholder:text-secondary"
+												class="flex-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-white placeholder:text-slate-500"
 											/>
 											<button
 												on:click={submitChatMessage}
-												class="px-3 py-2 bg-cyan-600 text-primary rounded hover:bg-cyan-500 transition"
+												class="px-3 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-500 transition"
 											>
 												<IconSend class="h-4 w-4" />
 											</button>
@@ -1697,14 +1697,14 @@
 							<div class="mt-6 flex justify-center">
 								<button
 									on:click={() => (dashboardMode = 'classic')}
-									class="px-4 py-2 surface-input text-secondary rounded-lg hover:bg-surface-muted text-sm transition"
+									class="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 text-sm transition"
 								>
 									Switch to Classic View
 								</button>
 							</div>
 						{:else}
 							<!-- Classic Dashboard Layout -->
-							<div class="rounded-xl border border-surface-accent bg-slate-900/80 p-4 overflow-x-auto">
+							<div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4 overflow-x-auto">
 								{#if activeTab === 'roadmap'}
 									<div class="min-w-[350px]">
 										<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
@@ -1726,16 +1726,16 @@
 								{:else if activeTab === 'timeline'}
 									<div class="space-y-4">
 										{#each timelineList as item}
-											<div class="rounded-lg border border-surface-accent panel p-4">
+											<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
 												<div class="flex items-center justify-between">
 													<span
-														class="inline-flex items-center gap-2 rounded-full border border-neon-cyan/40 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
+														class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
 														>{item.label}</span
 													>
-													<span class="text-xs text-secondary">{item.created_at}</span>
+													<span class="text-xs text-slate-400">{item.created_at}</span>
 												</div>
-												<p class="mt-3 text-sm text-secondary">{item.item_text}</p>
-												<div class="mt-2 text-xs text-secondary flex flex-wrap gap-4">
+												<p class="mt-3 text-sm text-slate-200">{item.item_text}</p>
+												<div class="mt-2 text-xs text-slate-400 flex flex-wrap gap-4">
 													{#if item.owner}<span>Owner: {item.owner}</span>{/if}
 													{#if item.metric}<span>Metric: {item.metric}</span>{/if}
 													{#if item.risk_note}<span>Risk: {item.risk_note}</span>{/if}
@@ -1744,7 +1744,7 @@
 										{/each}
 										{#if isFacilitator()}
 											<button
-												class="mt-2 inline-flex items-center gap-2 rounded-lg border border-neon-cyan/40 px-4 py-2 text-sm text-cyan-200 hover:border-cyan-300 transition-colors"
+												class="mt-2 inline-flex items-center gap-2 rounded-lg border border-cyan-400/40 px-4 py-2 text-sm text-cyan-200 hover:border-cyan-300 transition-colors"
 												on:click={() => (timelineModalOpen = true)}
 											>
 												<IconPlus class="h-4 w-4" />
@@ -1756,27 +1756,27 @@
 									<div class="flex flex-col gap-4">
 										<div class="max-h-80 space-y-3 overflow-y-auto pr-2">
 											{#each chatList as entry}
-												<div class="rounded-lg border border-surface-accent panel p-3">
-													<div class="flex items-center justify-between text-xs text-secondary">
+												<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
+													<div class="flex items-center justify-between text-xs text-slate-400">
 														<span
 															>{participantsList.find((p) => p.id === entry.participant_id)?.name ??
 																'Anonymous'}</span
 														>
 														<span>{entry.created_at}</span>
 													</div>
-													<p class="mt-2 text-sm text-secondary">{entry.message}</p>
+													<p class="mt-2 text-sm text-slate-200">{entry.message}</p>
 												</div>
 											{/each}
 										</div>
 										<form class="flex gap-3" on:submit|preventDefault={submitChatMessage}>
 											<input
-												class="flex-1 rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary placeholder:text-secondary focus:border-neon-cyan focus:outline-none"
+												class="flex-1 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
 												placeholder="Share a quick note for the room"
 												bind:value={chatMessage}
 											/>
 											<button
 												type="submit"
-												class="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-primary hover:bg-neon-cyan transition-colors"
+												class="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-cyan-400 transition-colors"
 											>
 												<IconSend class="h-4 w-4" />
 												Send
@@ -1786,10 +1786,10 @@
 								{:else if activeTab === 'participants'}
 									<div class="space-y-4">
 										<div class="flex items-center justify-between">
-											<h3 class="text-lg font-semibold text-primary">
+											<h3 class="text-lg font-semibold text-white">
 												Participant Activity Dashboard
 											</h3>
-											<span class="text-sm text-secondary"
+											<span class="text-sm text-slate-400"
 												>{participantActivity.length} participants</span
 											>
 										</div>
@@ -1800,28 +1800,28 @@
 												<p class="text-xs uppercase tracking-wide text-green-200">
 													Recently Active
 												</p>
-												<p class="text-xl font-semibold text-primary">
+												<p class="text-xl font-semibold text-white">
 													{participantActivity.filter((p) => p.isRecent).length}
 												</p>
 												<p class="text-xs text-green-100/80">Last 5 minutes</p>
 											</div>
-											<div class="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 p-3">
+											<div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
 												<p class="text-xs uppercase tracking-wide text-cyan-200">Total Responses</p>
-												<p class="text-xl font-semibold text-primary">
+												<p class="text-xl font-semibold text-white">
 													{participantActivity.reduce((sum, p) => sum + p.responseCount, 0)}
 												</p>
 												<p class="text-xs text-cyan-100/80">Ideas shared</p>
 											</div>
-											<div class="rounded-lg border border-retro-purple/30 bg-retro-purple/10 p-3">
+											<div class="rounded-lg border border-purple-400/30 bg-purple-400/10 p-3">
 												<p class="text-xs uppercase tracking-wide text-purple-200">Total Votes</p>
-												<p class="text-xl font-semibold text-primary">
+												<p class="text-xl font-semibold text-white">
 													{participantActivity.reduce((sum, p) => sum + p.totalVotes, 0)}
 												</p>
 												<p class="text-xs text-purple-100/80">Votes cast</p>
 											</div>
 											<div class="rounded-lg border border-yellow-400/30 bg-yellow-400/10 p-3">
 												<p class="text-xs uppercase tracking-wide text-yellow-200">Chat Messages</p>
-												<p class="text-xl font-semibold text-primary">
+												<p class="text-xl font-semibold text-white">
 													{participantActivity.reduce((sum, p) => sum + p.chatCount, 0)}
 												</p>
 												<p class="text-xs text-yellow-100/80">Messages sent</p>
@@ -1831,20 +1831,20 @@
 										<!-- Participant List -->
 										<div class="space-y-3">
 											{#each participantActivity as participant}
-												<div class="rounded-lg border border-surface-accent panel p-4">
+												<div class="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
 													<div class="flex items-center justify-between">
 														<div class="flex items-center gap-3">
 															<div
-																class="w-10 h-10 rounded-full flex items-center justify-center text-primary font-semibold"
+																class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
 																style="background-color: {participant.color}"
 															>
 																{participant.name.charAt(0).toUpperCase()}
 															</div>
 															<div>
 																<div class="flex items-center gap-2">
-																	<span class="font-medium text-primary">{participant.name}</span>
+																	<span class="font-medium text-white">{participant.name}</span>
 																	<span
-																		class="px-2 py-1 text-xs rounded-full surface-input text-secondary"
+																		class="px-2 py-1 text-xs rounded-full bg-slate-700 text-slate-300"
 																	>
 																		{participant.role}
 																	</span>
@@ -1855,7 +1855,7 @@
 																		></span>
 																	{/if}
 																</div>
-																<div class="flex items-center gap-4 text-xs text-secondary mt-1">
+																<div class="flex items-center gap-4 text-xs text-slate-400 mt-1">
 																	<span>Last: {participant.lastActivity}</span>
 																	{#if participant.minutesSinceActivity < 60}
 																		<span>{participant.minutesSinceActivity}m ago</span>
@@ -1875,26 +1875,26 @@
 															<div class="text-lg font-semibold text-cyan-200">
 																{participant.activityScore}
 															</div>
-															<div class="text-xs text-secondary">activity score</div>
+															<div class="text-xs text-slate-400">activity score</div>
 														</div>
 													</div>
 
 													<div class="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-														<div class="text-center p-2 rounded surface-muted/60">
-															<div class="font-medium text-primary">{participant.responseCount}</div>
-															<div class="text-xs text-secondary">responses</div>
+														<div class="text-center p-2 rounded bg-slate-800/60">
+															<div class="font-medium text-white">{participant.responseCount}</div>
+															<div class="text-xs text-slate-400">responses</div>
 														</div>
-														<div class="text-center p-2 rounded surface-muted/60">
-															<div class="font-medium text-primary">{participant.totalVotes}</div>
-															<div class="text-xs text-secondary">votes</div>
+														<div class="text-center p-2 rounded bg-slate-800/60">
+															<div class="font-medium text-white">{participant.totalVotes}</div>
+															<div class="text-xs text-slate-400">votes</div>
 														</div>
-														<div class="text-center p-2 rounded surface-muted/60">
-															<div class="font-medium text-primary">{participant.chatCount}</div>
-															<div class="text-xs text-secondary">chats</div>
+														<div class="text-center p-2 rounded bg-slate-800/60">
+															<div class="font-medium text-white">{participant.chatCount}</div>
+															<div class="text-xs text-slate-400">chats</div>
 														</div>
-														<div class="text-center p-2 rounded surface-muted/60">
-															<div class="font-medium text-primary">{participant.points}</div>
-															<div class="text-xs text-secondary">points</div>
+														<div class="text-center p-2 rounded bg-slate-800/60">
+															<div class="font-medium text-white">{participant.points}</div>
+															<div class="text-xs text-slate-400">points</div>
 														</div>
 													</div>
 
@@ -1919,7 +1919,7 @@
 								<div class="mt-4 flex justify-center">
 									<button
 										on:click={() => (dashboardMode = 'immersive')}
-										class="px-4 py-2 bg-cyan-600 text-primary rounded-lg hover:bg-cyan-500 text-sm"
+										class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 text-sm"
 									>
 										Switch to Immersive Dashboard
 									</button>
@@ -1933,26 +1933,26 @@
 				<!-- Leaderboard and QR Code Section: Facilitator Only -->
 				{#if isFacilitator()}
 					<section class="grid gap-6 lg:grid-cols-2">
-					<div class="rounded-2xl border border-surface-accent panel p-6">
-						<h2 class="text-lg font-semibold text-primary">Leaderboard</h2>
-						<p class="text-sm text-secondary">
+					<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+						<h2 class="text-lg font-semibold text-white">Leaderboard</h2>
+						<p class="text-sm text-slate-400">
 							Points reflect contributions, votes earned, and justice prompts.
 						</p>
 						<ul class="mt-4 space-y-3">
 							{#each leaderboardList as player, index}
 								<li
-									class="flex items-center justify-between rounded-lg border border-surface-accent panel px-3 py-2"
+									class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2"
 								>
 									<div class="flex items-center gap-3">
-										<span class="text-xs text-secondary">#{index + 1}</span>
+										<span class="text-xs text-slate-400">#{index + 1}</span>
 										<span
-											class="h-8 w-8 rounded-full border border-surface-accent flex items-center justify-center font-semibold"
+											class="h-8 w-8 rounded-full border border-slate-600 flex items-center justify-center font-semibold"
 											style={`background:${player.color}`}
 											>{player.name?.charAt(0)?.toUpperCase() ?? '?'}</span
 										>
 										<div>
-											<p class="text-sm text-primary">{player.name}</p>
-											<p class="text-xs text-secondary">{player.badges?.length ?? 0} badges</p>
+											<p class="text-sm text-white">{player.name}</p>
+											<p class="text-xs text-slate-400">{player.badges?.length ?? 0} badges</p>
 										</div>
 									</div>
 									<span class="font-mono text-cyan-200">{player.points ?? 0} pts</span>
@@ -1961,19 +1961,19 @@
 						</ul>
 					</div>
 
-					<div class="rounded-2xl border border-surface-accent panel p-6">
-						<h2 class="text-lg font-semibold text-primary">QR Code</h2>
-						<p class="text-sm text-secondary">New participants can scan to join instantly.</p>
+					<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
+						<h2 class="text-lg font-semibold text-white">QR Code</h2>
+						<p class="text-sm text-slate-400">New participants can scan to join instantly.</p>
 						<div class="mt-4 flex justify-center">
 							{#if qrSrc}
 								<img
-									class="h-40 w-40 rounded-lg border border-surface-accent surface p-2"
+									class="h-40 w-40 rounded-lg border border-slate-700 bg-white p-2"
 									alt="Join session QR code"
 									src={qrSrc}
 								/>
 							{/if}
 						</div>
-						<p class="mt-3 text-center text-xs text-secondary">/join?code={sessionCode}</p>
+						<p class="mt-3 text-center text-xs text-slate-500">/join?code={sessionCode}</p>
 					</div>
 					</section>
 				{/if}
@@ -1985,13 +1985,13 @@
 		<!-- {#if isMobile}
 			<button
 				on:click={() => cardStore.toggleCardPanel()}
-				class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500 text-primary shadow-lg shadow-cyan-500/50 transition hover:bg-neon-cyan active:scale-95"
+				class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500 text-slate-900 shadow-lg shadow-cyan-500/50 transition hover:bg-cyan-400 active:scale-95"
 				aria-label="Open card panel"
 			>
 				<IconCards class="h-6 w-6" />
 				{#if selectedCards.length > 0}
 					<span
-						class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-xs font-bold text-primary"
+						class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-xs font-bold text-white"
 					>
 						{selectedCards.length}
 					</span>
@@ -2027,8 +2027,8 @@
 	<div
 		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white flex items-center justify-center"
 	>
-		<div class="rounded-2xl border border-surface-accent bg-slate-900/80 px-6 py-10 text-center">
-			<p class="text-sm text-secondary">Loading session…</p>
+		<div class="rounded-2xl border border-slate-700 bg-slate-900/80 px-6 py-10 text-center">
+			<p class="text-sm text-slate-300">Loading session…</p>
 		</div>
 	</div>
 {/if}
@@ -2051,18 +2051,18 @@
 		box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
 	}
 
-	.session-shell :global(.surface-muted\/60),
-	.session-shell :global(.surface-muted\/50),
-	.session-shell :global(.surface-muted\/40),
-	.session-shell :global(.surface-muted\/30),
-	.session-shell :global(.surface-input) {
+	.session-shell :global(.bg-slate-800\/60),
+	.session-shell :global(.bg-slate-800\/50),
+	.session-shell :global(.bg-slate-800\/40),
+	.session-shell :global(.bg-slate-800\/30),
+	.session-shell :global(.bg-slate-700) {
 		background: hsl(var(--surface-elevated)) !important;
 		color: hsl(var(--text-secondary)) !important;
 	}
 
-	.session-shell :global(.border-surface-accent),
-	.session-shell :global(.border-surface-accent),
-	.session-shell :global(.border-surface-accent) {
+	.session-shell :global(.border-slate-800),
+	.session-shell :global(.border-slate-700),
+	.session-shell :global(.border-slate-600) {
 		border-color: hsl(var(--border-subtle)) !important;
 	}
 
@@ -2080,29 +2080,29 @@
 		color: hsl(var(--text-muted));
 	}
 
-	.session-shell :global(.text-secondary),
-	.session-shell :global(.text-secondary),
-	.session-shell :global(.text-secondary) {
+	.session-shell :global(.text-slate-300),
+	.session-shell :global(.text-slate-400),
+	.session-shell :global(.text-slate-500) {
 		color: hsl(var(--text-secondary)) !important;
 	}
 
-	.session-shell :global(.text-primary),
-	.session-shell :global(.text-primary) {
+	.session-shell :global(.text-white),
+	.session-shell :global(.text-slate-100) {
 		color: hsl(var(--text-primary)) !important;
 	}
 </style>
 {#if responseModalOpen}
-	<div class="fixed inset-0 z-50 flex items-center justify-center panel backdrop-blur">
-		<div class="w-full max-w-xl rounded-2xl border border-surface-accent bg-slate-900/90 p-6">
-			<h2 class="text-lg font-semibold text-primary">Share your response</h2>
-			<p class="mt-1 text-sm text-secondary">
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur">
+		<div class="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900/90 p-6">
+			<h2 class="text-lg font-semibold text-white">Share your response</h2>
+			<p class="mt-1 text-sm text-slate-400">
 				Link cards to earn bonus points and center your thinking.
 			</p>
 			<div class="mt-4 space-y-4">
-				<div class="flex flex-col gap-2 text-sm text-secondary">
+				<div class="flex flex-col gap-2 text-sm text-slate-300">
 					Prompt
-					<div class="rounded-lg border border-surface-accent panel px-3 py-2">
-						<p class="text-sm text-primary leading-relaxed">
+					<div class="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2">
+						<p class="text-sm text-white leading-relaxed">
 							{#if currentQuestion}
 								{#if currentQuestion.section}
 									<strong class="text-cyan-300 mr-1">{currentQuestion.section}:</strong>
@@ -2116,7 +2116,7 @@
 				</div>
 				{#if modalResponseType === 'scale'}
 					<!-- Scale / Slider Input -->
-					<label class="flex flex-col gap-2 text-sm text-secondary">
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
 						Your rating ({scaleMin}-{scaleMax})
 						<div class="space-y-2">
 							<input
@@ -2124,24 +2124,24 @@
 								min={scaleMin}
 								max={scaleMax}
 								step="1"
-								class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-cyan-500"
+								class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
 								bind:value={responseText}
 							/>
 							<div class="flex justify-between text-xs">
-								<span class="text-secondary">{scaleMinLabel}</span>
+								<span class="text-slate-400">{scaleMinLabel}</span>
 								<span class="text-cyan-300 font-bold text-lg">{responseText || scaleMin}</span>
-								<span class="text-secondary">{scaleMaxLabel}</span>
+								<span class="text-slate-400">{scaleMaxLabel}</span>
 							</div>
 						</div>
 					</label>
 
 				{:else if modalResponseType === 'singleChoice'}
 					<!-- Single Choice Radio Buttons -->
-					<label class="flex flex-col gap-2 text-sm text-secondary">
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
 						Select one option
 						<div class="space-y-2">
 							{#each modalOptions as option}
-								<label class="flex items-center gap-2 p-2 rounded border border-surface-accent bg-slate-900/50 hover:border-neon-cyan/50 cursor-pointer">
+								<label class="flex items-center gap-2 p-2 rounded border border-slate-700 bg-slate-900/50 hover:border-cyan-400/50 cursor-pointer">
 									<input
 										type="radio"
 										name="response-choice"
@@ -2149,7 +2149,7 @@
 										bind:group={responseText}
 										class="accent-cyan-500"
 									/>
-									<span class="text-sm text-primary">{option}</span>
+									<span class="text-sm text-white">{option}</span>
 								</label>
 							{/each}
 						</div>
@@ -2158,11 +2158,11 @@
 				{:else if modalResponseType === 'multiSelect'}
 					<!-- Multi-Select Checkboxes -->
 					{@const selections = responseText ? responseText.split(',').map(s => s.trim()) : []}
-					<label class="flex flex-col gap-2 text-sm text-secondary">
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
 						Select all that apply
 						<div class="space-y-2 max-h-64 overflow-y-auto">
 							{#each modalOptions as option}
-								<label class="flex items-center gap-2 p-2 rounded border border-surface-accent bg-slate-900/50 hover:border-neon-cyan/50 cursor-pointer">
+								<label class="flex items-center gap-2 p-2 rounded border border-slate-700 bg-slate-900/50 hover:border-cyan-400/50 cursor-pointer">
 									<input
 										type="checkbox"
 										value={option}
@@ -2177,7 +2177,7 @@
 										}}
 										class="accent-cyan-500"
 									/>
-									<span class="text-sm text-primary">{option}</span>
+									<span class="text-sm text-white">{option}</span>
 								</label>
 							{/each}
 						</div>
@@ -2186,37 +2186,37 @@
 				{:else if modalResponseType === 'landscape'}
 					<!-- 2D Landscape Positioning -->
 					<div class="space-y-4">
-						<label class="flex flex-col gap-2 text-sm text-secondary">
+						<label class="flex flex-col gap-2 text-sm text-slate-300">
 							Label your position (optional)
 							<input
 								type="text"
-								class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+								class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
 								placeholder="Brief description..."
 								value={landscapeLabel}
 								on:input={handleLandscapeLabelInput}
 							/>
 						</label>
 						<div class="flex flex-col gap-2">
-							<label class="text-sm text-secondary">
+							<label class="text-sm text-slate-300">
 								{landscapeXLabel}: <span class="text-cyan-300 font-bold">{landscapeX}</span>
 								<input
 									type="range"
 									min={landscapeMinX}
 									max={landscapeMaxX}
 									step="0.1"
-									class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
+									class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
 									value={landscapeX}
 									on:input={(event) => handleLandscapeAxisChange('x', event)}
 								/>
 							</label>
-							<label class="text-sm text-secondary">
+							<label class="text-sm text-slate-300">
 								{landscapeYLabel}: <span class="text-cyan-300 font-bold">{landscapeY}</span>
 								<input
 									type="range"
 									min={landscapeMinY}
 									max={landscapeMaxY}
 									step="0.1"
-									class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
+									class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
 									value={landscapeY}
 									on:input={(event) => handleLandscapeAxisChange('y', event)}
 								/>
@@ -2226,10 +2226,10 @@
 
 				{:else}
 					<!-- Written / Text Response (default) -->
-					<label class="flex flex-col gap-2 text-sm text-secondary">
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
 						Your idea or insight
 						<textarea
-							class="min-h-[120px] rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+							class="min-h-[120px] rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
 							placeholder="Describe your thought, story, or challenge…"
 							bind:value={responseText}
 						/>
@@ -2240,11 +2240,11 @@
 				<!-- {#if selectedCards.length > 0}
 					<div class="flex flex-col gap-2">
 						<div class="flex items-center justify-between">
-							<p class="text-sm text-secondary">Your selected cards</p>
+							<p class="text-sm text-slate-300">Your selected cards</p>
 							<button
 								type="button"
 								on:click={() => (isMobile ? cardStore.setCardPanelOpen(true) : null)}
-								class="text-xs text-neon-cyan hover:text-cyan-300"
+								class="text-xs text-cyan-400 hover:text-cyan-300"
 							>
 								{isMobile ? 'View all cards' : 'See panel →'}
 							</button>
@@ -2252,14 +2252,14 @@
 						<div class="flex flex-wrap gap-2">
 							{#each selectedCards as card}
 								<div
-									class="flex items-center gap-2 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-3 py-1.5"
+									class="flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3 py-1.5"
 								>
 									<span class="text-xs font-bold text-cyan-300">{card.letter}</span>
 									<span class="text-xs text-cyan-200">{card.title}</span>
 								</div>
 							{/each}
 						</div>
-						<p class="text-xs text-secondary">
+						<p class="text-xs text-slate-500">
 							These cards will be automatically linked to your response
 						</p>
 					</div>
@@ -2267,13 +2267,13 @@
 			</div>
 			<div class="mt-6 flex items-center justify-end gap-3">
 				<button
-					class="rounded-lg border border-surface-accent px-4 py-2 text-sm text-secondary hover:border-slate-500"
+					class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:border-slate-500"
 					on:click={() => (responseModalOpen = false)}
 				>
 					Cancel
 				</button>
 				<button
-					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-primary hover:bg-neon-cyan disabled:opacity-50 disabled:cursor-not-allowed"
+					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
 					on:click={submitResponse}
 					disabled={activePhase && !phaseRemainingMs}
 				>
@@ -2285,14 +2285,14 @@
 {/if}
 
 {#if timelineModalOpen}
-	<div class="fixed inset-0 z-50 flex items-center justify-center panel backdrop-blur">
-		<div class="w-full max-w-lg rounded-2xl border border-surface-accent bg-slate-900/90 p-6">
-			<h2 class="text-lg font-semibold text-primary">Add roadmap entry</h2>
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur">
+		<div class="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900/90 p-6">
+			<h2 class="text-lg font-semibold text-white">Add roadmap entry</h2>
 			<div class="mt-4 space-y-4">
-				<label class="flex flex-col gap-2 text-sm text-secondary">
+				<label class="flex flex-col gap-2 text-sm text-slate-300">
 					Phase
 					<select
-						class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-primary focus:border-neon-cyan focus:outline-none"
+						class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
 						bind:value={timelineLabel}
 					>
 						<option value="Now">Now</option>
@@ -2300,36 +2300,36 @@
 						<option value="Later">Later</option>
 					</select>
 				</label>
-				<label class="flex flex-col gap-2 text-sm text-secondary">
+				<label class="flex flex-col gap-2 text-sm text-slate-300">
 					Item description
 					<textarea
-						class="min-h-[100px] rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+						class="min-h-[100px] rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
 						placeholder="What should we take forward?"
 						bind:value={timelineText}
 					/>
 				</label>
 				<div class="grid gap-3 md:grid-cols-2">
-					<label class="flex flex-col gap-2 text-sm text-secondary">
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
 						Owner
 						<input
-							class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+							class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
 							placeholder="Optional"
 							bind:value={timelineOwner}
 						/>
 					</label>
-					<label class="flex flex-col gap-2 text-sm text-secondary">
+					<label class="flex flex-col gap-2 text-sm text-slate-300">
 						Metric
 						<input
-							class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+							class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
 							placeholder="Optional"
 							bind:value={timelineMetric}
 						/>
 					</label>
 				</div>
-				<label class="flex flex-col gap-2 text-sm text-secondary">
+				<label class="flex flex-col gap-2 text-sm text-slate-300">
 					Risk note
 					<input
-						class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+						class="rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-cyan-400 focus:outline-none"
 						placeholder="Optional"
 						bind:value={timelineRisk}
 					/>
@@ -2337,13 +2337,13 @@
 			</div>
 			<div class="mt-6 flex items-center justify-end gap-3">
 				<button
-					class="rounded-lg border border-surface-accent px-4 py-2 text-sm text-secondary hover:border-slate-500"
+					class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:border-slate-500"
 					on:click={() => (timelineModalOpen = false)}
 				>
 					Cancel
 				</button>
 				<button
-					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-primary hover:bg-neon-cyan"
+					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-400"
 					on:click={submitTimelineItem}
 				>
 					Add to roadmap

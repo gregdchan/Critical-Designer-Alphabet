@@ -73,11 +73,11 @@
 
 {#if $sessionInfo}
 	<div
-		class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-brand/20 bg-white/85 px-4 py-2 text-sm text-slate-700 shadow-sm backdrop-blur"
+		class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-brand/20 surface/85 px-4 py-2 text-sm text-primary shadow-sm backdrop-blur"
 	>
 		<div class="flex items-center gap-2">
 			<span class="inline-block h-3 w-3 rounded-full bg-success animate-pulse"></span>
-			<span class="font-semibold text-slate-900">Session Active:</span>
+			<span class="font-semibold text-primary">Session Active:</span>
 			<span class="ml-1 font-mono text-brand-soft">{$sessionInfo.code}</span>
 		</div>
 		<button
@@ -99,7 +99,7 @@
 			>
 				Live Session Arcade
 			</h1>
-			<p class="text-lg text-slate-600">
+			<p class="text-lg text-secondary">
 				Choose how you want to join the Critical Designer Alphabet experience. Facilitators launch
 				sessions, participants dive into collaborative play, and the presentation view keeps the
 				whole room in sync.
@@ -108,34 +108,34 @@
 
 		<div class="grid gap-6 md:grid-cols-3">
 			<button
-				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-slate-600 transition hover:-translate-y-1 hover:border-brand-soft/50 hover:shadow-lg"
+				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-secondary transition hover:-translate-y-1 hover:border-brand-soft/50 hover:shadow-lg"
 				on:click={openFacilitator}
 			>
 				<IconSparkles class="h-10 w-10 text-brand" />
-				<h2 class="text-lg font-semibold text-slate-900">Facilitator Console</h2>
-				<p class="text-sm text-slate-600 group-hover:text-slate-500">
+				<h2 class="text-lg font-semibold text-primary">Facilitator Console</h2>
+				<p class="text-sm text-secondary group-hover:text-secondary">
 					Create a session, pick templates, and guide inclusive planning.
 				</p>
 			</button>
 
 			<button
-				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-slate-600 transition hover:-translate-y-1 hover:border-secondary/40 hover:shadow-lg"
+				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-secondary transition hover:-translate-y-1 hover:border-secondary/40 hover:shadow-lg"
 				on:click={openPresentation}
 			>
 				<IconPresentationAnalytics class="h-10 w-10 text-secondary" />
-				<h2 class="text-lg font-semibold text-slate-900">Presentation View</h2>
-				<p class="text-sm text-slate-600 group-hover:text-slate-500">
+				<h2 class="text-lg font-semibold text-primary">Presentation View</h2>
+				<p class="text-sm text-secondary group-hover:text-secondary">
 					Broadcast live stats, heatmaps, and QR join codes on the big screen.
 				</p>
 			</button>
 
 			<button
-				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-slate-600 transition hover:-translate-y-1 hover:border-success/40 hover:shadow-lg"
+				class="group panel flex flex-col items-center gap-3 rounded-2xl px-6 py-8 text-left text-secondary transition hover:-translate-y-1 hover:border-success/40 hover:shadow-lg"
 				on:click={openJoin}
 			>
 				<IconUsers class="h-10 w-10 text-success" />
-				<h2 class="text-lg font-semibold text-slate-900">Participant Join</h2>
-				<p class="text-sm text-slate-600 group-hover:text-slate-500">
+				<h2 class="text-lg font-semibold text-primary">Participant Join</h2>
+				<p class="text-sm text-secondary group-hover:text-secondary">
 					Enter a code, pick a neon avatar, and start sharing inclusive insights.
 				</p>
 			</button>

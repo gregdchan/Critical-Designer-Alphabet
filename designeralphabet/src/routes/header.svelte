@@ -50,11 +50,11 @@
 	$: isInSession = $activePath.includes('/session/');
 </script>
 
-<header class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm">
+<header class="sticky top-0 z-40 border-b border-surface-accent surface/80 backdrop-blur-md shadow-sm">
 	<div class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
 		<a
 			href="/"
-			class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-700 transition hover:bg-slate-100"
+			class="flex items-center gap-3 rounded-lg px-3 py-2 text-primary transition hover:surface"
 			aria-label="Designer's Critical Alphabet home"
 			on:click={closeMenu}
 		>
@@ -63,7 +63,7 @@
 			</span>
 			<div class="flex flex-col text-left">
 				<span class="text-sm font-semibold">Critical Alphabet</span>
-				<span class="text-xs text-slate-500">Inclusive Planning</span>
+				<span class="text-xs text-secondary">Inclusive Planning</span>
 			</div>
 		</a>
 
@@ -74,7 +74,7 @@
 					class={`rounded-md px-3 py-2 text-sm font-medium transition ${
 						$activePath === link.href
 							? 'bg-blue-600 text-white shadow-sm'
-							: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+							: 'text-secondary hover:surface hover:text-primary'
 					}`}
 					aria-current={$activePath === link.href ? 'page' : undefined}
 				>
@@ -103,7 +103,7 @@
 				</a>
 			{/if}
 			<button
-				class="rounded-md border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-100 md:hidden"
+				class="rounded-md border border-surface-accent surface p-2 text-secondary transition hover:surface md:hidden"
 				type="button"
 				aria-expanded={menuOpen}
 				aria-label="Toggle navigation"
@@ -119,7 +119,7 @@
 	</div>
 
 	{#if menuOpen}
-		<div class="border-t border-slate-200 bg-white px-4 py-4 shadow-sm md:hidden">
+		<div class="border-t border-surface-accent surface px-4 py-4 shadow-sm md:hidden">
 			<nav class="flex flex-col gap-2" aria-label="Mobile navigation">
 				{#each links as link}
 					<a
@@ -127,7 +127,7 @@
 						class={`rounded-md px-3 py-2 text-sm font-medium transition ${
 							$activePath === link.href
 								? 'bg-blue-600 text-white shadow-sm'
-								: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+								: 'text-secondary hover:surface hover:text-primary'
 						}`}
 						aria-current={$activePath === link.href ? 'page' : undefined}
 						on:click={closeMenu}

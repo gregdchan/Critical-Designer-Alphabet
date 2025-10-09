@@ -307,32 +307,32 @@
 		<!-- Back Navigation -->
 		<button
 			on:click={goHome}
-			class="mb-4 flex items-center gap-2 text-secondary hover:text-primary transition-colors"
+			class="mb-4 flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
 		>
 			<ArrowLeft class="w-4 h-4" />
 			Back to Home
 		</button>
 
 		<div
-			class="panel backdrop-blur-sm rounded-2xl p-8 border border-neon-cyan/20 shadow-2xl"
+			class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-cyan-400/20 shadow-2xl"
 		>
 			<header class="text-center mb-8">
 				<div
-					class="w-16 h-16 bg-gradient-to-r from-neon-cyan to-retro-purple rounded-full flex items-center justify-center mx-auto mb-4"
+					class="w-16 h-16 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-4"
 				>
-					<UserPlus class="w-8 h-8 text-primary" />
+					<UserPlus class="w-8 h-8 text-white" />
 				</div>
 				<h1
-					class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-retro-purple mb-2"
+					class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2"
 				>
 					Join Session
 				</h1>
-				<p class="text-secondary">Enter your details to join the session</p>
+				<p class="text-slate-300">Enter your details to join the session</p>
 			</header>
 
 			<form on:submit|preventDefault={joinSession} class="space-y-6">
 				<div>
-					<label for="participantName" class="block text-sm font-medium text-secondary mb-2">
+					<label for="participantName" class="block text-sm font-medium text-slate-300 mb-2">
 						{joinAsFacilitator ? 'Facilitator Display Name (optional)' : 'Your Name'}
 					</label>
 					<input
@@ -340,13 +340,13 @@
 						type="text"
 						bind:value={participantName}
 						placeholder="Enter your name"
-						class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent transition-all"
+						class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
 						required={!joinAsFacilitator}
 					/>
 				</div>
 
 				<div>
-					<label for="sessionCode" class="block text-sm font-medium text-secondary mb-2">
+					<label for="sessionCode" class="block text-sm font-medium text-slate-300 mb-2">
 						Session Code
 					</label>
 					<input
@@ -354,16 +354,16 @@
 						type="text"
 						bind:value={sessionCode}
 						placeholder="Enter 6-character code"
-						class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent font-mono text-lg tracking-wider uppercase transition-all"
+						class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent font-mono text-lg tracking-wider uppercase transition-all"
 						maxlength="6"
 						required
 					/>
 				</div>
 
 				<div
-					class="flex items-center justify-between rounded-lg border border-surface-accent surface-muted px-4 py-3"
+					class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800/60 px-4 py-3"
 				>
-					<label class="flex items-center gap-2 text-sm text-secondary">
+					<label class="flex items-center gap-2 text-sm text-slate-200">
 						<input type="checkbox" bind:checked={joinAsFacilitator} />
 						I'm joining as the session facilitator
 					</label>
@@ -380,7 +380,7 @@
 
 				{#if joinAsFacilitator}
 					<div>
-						<label for="facilitatorEmail" class="block text-sm font-medium text-secondary mb-2">
+						<label for="facilitatorEmail" class="block text-sm font-medium text-slate-300 mb-2">
 							Facilitator Email
 						</label>
 						<input
@@ -388,10 +388,10 @@
 							type="email"
 							bind:value={facilitatorEmail}
 							placeholder="you@example.org"
-							class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent transition-all"
+							class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
 							required
 						/>
-						<p class="mt-2 text-xs text-secondary">
+						<p class="mt-2 text-xs text-slate-400">
 							Use the same email you provided when launching the session to regain facilitator
 							access.
 						</p>
@@ -401,7 +401,7 @@
 				<div role="group" aria-labelledby="avatar-color-label">
 					<p
 						id="avatar-color-label"
-						class="mb-3 flex items-center gap-2 text-sm font-medium text-secondary"
+						class="mb-3 flex items-center gap-2 text-sm font-medium text-slate-300"
 					>
 						<Palette class="w-4 h-4" />
 						Choose Your Avatar Color
@@ -413,8 +413,8 @@
 								on:click={() => (selectedColor = color.value)}
 								class="w-12 h-12 rounded-full border-2 transition-all hover:scale-110 {selectedColor ===
 								color.value
-									? 'border-white ring-2 ring-neon-cyan'
-									: 'border-surface-accent'}"
+									? 'border-white ring-2 ring-cyan-400'
+									: 'border-slate-600'}"
 								style="background-color: {color.value}"
 								title={color.name}
 							>
@@ -426,7 +426,7 @@
 							</button>
 						{/each}
 					</div>
-					<p class="text-xs text-secondary mt-2 text-center">
+					<p class="text-xs text-slate-400 mt-2 text-center">
 						Selected: {avatarColors.find((c) => c.value === selectedColor)?.name}
 					</p>
 				</div>
@@ -435,7 +435,7 @@
 					<button
 						type="submit"
 						disabled={loading}
-						class="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-neon-cyan hover:to-purple-500 text-primary font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+						class="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
 					>
 						{#if loading}
 							<div
@@ -450,9 +450,9 @@
 				</div>
 			</form>
 
-			<div class="mt-6 rounded-xl border border-surface-accent panel p-4">
+			<div class="mt-6 rounded-xl border border-slate-700 bg-slate-900/60 p-4">
 				{#if previewLoading}
-					<div class="flex items-center gap-3 text-secondary text-sm">
+					<div class="flex items-center gap-3 text-slate-300 text-sm">
 						<InfoCircle class="w-5 h-5 text-cyan-300 animate-pulse" />
 						Loading session blueprint…
 					</div>
@@ -465,34 +465,34 @@
 					<div class="space-y-4">
 						<div>
 							<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Session Blueprint</p>
-							<h2 class="mt-2 text-lg font-semibold text-primary">
+							<h2 class="mt-2 text-lg font-semibold text-white">
 								{sessionPreview.title ?? 'Untitled Session'}
 							</h2>
-							<p class="text-xs text-secondary">Code: {sessionCode.toUpperCase()}</p>
+							<p class="text-xs text-slate-400">Code: {sessionCode.toUpperCase()}</p>
 						</div>
 
 						{#if sessionPreview.challenge || templateBlueprint?.challenge}
-							<div class="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 p-3">
+							<div class="rounded-lg border border-cyan-400/30 bg-cyan-400/10 p-3">
 								<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Challenge Focus</p>
-								<p class="mt-2 text-sm text-primary">
+								<p class="mt-2 text-sm text-slate-100">
 									{sessionPreview.challenge ?? templateBlueprint?.challenge}
 								</p>
 							</div>
 						{/if}
 
 						{#if templateBlueprint?.description}
-							<p class="text-sm text-secondary leading-relaxed">
+							<p class="text-sm text-slate-300 leading-relaxed">
 								{templateBlueprint.description}
 							</p>
 						{/if}
 
 						{#if templateBlueprint?.lenses?.length}
 							<div>
-								<p class="text-xs uppercase tracking-[0.3em] text-secondary">Lenses</p>
+								<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Lenses</p>
 								<div class="mt-2 flex flex-wrap gap-2">
 									{#each templateBlueprint.lenses as lens}
 										<span
-											class="px-3 py-1 rounded-full border border-retro-purple/40 bg-retro-purple/10 text-xs text-purple-200"
+											class="px-3 py-1 rounded-full border border-purple-400/40 bg-purple-400/10 text-xs text-purple-200"
 										>
 											{lens}
 										</span>
@@ -502,23 +502,23 @@
 						{/if}
 					</div>
 				{:else}
-					<p class="flex items-start gap-3 text-sm text-secondary">
-						<InfoCircle class="w-5 h-5 text-secondary" />
+					<p class="flex items-start gap-3 text-sm text-slate-300">
+						<InfoCircle class="w-5 h-5 text-slate-400" />
 						Enter a 6-character session code to preview the focus and lenses before joining.
 					</p>
 				{/if}
 			</div>
 
-			<div class="mt-8 pt-6 border-t border-surface-accent">
-				<p class="text-xs text-secondary text-center">
+			<div class="mt-8 pt-6 border-t border-slate-700">
+				<p class="text-xs text-slate-400 text-center">
 					Don't have a session code? Contact your session lead.
 				</p>
 			</div>
 		</div>
 
-		<div class="mt-6 rounded-2xl border border-surface-accent panel p-6 shadow-lg">
+		<div class="mt-6 rounded-2xl border border-slate-700 bg-slate-800/50 p-6 shadow-lg">
 			<div class="flex items-center justify-between">
-				<h2 class="text-lg font-semibold text-primary">Recent Active Sessions</h2>
+				<h2 class="text-lg font-semibold text-white">Recent Active Sessions</h2>
 				<button
 					class="text-xs uppercase tracking-[0.2em] text-cyan-300 hover:text-cyan-100"
 					type="button"
@@ -530,22 +530,22 @@
 			{#if activeLoading}
 				<div class="flex items-center justify-center py-6">
 					<div
-						class="w-5 h-5 border-2 border-neon-cyan border-t-transparent rounded-full animate-spin"
+						class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"
 					></div>
-					<span class="ml-3 text-secondary">Loading sessions...</span>
+					<span class="ml-3 text-slate-300">Loading sessions...</span>
 				</div>
 			{:else if activeError}
 				<div class="text-center py-6">
 					<p class="text-rose-300 mb-3">{activeError}</p>
 					<button
-						class="px-3 py-2 surface-input hover:surface-muted text-primary rounded-lg transition-colors text-sm"
+						class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm"
 						on:click={loadActiveSessions}
 					>
 						Try Again
 					</button>
 				</div>
 			{:else if activeSessions.length === 0}
-				<p class="mt-4 text-sm text-secondary text-center py-4">
+				<p class="mt-4 text-sm text-slate-400 text-center py-4">
 					No active sessions right now. Check back soon!
 				</p>
 			{:else}
@@ -553,12 +553,12 @@
 					{#each activeSessions as session}
 						<button
 							type="button"
-							class="flex items-center justify-between rounded-xl border border-surface-accent panel px-4 py-3 text-left transition hover:border-neon-cyan/40 hover:bg-surface-muted"
+							class="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-left transition hover:border-cyan-400/40 hover:bg-slate-900/90"
 							on:click={() => chooseSession(session.code)}
 						>
 							<div class="flex-1">
 								<div class="flex items-center gap-2 mb-1">
-									<span class="text-sm font-semibold text-primary">
+									<span class="text-sm font-semibold text-white">
 										{session.title ?? 'Untitled Session'}
 									</span>
 									<span
@@ -569,12 +569,12 @@
 										{session.status}
 									</span>
 								</div>
-								<div class="flex items-center gap-3 text-xs text-secondary">
+								<div class="flex items-center gap-3 text-xs text-slate-400">
 									<span class="font-mono">{session.code}</span>
 									<span>{new Date(session.created_at).toLocaleDateString()}</span>
 								</div>
 							</div>
-							<div class="text-neon-cyan text-sm">Join →</div>
+							<div class="text-cyan-400 text-sm">Join →</div>
 						</button>
 					{/each}
 				</div>
@@ -582,16 +582,16 @@
 		</div>
 
 		<!-- Preview Avatar -->
-		<div class="mt-6 panel backdrop-blur-sm rounded-xl p-4 border border-surface-accent">
-			<p class="text-sm text-secondary text-center mb-3">Preview:</p>
+		<div class="mt-6 bg-slate-800/30 backdrop-blur-sm rounded-xl p-4 border border-slate-600">
+			<p class="text-sm text-slate-300 text-center mb-3">Preview:</p>
 			<div class="flex items-center justify-center gap-3">
 				<div
-					class="w-10 h-10 rounded-full border-2 border-white/20 flex items-center justify-center text-primary font-semibold text-sm"
+					class="w-10 h-10 rounded-full border-2 border-white/20 flex items-center justify-center text-white font-semibold text-sm"
 					style="background-color: {selectedColor}"
 				>
 					{participantName ? participantName.charAt(0).toUpperCase() : '?'}
 				</div>
-				<span class="text-primary font-medium">
+				<span class="text-white font-medium">
 					{participantName || 'Your Name'}
 				</span>
 			</div>

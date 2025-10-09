@@ -2,18 +2,7 @@
 	import { onMount } from 'svelte';
 	import {
 		IconChartBar as BarChart,
-		function getStatusClass(status: string): string {
-		switch (status) {
-			case 'live':
-				return 'text-green-400 bg-green-400/10';
-			case 'done':
-				return 'text-blue-400 bg-blue-400/10';
-			case 'planned':
-				return 'text-yellow-400 bg-yellow-400/10';
-			default:
-				return 'text-secondary surface-muted';
-		}
-	}s Users,
+		IconUsers as Users,
 		IconClock as Clock,
 		IconTrophy as Trophy,
 		IconDownload as Download,
@@ -111,7 +100,7 @@
 			case 'planned':
 				return 'text-yellow-400 bg-yellow-400/10';
 			default:
-				return 'text-secondary surface-muted';
+				return 'text-slate-400 bg-slate-400/10';
 		}
 	}
 
@@ -142,17 +131,17 @@
 	/>
 </svelte:head>
 
-<div class="min-h-screen surface">
+<div class="min-h-screen bg-slate-50">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 		<div class="space-y-8">
 			<!-- Header -->
 			<div class="flex items-center justify-between">
 				<div>
-					<h1 class="text-3xl font-bold text-primary">Planning Dashboard</h1>
-					<p class="text-secondary mt-1">Comprehensive workshop analytics and session management</p>
+					<h1 class="text-3xl font-bold text-slate-900">Planning Dashboard</h1>
+					<p class="text-slate-600 mt-1">Comprehensive workshop analytics and session management</p>
 				</div>
 				<button
-					class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-primary hover:bg-blue-700 transition-colors shadow-sm"
+					class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
 					on:click={() => (window.location.href = '/facilitator')}
 				>
 					<Target class="h-4 w-4" />
@@ -162,11 +151,11 @@
 
 			{#if error}
 				<div class="flex items-center justify-center py-12">
-					<div class="text-center surface rounded-xl border border-surface-accent p-8 shadow-sm">
+					<div class="text-center bg-white rounded-xl border border-slate-200 p-8 shadow-sm">
 						<div class="text-red-600 mb-2 font-semibold">⚠️ Error loading dashboard</div>
-						<div class="text-secondary text-sm">{error}</div>
+						<div class="text-slate-600 text-sm">{error}</div>
 						<button
-							class="mt-4 px-4 py-2 bg-blue-600 text-primary rounded-lg hover:bg-blue-700 transition shadow-sm"
+							class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
 							on:click={() => {
 								error = '';
 								loading = true;
@@ -179,12 +168,12 @@
 				</div>
 			{:else if loading}
 				<div class="flex items-center justify-center py-12">
-					<div class="text-secondary">Loading dashboard data...</div>
+					<div class="text-slate-600">Loading dashboard data...</div>
 				</div>
 			{:else}
 				<!-- Key Metrics -->
 				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600"
@@ -192,13 +181,13 @@
 								<BarChart class="h-5 w-5" />
 							</div>
 							<div>
-								<p class="text-sm text-secondary">Total Sessions</p>
-								<p class="text-2xl font-semibold text-primary">{dashboardMetrics.totalSessions}</p>
+								<p class="text-sm text-slate-600">Total Sessions</p>
+								<p class="text-2xl font-semibold text-slate-900">{dashboardMetrics.totalSessions}</p>
 							</div>
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 text-green-600"
@@ -206,15 +195,15 @@
 								<Users class="h-5 w-5" />
 							</div>
 							<div>
-								<p class="text-sm text-secondary">Participants</p>
-								<p class="text-2xl font-semibold text-primary">
+								<p class="text-sm text-slate-600">Participants</p>
+								<p class="text-2xl font-semibold text-slate-900">
 									{dashboardMetrics.totalParticipants}
 								</p>
 							</div>
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600"
@@ -222,13 +211,13 @@
 								<Lightbulb class="h-5 w-5" />
 							</div>
 							<div>
-								<p class="text-sm text-secondary">Ideas Generated</p>
-								<p class="text-2xl font-semibold text-primary">{dashboardMetrics.totalIdeas}</p>
+								<p class="text-sm text-slate-600">Ideas Generated</p>
+								<p class="text-2xl font-semibold text-slate-900">{dashboardMetrics.totalIdeas}</p>
 							</div>
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-orange-600"
@@ -236,13 +225,13 @@
 								<TrendingUp class="h-5 w-5" />
 							</div>
 							<div>
-								<p class="text-sm text-secondary">Avg Engagement</p>
-								<p class="text-2xl font-semibold text-primary">{dashboardMetrics.avgEngagement}</p>
+								<p class="text-sm text-slate-600">Avg Engagement</p>
+								<p class="text-2xl font-semibold text-slate-900">{dashboardMetrics.avgEngagement}</p>
 							</div>
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600"
@@ -250,8 +239,8 @@
 								<Clock class="h-5 w-5" />
 							</div>
 							<div>
-								<p class="text-sm text-secondary">Active Sessions</p>
-								<p class="text-2xl font-semibold text-primary">{dashboardMetrics.activeSessions}</p>
+								<p class="text-sm text-slate-600">Active Sessions</p>
+								<p class="text-2xl font-semibold text-slate-900">{dashboardMetrics.activeSessions}</p>
 							</div>
 						</div>
 					</div>
@@ -261,8 +250,8 @@
 				<div class="grid gap-8 lg:grid-cols-3">
 					<!-- Session List -->
 					<div class="lg:col-span-1">
-						<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm">
-							<h2 class="text-lg font-semibold text-primary mb-6">Recent Sessions</h2>
+						<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+							<h2 class="text-lg font-semibold text-slate-900 mb-6">Recent Sessions</h2>
 							<div class="space-y-4">
 								{#each sessions as session}
 									<button
@@ -270,12 +259,12 @@
 										class="w-full text-left p-4 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 {selectedSession?.code ===
 										session.code
 											? 'bg-blue-50 border-blue-200'
-											: 'border-surface-accent hover:surface'}"
+											: 'border-slate-200 hover:bg-slate-50'}"
 										on:click={() => loadSessionDetails(session)}
 										disabled={loadingSession}
 									>
 										<div class="flex items-center justify-between mb-2">
-											<h3 class="font-medium text-primary">{session.name}</h3>
+											<h3 class="font-medium text-slate-900">{session.name}</h3>
 											<span
 												class="px-2 py-1 text-xs font-medium rounded-full {getStatusColor(
 													session.status
@@ -284,8 +273,8 @@
 												{session.status}
 											</span>
 										</div>
-										<div class="text-sm text-secondary space-y-1">
-											<p>Code: <span class="font-mono text-primary">{session.code}</span></p>
+										<div class="text-sm text-slate-600 space-y-1">
+											<p>Code: <span class="font-mono text-slate-900">{session.code}</span></p>
 											<p>Facilitator: {session.facilitator}</p>
 											<p>{session.participantCount} participants • {session.responseCount} ideas</p>
 											<p class="text-xs">{formatDate(session.createdAt)}</p>
@@ -299,28 +288,28 @@
 					<!-- Session Details -->
 					<div class="lg:col-span-2">
 						{#if loadingSession}
-							<div class="surface rounded-xl border border-surface-accent p-12 text-center shadow-sm">
-								<div class="text-secondary">Loading session details...</div>
+							<div class="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-sm">
+								<div class="text-slate-600">Loading session details...</div>
 							</div>
 						{:else if selectedSession}
 							<div class="space-y-6">
 								<!-- Session Header -->
-								<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm">
+								<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
 									<div class="flex items-center justify-between mb-4">
 										<div>
-											<h2 class="text-xl font-semibold text-primary">{selectedSession.name}</h2>
-											<p class="text-secondary">Template: {selectedSession.template}</p>
+											<h2 class="text-xl font-semibold text-slate-900">{selectedSession.name}</h2>
+											<p class="text-slate-600">Template: {selectedSession.template}</p>
 										</div>
 										<div class="flex items-center gap-2">
 											<button
-												class="inline-flex items-center gap-2 rounded-lg border border-surface-accent surface px-3 py-2 text-sm font-medium text-primary hover:surface transition-colors shadow-sm"
+												class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
 												on:click={() => (window.location.href = `/session/${selectedSession.code}`)}
 											>
 												<Eye class="h-4 w-4" />
 												View Live
 											</button>
 											<button
-												class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-primary hover:bg-blue-700 transition-colors shadow-sm"
+												class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
 												on:click={() => exportSessionData(selectedSession.code)}
 											>
 												<Download class="h-4 w-4" />
@@ -332,54 +321,54 @@
 									<!-- Quick Stats -->
 									<div class="grid grid-cols-4 gap-4">
 										<div class="text-center">
-											<p class="text-2xl font-semibold text-primary">{participants.length}</p>
-											<p class="text-sm text-secondary">Participants</p>
+											<p class="text-2xl font-semibold text-slate-900">{participants.length}</p>
+											<p class="text-sm text-slate-600">Participants</p>
 										</div>
 										<div class="text-center">
-											<p class="text-2xl font-semibold text-primary">{responses.length}</p>
-											<p class="text-sm text-secondary">Ideas</p>
+											<p class="text-2xl font-semibold text-slate-900">{responses.length}</p>
+											<p class="text-sm text-slate-600">Ideas</p>
 										</div>
 										<div class="text-center">
-											<p class="text-2xl font-semibold text-primary">
+											<p class="text-2xl font-semibold text-slate-900">
 												{responses.reduce((sum, r) => sum + (r.votes?.length || 0), 0)}
 											</p>
-											<p class="text-sm text-secondary">Total Votes</p>
+											<p class="text-sm text-slate-600">Total Votes</p>
 										</div>
 										<div class="text-center">
-											<p class="text-2xl font-semibold text-primary">
+											<p class="text-2xl font-semibold text-slate-900">
 												{Math.round(
 													(responses.reduce((sum, r) => sum + (r.votes?.length || 0), 0) /
 														responses.length) *
 														10
 												) / 10 || 0}
 											</p>
-											<p class="text-sm text-secondary">Avg Votes/Idea</p>
+											<p class="text-sm text-slate-600">Avg Votes/Idea</p>
 										</div>
 									</div>
 								</div>
 
 								<!-- Leaderboard -->
-								<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm">
-									<h3 class="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
+								<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+									<h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
 										<Trophy class="h-5 w-5 text-yellow-500" />
 										Leaderboard
 									</h3>
 									<div class="space-y-3">
 										{#each leaderboard.slice(0, 5) as participant, index}
-											<div class="flex items-center gap-4 p-3 rounded-lg border border-surface-accent hover:surface transition-colors">
+											<div class="flex items-center gap-4 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
 												<div class="flex items-center gap-3">
-													<span class="text-lg font-semibold text-primary w-6 text-center"
+													<span class="text-lg font-semibold text-slate-700 w-6 text-center"
 														>#{index + 1}</span
 													>
 													<div
-														class="w-8 h-8 rounded-full flex items-center justify-center text-primary text-sm font-medium"
+														class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
 														style="background-color: {participant.avatarColor || '#6b7280'}"
 													>
 														{participant.name.charAt(0)}
 													</div>
 													<div>
-														<p class="text-sm font-medium text-primary">{participant.name}</p>
-														<p class="text-xs text-secondary">
+														<p class="text-sm font-medium text-slate-900">{participant.name}</p>
+														<p class="text-xs text-slate-600">
 															{participant.contributionCount} ideas • {participant.votesReceived} votes received
 														</p>
 													</div>
@@ -393,7 +382,7 @@
 																>
 															{/each}
 															{#if participant.badges.length > 3}
-																<span class="text-xs text-secondary"
+																<span class="text-xs text-slate-500"
 																	>+{participant.badges.length - 3}</span
 																>
 															{/if}
@@ -407,8 +396,8 @@
 								</div>
 							</div>
 						{:else}
-							<div class="surface rounded-xl border border-surface-accent p-12 text-center shadow-sm">
-								<div class="text-secondary">
+							<div class="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-sm">
+								<div class="text-slate-600">
 									<BarChart class="h-12 w-12 mx-auto mb-4 opacity-50" />
 									<p>Select a session to view detailed analytics</p>
 								</div>
