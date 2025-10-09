@@ -436,6 +436,12 @@ export function getParticipantProfile(code: string) {
 			const parsed = JSON.parse(raw);
 			if (!parsed) continue;
 			if (!parsed.sessionCode || parsed.sessionCode === code) {
+				if (!parsed.id && parsed.participantId) {
+					parsed.id = parsed.participantId;
+				}
+				if (!parsed.participantId && parsed.id) {
+					parsed.participantId = parsed.id;
+				}
 				return parsed;
 			}
 		} catch {
@@ -449,7 +455,13 @@ export function getParticipantProfile(code: string) {
 export function storeParticipantProfile(code: string, profile: Participant) {
 	if (!browser) return;
 	try {
-		const serialized = JSON.stringify(profile);
+		const normalized = {
+			...profile,
+			sessionCode: (profile as any).sessionCode ?? code,
+			id: (profile as any).id ?? (profile as any).participantId ?? '',
+			participantId: (profile as any).participantId ?? (profile as any).id ?? ''
+		};
+		const serialized = JSON.stringify(normalized);
 		localStorage.setItem(`${PARTICIPANT_KEY_PREFIX}${code}`, serialized);
 		sessionStorage.setItem(SESSION_STORAGE_KEY, serialized);
 		document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(serialized)}; path=/; SameSite=Lax`;

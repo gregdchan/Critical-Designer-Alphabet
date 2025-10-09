@@ -431,8 +431,8 @@
 		return phaseStatusLabels[status as keyof typeof phaseStatusLabels] || status;
 	};
 
-	async function ensureProfile() {
-		if (!browser) return;
+	async function ensureProfile(): Promise<boolean> {
+		if (!browser) return false;
 		sessionLoading = true;
 		sessionError = '';
 
@@ -444,12 +444,16 @@
 				// Profile exists locally - use it
 				currentParticipant = {
 					...stored,
-					sessionCode: stored.sessionCode ?? sessionCode
+					sessionCode: stored.sessionCode ?? sessionCode,
+					id: stored.id ?? stored.participantId ?? stored.id
 				};
+				if (!currentParticipant.participantId && currentParticipant.id) {
+					currentParticipant.participantId = currentParticipant.id;
+				}
 				currentUser.set(currentParticipant);
 				storeParticipantProfile(sessionCode, currentParticipant);
 				sessionLoading = false;
-				return;
+				return true;
 			}
 
 			// No local profile - check if user is already a participant in the database
@@ -459,19 +463,22 @@
 			if (data.success && data.participants && data.participants.length > 0) {
 				// User might be returning - show rejoin modal or redirect to join page
 				console.log('Found existing participants, redirecting to join page');
-				goto(`/join?code=${sessionCode}`);
-				return;
+				await goto(`/join?code=${sessionCode}`);
+				return false;
 			}
 
 			// No profile found anywhere - redirect to join
 			if (activeRole !== 'facilitator') {
-				goto(`/join?code=${sessionCode}`);
+				await goto(`/join?code=${sessionCode}`);
+				return false;
 			}
 			sessionLoading = false;
+			return true;
 		} catch (error) {
 			console.error('Error checking participant profile:', error);
 			sessionError = 'Failed to load session. Please try refreshing.';
 			sessionLoading = false;
+			return false;
 		}
 	}
 
@@ -557,14 +564,15 @@
 	let qrSrc = '';
 
 	onMount(() => {
-		// Run async profile check without blocking mount
-		ensureProfile();
-		// startRealtimeSession(sessionCode);
+		let cleanup: (() => void) | undefined;
 
-		// Set loading to false once session data starts coming in
-		if ($sessionDetails) {
-			sessionLoading = false;
-		}
+		(async () => {
+			const ready = await ensureProfile();
+			if (ready) {
+				await refreshSession(sessionCode);
+			}
+		})();
+
 		if (browser) {
 			const base = window.location.origin;
 			qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${base}/join?code=${sessionCode}`)}`;
@@ -592,11 +600,15 @@
 
 			document.addEventListener('keydown', handleKeydown);
 
-			return () => {
+			cleanup = () => {
 				window.removeEventListener('resize', handleResize);
 				document.removeEventListener('keydown', handleKeydown);
 			};
 		}
+
+		return () => {
+			cleanup?.();
+		};
 	});
 
 	onDestroy(() => {

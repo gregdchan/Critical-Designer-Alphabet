@@ -248,6 +248,7 @@
 
 				if (browser && data.participant) {
 					const profile = {
+						id: data.participant.id as string,
 						participantId: data.participant.id as string,
 						sessionCode: uppercaseCode,
 						name: participantName || facilitatorEmail,
@@ -277,6 +278,7 @@
 
 				if (browser && data.participant) {
 					const profile = {
+						id: data.participant.id as string,
 						participantId: data.participant.id as string,
 						sessionCode: uppercaseCode,
 						name: participantName,
