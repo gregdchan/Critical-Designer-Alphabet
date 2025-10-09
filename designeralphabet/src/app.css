@@ -75,8 +75,8 @@ h1, h2, h3, h4, h5, h6 {
 	font-family: 'Orbitron', 'Poppins', sans-serif;
 	font-weight: 800;
 	letter-spacing: 0.01em;
-	color: hsl(var(--brand));
-	text-shadow: 0 2px 12px hsl(var(--brand-soft) / 0.12);
+	color: hsl(var(--teal-dark));
+	text-shadow: none;
 }
 
 
@@ -439,6 +439,150 @@ a:focus-visible {
 :global(.border-emerald-400\/30),
 :global(.border-emerald-400\/20) {
 	border-color: rgba(34, 160, 107, 0.28) !important;
+}
+
+/* ========================================
+   HIGH CONTRAST ACCENT ELEMENTS
+   ======================================== */
+
+/* Primary action buttons - Teal with white text */
+:global(.bg-blue-600),
+:global(.bg-blue-700) {
+	background-color: #007172 !important; /* Teal */
+	color: #ffffff !important;
+	font-weight: 600 !important;
+	border: 2px solid #025259 !important; /* Teal dark */
+	box-shadow: 0 4px 12px rgba(0, 113, 114, 0.35) !important;
+}
+
+:global(.bg-blue-600:hover),
+:global(.hover\:bg-blue-700:hover) {
+	background-color: #025259 !important; /* Teal dark on hover */
+	box-shadow: 0 6px 16px rgba(0, 113, 114, 0.45) !important;
+	transform: translateY(-1px);
+}
+
+/* Critical/danger buttons - Deep orange with white text */
+:global(.bg-red-600),
+:global(.bg-red-700) {
+	background-color: #D94F04 !important; /* Orange dark */
+	color: #ffffff !important;
+	font-weight: 700 !important;
+	border: 2px solid #bf4304 !important;
+	box-shadow: 0 4px 12px rgba(217, 79, 4, 0.4) !important;
+}
+
+:global(.bg-red-600:hover),
+:global(.hover\:bg-red-700:hover) {
+	background-color: #bf4304 !important;
+	box-shadow: 0 6px 16px rgba(217, 79, 4, 0.5) !important;
+	transform: translateY(-1px);
+}
+
+/* Warning/alert buttons - Vibrant orange with black text */
+:global(.bg-yellow-400),
+:global(.bg-yellow-500),
+:global(.bg-yellow-600) {
+	background-color: #F29325 !important; /* Orange */
+	color: #0f172a !important;
+	font-weight: 700 !important;
+	border: 2px solid #D94F04 !important;
+	box-shadow: 0 4px 12px rgba(242, 147, 37, 0.4) !important;
+}
+
+/* Success buttons - Teal with white text */
+:global(.bg-green-400),
+:global(.bg-green-500),
+:global(.bg-green-600) {
+	background-color: #00a0a3 !important; /* Light teal */
+	color: #ffffff !important;
+	font-weight: 600 !important;
+	border: 2px solid #007172 !important;
+	box-shadow: 0 4px 12px rgba(0, 160, 163, 0.35) !important;
+}
+
+/* Status badges - high contrast */
+:global(.bg-green-400\/20),
+:global(.bg-green-400\/10) {
+	background-color: #00a0a3 !important;
+	color: #ffffff !important;
+	font-weight: 700 !important;
+	padding: 0.5rem 1rem !important;
+	border: 2px solid #007172 !important;
+}
+
+:global(.bg-yellow-400\/20),
+:global(.bg-yellow-400\/10) {
+	background-color: #F29325 !important;
+	color: #0f172a !important;
+	font-weight: 700 !important;
+	padding: 0.5rem 1rem !important;
+	border: 2px solid #D94F04 !important;
+}
+
+:global(.bg-blue-400\/20),
+:global(.bg-blue-400\/10) {
+	background-color: #007172 !important;
+	color: #ffffff !important;
+	font-weight: 700 !important;
+	padding: 0.5rem 1rem !important;
+	border: 2px solid #025259 !important;
+}
+
+/* Text colors for badges */
+:global(.text-green-300),
+:global(.text-green-400) {
+	color: #ffffff !important;
+}
+
+:global(.text-yellow-300),
+:global(.text-yellow-400) {
+	color: #0f172a !important;
+}
+
+:global(.text-blue-300),
+:global(.text-blue-400) {
+	color: #ffffff !important;
+}
+
+/* Icon backgrounds */
+:global(.bg-blue-50) {
+	background-color: #007172 !important;
+	color: #ffffff !important;
+	border: 2px solid #025259 !important;
+}
+
+:global(.text-blue-600),
+:global(.text-blue-500) {
+	color: #ffffff !important;
+}
+
+:global(.bg-green-50) {
+	background-color: #00a0a3 !important;
+	color: #ffffff !important;
+	border: 2px solid #007172 !important;
+}
+
+:global(.text-green-600),
+:global(.text-green-500) {
+	color: #ffffff !important;
+}
+
+:global(.bg-purple-50) {
+	background-color: #025259 !important;
+	color: #ffffff !important;
+	border: 2px solid #013840 !important;
+}
+
+:global(.text-purple-600),
+:global(.text-purple-500) {
+	color: #ffffff !important;
+}
+
+/* Border colors for accents */
+:global(.border-blue-100),
+:global(.border-blue-200) {
+	border-color: #007172 !important;
 }
 
 [data-reduced-motion='true'] *,
