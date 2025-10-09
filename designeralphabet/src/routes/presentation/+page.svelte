@@ -1129,7 +1129,6 @@
 											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
 										</div>
 									{/if}
-								{/if}
 							{/if}
 						{/each}
 				</div>
