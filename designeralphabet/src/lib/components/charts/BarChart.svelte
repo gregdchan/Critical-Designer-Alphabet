@@ -2,22 +2,25 @@
   import { scaleBand, scaleLinear } from 'd3-scale';
   import { max } from 'd3-array';
   import { select } from 'd3-selection';
-  import { onMount } from 'svelte';
   import ChartFrame from '$lib/components/charts/ChartFrame.svelte';
   import type { ChartData } from '$lib/types/charts';
 
-  export let data: ChartData | null = null;
-  export let title = '';
+  interface Props {
+    data: ChartData | null;
+    title?: string;
+  }
+
+  let { data = null, title = '' }: Props = $props();
   const ariaLabel = 'Bar chart showing option tallies';
 
-  let tooltipEl: HTMLDivElement | null = null;
-  let rootEl: SVGGElement;
+  let tooltipEl: HTMLDivElement | null = $state(null);
+  let rootEl: SVGGElement | null = $state(null);
 
-  function render(root: SVGGElement, innerWidth: number, innerHeight: number) {
+  function render(root: SVGGElement, innerWidth: number, innerHeight: number, currentData: ChartData | null) {
     const g = select(root);
     g.selectAll('*').remove();
-    if (!data || !data.series?.[0]?.points?.length) return;
-    const points = data.series[0].points;
+    if (!currentData || !currentData.series?.[0]?.points?.length) return;
+    const points = currentData.series[0].points;
 
     const y = scaleBand()
       .domain(points.map((d) => d.label))
@@ -82,17 +85,15 @@
       })
       .on('mouseleave', () => tooltipEl && (tooltipEl.style.opacity = '0'));
   }
-
-  onMount(() => {});
 </script>
 
 <ChartFrame {title} {ariaLabel}>
   {#snippet children({ innerWidth, innerHeight })}
-    {#key data}
-      <g bind:this={rootEl}>
-        {@html (render(rootEl, innerWidth, innerHeight), '')}
-      </g>
-    {/key}
+    <g bind:this={rootEl}>
+      {#if rootEl}
+        {@html (render(rootEl, innerWidth, innerHeight, data), '')}
+      {/if}
+    </g>
   {/snippet}
   {#snippet tooltip()}
     <div bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
