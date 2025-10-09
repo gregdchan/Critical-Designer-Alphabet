@@ -1428,7 +1428,7 @@
 								<label class="flex flex-col gap-2 text-xs text-secondary">
 									Label
 									<input
-										class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
+										class="rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
 										placeholder="e.g., Reflection Sprint"
 										bind:value={customLabel}
 									/>
@@ -1436,7 +1436,7 @@
 								<label class="flex flex-col gap-2 text-xs text-secondary">
 									Minutes
 									<input
-										class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
+										class="rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
 										type="number"
 										min="1"
 										step="1"
@@ -1574,13 +1574,13 @@
 							<div class="space-y-6">
 								<!-- Top Row: Two Smaller Charts Side by Side -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-4 h-80">
+									<div class="bg-surface-muted rounded-xl border border-brand/20 p-4 h-80">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Participation Pulse</h3>
 										<div class="w-full h-60">
 											<ParticipationPulse roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
 										</div>
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-4 h-80">
+									<div class="bg-surface-muted rounded-xl border border-brand/20 p-4 h-80">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Inclusivity Meter</h3>
 										<div class="w-full h-60">
 											<InclusivityMeter roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
@@ -1589,7 +1589,7 @@
 								</div>
 
 								<!-- Main Chart Area: Full Width Below -->
-								<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-6">
+								<div class="bg-surface-muted rounded-xl border border-brand/20 p-6">
 									{#if activeTab === 'roadmap'}
 										<h3 class="text-lg font-semibold text-primary mb-4">Roadmap Timeline</h3>
 										<div class="w-full h-[520px] overflow-hidden">
@@ -1642,7 +1642,7 @@
 
 								<!-- Bottom Row: Leaderboard and Chat Side by Side -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-4">
+									<div class="bg-surface-muted rounded-xl border border-brand/20 p-4">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Live Leaderboard</h3>
 										<div class="space-y-2 max-h-64 overflow-y-auto">
 											{#if leaderboardList.length > 0}
@@ -1660,7 +1660,7 @@
 											{/if}
 										</div>
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-4">
+									<div class="bg-surface-muted rounded-xl border border-brand/20 p-4">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Quick Chat</h3>
 										<div class="h-48 overflow-y-auto mb-3 space-y-2">
 											{#if chatList.length > 0}
@@ -1770,7 +1770,7 @@
 										</div>
 										<form class="flex gap-3" on:submit|preventDefault={submitChatMessage}>
 											<input
-												class="flex-1 rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary placeholder:text-secondary focus:border-brand focus:outline-none"
+												class="flex-1 rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary placeholder:text-secondary focus:border-brand focus:outline-none"
 												placeholder="Share a quick note for the room"
 												bind:value={chatMessage}
 											/>
@@ -2027,7 +2027,7 @@
 	<div
 		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white flex items-center justify-center"
 	>
-		<div class="rounded-2xl border border-line bg-slate-900/80 px-6 py-10 text-center">
+		<div class="rounded-2xl border border-line bg-surface-elevated px-6 py-10 text-center">
 			<p class="text-sm text-secondary">Loading session…</p>
 		</div>
 	</div>
@@ -2092,8 +2092,8 @@
 	}
 </style>
 {#if responseModalOpen}
-	<div class="fixed inset-0 z-50 flex items-center justify-center panel backdrop-blur">
-		<div class="w-full max-w-xl rounded-2xl border border-line bg-slate-900/90 p-6">
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur">
+		<div class="w-full max-w-xl rounded-2xl border border-line bg-surface-elevated p-6 shadow-2xl">
 			<h2 class="text-lg font-semibold text-primary">Share your response</h2>
 			<p class="mt-1 text-sm text-secondary">
 				Link cards to earn bonus points and center your thinking.
@@ -2101,7 +2101,7 @@
 			<div class="mt-4 space-y-4">
 				<div class="flex flex-col gap-2 text-sm text-secondary">
 					Prompt
-					<div class="rounded-lg border border-line panel px-3 py-2">
+					<div class="rounded-lg border border-line bg-surface-muted px-3 py-2">
 						<p class="text-sm text-primary leading-relaxed">
 							{#if currentQuestion}
 								{#if currentQuestion.section}
@@ -2124,7 +2124,7 @@
 								min={scaleMin}
 								max={scaleMax}
 								step="1"
-								class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-cyan-500"
+								class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-brand"
 								bind:value={responseText}
 							/>
 							<div class="flex justify-between text-xs">
@@ -2141,13 +2141,13 @@
 						Select one option
 						<div class="space-y-2">
 							{#each modalOptions as option}
-								<label class="flex items-center gap-2 p-2 rounded border border-line bg-slate-900/50 hover:border-brand/50 cursor-pointer">
+								<label class="flex items-center gap-2 p-2 rounded border border-line bg-surface-muted hover:border-brand/50 cursor-pointer">
 									<input
 										type="radio"
 										name="response-choice"
 										value={option}
 										bind:group={responseText}
-										class="accent-cyan-500"
+										class="accent-brand"
 									/>
 									<span class="text-sm text-primary">{option}</span>
 								</label>
@@ -2162,7 +2162,7 @@
 						Select all that apply
 						<div class="space-y-2 max-h-64 overflow-y-auto">
 							{#each modalOptions as option}
-								<label class="flex items-center gap-2 p-2 rounded border border-line bg-slate-900/50 hover:border-brand/50 cursor-pointer">
+								<label class="flex items-center gap-2 p-2 rounded border border-line bg-surface-muted hover:border-brand/50 cursor-pointer">
 									<input
 										type="checkbox"
 										value={option}
@@ -2175,7 +2175,7 @@
 												responseText = selections.filter(s => s !== option).join(', ');
 											}
 										}}
-										class="accent-cyan-500"
+										class="accent-brand"
 									/>
 									<span class="text-sm text-primary">{option}</span>
 								</label>
@@ -2190,7 +2190,7 @@
 							Label your position (optional)
 							<input
 								type="text"
-								class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
+								class="rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 								placeholder="Brief description..."
 								value={landscapeLabel}
 								on:input={handleLandscapeLabelInput}
@@ -2204,7 +2204,7 @@
 									min={landscapeMinX}
 									max={landscapeMaxX}
 									step="0.1"
-									class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
+									class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-brand mt-2"
 									value={landscapeX}
 									on:input={(event) => handleLandscapeAxisChange('x', event)}
 								/>
@@ -2216,7 +2216,7 @@
 									min={landscapeMinY}
 									max={landscapeMaxY}
 									step="0.1"
-									class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-2"
+									class="w-full h-2 surface-input rounded-lg appearance-none cursor-pointer accent-brand mt-2"
 									value={landscapeY}
 									on:input={(event) => handleLandscapeAxisChange('y', event)}
 								/>
@@ -2229,7 +2229,7 @@
 					<label class="flex flex-col gap-2 text-sm text-secondary">
 						Your idea or insight
 						<textarea
-							class="min-h-[120px] rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
+							class="min-h-[120px] rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 							placeholder="Describe your thought, story, or challenge…"
 							bind:value={responseText}
 						/>
@@ -2285,14 +2285,14 @@
 {/if}
 
 {#if timelineModalOpen}
-	<div class="fixed inset-0 z-50 flex items-center justify-center panel backdrop-blur">
-		<div class="w-full max-w-lg rounded-2xl border border-line bg-slate-900/90 p-6">
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur">
+		<div class="w-full max-w-lg rounded-2xl border border-line bg-surface-elevated p-6 shadow-2xl">
 			<h2 class="text-lg font-semibold text-primary">Add roadmap entry</h2>
 			<div class="mt-4 space-y-4">
 				<label class="flex flex-col gap-2 text-sm text-secondary">
 					Phase
 					<select
-						class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-primary focus:border-brand focus:outline-none"
+						class="rounded-lg border border-line bg-surface-muted px-3 py-2 text-primary focus:border-brand focus:outline-none"
 						bind:value={timelineLabel}
 					>
 						<option value="Now">Now</option>
@@ -2303,7 +2303,7 @@
 				<label class="flex flex-col gap-2 text-sm text-secondary">
 					Item description
 					<textarea
-						class="min-h-[100px] rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
+						class="min-h-[100px] rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 						placeholder="What should we take forward?"
 						bind:value={timelineText}
 					/>
@@ -2312,7 +2312,7 @@
 					<label class="flex flex-col gap-2 text-sm text-secondary">
 						Owner
 						<input
-							class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
+							class="rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 							placeholder="Optional"
 							bind:value={timelineOwner}
 						/>
@@ -2320,7 +2320,7 @@
 					<label class="flex flex-col gap-2 text-sm text-secondary">
 						Metric
 						<input
-							class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
+							class="rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 							placeholder="Optional"
 							bind:value={timelineMetric}
 						/>
@@ -2329,7 +2329,7 @@
 				<label class="flex flex-col gap-2 text-sm text-secondary">
 					Risk note
 					<input
-						class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
+						class="rounded-lg border border-line bg-surface-muted px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 						placeholder="Optional"
 						bind:value={timelineRisk}
 					/>

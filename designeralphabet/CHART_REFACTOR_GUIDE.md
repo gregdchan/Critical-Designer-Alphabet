@@ -1,8 +1,16 @@
-# Chart Refactoring Guide
+# Chart Refactoring Guide - PHASE-BASED ARCHITECTURE
 
 ## Overview
 
-This guide documents the unified chart architecture for consistent rendering across facilitator and presentation pages. The refactor **does not alter the Supabase schema** and maintains backward compatibility with existing code.
+This guide documents the **phase-based, question-specific** chart architecture for consistent rendering across facilitator and presentation pages.
+
+### Key Principles
+1. **Each PHASE has multiple QUESTIONS**
+2. **Each QUESTION has ONE specific chart** (type determined by Sanity)
+3. **Charts show data ONLY for their question** (not aggregated)
+4. **Phases organize which charts to display**
+5. **No Supabase schema changes** - read-only
+6. **Backward compatible** with existing code
 
 ---
 
@@ -12,21 +20,21 @@ This guide documents the unified chart architecture for consistent rendering acr
 
 ```
 Supabase (dynamic data: responses, participants)
-    “
+    ï¿½
 lib/realtime.ts (realtime subscriptions)
-    “
+    ï¿½
 lib/stores/charts.ts (unified chart stores)
-    “
+    ï¿½
 Components (BarChart, WordCloud, etc.)
-    “
+    ï¿½
 Facilitator & Presentation Pages
 ```
 
 ```
 Sanity CMS (static data: questions, labels, config)
-    “
+    ï¿½
 lib/utils/sanity.ts (cached queries)
-    “
+    ï¿½
 lib/stores/charts.ts (metadata enrichment)
 ```
 
@@ -84,53 +92,43 @@ Refactored chart component supporting both old and new APIs.
 
 ## Usage Examples
 
-### Example 1: Facilitator Page (New Approach)
+### Example 1: Phase-Based Facilitator Page (RECOMMENDED)
 
 ```svelte
 <script lang="ts">
-  import { charts } from '$lib/stores/charts';
-  import BarChart from '$lib/components/charts/BarChart.svelte';
-  import { onMount } from 'svelte';
+  import { phases, sessionDetails } from '$lib/realtime';
+  import PhaseCharts from '$lib/components/PhaseCharts.svelte';
   import { browser } from '$app/environment';
 
-  // Session setup happens automatically via realtime.ts
-  onMount(() => {
-    // Your existing session connection code
-  });
+  // Currently active phase (or selected phase)
+  $: activePhaseKey = $sessionDetails?.active_phase_key;
 </script>
 
-<section class="charts-grid">
-  <div class="chart-card">
-    <h3>Response Distribution</h3>
-    {#if browser}
-      {#if $charts.responseTally}
-        <BarChart
-          chartData={$charts.responseTally}
-          width={800}
-          height={400}
-        />
-      {:else}
-        <p>Loading data...</p>
-      {/if}
-    {/if}
-  </div>
+<!-- Phase Tabs/Buttons -->
+<nav class="phase-navigation">
+  {#each $phases as phase}
+    <button
+      class={activePhaseKey === phase.phase_key ? 'active' : ''}
+      on:click={() => selectPhase(phase.phase_key)}
+    >
+      {phase.title}
+    </button>
+  {/each}
+</nav>
 
-  <div class="chart-card">
-    <h3>Theme Engagement</h3>
-    {#if browser}
-      {#if $charts.themes}
-        <BarChart
-          chartData={$charts.themes}
-          width={800}
-          height={400}
-        />
-      {:else}
-        <p>Loading data...</p>
-      {/if}
-    {/if}
-  </div>
-</section>
+<!-- Charts for Selected Phase -->
+{#if activePhaseKey && browser}
+  <PhaseCharts phaseKey={activePhaseKey} width={900} height={520} />
+{/if}
 ```
+
+**How it works:**
+- User clicks a phase button
+- `PhaseCharts` component automatically:
+  - Finds all questions for that phase
+  - Determines chart type from Sanity (`response_type`, `map_type`, `recommended_dashboards`)
+  - Renders one chart per question
+  - Filters responses to show only data for each specific question
 
 ### Example 2: Presentation Page (Same Approach)
 

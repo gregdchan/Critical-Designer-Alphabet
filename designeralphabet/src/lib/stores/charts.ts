@@ -1,10 +1,16 @@
 /**
  * Unified chart store for consistent data across facilitator and presentation pages
- * Combines Supabase realtime data with Sanity static metadata
+ * PHASE-BASED & QUESTION-SPECIFIC architecture
+ *
+ * Key concepts:
+ * - Each PHASE has multiple QUESTIONS
+ * - Each QUESTION has a specific chart type (from Sanity: response_type, map_type, recommended_dashboards)
+ * - Charts show data ONLY for their specific question (not aggregated)
+ * - Phases determine which questions/charts to display
  */
 
 import { derived, writable, get, type Readable } from 'svelte/store';
-import {responses, questions as realtimeQuestions, sessionDetails } from '$lib/realtime';
+import { responses, questions as realtimeQuestions, sessionDetails, phases } from '$lib/realtime';
 import type {
 	ChartData,
 	ChartSeries,
@@ -15,7 +21,7 @@ import type {
 	HeatmapData
 } from '$lib/types/charts';
 import type { Response } from '$lib/gamification';
-import type { Question } from '$lib/realtime';
+import type { Question, Phase } from '$lib/realtime';
 import { getChartColor } from '$lib/utils/sanity';
 
 // Throttle chart updates to ~10fps for performance
@@ -37,280 +43,303 @@ function triggerChartUpdate() {
 responses.subscribe(() => triggerChartUpdate());
 
 /**
- * Response tally chart - shows count of responses per option
+ * Map response_type and map_type to chart component names
  */
-export const responseTallyChart: Readable<ChartData | null> = derived(
-	[responses, realtimeQuestions, throttledUpdates],
-	([$responses, $questions, _]) => {
-		if (!$responses || !$questions || $questions.length === 0) {
-			return null;
+function getChartType(question: Question): string {
+	// Priority 1: recommended_dashboards (explicitly set in Sanity)
+	if (question.recommended_dashboards && question.recommended_dashboards.length > 0) {
+		return question.recommended_dashboards[0]; // Use first recommendation
+	}
+
+	// Priority 2: map_type (for spatial/landscape charts)
+	if (question.map_type) {
+		return question.map_type; // e.g., 'landscape', 'roadmap'
+	}
+
+	// Priority 3: response_type (fallback)
+	const responseType = question.response_type || 'written';
+
+	switch (responseType) {
+		case 'multiple_choice':
+		case 'multiselect':
+			return 'bar'; // Bar chart for options
+		case 'scale':
+			return 'bar'; // Bar chart for scale distribution
+		case 'written':
+		case 'text':
+			return 'wordcloud'; // Word cloud for text
+		case 'landscape':
+		case 'positioning':
+			return 'landscape'; // 2D scatter plot
+		default:
+			return 'bar'; // Default fallback
+	}
+}
+
+/**
+ * Get chart data for a SPECIFIC QUESTION
+ * This is the core function - one question = one chart
+ */
+export function getQuestionChartData(
+	questionId: string,
+	$responses: Response[],
+	$questions: Question[]
+): ChartData | null {
+	const question = $questions.find(q => q.id === questionId);
+	if (!question) return null;
+
+	// Filter responses for THIS question only
+	const questionResponses = $responses.filter(r => r.question_id === questionId);
+	if (questionResponses.length === 0) return null;
+
+	const chartType = getChartType(question);
+
+	// Build chart data based on response type
+	switch (chartType) {
+		case 'bar':
+		case 'pie':
+			return buildOptionChart(question, questionResponses);
+
+		case 'wordcloud':
+			return buildWordCloudChart(question, questionResponses);
+
+		case 'landscape':
+			return buildLandscapeChart(question, questionResponses);
+
+		case 'roadmap':
+		case 'timeline':
+			return buildRoadmapChart(question, questionResponses);
+
+		default:
+			return buildOptionChart(question, questionResponses); // Fallback
+	}
+}
+
+/**
+ * Build bar/pie chart data for multiple choice questions
+ */
+function buildOptionChart(question: Question, questionResponses: Response[]): ChartData {
+	const tallies = new Map<string, number>();
+
+	questionResponses.forEach(r => {
+		if (r.option_id) {
+			tallies.set(r.option_id, (tallies.get(r.option_id) || 0) + 1);
+		} else if (r.scale_value !== null && r.scale_value !== undefined) {
+			// For scale questions, group by value
+			const scaleKey = `${r.scale_value}`;
+			tallies.set(scaleKey, (tallies.get(scaleKey) || 0) + 1);
 		}
+	});
 
-		// Aggregate responses by question and option
-		const tallies = new Map<string, Map<string, number>>();
+	const points: ChartPoint[] = Array.from(tallies.entries()).map(
+		([label, value], index) => ({
+			label,
+			value,
+			color: getChartColor(index)
+		})
+	);
 
-		$responses.forEach(r => {
-			if (!r.option_id) return;
-
-			if (!tallies.has(r.question_id)) {
-				tallies.set(r.question_id, new Map());
-			}
-
-			const questionTally = tallies.get(r.question_id)!;
-			const currentCount = questionTally.get(r.option_id) || 0;
-			questionTally.set(r.option_id, currentCount + 1);
-		});
-
-		// Build series for each question
-		const series: ChartSeries[] = [];
-
-		$questions.forEach((q, qIndex) => {
-			const questionTally = tallies.get(q.id);
-			if (!questionTally || questionTally.size === 0) return;
-
-			const points: ChartPoint[] = Array.from(questionTally.entries()).map(
-				([optionId, count], index) => ({
-					label: optionId,
-					value: count,
-					color: getChartColor(index)
-				})
-			);
-
-			series.push({
-				id: q.id,
-				label: q.text || q.section || `Question ${qIndex + 1}`,
-				points
-			});
-		});
-
-		return {
-			title: 'Response Distribution',
-			series,
-			meta: {
-				totalResponses: $responses.length,
-				totalQuestions: $questions.length
-			}
-		};
-	}
-);
+	return {
+		title: question.text || question.section || 'Responses',
+		series: [{ id: question.id, label: question.section || 'Options', points }],
+		meta: {
+			questionId: question.id,
+			totalResponses: questionResponses.length,
+			chartType: 'bar'
+		}
+	};
+}
 
 /**
- * Word cloud data - extracts text responses for visualization
+ * Build word cloud data for text responses
  */
-export const wordCloudData: Readable<WordCloudData | null> = derived(
-	[responses, throttledUpdates],
-	([$responses, _]) => {
-		if (!$responses) return null;
+function buildWordCloudChart(question: Question, questionResponses: Response[]): ChartData {
+	const textResponses = questionResponses.filter(r => r.response_text);
 
-		const textResponses = $responses.filter(r => r.response_text);
-		if (textResponses.length === 0) return null;
+	// Count word frequency
+	const wordCounts = new Map<string, number>();
 
-		// Count word frequency
-		const wordCounts = new Map<string, number>();
+	textResponses.forEach(r => {
+		if (!r.response_text) return;
 
-		textResponses.forEach(r => {
-			if (!r.response_text) return;
+		const words = r.response_text
+			.toLowerCase()
+			.split(/\W+/)
+			.filter(w => w.length > 3); // Filter short words
 
-			const words = r.response_text
-				.toLowerCase()
-				.split(/\W+/)
-				.filter(w => w.length > 3); // Filter short words
-
-			words.forEach(word => {
-				wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
-			});
+		words.forEach(word => {
+			wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
 		});
+	});
 
-		// Convert to array and sort by frequency
-		return Array.from(wordCounts.entries())
-			.map(([text, value], index) => ({
-				text,
-				value,
-				color: getChartColor(index)
-			}))
-			.sort((a, b) => b.value - a.value)
-			.slice(0, 50); // Top 50 words
-	}
-);
+	const points: ChartPoint[] = Array.from(wordCounts.entries())
+		.map(([label, value], index) => ({
+			label,
+			value,
+			color: getChartColor(index)
+		}))
+		.sort((a, b) => b.value - a.value)
+		.slice(0, 50); // Top 50 words
+
+	return {
+		title: question.text || 'Word Cloud',
+		series: [{ id: question.id, label: 'Words', points }],
+		meta: {
+			questionId: question.id,
+			totalResponses: textResponses.length,
+			chartType: 'wordcloud'
+		}
+	};
+}
 
 /**
- * Landscape chart data - for 2D scatter plot responses
+ * Build landscape/scatter plot data
  */
-export const landscapeData: Readable<LandscapePoint[] | null> = derived(
-	[responses, throttledUpdates],
-	([$responses, _]) => {
-		if (!$responses) return null;
+function buildLandscapeChart(question: Question, questionResponses: Response[]): ChartData {
+	const landscapeResponses = questionResponses.filter(
+		r => r.landscape_x !== null && r.landscape_x !== undefined &&
+			r.landscape_y !== null && r.landscape_y !== undefined
+	);
 
-		const landscapeResponses = $responses.filter(
-			r => r.landscape_x !== null && r.landscape_x !== undefined &&
-			     r.landscape_y !== null && r.landscape_y !== undefined
-		);
-
-		if (landscapeResponses.length === 0) return null;
-
-		return landscapeResponses.map((r, index) => ({
+	const points: ChartPoint[] = landscapeResponses.map((r, index) => ({
+		label: r.response_text || `Response ${index + 1}`,
+		value: r.votes || 0,
+		color: getChartColor(index),
+		metadata: {
 			x: r.landscape_x!,
 			y: r.landscape_y!,
-			label: r.response_text || `Response ${index + 1}`,
-			color: getChartColor(index),
-			metadata: {
-				participantId: r.participant_id,
-				questionId: r.question_id,
-				votes: r.votes || 0
-			}
-		}));
-	}
-);
+			participantId: r.participant_id,
+			votes: r.votes || 0
+		}
+	}));
+
+	return {
+		title: question.text || 'Landscape View',
+		series: [{ id: question.id, label: 'Responses', points }],
+		meta: {
+			questionId: question.id,
+			totalResponses: landscapeResponses.length,
+			chartType: 'landscape',
+			config: question.config || {}
+		}
+	};
+}
 
 /**
- * Theme heatmap - aggregates responses by topic/category
+ * Build roadmap/timeline chart
  */
-export const themeHeatmap: Readable<ChartData | null> = derived(
-	[responses, realtimeQuestions, throttledUpdates],
-	([$responses, $questions, _]) => {
-		if (!$responses || !$questions) return null;
+function buildRoadmapChart(question: Question, questionResponses: Response[]): ChartData {
+	const textResponses = questionResponses.filter(r => r.response_text);
 
-		// Group by section (topic/theme)
-		const themeCounts = new Map<string, number>();
+	const points: ChartPoint[] = textResponses.map((r, index) => ({
+		label: r.response_text || `Item ${index + 1}`,
+		value: r.votes || 0,
+		color: getChartColor(index),
+		metadata: {
+			responseId: r.id,
+			participantId: r.participant_id,
+			createdAt: r.created_at
+		}
+	}));
 
-		$responses.forEach(r => {
-			const question = $questions.find(q => q.id === r.question_id);
-			if (!question || !question.section) return;
+	return {
+		title: question.text || 'Roadmap',
+		series: [{ id: question.id, label: 'Items', points }],
+		meta: {
+			questionId: question.id,
+			totalResponses: textResponses.length,
+			chartType: 'roadmap'
+		}
+	};
+}
 
-			const section = question.section;
-			themeCounts.set(section, (themeCounts.get(section) || 0) + 1);
+/**
+ * PHASE-BASED STORES
+ * These are the main exports - organized by phase and question
+ */
+
+/**
+ * Get all questions for a specific phase
+ */
+export const phaseQuestions = derived(
+	[phases, realtimeQuestions],
+	([$phases, $questions]) => {
+		const phaseMap = new Map<string, Question[]>();
+
+		$phases.forEach(phase => {
+			const phaseKey = phase.phase_key || phase.id;
+			const phaseQs = $questions.filter(q => q.phase_key === phaseKey);
+			phaseMap.set(phaseKey, phaseQs);
 		});
 
-		if (themeCounts.size === 0) return null;
-
-		const points: ChartPoint[] = Array.from(themeCounts.entries()).map(
-			([label, value], index) => ({
-				label,
-				value,
-				color: getChartColor(index)
-			})
-		);
-
-		return {
-			title: 'Theme Engagement',
-			series: [{ id: 'themes', label: 'Themes', points }],
-			meta: {
-				totalThemes: themeCounts.size
-			}
-		};
+		return phaseMap;
 	}
 );
 
 /**
- * Scale responses chart - for numeric scale questions
+ * Get chart data for all questions in a phase
  */
-export const scaleChart: Readable<ChartData | null> = derived(
-	[responses, realtimeQuestions, throttledUpdates],
-	([$responses, $questions, _]) => {
-		if (!$responses || !$questions) return null;
+export function getPhaseCharts(
+	phaseKey: string,
+	$responses: Response[],
+	$questions: Question[]
+): Map<string, { question: Question; chartData: ChartData | null; chartType: string }> {
+	const phaseQs = $questions.filter(q => q.phase_key === phaseKey);
+	const chartMap = new Map();
 
-		const scaleResponses = $responses.filter(r => r.scale_value !== null);
-		if (scaleResponses.length === 0) return null;
+	phaseQs.forEach(question => {
+		const chartData = getQuestionChartData(question.id, $responses, $questions);
+		const chartType = getChartType(question);
 
-		// Group by question
-		const scaleData = new Map<string, number[]>();
-
-		scaleResponses.forEach(r => {
-			if (!scaleData.has(r.question_id)) {
-				scaleData.set(r.question_id, []);
-			}
-			scaleData.get(r.question_id)!.push(r.scale_value!);
+		chartMap.set(question.id, {
+			question,
+			chartData,
+			chartType
 		});
+	});
 
-		// Calculate averages
-		const series: ChartSeries[] = Array.from(scaleData.entries()).map(
-			([questionId, values], index) => {
-				const question = $questions.find(q => q.id === questionId);
-				const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
-
-				return {
-					id: questionId,
-					label: question?.text || question?.section || `Scale ${index + 1}`,
-					points: [
-						{
-							label: 'Average',
-							value: avg,
-							color: getChartColor(index)
-						}
-					]
-				};
-			}
-		);
-
-		return {
-			title: 'Scale Responses',
-			series,
-			meta: {
-				totalScaleQuestions: scaleData.size
-			}
-		};
-	}
-);
+	return chartMap;
+}
 
 /**
- * Voting leaderboard - shows most voted responses
+ * Reactive store: Charts for current active phase
  */
-export const votingLeaderboard: Readable<ChartData | null> = derived(
-	[responses, throttledUpdates],
-	([$responses, _]) => {
-		if (!$responses) return null;
+export const activePhaseCharts = derived(
+	[sessionDetails, phases, responses, realtimeQuestions, throttledUpdates],
+	([$session, $phases, $responses, $questions, _]) => {
+		if (!$session?.active_phase_key || !$phases || !$questions || !$responses) {
+			return new Map();
+		}
 
-		const votedResponses = $responses
-			.filter(r => r.votes && r.votes > 0)
-			.sort((a, b) => (b.votes || 0) - (a.votes || 0))
-			.slice(0, 10); // Top 10
-
-		if (votedResponses.length === 0) return null;
-
-		const points: ChartPoint[] = votedResponses.map((r, index) => ({
-			label: r.response_text?.substring(0, 30) || `Response ${r.id.substring(0, 8)}`,
-			value: r.votes || 0,
-			color: getChartColor(index),
-			metadata: {
-				responseId: r.id,
-				fullText: r.response_text
-			}
-		}));
-
-		return {
-			title: 'Top Voted Responses',
-			series: [{ id: 'votes', label: 'Votes', points }],
-			meta: {
-				totalVotedResponses: $responses.filter(r => r.votes && r.votes > 0).length
-			}
-		};
+		const activePhaseKey = $session.active_phase_key;
+		return getPhaseCharts(activePhaseKey, $responses, $questions);
 	}
 );
 
 /**
- * Session status summary for display
+ * Session summary for display
  */
 export const sessionSummary = derived(
-	[sessionDetails, responses, realtimeQuestions],
-	([$session, $responses, $questions]) => {
+	[sessionDetails, responses, realtimeQuestions, phases],
+	([$session, $responses, $questions, $phases]) => {
+		const activePhase = $phases.find(p =>
+			p.phase_key === $session?.active_phase_key || p.id === $session?.active_phase_key
+		);
+
 		return {
 			code: $session?.code || '',
 			title: $session?.title || 'Untitled Session',
 			status: $session?.status || 'planned',
 			totalResponses: $responses?.length || 0,
 			totalQuestions: $questions?.length || 0,
-			activePhase: $session?.active_phase_key || null
+			totalPhases: $phases?.length || 0,
+			activePhase: activePhase || null,
+			activePhaseKey: $session?.active_phase_key || null
 		};
 	}
 );
 
-// Export all chart stores
-export const charts = {
-	responseTally: responseTallyChart,
-	wordCloud: wordCloudData,
-	landscape: landscapeData,
-	themes: themeHeatmap,
-	scale: scaleChart,
-	votingLeaderboard: votingLeaderboard,
-	summary: sessionSummary
-};
+/**
+ * Export helper to get chart component name from chart type
+ */
+export { getChartType };
