@@ -504,8 +504,8 @@
 	});
 </script>
 
-<div class="relative">
-	<svg bind:this={svg}></svg>
+<div class="relative landscape-container">
+	<svg bind:this={svg} {width} {height}></svg>
 	<div
 		bind:this={tooltipEl}
 		class="pointer-events-none absolute rounded-lg border border-slate-700 bg-slate-900/95 p-3 shadow-xl backdrop-blur"
@@ -514,7 +514,16 @@
 </div>
 
 <style>
+	.landscape-container {
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+	}
+
 	svg {
+		display: block;
+		max-width: 100%;
+		height: auto;
 		background: linear-gradient(
 			135deg,
 			hsl(var(--surface-muted)) 0%,

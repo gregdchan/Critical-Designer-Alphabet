@@ -409,12 +409,21 @@
 	});
 </script>
 
-<div class="relative">
-	<svg bind:this={svg}></svg>
+<div class="relative word-cloud-container">
+	<svg bind:this={svg} {width} {height}></svg>
 </div>
 
 <style>
+	.word-cloud-container {
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+	}
+
 	svg {
+		display: block;
+		max-width: 100%;
+		height: auto;
 		background: linear-gradient(
 			135deg,
 			hsl(var(--surface-muted)) 0%,
