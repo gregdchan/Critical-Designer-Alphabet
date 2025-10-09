@@ -9,11 +9,14 @@
 	export let data: Array<{ value: number; count: number }> = [];
 	export let scaleSettings = { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
 	export let totalResponses = 0;
+	export let question = '';
 	export let width = 800;
 	export let height = 400;
 
 	let svgElement: SVGSVGElement;
 	let chartGroup: SVGGElement;
+	let showTooltip = false;
+	let tooltipData = { value: 0, count: 0, percentage: 0, x: 0, y: 0 };
 
 	const margin = { top: 20, right: 40, bottom: 60, left: 60 };
 	$: innerWidth = width - margin.left - margin.right;
@@ -116,38 +119,18 @@
 			.delay((d, i) => 1200 + i * 50)
 			.attr('r', 5);
 
-		// Add tooltips on hover
+		// Add hover interactions
 		points
 			.on('mouseover', function (event, d) {
 				select(this).transition().duration(200).attr('r', 8);
-
-				const tooltip = chart
-					.append('g')
-					.attr('class', 'tooltip')
-					.attr('transform', `translate(${xScale(d.value)}, ${yScale(d.count) - 20})`);
-
-				tooltip
-					.append('rect')
-					.attr('x', -40)
-					.attr('y', -25)
-					.attr('width', 80)
-					.attr('height', 20)
-					.attr('fill', 'hsl(var(--surface) / 0.92)')
-					.attr('rx', 4);
-
-				tooltip
-					.append('text')
-					.attr('text-anchor', 'middle')
-					.attr('dy', '-0.8em')
-					.attr('fill', theme.brand)
-					.attr('font-family', 'Orbitron, sans-serif')
-					.attr('font-size', '12px')
-					.attr('font-weight', 'bold')
-					.text(`${d.value}: ${d.count}`);
+				showTooltipData(event, d);
+			})
+			.on('mousemove', function (event) {
+				updateTooltipPosition(event);
 			})
 			.on('mouseout', function () {
 				select(this).transition().duration(200).attr('r', 5);
-				chart.selectAll('.tooltip').remove();
+				hideTooltipData();
 			});
 
 		// X-axis
@@ -274,6 +257,28 @@
 		});
 	}
 
+	function showTooltipData(event: MouseEvent, d: any) {
+		const totalCount = data.reduce((sum, item) => sum + item.count, 0);
+		tooltipData = {
+			value: d.value,
+			count: d.count,
+			percentage: totalCount > 0 ? (d.count / totalCount) * 100 : 0,
+			x: event.clientX,
+			y: event.clientY
+		};
+		showTooltip = true;
+	}
+
+	function updateTooltipPosition(event: MouseEvent) {
+		if (showTooltip) {
+			tooltipData = { ...tooltipData, x: event.clientX, y: event.clientY };
+		}
+	}
+
+	function hideTooltipData() {
+		showTooltip = false;
+	}
+
 	onMount(() => {
 		updateChart();
 	});
@@ -310,6 +315,29 @@
 	{#if data.length === 0}
 		<div class="overlay">
 			<div class="empty-text">No responses yet</div>
+		</div>
+	{/if}
+
+	<!-- Tooltip -->
+	{#if showTooltip}
+		<div 
+			class="chart-tooltip"
+			style="left: {tooltipData.x + 15}px; top: {tooltipData.y - 10}px;"
+		>
+			{#if question}
+				<div class="tooltip-question">{question}</div>
+			{/if}
+			<div class="tooltip-label">Scale Value: {tooltipData.value}</div>
+			<div class="tooltip-stats">
+				<div class="tooltip-stat">
+					<span class="stat-label">Responses:</span>
+					<span class="stat-value">{tooltipData.count}</span>
+				</div>
+				<div class="tooltip-stat">
+					<span class="stat-label">Percentage:</span>
+					<span class="stat-value">{tooltipData.percentage.toFixed(1)}%</span>
+				</div>
+			</div>
 		</div>
 	{/if}
 </div>
@@ -349,5 +377,57 @@
 
 	:global(.line-chart .data-point:hover) {
 		filter: drop-shadow(0 0 8px hsl(var(--brand)));
+	}
+
+	.chart-tooltip {
+		position: fixed;
+		pointer-events: none;
+		background: hsl(var(--surface-elevated));
+		border: 1px solid hsl(var(--brand) / 0.3);
+		border-radius: 8px;
+		padding: 12px;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+		z-index: 1000;
+		min-width: 200px;
+		backdrop-filter: blur(8px);
+	}
+
+	.tooltip-question {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--brand));
+		margin-bottom: 8px;
+		padding-bottom: 6px;
+		border-bottom: 1px solid hsl(var(--border-subtle));
+	}
+
+	.tooltip-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: hsl(var(--text-primary));
+		margin-bottom: 8px;
+	}
+
+	.tooltip-stats {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.tooltip-stat {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.75rem;
+	}
+
+	.stat-label {
+		color: hsl(var(--text-secondary));
+	}
+
+	.stat-value {
+		font-weight: 600;
+		color: hsl(var(--brand));
+		font-family: 'Orbitron', sans-serif;
 	}
 </style>

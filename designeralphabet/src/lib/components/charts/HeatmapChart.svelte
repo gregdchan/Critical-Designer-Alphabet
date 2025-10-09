@@ -12,6 +12,7 @@
 	export let responses: Response[] = [];
 	export let width = 880;
 	export let height = 520;
+	export let question = '';
 
 	let svg: SVGSVGElement;
 	let tooltipEl: HTMLDivElement;
@@ -238,6 +239,7 @@
 					.style('opacity', 0.98)
 					.html(
 						`
+            ${question ? `<div class="tooltip-question">${question}</div>` : ''}
             <div class="tooltip-heading">${d.lens} × ${d.maturity}</div>
             <div class="tooltip-count">${d.count} insight${d.count === 1 ? '' : 's'}</div>
             <div class="tooltip-list">${previewList || 'No entries yet'}</div>
@@ -440,6 +442,15 @@
 		pointer-events: none;
 		box-shadow: 0 18px 38px hsl(var(--brand) / 0.28);
 		mix-blend-mode: screen;
+	}
+
+	:global(.chart-tooltip .tooltip-question) {
+		font-size: 0.7rem;
+		font-weight: 600;
+		color: hsl(var(--brand));
+		margin-bottom: 0.6rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid hsl(var(--border-subtle));
 	}
 
 	:global(.chart-tooltip .tooltip-heading) {

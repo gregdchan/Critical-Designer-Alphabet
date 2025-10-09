@@ -10,9 +10,12 @@
 	export let width = 400;
 	export let height = 400;
 	export let showLegend = true;
+	export let question = '';
 
 	let svgElement: SVGSVGElement;
 	let chartGroup: SVGGElement;
+	let showTooltip = false;
+	let tooltipData = { label: '', value: 0, percentage: 0, x: 0, y: 0 };
 
 	const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 	$: radius = Math.min(width, height) / 2 - Math.max(...Object.values(margin));
@@ -76,6 +79,7 @@
 			.style('cursor', 'pointer')
 			.attr('opacity', 0)
 			.on('mouseover', handleMouseOver)
+			.on('mousemove', handleMouseMove)
 			.on('mouseout', handleMouseOut)
 			.each(function (d: any) {
 				(this as any)._current = { startAngle: 0, endAngle: 0 };
@@ -143,6 +147,16 @@
 	}
 
 	function handleMouseOver(event: MouseEvent, d: any) {
+		const totalCount = data.reduce((sum, item) => sum + item.value, 0);
+		tooltipData = {
+			label: d.data.label,
+			value: d.data.value,
+			percentage: totalCount > 0 ? (d.data.value / totalCount) * 100 : 0,
+			x: event.clientX,
+			y: event.clientY
+		};
+		showTooltip = true;
+
 		select(event.currentTarget as Element)
 			.transition()
 			.duration(200)
@@ -155,7 +169,15 @@
 			});
 	}
 
+	function handleMouseMove(event: MouseEvent) {
+		if (showTooltip) {
+			tooltipData = { ...tooltipData, x: event.clientX, y: event.clientY };
+		}
+	}
+
 	function handleMouseOut(event: MouseEvent) {
+		showTooltip = false;
+
 		select(event.currentTarget as Element)
 			.transition()
 			.duration(200)
@@ -209,6 +231,29 @@
 	{#if data.length === 0}
 		<div class="overlay">
 			<div class="empty-text">No responses yet</div>
+		</div>
+	{/if}
+
+	<!-- Tooltip -->
+	{#if showTooltip}
+		<div 
+			class="chart-tooltip"
+			style="left: {tooltipData.x + 15}px; top: {tooltipData.y - 10}px;"
+		>
+			{#if question}
+				<div class="tooltip-question">{question}</div>
+			{/if}
+			<div class="tooltip-label">{tooltipData.label}</div>
+			<div class="tooltip-stats">
+				<div class="tooltip-stat">
+					<span class="stat-label">Responses:</span>
+					<span class="stat-value">{tooltipData.value}</span>
+				</div>
+				<div class="tooltip-stat">
+					<span class="stat-label">Percentage:</span>
+					<span class="stat-value">{tooltipData.percentage.toFixed(1)}%</span>
+				</div>
+			</div>
 		</div>
 	{/if}
 </div>
@@ -311,5 +356,57 @@
 	:global(.pie-chart .slice-path) {
 		filter: url(#pie-glow);
 		transition: all 0.2s ease;
+	}
+
+	.chart-tooltip {
+		position: fixed;
+		pointer-events: none;
+		background: hsl(var(--surface-elevated));
+		border: 1px solid hsl(var(--brand) / 0.3);
+		border-radius: 8px;
+		padding: 12px;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+		z-index: 1000;
+		min-width: 200px;
+		backdrop-filter: blur(8px);
+	}
+
+	.tooltip-question {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--brand));
+		margin-bottom: 8px;
+		padding-bottom: 6px;
+		border-bottom: 1px solid hsl(var(--border-subtle));
+	}
+
+	.tooltip-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: hsl(var(--text-primary));
+		margin-bottom: 8px;
+	}
+
+	.tooltip-stats {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.tooltip-stat {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.75rem;
+	}
+
+	.stat-label {
+		color: hsl(var(--text-secondary));
+	}
+
+	.stat-value {
+		font-weight: 600;
+		color: hsl(var(--brand));
+		font-family: 'Orbitron', sans-serif;
 	}
 </style>

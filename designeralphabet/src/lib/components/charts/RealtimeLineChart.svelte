@@ -10,6 +10,7 @@
 
 	let data: Array<{ value: number; count: number }> = [];
 	let scaleSettings = { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
+	let question = '';
 	let totalResponses = 0;
 	let loading = true;
 	let error: string | null = null;
@@ -45,6 +46,7 @@
 			return;
 		}
 
+		question = questionData.text || '';
 		scaleSettings = questionData.scale || { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
 		const questionResponses = responses.filter((r) => r.question_id === questionId);
 
@@ -77,7 +79,7 @@
 			<p>Error: {error}</p>
 		</div>
 	{:else}
-		<LineChart {data} {scaleSettings} {totalResponses} {width} {height} />
+		<LineChart {data} {scaleSettings} {totalResponses} {width} {height} {question} />
 	{/if}
 </div>
 

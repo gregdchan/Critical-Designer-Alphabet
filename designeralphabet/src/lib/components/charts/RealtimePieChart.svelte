@@ -10,6 +10,7 @@
 	export let showLegend = true;
 
 	let data: Array<{ label: string; value: number; percentage: number }> = [];
+	let question = '';
 	let loading = true;
 	let error: string | null = null;
 
@@ -44,6 +45,7 @@
 			return;
 		}
 
+		question = questionData.text || '';
 		const questionResponses = responses.filter((r) => r.question_id === questionId);
 		const options = questionData.options || [];
 
@@ -82,7 +84,7 @@
 			<p>Error: {error}</p>
 		</div>
 	{:else}
-		<PieChart {data} {width} {height} {showLegend} />
+		<PieChart {data} {width} {height} {showLegend} {question} />
 	{/if}
 </div>
 

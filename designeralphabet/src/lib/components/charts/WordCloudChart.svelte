@@ -14,6 +14,7 @@
 	export let responses: WordCloudResponse[] = [];
 	export let width = 900;
 	export let height = 600;
+	export let question = '';
 
 	let svg: SVGSVGElement;
 	let mounted = false;
@@ -222,9 +223,10 @@
 				tooltipMerge
 					.html(
 						`
+						${question ? `<div style="font-size: 11px; font-weight: 600; color: ${theme.brand}; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid hsl(var(--border-subtle));">${question}</div>` : ''}
 						<div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; color: ${theme.ink};">${d.text}</div>
-						<div style="color: ${theme.ink2}; margin-bottom: 4px;">By: ${d.participant}</div>
-						<div style="color: ${theme.inkMuted}; margin-bottom: 4px;">Lens: ${d.lens}</div>
+						<div style="color: ${theme.ink2}; margin-bottom: 4px; font-size: 11px;">By: ${d.participant}</div>
+						<div style="color: ${theme.inkMuted}; margin-bottom: 4px; font-size: 11px;">Lens: ${d.lens}</div>
 						<div style="color: ${theme.brand}; font-weight: 600; margin-top: 8px; padding-top: 8px; border-top: 1px solid hsl(var(--border-subtle));">
 							${d.votes} votes (${d.votePercentage.toFixed(1)}%)
 						</div>

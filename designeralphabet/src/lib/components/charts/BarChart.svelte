@@ -30,6 +30,9 @@
 
 	let svgElement: SVGSVGElement;
 	let chartGroup: SVGGElement;
+	let tooltip: HTMLDivElement;
+	let showTooltip = false;
+	let tooltipData = { label: '', value: 0, percentage: 0, x: 0, y: 0 };
 
 	const margin = { top: 20, right: 80, bottom: 60, left: 200 };
 	$: innerWidth = width - margin.left - margin.right;
@@ -80,7 +83,8 @@
 			.attr('width', 0)
 			.attr('height', yScale.bandwidth())
 			.attr('fill', 'url(#bar-gradient)')
-			.attr('rx', 6);
+			.attr('rx', 6)
+			.style('cursor', 'pointer');
 
 		// Animate bars
 		barRects
@@ -88,6 +92,28 @@
 			.duration(800)
 			.delay((d, i) => i * 100)
 			.attr('width', (d) => xScale(d.value));
+
+		// Add hover interactions
+		barRects
+			.on('mouseenter', function(event, d) {
+				select(this)
+					.transition()
+					.duration(200)
+					.attr('opacity', 0.8);
+				
+				showTooltipData(event, d);
+			})
+			.on('mousemove', function(event) {
+				updateTooltipPosition(event);
+			})
+			.on('mouseleave', function() {
+				select(this)
+					.transition()
+					.duration(200)
+					.attr('opacity', 1);
+				
+				hideTooltipData();
+			});
 
 		// Value labels inside bars
 		bars
@@ -157,6 +183,28 @@
 			});
 	}
 
+	function showTooltipData(event: MouseEvent, d: any) {
+		const totalCount = normalizedData.reduce((sum, item) => sum + item.value, 0);
+		tooltipData = {
+			label: d.label,
+			value: d.value,
+			percentage: totalCount > 0 ? (d.value / totalCount) * 100 : 0,
+			x: event.clientX,
+			y: event.clientY
+		};
+		showTooltip = true;
+	}
+
+	function updateTooltipPosition(event: MouseEvent) {
+		if (showTooltip) {
+			tooltipData = { ...tooltipData, x: event.clientX, y: event.clientY };
+		}
+	}
+
+	function hideTooltipData() {
+		showTooltip = false;
+	}
+
 	onMount(() => {
 		updateChart();
 	});
@@ -193,6 +241,30 @@
 	{#if normalizedData.length === 0}
 		<div class="overlay">
 			<div class="empty-text">No responses yet</div>
+		</div>
+	{/if}
+
+	<!-- Tooltip -->
+	{#if showTooltip}
+		<div 
+			bind:this={tooltip}
+			class="chart-tooltip"
+			style="left: {tooltipData.x + 15}px; top: {tooltipData.y - 10}px;"
+		>
+			{#if question}
+				<div class="tooltip-question">{question}</div>
+			{/if}
+			<div class="tooltip-label">{tooltipData.label}</div>
+			<div class="tooltip-stats">
+				<div class="tooltip-stat">
+					<span class="stat-label">Responses:</span>
+					<span class="stat-value">{tooltipData.value}</span>
+				</div>
+				<div class="tooltip-stat">
+					<span class="stat-label">Percentage:</span>
+					<span class="stat-value">{tooltipData.percentage.toFixed(1)}%</span>
+				</div>
+			</div>
 		</div>
 	{/if}
 </div>
@@ -236,5 +308,57 @@
 
 	:global(.y-label) {
 		cursor: default;
+	}
+
+	.chart-tooltip {
+		position: fixed;
+		pointer-events: none;
+		background: hsl(var(--surface-elevated));
+		border: 1px solid hsl(var(--brand) / 0.3);
+		border-radius: 8px;
+		padding: 12px;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+		z-index: 1000;
+		min-width: 200px;
+		backdrop-filter: blur(8px);
+	}
+
+	.tooltip-question {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--brand));
+		margin-bottom: 8px;
+		padding-bottom: 6px;
+		border-bottom: 1px solid hsl(var(--border-subtle));
+	}
+
+	.tooltip-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: hsl(var(--text-primary));
+		margin-bottom: 8px;
+	}
+
+	.tooltip-stats {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.tooltip-stat {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.75rem;
+	}
+
+	.stat-label {
+		color: hsl(var(--text-secondary));
+	}
+
+	.stat-value {
+		font-weight: 600;
+		color: hsl(var(--brand));
+		font-family: 'Orbitron', sans-serif;
 	}
 </style>

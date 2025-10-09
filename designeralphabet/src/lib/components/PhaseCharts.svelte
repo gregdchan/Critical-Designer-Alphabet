@@ -66,6 +66,7 @@
 									responses={$responses.filter(r => r.question_id === question.id)}
 									{width}
 									{height}
+									question={question.text || ''}
 								/>
 
 							{:else if chartType === 'landscape'}
@@ -73,6 +74,7 @@
 									responses={$responses.filter(r => r.question_id === question.id)}
 									{width}
 									{height}
+									question={question.text || ''}
 								/>
 
 							{:else if chartType === 'roadmap' || chartType === 'timeline'}
@@ -80,6 +82,7 @@
 									responses={$responses.filter(r => r.question_id === question.id)}
 									{width}
 									{height}
+									question={question.text || ''}
 								/>
 
 							{:else}
