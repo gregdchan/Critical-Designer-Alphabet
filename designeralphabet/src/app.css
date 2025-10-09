@@ -404,14 +404,17 @@ a:focus-visible {
 }
 
 :global(.text-cyan-100),
-:global(.text-cyan-200) {
-	color: hsl(var(--text-primary)) !important;
+:global(.text-cyan-200),
+:global(.text-cyan-300) {
+	color: #1a2332 !important; /* Dark navy - high contrast */
 }
 
-/* Ensure hover variants are also high contrast */
-:global(.hover\:text-cyan-100:hover),
-:global(.hover\:text-cyan-200:hover) {
-	color: hsl(var(--text-primary)) !important;
+:global(.hover\:text-cyan-300:hover) {
+	color: #025259 !important;
+}
+
+:global(.hover\:border-cyan-300:hover) {
+	border-color: #025259 !important;
 }
 
 :global(.bg-slate-900),
@@ -622,22 +625,6 @@ a:focus-visible {
 :global(.text-purple-600),
 :global(.text-purple-500) {
 	color: #ffffff !important;
-}
-
-/* Cyan text overrides for high contrast on light backgrounds */
-:global(.text-cyan-200),
-:global(.text-cyan-100),
-:global(.text-cyan-300) {
-	color: #1a2332 !important; /* Dark navy - high contrast */
-}
-
-/* Hover states for cyan text */
-:global(.hover\:text-cyan-300:hover) {
-	color: #025259 !important; /* Teal-dark */
-}
-
-:global(.hover\:border-cyan-300:hover) {
-	border-color: #025259 !important;
 }
 
 /* Border colors for accents */

@@ -754,9 +754,9 @@
 											{session.title || 'Untitled Session'}
 										</span>
 										<span
-											class="px-2 py-1 text-xs rounded-full {session.status === 'live'
-												? 'bg-pastel-green/20 text-pastel-green'
-												: 'bg-pastel-orange/20 text-pastel-orange'}"
+											class="px-2 py-1 text-xs rounded-full font-semibold {session.status === 'live'
+												? 'bg-green-600 text-white'
+												: 'bg-yellow-500 text-slate-900'}"
 										>
 											{session.status}
 										</span>
