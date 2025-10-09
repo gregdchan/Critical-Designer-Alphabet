@@ -18,6 +18,22 @@
     if (!currentData || !currentData.series?.[0]?.points?.length) return;
     const points = currentData.series[0].points;
 
+    // Calculate max label width dynamically
+    const tempText = g.append('text').style('font-size', '11px').style('font-weight', '500');
+    const maxLabelWidth = Math.max(
+      ...points.map((d) => {
+        tempText.text(d.label);
+        return (tempText.node() as any)?.getComputedTextLength() || 0;
+      }),
+      80 // minimum
+    );
+    tempText.remove();
+
+    // Reserve space for labels and values
+    const labelWidth = Math.min(maxLabelWidth + 16, innerWidth * 0.3); // Max 30% of width
+    const valueWidth = 40; // Space for right value labels
+    const barAreaWidth = Math.max(50, innerWidth - labelWidth - valueWidth);
+
     const y = scaleBand()
       .domain(points.map((d) => d.label))
       .range([0, innerHeight])
@@ -25,7 +41,7 @@
 
     const x = scaleLinear()
       .domain([0, Math.max(1, max(points, (d) => d.value) ?? 1)])
-      .range([0, innerWidth]);
+      .range([0, barAreaWidth]);
 
     // Row background for readability
     g.append('g')
@@ -40,35 +56,54 @@
 
     const rows = g.append('g').selectAll('g').data(points).join('g');
 
-    rows
-      .append('rect')
-      .attr('x', 0)
-      .attr('y', (d) => y(d.label) ?? 0)
-      .attr('height', y.bandwidth())
-      .attr('width', (d) => x(d.value))
-      .attr('fill', 'var(--chart-1)')
-      .attr('rx', 6)
-      .attr('data-testid', 'bar-root');
-
-    // Labels and values
+    // Labels on the left - no truncation if space allows
     rows
       .append('text')
-      .attr('x', -8)
-      .attr('y', (d) => (y(d.label) ?? 0) + y.bandwidth() / 2)
-      .attr('dy', '0.35em')
-      .attr('text-anchor', 'end')
-      .attr('fill', 'hsl(var(--text-primary))')
-      .style('font-size', '12px')
-      .text((d) => d.label);
-
-    rows
-      .append('text')
-      .attr('x', (d) => x(d.value) + 6)
+      .attr('x', 4)
       .attr('y', (d) => (y(d.label) ?? 0) + y.bandwidth() / 2)
       .attr('dy', '0.35em')
       .attr('text-anchor', 'start')
       .attr('fill', 'hsl(var(--text-primary))')
-      .style('font-size', '12px')
+      .style('font-size', '11px')
+      .style('font-weight', '500')
+      .each(function(d: any) {
+        const text = select(this);
+        const availableWidth = labelWidth - 8;
+        text.text(d.label);
+
+        // Only truncate if necessary
+        let textLength = (text.node() as any)?.getComputedTextLength() || 0;
+        if (textLength > availableWidth) {
+          let label = d.label;
+          while (textLength > availableWidth && label.length > 0) {
+            label = label.slice(0, -1);
+            text.text(label + '...');
+            textLength = (text.node() as any)?.getComputedTextLength() || 0;
+          }
+        }
+      });
+
+    // Bars with gradient colors
+    rows
+      .append('rect')
+      .attr('x', labelWidth)
+      .attr('y', (d) => y(d.label) ?? 0)
+      .attr('height', y.bandwidth())
+      .attr('width', (d) => Math.max(0, x(d.value)))
+      .attr('fill', (d, i) => `var(--chart-${(i % 8) + 1})`)
+      .attr('rx', 4)
+      .attr('data-testid', 'bar-root');
+
+    // Values on the right
+    rows
+      .append('text')
+      .attr('x', (d) => labelWidth + x(d.value) + 6)
+      .attr('y', (d) => (y(d.label) ?? 0) + y.bandwidth() / 2)
+      .attr('dy', '0.35em')
+      .attr('text-anchor', 'start')
+      .attr('fill', 'hsl(var(--text-primary))')
+      .style('font-size', '11px')
+      .style('font-weight', '600')
       .text((d) => d.value);
 
     rows

@@ -9,6 +9,7 @@
     import { buildChartForQuestion, type InferredQuestionType } from '$lib/aggregators/questionCharts';
     import BarChart from '$lib/components/charts/BarChart.svelte';
     import PieChart from '$lib/components/charts/PieChart.svelte';
+    import LineChart from '$lib/components/charts/LineChart.svelte';
     import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
     import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
     import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
@@ -20,7 +21,7 @@ export let height = 520;
 // Map inferred types to components
 const componentMap: Record<InferredQuestionType, any> = {
     multipleChoice: BarChart,
-    rating: PieChart,
+    rating: LineChart,
     boolean: PieChart,
     voting: WordCloudChart,
     openText: WordCloudChart

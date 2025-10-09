@@ -102,9 +102,19 @@ export function buildChartForQuestion(
       const options = getOptionsFromConfig(question);
       const counts = new Map<string, number>();
 
+      // Normalize function to handle variations
+      const normalize = (str: string) => str.trim().toLowerCase();
+
+      // Map to track normalized -> original label
+      const labelMap = new Map<string, string>();
+
       // Initialize counts for all configured options
       if (options.length > 0) {
-        for (const opt of options) counts.set(opt, 0);
+        for (const opt of options) {
+          const normalized = normalize(opt);
+          counts.set(normalized, 0);
+          labelMap.set(normalized, opt); // Store original casing
+        }
       }
 
       // Check if this is a multiSelect question (can have comma-separated values)
@@ -118,18 +128,32 @@ export function buildChartForQuestion(
           // Split comma-separated values and count each individually
           const selections = raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
           for (const selection of selections) {
-            counts.set(selection, (counts.get(selection) ?? 0) + 1);
+            const normalized = normalize(selection);
+            counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
+            // Store first occurrence of label if not already stored
+            if (!labelMap.has(normalized)) {
+              labelMap.set(normalized, selection);
+            }
           }
         } else {
           // Single selection - count as-is
-          counts.set(raw, (counts.get(raw) ?? 0) + 1);
+          const normalized = normalize(raw);
+          counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
+          if (!labelMap.has(normalized)) {
+            labelMap.set(normalized, raw);
+          }
         }
       }
 
       const points: ChartPoint[] = Array.from(counts.entries())
-        .map(([label, value]) => ({ id: label, label, value: Number(value) || 0 }))
-        .filter((p) => Number.isFinite(p.value) && p.value >= 0)
+        .map(([normalizedLabel, value]) => ({
+          id: normalizedLabel,
+          label: labelMap.get(normalizedLabel) || normalizedLabel, // Use original label
+          value: Number(value) || 0
+        }))
+        .filter((p) => Number.isFinite(p.value) && p.value > 0) // Filter out zero counts
         .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label));
+
       const total = points.reduce((s, p) => s + (Number.isFinite(p.value) ? p.value : 0), 0);
       return {
         type,

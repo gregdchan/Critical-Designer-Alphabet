@@ -44,7 +44,7 @@
       })
       .on('mouseleave', () => tooltipEl && (tooltipEl.style.opacity = '0'));
 
-    // Labels (hide under 7%)
+    // Labels (hide under 7%, truncate long labels)
     rootG
       .selectAll('text')
       .data(arcs)
@@ -54,7 +54,14 @@
       .attr('font-size', '11px')
       .attr('text-anchor', 'middle')
       .attr('fill', 'hsl(var(--text-primary))')
-      .text((d: any) => ((d.data.value / total) * 100 >= 7 ? d.data.label : ''));
+      .text((d: any) => {
+        if ((d.data.value / total) * 100 < 7) return '';
+        const label = d.data.label;
+        // Truncate labels based on slice size
+        const pct = (d.data.value / total) * 100;
+        const maxLen = pct >= 15 ? 12 : pct >= 10 ? 8 : 6;
+        return label.length > maxLen ? label.slice(0, maxLen) + '...' : label;
+      });
   }
 </script>
 

@@ -64,7 +64,7 @@ function getChartType(question: Question): string {
 		case 'multiselect':
 			return 'bar'; // Bar chart for options
 		case 'scale':
-			return 'bar'; // Bar chart for scale distribution
+			return 'line'; // Line chart for scale distribution
 		case 'written':
 		case 'text':
 			return 'wordcloud'; // Word cloud for text

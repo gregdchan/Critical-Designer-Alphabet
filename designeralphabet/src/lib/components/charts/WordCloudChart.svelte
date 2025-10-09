@@ -12,12 +12,23 @@
 	};
 
 	export let responses: WordCloudResponse[] = [];
-	export let width = 900;
-	export let height = 600;
 	export let question = '';
 
+	let container: HTMLDivElement | null = null;
+	let width = 900;
+	let height = 600;
 	let svg: SVGSVGElement;
 	let mounted = false;
+
+	const ro = typeof ResizeObserver !== 'undefined'
+		? new ResizeObserver((entries) => {
+				const r = entries[0]?.contentRect;
+				if (r) {
+					width = Math.max(300, r.width);
+					height = Math.max(300, r.height);
+				}
+			})
+		: null;
 
 	const lensOrder = [
 		'Risk',
@@ -57,9 +68,9 @@
 		// Calculate total votes
 		const totalVotes = data.reduce((sum, r) => sum + (r.votes || 0), 0);
 
-		// Minimum size for bubbles with 0 votes
-		const minRadius = 15;
-		const maxRadius = 80;
+		// Bubble sizing
+		const minRadius = 20;
+		const maxRadius = 60;
 
 		// Map responses to bubbles with vote percentages
 		const basePalette = Object.fromEntries(
@@ -94,16 +105,21 @@
 
 		const bubbles = data
 			.filter((r) => r.text && r.text.trim().length > 0)
-			.map((response) => {
+			.map((response, idx) => {
 				const votes = response.votes || 0;
 				const votePercentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
 				const lensLabel = normaliseLens(response.lens);
 
-				// Scale radius based on vote percentage (0-100%)
-				// Even 0 votes get minimum size
-				const radius = totalVotes > 0
-					? minRadius + (votePercentage / 100) * (maxRadius - minRadius)
-					: minRadius;
+				// Scale radius based on vote percentage
+				let radius: number;
+				if (totalVotes > 0) {
+					// Vote-based sizing
+					radius = minRadius + (votePercentage / 100) * (maxRadius - minRadius);
+				} else {
+					// Equal sizing with some variation based on text length
+					const textLen = response.text?.length || 10;
+					radius = minRadius + Math.min(15, Math.sqrt(textLen) * 2);
+				}
 
 				const lensColor = resolveLensColor(lensLabel);
 
@@ -257,66 +273,60 @@
 			.append('text')
 			.attr('text-anchor', 'middle')
 			.attr('dominant-baseline', 'middle')
-			.attr('fill', 'hsl(var(--text-on-teal))')
+			.attr('fill', 'white')
 			.attr('font-weight', '600')
 			.attr('pointer-events', 'none')
 			.style('user-select', 'none')
+			.style('text-shadow', '0 1px 2px rgba(0,0,0,0.3)')
 			.each(function (d: any) {
 				const text = d3.select(this);
-				const maxWidth = d.radius * 1.8;
+				const maxWidth = d.radius * 1.6;
 				const words = d.text.split(/\s+/);
 
 				// Calculate font size based on bubble radius
-				const fontSize = Math.max(10, Math.min(16, d.radius / 3));
+				const fontSize = Math.max(9, Math.min(14, d.radius / 3.5));
 				text.attr('font-size', `${fontSize}px`);
 
-				// Wrap text to fit in circle
-				let line: string[] = [];
-				let lineNumber = 0;
-				const lineHeight = fontSize * 1.1;
-				const maxLines = Math.floor((d.radius * 2) / lineHeight);
+				const lineHeight = fontSize * 1.2;
+				const maxLines = Math.max(1, Math.floor((d.radius * 1.6) / lineHeight));
 
-				for (let i = 0; i < words.length; i++) {
-					line.push(words[i]);
-					text.text(line.join(' '));
+				// Simple approach: create tspan lines
+				const lines: string[] = [];
+				let currentLine = '';
 
-					if ((text.node() as any).getComputedTextLength() > maxWidth) {
-						if (line.length === 1) {
-							// Single word too long, truncate it
-							const word = line[0];
-							let truncated = word;
-							while ((text.node() as any).getComputedTextLength() > maxWidth && truncated.length > 0) {
-								truncated = truncated.slice(0, -1);
-								text.text(truncated + '...');
-							}
-							lineNumber++;
-							line = [];
-						} else {
-							// Remove last word and create new line
-							line.pop();
-							const tspan = text
-								.append('tspan')
-								.attr('x', 0)
-								.attr('dy', lineNumber === 0 ? `-${(lineHeight * (maxLines - 1)) / 2}px` : `${lineHeight}px`)
-								.text(line.join(' '));
-							lineNumber++;
-							line = [words[i]];
+				for (const word of words) {
+					const testLine = currentLine ? `${currentLine} ${word}` : word;
+					// Rough estimate: 0.6 * fontSize per character
+					const estimatedWidth = testLine.length * fontSize * 0.6;
 
-							if (lineNumber >= maxLines) break;
-						}
+					if (estimatedWidth > maxWidth && currentLine) {
+						lines.push(currentLine);
+						currentLine = word;
+						if (lines.length >= maxLines) break;
+					} else {
+						currentLine = testLine;
 					}
 				}
 
-				// Add remaining words
-				if (line.length > 0 && lineNumber < maxLines) {
-					text.append('tspan')
-						.attr('x', 0)
-						.attr('dy', lineNumber === 0 ? 0 : `${lineHeight}px`)
-						.text(line.join(' '));
+				if (currentLine && lines.length < maxLines) {
+					lines.push(currentLine);
 				}
 
-				// Clear the main text element
-				text.text('');
+				// Truncate if needed
+				const displayLines = lines.slice(0, maxLines);
+				if (displayLines.length === 0 && words.length > 0) {
+					// Fallback: show first word truncated
+					displayLines.push(words[0].slice(0, 12) + (words[0].length > 12 ? '...' : ''));
+				}
+
+				// Add tspan for each line
+				const startY = -(displayLines.length - 1) * lineHeight / 2;
+				displayLines.forEach((line, i) => {
+					text.append('tspan')
+						.attr('x', 0)
+						.attr('dy', i === 0 ? `${startY}px` : `${lineHeight}px`)
+						.text(line);
+				});
 			});
 
 		// Add vote count badges for items with votes
@@ -337,7 +347,7 @@
 			.attr('y', (d: any) => -d.radius * 0.6)
 			.attr('text-anchor', 'middle')
 			.attr('dominant-baseline', 'middle')
-			.attr('fill', 'hsl(var(--text-on-teal))')
+			.attr('fill', 'white')
 			.attr('font-size', (d: any) => Math.min(d.radius * 0.2, 12) + 'px')
 			.attr('font-weight', '700')
 			.attr('pointer-events', 'none')
@@ -399,18 +409,20 @@
 
 	onMount(() => {
 		mounted = true;
+		if (container && ro) ro.observe(container);
 		renderWordCloud();
 	});
 
 	onDestroy(() => {
 		mounted = false;
+		ro?.disconnect();
 		// Clean up any tooltips
 		d3.select('body').selectAll('.word-cloud-tooltip').remove();
 	});
 </script>
 
-<div class="relative word-cloud-container">
-	<svg bind:this={svg} {width} {height}></svg>
+<div bind:this={container} class="relative word-cloud-container">
+	<svg bind:this={svg} viewBox="0 0 {width} {height}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"></svg>
 </div>
 
 <style>
@@ -422,8 +434,9 @@
 
 	svg {
 		display: block;
-		max-width: 100%;
-		height: auto;
+		width: 100%;
+		height: 100%;
+		min-height: 400px;
 		background: linear-gradient(
 			135deg,
 			hsl(var(--surface-muted)) 0%,

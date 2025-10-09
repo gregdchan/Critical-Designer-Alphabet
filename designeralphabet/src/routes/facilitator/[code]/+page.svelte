@@ -4,6 +4,7 @@
   import { browser } from '$app/environment';
   import BarChart from '$lib/components/charts/BarChart.svelte';
   import PieChart from '$lib/components/charts/PieChart.svelte';
+  import LineChart from '$lib/components/charts/LineChart.svelte';
   import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
   import { buildChartForQuestion, inferQuestionType } from '$lib/aggregators/questionCharts';
   import { sessionDetails, questions, responses, startRealtimeSession, stopRealtimeSession } from '$lib/realtime';
@@ -11,7 +12,7 @@
 
   const chartMap = {
     multipleChoice: BarChart,
-    rating: PieChart,
+    rating: LineChart,
     boolean: PieChart,
     voting: WordCloudChart,
     openText: WordCloudChart

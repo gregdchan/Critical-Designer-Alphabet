@@ -29,13 +29,14 @@
   $: innerHeight = Math.max(0, height - margin.top - margin.bottom);
 </script>
 
-<div bind:this={container} class={`w-full h-full ${className}`}>
+<div bind:this={container} class={`w-full h-full chart-frame ${className}`}>
   <svg
     role="img"
     aria-label={ariaLabel || title}
     viewBox={`0 0 ${Math.max(0, width)} ${Math.max(0, height)}`}
     width="100%"
     height="100%"
+    preserveAspectRatio="xMidYMid meet"
   >
     {#if title}
       <title>{title}</title>
@@ -48,6 +49,13 @@
 </div>
 
 <style>
-  svg { display: block; }
+  .chart-frame {
+    overflow: hidden;
+  }
+  svg {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+  }
 </style>
 
