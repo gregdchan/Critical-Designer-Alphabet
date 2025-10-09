@@ -90,9 +90,20 @@ let supabaseChannel: ReturnType<typeof supabase.channel> | null = null;
 
 async function fetchBundle(code: string) {
 	try {
+		console.log(`[Realtime] Fetching bundle for session: ${code}`);
 		const res = await fetch(`/api/session/${code}`);
 		const data = await res.json();
-		if (!data.success) return;
+		if (!data.success) {
+			console.warn('[Realtime] Bundle fetch failed:', data.error);
+			return;
+		}
+		console.log('[Realtime] Bundle received:', {
+			session: !!data.session,
+			participants: data.participants?.length || 0,
+			questions: data.questions?.length || 0,
+			responses: data.responses?.length || 0,
+			phases: data.phases?.length || 0
+		});
 		sessionDetails.set(data.session);
 		participants.set(data.participants ?? []);
 		questions.set(data.questions ?? []);
@@ -101,7 +112,7 @@ async function fetchBundle(code: string) {
 		chat.set(data.chat ?? []);
 		phases.set(data.phases ?? []);
 	} catch (error) {
-		console.error('Failed to load session bundle', error);
+		console.error('[Realtime] Failed to load session bundle', error);
 	}
 }
 
@@ -277,8 +288,8 @@ export async function startRealtimeSession(code: string) {
 		.on(
 			'postgres_changes',
 			{ event: '*', schema: 'public', table: 'responses', filter: `room_code=eq.${code}` },
-			async () => {
-				console.log('[Realtime] Responses updated');
+			async (payload) => {
+				console.log('[Realtime] Responses updated!', payload);
 				await fetchBundle(code);
 			}
 		)

@@ -164,6 +164,8 @@
 	const BOARD_SEQUENCE: BoardId[] = [
 		'phase',
 		'responses',
+		'timeline',
+		'leaderboard',
 		'barChart',
 		'pieChart',
 		'lineChart',
@@ -174,8 +176,6 @@
 		'riskImpactMatrix',
 		'maturityDial',
 		'inclusivityMeter',
-		'leaderboard',
-		'timeline',
 		'chat'
 	];
 
