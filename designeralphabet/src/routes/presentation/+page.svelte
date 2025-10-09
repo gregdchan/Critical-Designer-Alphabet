@@ -20,7 +20,7 @@
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import PieChart from '$lib/components/charts/PieChart.svelte';
 	import LineChart from '$lib/components/charts/LineChart.svelte';
-    import { tallyByOption } from '$lib/selectors/aggregate';
+    import { buildChartForQuestion } from '$lib/aggregators/questionCharts';
 	import RealtimeLineChart from '$lib/components/charts/RealtimeLineChart.svelte';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
 	import MaturityDial from '$lib/charts/MaturityDial.svelte';
@@ -772,12 +772,13 @@
 										<div class="space-y-8">
 											{#each choiceQuestions as question}
 												{@const qRows = responsesList.filter(r => r.question_id === question.id)}
-												{@const chart = tallyByOption(qRows, question.text)}
+												{@const built = buildChartForQuestion(question, qRows)}
+												{@const chart = built.data}
 												<div class="space-y-3">
 													<div class="flex items-center justify-between mb-2">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
 													</div>
-			                                {#if chart.series[0].points.length}
+			                                {#if chart && chart.series[0]?.points?.length}
 			                                    <div style="width:100%;height: min(700px, calc(70px*{Math.max(3, chart.series[0].points.length)}));">
 			                                        <BarChart data={chart} title={question.text} />
 			                                    </div>
@@ -810,12 +811,13 @@
 										<div class="space-y-6">
 											{#each choiceQuestions as question}
 												{@const qRows = responsesList.filter(r => r.question_id === question.id)}
-												{@const chart = tallyByOption(qRows, question.text)}
+												{@const built = buildChartForQuestion(question, qRows)}
+												{@const chart = built.data}
 												<div class="space-y-4">
 													<div class="flex items-center justify-between">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
 													</div>
-			                                {#if chart.series[0].points.length}
+			                                {#if chart && chart.series[0]?.points?.length}
 			                                    <div style="width:100%;height:500px;">
 			                                        <PieChart data={chart} title={question.text} />
 			                                    </div>

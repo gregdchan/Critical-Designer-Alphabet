@@ -70,9 +70,28 @@ async function handleWebhook(payload: any) {
 	// Handle question deletion
 	if (payload._deleted) {
 		console.log('[Sanity Webhook] Question deleted:', _id);
-		// Optionally delete from Supabase
-		// await supabaseAdmin.from('questions').delete().eq('sanity_id', _id);
-		return json({ success: true, message: 'Question deletion noted' });
+
+		const sessionCode = payload.sessionCode || payload.session_code;
+		const questionText = payload.text;
+
+		if (sessionCode && questionText) {
+			// Delete the question from Supabase
+			const { error } = await supabaseAdmin
+				.from('questions')
+				.delete()
+				.eq('room_code', sessionCode)
+				.eq('text', questionText);
+
+			if (error) {
+				console.error('[Sanity Webhook] Failed to delete question:', error);
+				return json({ success: false, error: error.message }, { status: 500 });
+			}
+
+			console.log('[Sanity Webhook] Question deleted from Supabase');
+			return json({ success: true, message: 'Question deleted' });
+		}
+
+		return json({ success: true, message: 'Question deletion noted (no session code)' });
 	}
 
 	// Extract question data from payload

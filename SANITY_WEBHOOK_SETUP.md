@@ -92,6 +92,16 @@ Connected Clients Refetch
 Charts Update Automatically
 ```
 
+### Question Deletion
+
+When you delete a question in Sanity:
+1. The webhook receives a payload with `_deleted: true`
+2. The endpoint automatically deletes the question from Supabase
+3. Realtime subscription fires
+4. The chart/dashboard for that question disappears from all connected views
+
+**Note**: Deleting a question does NOT delete associated responses. If you want to also remove responses, you'll need to handle that separately.
+
 ### Webhook Payload Structure
 
 Sanity sends a payload like:

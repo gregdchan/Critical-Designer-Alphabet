@@ -95,6 +95,9 @@ export function buildChartForQuestion(
   const type = inferQuestionType(question, responses);
   // Dev visibility
   console.debug('Chart inference:', question?.text ?? question?.section ?? '(untitled)', '→', type);
+  console.debug('  Question ID:', question.id, '| Room Code:', (question as any).room_code);
+  console.debug('  Responses count:', responses.length);
+  console.debug('  Response question_ids:', responses.map(r => r.question_id).slice(0, 5));
 
   // Build chart data per inferred type
   switch (type) {
