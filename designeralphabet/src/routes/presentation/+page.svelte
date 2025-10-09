@@ -770,19 +770,19 @@
 										</header>
 										<div class="space-y-8">
 											{#each choiceQuestions as question}
+												{@const qRows = responsesList.filter(r => r.question_id === question.id)}
+												{@const chart = tallyByOption(qRows, question.text)}
 												<div class="space-y-3">
 													<div class="flex items-center justify-between mb-2">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
 													</div>
-                                {@const qRows = responsesList.filter(r => r.question_id === question.id)}
-                                {@const chart = tallyByOption(qRows, question.text)}
-                                {#if chart.series[0].points.length}
-                                    <div style="width:100%;height: min(700px, calc(70px*{Math.max(3, chart.series[0].points.length)}));">
-                                        <BarChart data={chart} title={question.text} />
-                                    </div>
-                                {:else}
-                                    <div class="text-ink-muted text-sm">No data yet.</div>
-                                {/if}
+			                                {#if chart.series[0].points.length}
+			                                    <div style="width:100%;height: min(700px, calc(70px*{Math.max(3, chart.series[0].points.length)}));">
+			                                        <BarChart data={chart} title={question.text} />
+			                                    </div>
+			                                {:else}
+			                                    <div class="text-ink-muted text-sm">No data yet.</div>
+			                                {/if}
 												</div>
 											{/each}
 										</div>
@@ -808,19 +808,19 @@
 										</header>
 										<div class="space-y-6">
 											{#each choiceQuestions as question}
+												{@const qRows = responsesList.filter(r => r.question_id === question.id)}
+												{@const chart = tallyByOption(qRows, question.text)}
 												<div class="space-y-4">
 													<div class="flex items-center justify-between">
 														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
 													</div>
-                                {@const qRows = responsesList.filter(r => r.question_id === question.id)}
-                                {@const chart = tallyByOption(qRows, question.text)}
-                                {#if chart.series[0].points.length}
-                                    <div style="width:100%;height:500px;">
-                                        <PieChart data={chart} title={question.text} />
-                                    </div>
-                                {:else}
-                                    <div class="text-ink-muted text-sm">No data yet.</div>
-                                {/if}
+			                                {#if chart.series[0].points.length}
+			                                    <div style="width:100%;height:500px;">
+			                                        <PieChart data={chart} title={question.text} />
+			                                    </div>
+			                                {:else}
+			                                    <div class="text-ink-muted text-sm">No data yet.</div>
+			                                {/if}
 												</div>
 											{/each}
 										</div>

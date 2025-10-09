@@ -26,6 +26,12 @@
     overrides = { ...overrides, [qid]: type as OverrideType };
   }
 
+  function handleOverrideEvent(qid: string, e: Event) {
+    const target = e.currentTarget as HTMLSelectElement | null;
+    const value = target?.value ?? '';
+    handleOverride(qid, value);
+  }
+
   onMount(async () => {
     if (!browser) return;
     roomCode = $page.params.code || '';
@@ -49,7 +55,7 @@
         {#if q}
           {@const qResponses = $responses.filter(r => r.question_id === q.id)}
           {@const inferred = inferQuestionType(q, qResponses)}
-          {@const chartType: OverrideType = overrides[q.id] || inferred}
+          {@const chartType = overrides[q.id] || inferred}
           {@const ChartComp = chartMap[chartType]}
           {@const built = buildChartForQuestion(q, qResponses)}
 
@@ -65,7 +71,7 @@
                 <label class="text-xs text-secondary">Chart</label>
                 <select
                   class="text-sm surface-input border border-line rounded px-2 py-1"
-                  on:change={(e) => handleOverride(q.id, (e.target as HTMLSelectElement).value)}
+                  on:change={(e) => handleOverrideEvent(q.id, e)}
                 >
                   {#each Object.keys(chartMap) as key}
                     <option value={key} selected={chartType === key}>{key}</option>
@@ -85,7 +91,7 @@
               </div>
             {:else if built?.data}
               <div class="w-full" style="height:520px">
-                <ChartComp data={built.data as ChartData} title={q.text || ''} />
+                <ChartComp data={built.data} title={q.text || ''} />
               </div>
             {:else}
               <div class="p-6 text-sm text-secondary">No responses yet</div>
@@ -105,4 +111,3 @@
     box-shadow: 0 12px 32px rgba(15, 23, 42, 0.07);
   }
 </style>
-
