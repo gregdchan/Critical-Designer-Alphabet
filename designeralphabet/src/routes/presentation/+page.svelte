@@ -323,11 +323,14 @@
 
 		const dashboards: string[] = [];
 
+		// Always add phase info board when there's an active phase
+		dashboards.push('phase');
+
 		// Collect dashboards from manually selected dashboards in Sanity
 		phaseQuestions.forEach((q) => {
 			// Check for field (supports both snake_case from DB and camelCase from Sanity)
 			const selectedDashboards = q.recommendedDashboards || q.recommended_dashboards;
-			
+
 			if (Array.isArray(selectedDashboards) && selectedDashboards.length > 0) {
 				selectedDashboards.forEach((d: string) => {
 					if (!dashboards.includes(d)) {
@@ -337,10 +340,8 @@
 			}
 		});
 
-		// If no dashboards explicitly configured, auto-detect based on question types
-		if (dashboards.length === 0 && phaseQuestions.length > 0) {
-			// Always add phase info board
-			dashboards.push('phase');
+		// If no dashboards explicitly configured (besides phase), auto-detect based on question types
+		if (dashboards.length === 1 && phaseQuestions.length > 0) {
 			
 			// Add chart types based on response types
 			phaseQuestions.forEach((q) => {
@@ -1040,7 +1041,7 @@
 															>{participant.name ?? 'Participant'}</span
 														>
 													</div>
-													<span class="text-xs text-cyan-200">{participant.points ?? 0} pts</span>
+													<span class="text-xs text-cyan-200 flex-shrink-0 ml-auto">{participant.points ?? 0} pts</span>
 												</div>
 											{/each}
 										</div>

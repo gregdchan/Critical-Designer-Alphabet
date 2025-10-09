@@ -1729,7 +1729,7 @@
 															<span class="text-xs font-bold text-brand">#{index + 1}</span>
 															<span class="text-sm text-primary truncate">{participant.name}</span>
 														</div>
-														<span class="text-xs text-cyan-200">{participant.points}pts</span>
+														<span class="text-xs text-cyan-200 flex-shrink-0 ml-auto">{participant.points ?? 0} pts</span>
 													</div>
 												{/each}
 											{:else}
@@ -1970,7 +1970,7 @@
 															<div class="text-xs text-secondary">chats</div>
 														</div>
 														<div class="text-center p-2 rounded surface-muted/60">
-															<div class="font-medium text-primary">{participant.points}</div>
+															<div class="font-medium text-primary truncate px-1">{participant.points ?? 0}</div>
 															<div class="text-xs text-secondary">points</div>
 														</div>
 													</div>
