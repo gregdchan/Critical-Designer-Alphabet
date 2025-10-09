@@ -30,7 +30,7 @@
 
 	<!-- Drawer -->
 	<div
-		class="fixed top-0 right-0 h-full w-full max-w-2xl bg-white border-l-4 border-slate-200 shadow-2xl z-50 overflow-y-auto"
+		class="fixed top-0 right-0 h-full w-full max-w-2xl bg-white border-l-4 border-slate-200 shadow-2xl z-50 overflow-y-auto overflow-x-hidden"
 	>
 		<slot />
 	</div>

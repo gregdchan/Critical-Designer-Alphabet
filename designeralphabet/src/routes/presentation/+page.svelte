@@ -856,7 +856,12 @@
 									</div>
 								</div>
 							{:else if boardId === 'barChart'}
-								{@const choiceQuestions = phaseQuestions.filter(q => ['singleChoice', 'multiSelect'].includes(q.response_type || ''))}
+								{@const choiceQuestions = phaseQuestions.filter(q => {
+									const recommended = q.recommended_dashboards || [];
+									// Show in bar chart if: explicitly set to bar/barchart OR if it's a choice question without explicit dashboard preference
+									return (Array.isArray(recommended) && (recommended.some(d => ['bar', 'barchart', 'barChart'].includes(d)))) ||
+										   (!recommended.length && ['singleChoice', 'multiSelect'].includes(q.response_type || ''));
+								})}
 								{#if choiceQuestions.length > 0}
 									<div
 										class="presentation-panel rounded-2xl border border-blue-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(59,130,246,0.2)]"
@@ -895,7 +900,11 @@
 									</div>
 								{/if}
 							{:else if boardId === 'pieChart'}
-								{@const choiceQuestions = phaseQuestions.filter(q => ['singleChoice', 'multiSelect'].includes(q.response_type || ''))}
+								{@const choiceQuestions = phaseQuestions.filter(q => {
+									const recommended = q.recommended_dashboards || [];
+									// Show in pie chart if: explicitly set to pie/piechart
+									return Array.isArray(recommended) && recommended.some(d => ['pie', 'piechart', 'pieChart'].includes(d));
+								})}
 								{#if choiceQuestions.length > 0}
 									<div
 										class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"

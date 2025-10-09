@@ -342,9 +342,9 @@ function variantClass(card: Card | null, role: string): string {
 			No cards match these filters. Try clearing filters or drawing at random.
 		</div>
 	{:else}
-		<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 max-w-full overflow-hidden">
 			{#each filteredCards as card, index (card._id)}
-				<div>
+				<div class="max-w-full overflow-hidden">
 					<article
 						class={`card ${getCardClass(card)} gap-3 ${
 							selectedCards.some((entry) => entry._id === card._id) ? 'selected' : ''
@@ -457,11 +457,11 @@ function variantClass(card: Card | null, role: string): string {
 
 <SimpleDrawer open={$drawerOpen} on:backdrop={closeDetails}>
 	{#if activeCard}
-		<article class="flex h-full flex-col gap-6 overflow-y-auto bg-white p-6 text-slate-900">
-			<header class="flex items-start justify-between gap-4">
-				<div class="space-y-3">
+		<article class="flex h-full flex-col gap-6 overflow-y-auto overflow-x-hidden bg-white p-4 sm:p-6 text-slate-900 w-full max-w-full box-border">
+			<header class="flex items-start justify-between gap-3 w-full max-w-full">
+				<div class="space-y-3 min-w-0 flex-1">
 					<div
-						class="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em]"
+						class="flex flex-wrap items-center gap-2 text-[0.65rem] uppercase tracking-[0.25em]"
 					>
 						{#if activeCard.category}
 							<span class={`rounded-full border-2 px-3 py-1.5 font-bold ${variantClass(activeCard, 'chip')}`}>
@@ -470,13 +470,13 @@ function variantClass(card: Card | null, role: string): string {
 						{/if}
 						<span class="rounded-full border-2 border-slate-300 bg-slate-100 px-3 py-1.5 font-semibold text-slate-700">{activeCard.cardID}</span>
 					</div>
-					<h2 class="font-retro text-2xl uppercase tracking-[0.4em] text-slate-900">{activeCard.title}</h2>
-					<p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-600">
+					<h2 class="font-retro text-xl sm:text-2xl uppercase tracking-[0.3em] sm:tracking-[0.4em] text-slate-900 break-words">{activeCard.title}</h2>
+					<p class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-600">
 						Letter {activeCard.letter}
 					</p>
 				</div>
 				<button
-					class="rounded-full border-2 border-slate-300 bg-slate-100 p-2.5 text-slate-700 transition hover:border-slate-400 hover:bg-slate-200"
+					class="rounded-full border-2 border-slate-300 bg-slate-100 p-2.5 text-slate-700 transition hover:border-slate-400 hover:bg-slate-200 flex-shrink-0"
 					type="button"
 					on:click={closeDetails}
 					aria-label="Close"
@@ -486,39 +486,39 @@ function variantClass(card: Card | null, role: string): string {
 			</header>
 			{#if activeCard.description}
 				<section
-					class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5 text-base"
+					class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 text-base w-full max-w-full box-border"
 				>
-					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-900">Description</h3>
-					<p class="leading-relaxed text-slate-800">{activeCard.description}</p>
+					<h3 class="text-xs font-bold uppercase tracking-[0.25em] text-slate-900">Description</h3>
+					<p class="leading-relaxed text-slate-800 break-words">{activeCard.description}</p>
 				</section>
 			{/if}
 			{#if activeCard.prompt}
 				<section
-					class="rounded-2xl border-2 border-purple-300 bg-purple-50 p-5 text-base"
+					class="rounded-2xl border-2 border-purple-300 bg-purple-50 p-4 sm:p-5 text-base w-full max-w-full box-border"
 				>
-					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-purple-900">Prompt</h3>
-					<p class="mt-2 leading-relaxed text-purple-900">{activeCard.prompt}</p>
+					<h3 class="text-xs font-bold uppercase tracking-[0.25em] text-purple-900">Prompt</h3>
+					<p class="mt-2 leading-relaxed text-purple-900 break-words">{activeCard.prompt}</p>
 				</section>
 			{/if}
 			{#if activeCard.exampleUse?.length}
-				<section class="space-y-3 text-base">
-					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-900">Example Uses</h3>
-					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
+				<section class="space-y-3 text-base w-full max-w-full">
+					<h3 class="text-xs font-bold uppercase tracking-[0.25em] text-slate-900">Example Uses</h3>
+					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border">
 						{#each activeCard.exampleUse as example}
-							<li class="leading-relaxed text-slate-800">• {example}</li>
+							<li class="leading-relaxed text-slate-800 break-words">• {example}</li>
 						{/each}
 					</ul>
 				</section>
 			{/if}
 			{#if activeCard.readingList?.length}
-				<section class="space-y-3 text-base">
-					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-900">Reading List</h3>
-					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
+				<section class="space-y-3 text-base w-full max-w-full">
+					<h3 class="text-xs font-bold uppercase tracking-[0.25em] text-slate-900">Reading List</h3>
+					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border">
 						{#each activeCard.readingList as item}
-							<li class="text-slate-800">
+							<li class="text-slate-800 break-words">
 								{#if item.url}
 									<a
-										class="font-semibold text-blue-600 underline-offset-4 hover:underline"
+										class="font-semibold text-blue-600 underline-offset-4 hover:underline break-words"
 										href={item.url}
 										target="_blank"
 										rel="noreferrer"
@@ -534,13 +534,13 @@ function variantClass(card: Card | null, role: string): string {
 				</section>
 			{/if}
 			{#if activeCard.sources?.length}
-				<section class="space-y-3 text-base">
-					<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-900">Sources</h3>
-					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
+				<section class="space-y-3 text-base w-full max-w-full">
+					<h3 class="text-xs font-bold uppercase tracking-[0.25em] text-slate-900">Sources</h3>
+					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border">
 						{#each activeCard.sources as source}
-							<li>
+							<li class="w-full max-w-full overflow-hidden">
 								<a
-									class="break-all font-semibold text-pink-600 underline-offset-4 hover:underline"
+									class="break-all font-semibold text-pink-600 underline-offset-4 hover:underline inline-block max-w-full"
 									href={source}
 									target="_blank"
 									rel="noreferrer">{source}</a
@@ -550,9 +550,9 @@ function variantClass(card: Card | null, role: string): string {
 					</ul>
 				</section>
 			{/if}
-			<footer class="mt-auto space-y-3 border-t-2 border-slate-200 pt-4 text-sm">
+			<footer class="mt-auto space-y-3 border-t-2 border-slate-200 pt-4 text-sm w-full max-w-full box-border">
 				<button
-					class="w-full rounded-full border-2 border-purple-500 bg-purple-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.3em] text-white shadow-lg transition hover:bg-purple-700"
+					class="w-full rounded-full border-2 border-purple-500 bg-purple-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-white shadow-lg transition hover:bg-purple-700"
 					type="button"
 					on:click={() => activeCard && toggleCard(activeCard)}
 				>
@@ -560,7 +560,7 @@ function variantClass(card: Card | null, role: string): string {
 						? 'Remove from staged deck'
 						: 'Stage this card'}
 				</button>
-				<p class="leading-relaxed text-slate-600">
+				<p class="leading-relaxed text-slate-600 break-words">
 					The Designer's Critical Alphabet is by Dr. Lesley-Ann Noel. Respect licensing and context
 					when sharing.
 				</p>

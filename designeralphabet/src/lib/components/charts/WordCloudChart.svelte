@@ -435,6 +435,14 @@
 		width: 100%;
 		max-width: 100%;
 		overflow: hidden;
+		aspect-ratio: 16/9; /* Landscape on desktop */
+	}
+
+	/* Portrait on mobile */
+	@media (max-width: 768px) {
+		.word-cloud-container {
+			aspect-ratio: 3/4;
+		}
 	}
 
 	svg {

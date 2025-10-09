@@ -3,7 +3,7 @@
   import { max } from 'd3-array';
   import { select } from 'd3-selection';
   import ChartFrame from '$lib/components/charts/ChartFrame.svelte';
-  import type { ChartData } from '$lib/types/charts';
+  import type { ChartData, ChartPoint } from '$lib/types/charts';
 
   export let data: ChartData | null = null;
   export let title = '';
@@ -11,6 +11,7 @@
 
   let tooltipEl: HTMLDivElement | null = null;
   let rootEl: SVGGElement;
+  let selectedBar: ChartPoint | null = null;
 
   function render(root: SVGGElement, innerWidth: number, innerHeight: number, currentData: ChartData | null) {
     const g = select(root);
@@ -106,6 +107,8 @@
       .attr('width', (d) => Math.max(0, x(d.value)))
       .attr('fill', (d, i) => `var(--chart-${(i % 8) + 1})`)
       .attr('rx', 4)
+      .attr('cursor', 'pointer')
+      .attr('opacity', (d: any) => selectedBar && selectedBar.id === d.id ? 1 : 0.85)
       .attr('data-testid', 'bar-root');
 
     // Values on the right
@@ -118,9 +121,13 @@
       .attr('fill', 'hsl(var(--text-primary))')
       .style('font-size', '11px')
       .style('font-weight', '600')
+      .style('pointer-events', 'none')
       .text((d) => d.value);
 
     rows
+      .on('click', (event, d: any) => {
+        selectedBar = selectedBar?.id === d.id ? null : d;
+      })
       .on('mousemove', (event, d: any) => {
         if (!tooltipEl) return;
         const { clientX, clientY } = event as MouseEvent;
@@ -130,11 +137,51 @@
       })
       .on('mouseleave', () => tooltipEl && (tooltipEl.style.opacity = '0'));
   }
+
+  $: if (data && rootEl) {
+    // Re-render when selectedBar changes to update opacity
+    select(rootEl).selectAll('rect[data-testid="bar-root"]').attr('opacity', (d: any) =>
+      selectedBar && selectedBar.id === d.id ? 1 : 0.85
+    );
+  }
+
+  $: total = data?.series?.[0]?.points.reduce((s, p) => s + p.value, 0) || 1;
+  $: percentage = selectedBar ? ((selectedBar.value / total) * 100).toFixed(1) : '0';
 </script>
 
-<ChartFrame {title} {ariaLabel} let:innerWidth let:innerHeight>
-  <g bind:this={rootEl}>
-    {@html (render(rootEl, innerWidth, innerHeight, data), '')}
-  </g>
-  <div slot="tooltip" bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
-</ChartFrame>
+<div class="w-full h-full flex flex-col gap-4">
+  <ChartFrame {title} {ariaLabel} let:innerWidth let:innerHeight>
+    <g bind:this={rootEl}>
+      {@html (render(rootEl, innerWidth, innerHeight, data), '')}
+    </g>
+    <div slot="tooltip" bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
+  </ChartFrame>
+
+  {#if selectedBar}
+    <div class="rounded-xl border-2 border-blue-400/30 bg-blue-50/80 p-4 shadow-lg backdrop-blur-sm transition-all">
+      <div class="flex items-start justify-between gap-3 mb-3">
+        <h3 class="font-bold text-blue-900 text-sm uppercase tracking-wide">Selected Option</h3>
+        <button
+          on:click={() => selectedBar = null}
+          class="text-blue-600 hover:text-blue-800 transition-colors"
+          aria-label="Close detail panel"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-2">
+        <p class="text-blue-900 font-semibold break-words">{selectedBar.label}</p>
+        <div class="flex items-baseline gap-2 text-sm">
+          <span class="text-blue-700 font-medium">{selectedBar.value} responses</span>
+          <span class="text-blue-600">({percentage}%)</span>
+        </div>
+      </div>
+    </div>
+  {:else}
+    <div class="rounded-xl border-2 border-slate-200 bg-slate-50 p-4 text-center">
+      <p class="text-slate-500 text-sm">Click on a bar to view details</p>
+    </div>
+  {/if}
+</div>
