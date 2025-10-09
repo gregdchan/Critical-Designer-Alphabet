@@ -31,10 +31,10 @@
 	const CATEGORIES = ['theory', 'practice', 'lens', 'mindset', 'method'];
 	const CATEGORY_COLORS: Record<string, string> = {
 		theory: 'text-purple-400 border-purple-400/40',
-		practice: 'text-cyan-400 border-cyan-400/40',
+		practice: 'text-brand border-cyan-400/40',
 		lens: 'text-pink-400 border-pink-400/40',
 		mindset: 'text-lime-400 border-lime-400/40',
-		method: 'text-blue-400 border-blue-400/40'
+		method: 'text-brand border-blue-400/40'
 	};
 
 	onMount(async () => {
@@ -68,8 +68,8 @@
 
 	function getCategoryColor(category?: string): string {
 		return category
-			? CATEGORY_COLORS[category] || 'text-slate-400 border-slate-400/40'
-			: 'text-slate-400 border-slate-400/40';
+			? CATEGORY_COLORS[category] || 'text-ink-muted border-slate-400/40'
+			: 'text-ink-muted border-slate-400/40';
 	}
 </script>
 
@@ -102,18 +102,18 @@
 			<div class="border-b border-slate-700 px-4 pb-4">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<IconCards class="h-5 w-5 text-cyan-400" />
+						<IconCards class="h-5 w-5 text-brand" />
 						<h3 class="text-lg font-semibold text-white">Design Cards</h3>
 					</div>
 					<button
 						on:click={closePanel}
-						class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+						class="rounded-lg p-2 text-ink-muted hover:bg-slate-800 hover:text-white"
 					>
 						<IconX class="h-5 w-5" />
 					</button>
 				</div>
 
-				<p class="mt-2 text-xs text-slate-400">
+				<p class="mt-2 text-xs text-ink-muted">
 					Selected {selectedCards.length}/{maxSelection} cards
 				</p>
 			</div>
@@ -121,7 +121,7 @@
 			<!-- Search & Filter -->
 			<div class="border-b border-slate-700 p-4 space-y-3">
 				<div class="relative">
-					<IconSearch class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+					<IconSearch class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
 					<input
 						type="text"
 						placeholder="Search cards..."
@@ -136,8 +136,8 @@
 						on:click={() => (categoryFilter = null)}
 						class="whitespace-nowrap rounded-full border px-3 py-1 text-xs transition {categoryFilter ===
 						null
-							? 'border-cyan-400 bg-cyan-400/10 text-cyan-400'
-							: 'border-slate-600 text-slate-400 hover:border-slate-500'}"
+							? 'border-cyan-400 bg-brand/10 text-brand'
+							: 'border-slate-600 text-ink-muted hover:border-slate-500'}"
 					>
 						All
 					</button>
@@ -147,7 +147,7 @@
 							class="whitespace-nowrap rounded-full border px-3 py-1 text-xs capitalize transition {categoryFilter ===
 							category
 								? getCategoryColor(category) + ' bg-current/10'
-								: 'border-slate-600 text-slate-400 hover:border-slate-500'}"
+								: 'border-slate-600 text-ink-muted hover:border-slate-500'}"
 						>
 							{category}
 						</button>
@@ -164,7 +164,7 @@
 						/>
 					</div>
 				{:else if filteredCards.length === 0}
-					<p class="py-12 text-center text-sm text-slate-400">No cards found</p>
+					<p class="py-12 text-center text-sm text-ink-muted">No cards found</p>
 				{:else}
 					<div class="grid grid-cols-2 gap-3">
 						{#each filteredCards as card}
@@ -174,14 +174,14 @@
 								on:click={() => handleCardClick(card)}
 								{disabled}
 								class="group relative rounded-xl border p-3 text-left transition {selected
-									? 'border-cyan-400 bg-cyan-400/10 shadow-lg shadow-cyan-400/20'
+									? 'border-cyan-400 bg-brand/10 shadow-lg shadow-cyan-400/20'
 									: disabled
 										? 'border-slate-700 bg-slate-800/50 opacity-50'
 										: 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800'}"
 							>
 								{#if selected}
 									<div
-										class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-400 text-slate-900"
+										class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-brand text-ink"
 									>
 										<IconCheck class="h-4 w-4" />
 									</div>
@@ -208,7 +208,7 @@
 
 								<h4 class="font-medium text-white text-sm line-clamp-2">{card.title}</h4>
 								{#if card.description}
-									<p class="mt-1 text-xs text-slate-400 line-clamp-2">{card.description}</p>
+									<p class="mt-1 text-xs text-ink-muted line-clamp-2">{card.description}</p>
 								{/if}
 							</button>
 						{/each}
@@ -219,12 +219,12 @@
 			<!-- Selected Cards Quick View -->
 			{#if selectedCards.length > 0}
 				<div class="border-t border-slate-700 bg-slate-900/95 p-4">
-					<p class="mb-2 text-xs font-medium uppercase tracking-wider text-cyan-400">My Cards</p>
+					<p class="mb-2 text-xs font-medium uppercase tracking-wider text-brand">My Cards</p>
 					<div class="flex flex-wrap gap-2">
 						{#each selectedCards as card}
 							<button
 								on:click={() => onCardToggle(card)}
-								class="group flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-300 transition hover:bg-cyan-400/20"
+								class="group flex items-center gap-2 rounded-full border border-cyan-400/40 bg-brand/10 px-3 py-1.5 text-xs text-brand transition hover:bg-brand/20"
 							>
 								<span class="font-bold">{card.letter}</span>
 								<span>{card.title}</span>
@@ -245,13 +245,13 @@
 			class="flex items-center justify-between border-b border-slate-700 p-4 hover:bg-slate-800/50 transition"
 		>
 			<div class="flex items-center gap-2">
-				<IconCards class="h-5 w-5 text-cyan-400" />
+				<IconCards class="h-5 w-5 text-brand" />
 				<h3 class="font-semibold text-white">Design Cards</h3>
 			</div>
 			{#if isPanelExpanded}
-				<IconChevronDown class="h-5 w-5 text-slate-400" />
+				<IconChevronDown class="h-5 w-5 text-ink-muted" />
 			{:else}
-				<IconChevronRight class="h-5 w-5 text-slate-400" />
+				<IconChevronRight class="h-5 w-5 text-ink-muted" />
 			{/if}
 		</button>
 
@@ -259,7 +259,7 @@
 			<!-- Search & Filter -->
 			<div class="border-b border-slate-700 p-4 space-y-3">
 				<div class="relative">
-					<IconSearch class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+					<IconSearch class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
 					<input
 						type="text"
 						placeholder="Search cards..."
@@ -268,7 +268,7 @@
 					/>
 				</div>
 
-				<p class="text-xs text-slate-400">
+				<p class="text-xs text-ink-muted">
 					Selected {selectedCards.length}/{maxSelection}
 				</p>
 
@@ -277,8 +277,8 @@
 					<button
 						on:click={() => (categoryFilter = null)}
 						class="rounded-full border px-2.5 py-1 text-xs transition {categoryFilter === null
-							? 'border-cyan-400 bg-cyan-400/10 text-cyan-400'
-							: 'border-slate-600 text-slate-400 hover:border-slate-500'}"
+							? 'border-cyan-400 bg-brand/10 text-brand'
+							: 'border-slate-600 text-ink-muted hover:border-slate-500'}"
 					>
 						All
 					</button>
@@ -288,7 +288,7 @@
 							class="rounded-full border px-2.5 py-1 text-xs capitalize transition {categoryFilter ===
 							category
 								? getCategoryColor(category) + ' bg-current/10'
-								: 'border-slate-600 text-slate-400 hover:border-slate-500'}"
+								: 'border-slate-600 text-ink-muted hover:border-slate-500'}"
 						>
 							{category}
 						</button>
@@ -305,7 +305,7 @@
 						/>
 					</div>
 				{:else if filteredCards.length === 0}
-					<p class="py-12 text-center text-sm text-slate-400">No cards found</p>
+					<p class="py-12 text-center text-sm text-ink-muted">No cards found</p>
 				{:else}
 					<div class="space-y-2">
 						{#each filteredCards as card}
@@ -315,14 +315,14 @@
 								on:click={() => handleCardClick(card)}
 								{disabled}
 								class="group relative w-full rounded-lg border p-3 text-left transition {selected
-									? 'border-cyan-400 bg-cyan-400/10 shadow-lg shadow-cyan-400/20'
+									? 'border-cyan-400 bg-brand/10 shadow-lg shadow-cyan-400/20'
 									: disabled
 										? 'border-slate-700 bg-slate-800/30 opacity-50 cursor-not-allowed'
 										: 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800'}"
 							>
 								{#if selected}
 									<div
-										class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-cyan-400 text-slate-900"
+										class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-ink"
 									>
 										<IconCheck class="h-3 w-3" />
 									</div>
@@ -340,7 +340,7 @@
 								</div>
 
 								{#if card.description}
-									<p class="text-xs text-slate-400 line-clamp-2">{card.description}</p>
+									<p class="text-xs text-ink-muted line-clamp-2">{card.description}</p>
 								{/if}
 
 								{#if card.category}
@@ -364,25 +364,25 @@
 			{#if selectedCards.length > 0}
 				<div class="border-t border-slate-700 bg-slate-900/95 p-4">
 					<div class="mb-3 flex items-center gap-2">
-						<IconStar class="h-4 w-4 text-cyan-400" />
-						<p class="text-xs font-medium uppercase tracking-wider text-cyan-400">My Cards</p>
+						<IconStar class="h-4 w-4 text-brand" />
+						<p class="text-xs font-medium uppercase tracking-wider text-brand">My Cards</p>
 					</div>
 					<div class="space-y-2">
 						{#each selectedCards as card}
 							<div
-								class="group flex items-center justify-between rounded-lg border border-cyan-400/40 bg-cyan-400/10 p-2"
+								class="group flex items-center justify-between rounded-lg border border-cyan-400/40 bg-brand/10 p-2"
 							>
 								<div class="flex items-center gap-2">
 									<span
-										class="flex h-6 w-6 items-center justify-center rounded border border-cyan-400 text-xs font-bold text-cyan-400"
+										class="flex h-6 w-6 items-center justify-center rounded border border-cyan-400 text-xs font-bold text-brand"
 									>
 										{card.letter}
 									</span>
-									<span class="text-sm text-cyan-300">{card.title}</span>
+									<span class="text-sm text-brand">{card.title}</span>
 								</div>
 								<button
 									on:click={() => onCardToggle(card)}
-									class="rounded p-1 text-cyan-400 opacity-0 transition group-hover:opacity-100 hover:bg-cyan-400/20"
+									class="rounded p-1 text-brand opacity-0 transition group-hover:opacity-100 hover:bg-brand/20"
 								>
 									<IconX class="h-4 w-4" />
 								</button>

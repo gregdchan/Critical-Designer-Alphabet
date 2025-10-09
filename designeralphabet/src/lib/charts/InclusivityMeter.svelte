@@ -3,8 +3,8 @@
 	import { arc } from 'd3-shape';
 	import { interpolate } from 'd3-interpolate';
 	import BaseChart from './BaseChart.svelte';
-	import { useParticipants, useResponses } from '$lib/hooks/useSupabaseRealtime';
-	import { NEON_COLORS } from '$lib/utils/colors';
+import { useParticipants, useResponses } from '$lib/hooks/useSupabaseRealtime';
+import { getThemeColors } from '$lib/utils/colors';
 	import type { ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
@@ -81,6 +81,8 @@
 		const radius = Math.min(innerWidth, innerHeight) / 2 - 20;
 		const centerX = innerWidth / 2;
 		const centerY = innerHeight / 2;
+		const themeColors = getThemeColors();
+		const inclusivityColor = getInclusivityColor(inclusivityPercentage);
 
 		// Arc generator for gauge
 		const arcGenerator = arc()
@@ -98,10 +100,10 @@
 		chart.selectAll('*').remove();
 
 		// Background arc
-		chart
-			.append('path')
-			.attr('class', 'gauge-background')
-			.attr('transform', `translate(${centerX}, ${centerY})`)
+	chart
+		.append('path')
+		.attr('class', 'gauge-background')
+		.attr('transform', `translate(${centerX}, ${centerY})`)
 			.attr(
 				'd',
 				arcGenerator({
@@ -111,19 +113,19 @@
 					outerRadius: radius * 0.9
 				})
 			)
-			.attr('fill', 'rgba(255, 255, 255, 0.1)')
-			.attr('stroke', 'rgba(255, 255, 255, 0.2)')
+		.attr('fill', 'hsl(var(--surface) / 0.12)')
+		.attr('stroke', 'hsl(var(--border-subtle) / 0.35)')
 			.attr('stroke-width', 1);
 
 		// Progress arc
 		const progressAngle = startAngle + (endAngle - startAngle) * (inclusivityPercentage / 100);
 
-		const progressArc = chart
-			.append('path')
-			.attr('class', 'gauge-progress')
-			.attr('transform', `translate(${centerX}, ${centerY})`)
-			.attr('fill', getInclusivityColor(inclusivityPercentage))
-			.attr('stroke', getInclusivityColor(inclusivityPercentage))
+	const progressArc = chart
+		.append('path')
+		.attr('class', 'gauge-progress')
+		.attr('transform', `translate(${centerX}, ${centerY})`)
+		.attr('fill', inclusivityColor)
+		.attr('stroke', inclusivityColor)
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#neon-glow)')
 			.attr('opacity', 0);
@@ -190,13 +192,13 @@
 			.attr('class', 'gauge-needle')
 			.attr('transform', `translate(${centerX}, ${centerY})`);
 
-		needle
-			.append('line')
-			.attr('x1', 0)
-			.attr('y1', 0)
-			.attr('x2', Math.cos(startAngle) * radius * 0.5)
-			.attr('y2', Math.sin(startAngle) * radius * 0.5)
-			.attr('stroke', '#ff2aad')
+	needle
+		.append('line')
+		.attr('x1', 0)
+		.attr('y1', 0)
+		.attr('x2', Math.cos(startAngle) * radius * 0.5)
+		.attr('y2', Math.sin(startAngle) * radius * 0.5)
+		.attr('stroke', themeColors.accentCritical)
 			.attr('stroke-width', 3)
 			.attr('stroke-linecap', 'round')
 			.attr('filter', 'url(#neon-glow)')
@@ -254,12 +256,12 @@
 			.attr('opacity', 1);
 
 		// Fairness multiplier
-		centerGroup
-			.append('text')
-			.attr('class', 'multiplier-text')
-			.attr('text-anchor', 'middle')
-			.attr('dy', '1.5em')
-			.attr('fill', NEON_COLORS.lime)
+	centerGroup
+		.append('text')
+		.attr('class', 'multiplier-text')
+		.attr('text-anchor', 'middle')
+		.attr('dy', '1.5em')
+		.attr('fill', inclusivityColor)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '14px')
 			.attr('font-weight', 'bold')
@@ -288,12 +290,13 @@
 			.attr('opacity', 1);
 	}
 
-	function getInclusivityColor(percentage: number): string {
-		if (percentage >= 80) return NEON_COLORS.lime; // Green - Excellent
-		if (percentage >= 60) return NEON_COLORS.yellow; // Yellow - Good
-		if (percentage >= 40) return NEON_COLORS.orange; // Orange - Fair
-		return NEON_COLORS.pink; // Pink - Needs improvement
-	}
+function getInclusivityColor(percentage: number): string {
+	const theme = getThemeColors();
+	if (percentage >= 80) return theme.risk.low;
+	if (percentage >= 60) return theme.accentWarm;
+	if (percentage >= 40) return theme.accentCritical;
+	return theme.brand;
+}
 
 	function getInclusivityStatus(percentage: number): string {
 		if (percentage >= 80) return 'Excellent';

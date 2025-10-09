@@ -76,6 +76,7 @@ module.exports = {
 				soft: '0 4px 6px -1px rgba(2, 82, 89, 0.08), 0 2px 4px -1px rgba(2, 82, 89, 0.04)',
 				medium: '0 10px 15px -3px rgba(2, 82, 89, 0.10), 0 4px 6px -2px rgba(2, 82, 89, 0.06)',
 				card: '0 1px 3px 0 rgba(2, 82, 89, 0.10), 0 1px 2px 0 rgba(2, 82, 89, 0.04)',
+				brand: '0 4px 14px 0 hsl(var(--brand) / 0.25)',
 				'teal': '0 4px 14px 0 rgba(0, 113, 114, 0.25)',
 				'orange': '0 4px 14px 0 rgba(242, 147, 37, 0.25)',
 				'playful': '0 8px 32px 0 rgba(0, 113, 114, 0.12), 0 1.5px 8px 0 rgba(242, 147, 37, 0.12)',

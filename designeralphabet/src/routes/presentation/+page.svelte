@@ -422,11 +422,11 @@
 	}
 </script>
 
-<div class="presentation-shell min-h-screen text-slate-800">
+<div class="presentation-shell min-h-screen text-ink">
 	<header class="presentation-header border-b px-10 py-6 backdrop-blur">
 		<div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 			<div class="space-y-2">
-				<p class="text-xs uppercase tracking-[0.4em] text-cyan-300">Session Broadcast</p>
+				<p class="text-xs uppercase tracking-[0.4em] text-brand">Session Broadcast</p>
 				<h1 class="text-3xl font-semibold text-white">
 					{sessionInfo?.title ?? 'Presentation Dashboard'}
 					{#if activeCode}
@@ -437,13 +437,13 @@
 						</span>
 					{/if}
 				</h1>
-				<p class="text-sm text-slate-300">
+				<p class="text-sm text-ink-muted">
 					Curated presentation boards that adapt to the active phase and facilitator preferences.
 				</p>
 				{#if activePhase}
-					<div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+					<div class="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
 						<span class="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 px-3 py-1">
-							<IconSparkles class="h-3.5 w-3.5 text-cyan-300" />
+							<IconSparkles class="h-3.5 w-3.5 text-brand" />
 							<span>{phaseStatusLabels[activePhase.status]}</span>
 						</span>
 						{#if activePhase.title}
@@ -464,19 +464,19 @@
 				on:submit|preventDefault={handleStartPresentation}
 			>
 				<input
-					class="w-48 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
+					class="w-48 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-ink-2 focus:border-cyan-400 focus:outline-none"
 					placeholder="Enter session code"
 					bind:value={joinCode}
 					maxlength="16"
 				/>
 				<button
 					type="submit"
-					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-cyan-400"
+					class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-brand"
 				>
 					{activeCode ? 'Switch session' : 'Start presentation'}
 				</button>
 			</form>
-			<div class="flex items-center gap-6 text-sm text-slate-300">
+			<div class="flex items-center gap-6 text-sm text-ink-muted">
 				<span class="inline-flex items-center gap-2"
 					><IconUsers class="h-5 w-5" /> {participantsList.length} participants</span
 				>
@@ -492,7 +492,7 @@
 			<div class="max-w-4xl w-full space-y-6">
 				<div class="text-center space-y-4">
 					<h2 class="text-2xl font-semibold text-white">Select a Session</h2>
-					<p class="text-slate-400">
+					<p class="text-ink-muted">
 						Choose from available sessions or enter a session code manually to begin the presentation.
 					</p>
 				</div>
@@ -510,8 +510,8 @@
 								class="group presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 text-left transition hover:border-cyan-400/60 hover:bg-slate-900"
 							>
 								<div class="flex items-center justify-between mb-3">
-									<span class="font-mono text-lg font-semibold text-cyan-300">{session.code}</span>
-									<span class="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase text-slate-400">
+									<span class="font-mono text-lg font-semibold text-brand">{session.code}</span>
+									<span class="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase text-ink-muted">
 										{session.status}
 									</span>
 								</div>
@@ -519,11 +519,11 @@
 									{session.title || 'Untitled Session'}
 								</h3>
 								{#if session.focus}
-									<p class="text-sm text-slate-400 line-clamp-2 mb-3">
+									<p class="text-sm text-ink-muted line-clamp-2 mb-3">
 										{session.focus}
 									</p>
 								{/if}
-								<div class="flex items-center gap-2 text-xs text-slate-500">
+								<div class="flex items-center gap-2 text-xs text-ink-2">
 									<IconUsers class="h-4 w-4" />
 									<span>{session.participant_count || 0} participants</span>
 								</div>
@@ -532,25 +532,25 @@
 					</div>
 				{:else}
 					<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-8 text-center">
-						<p class="text-slate-400">No active sessions found. Enter a code manually below.</p>
+						<p class="text-ink-muted">No active sessions found. Enter a code manually below.</p>
 					</div>
 				{/if}
 
 				<div class="pt-6 border-t border-slate-700">
-					<p class="text-center text-sm text-slate-400 mb-4">Or enter a session code manually:</p>
+					<p class="text-center text-sm text-ink-muted mb-4">Or enter a session code manually:</p>
 					<form
 						class="flex items-center justify-center gap-3"
 						on:submit|preventDefault={handleStartPresentation}
 					>
 						<input
-							class="w-64 rounded-lg border border-slate-700 bg-slate-900/80 px-4 py-2 text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
+							class="w-64 rounded-lg border border-slate-700 bg-slate-900/80 px-4 py-2 text-white placeholder:text-ink-2 focus:border-cyan-400 focus:outline-none"
 							placeholder="Enter session code"
 							bind:value={joinCode}
 							maxlength="16"
 						/>
 						<button
 							type="submit"
-							class="rounded-lg bg-cyan-500 px-6 py-2 font-semibold text-slate-900 transition-colors hover:bg-cyan-400"
+							class="rounded-lg bg-brand px-6 py-2 font-semibold text-ink transition-colors hover:bg-brand"
 						>
 							Start
 						</button>
@@ -564,7 +564,7 @@
 				<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-10 text-center">
 					<div class="space-y-3">
 						<h3 class="text-lg font-semibold text-slate-200">Waiting for content...</h3>
-						<p class="text-sm text-slate-400">
+						<p class="text-sm text-ink-muted">
 							Charts will automatically appear when questions have dashboards configured and responses arrive.
 						</p>
 					</div>
@@ -582,7 +582,7 @@
 											<h2 class="text-xl font-semibold text-slate-100">
 												{BOARD_DEFINITIONS[boardId].label}
 											</h2>
-											<p class="text-sm text-slate-400">
+											<p class="text-sm text-ink-muted">
 												{BOARD_DEFINITIONS[boardId].description}
 											</p>
 										</div>
@@ -602,7 +602,7 @@
 										<h2 class="text-xl font-semibold text-slate-100">
 											{BOARD_DEFINITIONS[boardId].label}
 										</h2>
-										<p class="text-sm text-slate-400">
+										<p class="text-sm text-ink-muted">
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
@@ -618,7 +618,7 @@
 										<h2 class="text-xl font-semibold text-slate-100">
 											{BOARD_DEFINITIONS[boardId].label}
 										</h2>
-										<p class="text-sm text-slate-400">
+										<p class="text-sm text-ink-muted">
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
@@ -636,7 +636,7 @@
 											<h2 class="text-xl font-semibold text-slate-100">
 												{BOARD_DEFINITIONS[boardId].label}
 											</h2>
-											<p class="text-sm text-slate-400">
+											<p class="text-sm text-ink-muted">
 												{BOARD_DEFINITIONS[boardId].description}
 											</p>
 										</header>
@@ -657,7 +657,7 @@
 										</div>
 									</div>
 								{:else}
-									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
 										No choice-based questions in this phase.
 									</div>
 								{/if}
@@ -671,7 +671,7 @@
 											<h2 class="text-xl font-semibold text-slate-100">
 												{BOARD_DEFINITIONS[boardId].label}
 											</h2>
-											<p class="text-sm text-slate-400">
+											<p class="text-sm text-ink-muted">
 												{BOARD_DEFINITIONS[boardId].description}
 											</p>
 										</header>
@@ -693,7 +693,7 @@
 										</div>
 									</div>
 								{:else}
-									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
 										No choice-based questions in this phase.
 									</div>
 								{/if}
@@ -707,7 +707,7 @@
 											<h2 class="text-xl font-semibold text-slate-100">
 												{BOARD_DEFINITIONS[boardId].label}
 											</h2>
-											<p class="text-sm text-slate-400">
+											<p class="text-sm text-ink-muted">
 												{BOARD_DEFINITIONS[boardId].description}
 											</p>
 										</header>
@@ -728,7 +728,7 @@
 										</div>
 									</div>
 								{:else}
-									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-400">
+									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
 										No scale questions in this phase.
 									</div>
 								{/if}
@@ -742,7 +742,7 @@
 												<h2 class="text-xl font-semibold text-slate-100">
 													{BOARD_DEFINITIONS[boardId].label}
 												</h2>
-												<p class="text-sm text-slate-400">
+												<p class="text-sm text-ink-muted">
 													{BOARD_DEFINITIONS[boardId].description}
 												</p>
 											</header>
@@ -756,13 +756,13 @@
 													/>
 												</div>
 											{:else}
-												<p class="text-sm text-slate-400">
+												<p class="text-sm text-ink-muted">
 													This chart is unavailable for the current session.
 												</p>
 											{/if}
 										</div>
 									{:else}
-										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
+										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
 											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
 										</div>
 									{/if}
@@ -777,7 +777,7 @@
 												<h2 class="text-xl font-semibold text-slate-100">
 													{BOARD_DEFINITIONS[boardId].label}
 												</h2>
-												<p class="text-sm text-slate-400">
+												<p class="text-sm text-ink-muted">
 													{BOARD_DEFINITIONS[boardId].description}
 												</p>
 											</header>
@@ -791,13 +791,13 @@
 													/>
 												</div>
 											{:else}
-												<p class="text-sm text-slate-400">
+												<p class="text-sm text-ink-muted">
 													This chart is unavailable for the current session.
 												</p>
 											{/if}
 										</div>
 									{:else}
-										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
+										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
 											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
 										</div>
 								{/if}
@@ -808,13 +808,13 @@
 					<aside class="space-y-8">
 						<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
 							<h3 class="text-lg font-semibold text-white">Session Dashboard</h3>
-							<p class="text-sm text-slate-400">
+							<p class="text-sm text-ink-muted">
 								View detailed analytics and controls for this session.
 							</p>
 							<div class="mt-6 flex justify-center">
 								<a
 									href="/dashboard"
-									class="w-full rounded-lg bg-cyan-500 px-6 py-3 text-center text-sm font-semibold text-slate-900 transition-colors hover:bg-cyan-400"
+									class="w-full rounded-lg bg-brand px-6 py-3 text-center text-sm font-semibold text-ink transition-colors hover:bg-brand"
 								>
 									Go to Dashboard
 								</a>
@@ -836,11 +836,11 @@
 										{/if}
 									</header>
 									{#if activePhase}
-										<div class="space-y-3 text-sm text-slate-300">
+										<div class="space-y-3 text-sm text-ink-muted">
 											{#if activePhase.description}
 												<p class="leading-relaxed">{activePhase.description}</p>
 											{/if}
-											<div class="flex flex-wrap gap-2 text-xs text-slate-400">
+											<div class="flex flex-wrap gap-2 text-xs text-ink-muted">
 												<span class="rounded border border-slate-700 px-2 py-0.5">
 													{phaseQuestions.length} focus questions
 												</span>
@@ -863,7 +863,7 @@
 															<li class="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
 																<p class="text-sm font-medium text-white">{card.title}</p>
 																{#if card.description}
-																	<p class="mt-1 text-xs text-slate-400 line-clamp-2">
+																	<p class="mt-1 text-xs text-ink-muted line-clamp-2">
 																		{card.description}
 																	</p>
 																{/if}
@@ -871,7 +871,7 @@
 														{/each}
 													</ul>
 													{#if activePhase.cards.length > 3}
-														<p class="mt-2 text-xs text-slate-500">
+														<p class="mt-2 text-xs text-ink-2">
 															+{activePhase.cards.length - 3} more cards in this phase
 														</p>
 													{/if}
@@ -879,7 +879,7 @@
 											{/if}
 											{#if upcomingPhases.length}
 												<div>
-													<p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+													<p class="text-xs uppercase tracking-[0.3em] text-ink-muted">
 														Coming up
 													</p>
 													<ul class="mt-2 space-y-2">
@@ -889,7 +889,7 @@
 																	{phase.title ?? phase.phase_key ?? 'Phase'}
 																</p>
 																{#if phase.duration_minutes}
-																	<p class="text-xs text-slate-400">
+																	<p class="text-xs text-ink-muted">
 																		{phase.duration_minutes} minute block
 																	</p>
 																{/if}
@@ -900,7 +900,7 @@
 											{/if}
 										</div>
 									{:else}
-										<p class="text-sm text-slate-400">
+										<p class="text-sm text-ink-muted">
 											No phase is active yet. Activate a phase from the facilitator console to surface
 											context here.
 										</p>
@@ -919,7 +919,7 @@
 											{#each leaderboardList.slice(0, 6) as participant, index}
 												<div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">
 													<div class="flex items-center gap-2">
-														<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
+														<span class="text-xs font-bold text-brand">#{index + 1}</span>
 														<span class="text-sm text-white truncate max-w-[140px]"
 															>{participant.name ?? 'Participant'}</span
 														>
@@ -929,7 +929,7 @@
 											{/each}
 										</div>
 									{:else}
-										<p class="text-sm text-slate-400">Waiting for the first contributions.</p>
+										<p class="text-sm text-ink-muted">Waiting for the first contributions.</p>
 									{/if}
 								</div>
 							{:else if boardId === 'timeline'}
@@ -937,25 +937,25 @@
 									<h3 class="text-lg font-semibold text-white">
 										{BOARD_DEFINITIONS[boardId].label}
 									</h3>
-									<p class="text-xs text-slate-500">
+									<p class="text-xs text-ink-2">
 										{BOARD_DEFINITIONS[boardId].description}
 									</p>
 									<div class="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1">
 										{#if timelineList.length}
 											{#each timelineList.slice().reverse() as item}
 												<div class="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
-													<div class="flex items-center justify-between text-xs text-slate-400">
+													<div class="flex items-center justify-between text-xs text-ink-muted">
 														<span>{item.label}</span>
 														<span>{formatTimestamp(item.created_at)}</span>
 													</div>
 													<p class="mt-2 text-sm text-slate-200">{item.item_text}</p>
 													{#if item.owner}
-														<p class="mt-1 text-xs text-slate-500">Owner: {item.owner}</p>
+														<p class="mt-1 text-xs text-ink-2">Owner: {item.owner}</p>
 													{/if}
 												</div>
 											{/each}
 										{:else}
-											<p class="text-sm text-slate-400">No timeline entries yet.</p>
+											<p class="text-sm text-ink-muted">No timeline entries yet.</p>
 										{/if}
 									</div>
 								</div>
@@ -964,14 +964,14 @@
 									<h3 class="text-lg font-semibold text-white">
 										{BOARD_DEFINITIONS[boardId].label}
 									</h3>
-									<p class="text-xs text-slate-500">
+									<p class="text-xs text-ink-2">
 										{BOARD_DEFINITIONS[boardId].description}
 									</p>
 									<div class="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1">
 										{#if chatList.length}
 											{#each chatList.slice().reverse() as entry}
 												<div class="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
-													<p class="text-xs text-slate-400">
+													<p class="text-xs text-ink-muted">
 														{participantsList.find((p) => p.id === entry.participant_id)?.name ??
 														'Anonymous'} · {formatTimestamp(entry.created_at)}
 													</p>
@@ -979,7 +979,7 @@
 												</div>
 											{/each}
 										{:else}
-											<p class="text-sm text-slate-400">The chat feed will appear here live.</p>
+											<p class="text-sm text-ink-muted">The chat feed will appear here live.</p>
 										{/if}
 									</div>
 								</div>
@@ -993,7 +993,7 @@
 												<h3 class="text-lg font-semibold text-white">
 													{BOARD_DEFINITIONS[boardId].label}
 												</h3>
-												<p class="text-xs text-slate-500">
+												<p class="text-xs text-ink-2">
 													{BOARD_DEFINITIONS[boardId].description}
 												</p>
 											</header>
@@ -1007,13 +1007,13 @@
 													/>
 												</div>
 											{:else}
-												<p class="text-sm text-slate-400">
+												<p class="text-sm text-ink-muted">
 													This chart is unavailable for the current session.
 												</p>
 											{/if}
 										</div>
 									{:else}
-										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-slate-300">
+										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
 											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
 										</div>
 									{/if}

@@ -5,8 +5,8 @@
 	import { scaleLinear, scaleTime } from 'd3-scale';
 	import { extent, max } from 'd3-array';
 	import BaseChart from './BaseChart.svelte';
-	import { useTimeline } from '$lib/hooks/useSupabaseRealtime';
-	import { NEON_COLORS } from '$lib/utils/colors';
+import { useTimeline } from '$lib/hooks/useSupabaseRealtime';
+import { getThemeColors } from '$lib/utils/colors';
 	import type { ParticipationPoint, ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
@@ -125,6 +125,8 @@
 		if (!svgElement || !dimensions || !participationData.length) return;
 
 		const { innerWidth, innerHeight } = dimensions;
+		const themeColors = getThemeColors();
+		const primary = themeColors.brand;
 
 		// Scales
 		const xScale = scaleTime()
@@ -161,13 +163,13 @@
 		gradient
 			.append('stop')
 			.attr('offset', '0%')
-			.attr('stop-color', NEON_COLORS.cyan)
-			.attr('stop-opacity', 0.8);
+			.attr('stop-color', primary)
+			.attr('stop-opacity', 0.85);
 
 		gradient
 			.append('stop')
 			.attr('offset', '100%')
-			.attr('stop-color', NEON_COLORS.cyan)
+			.attr('stop-color', primary)
 			.attr('stop-opacity', 0.1);
 
 		// Add area under curve
@@ -194,7 +196,7 @@
 			.datum(participationData)
 			.attr('class', 'pulse-line')
 			.attr('fill', 'none')
-			.attr('stroke', NEON_COLORS.cyan)
+			.attr('stroke', primary)
 			.attr('stroke-width', 3)
 			.attr('filter', 'url(#neon-glow)')
 			.attr('d', lineGenerator)
@@ -209,17 +211,17 @@
 			.attr('stroke-dashoffset', 0);
 
 		// Add data points
-		chart
-			.selectAll('.pulse-dot')
-			.data(participationData)
-			.enter()
-			.append('circle')
-			.attr('class', 'pulse-dot')
-			.attr('cx', (d) => xScale(d.timestamp))
-			.attr('cy', (d) => yScale(d.submissions))
-			.attr('r', 0)
-			.attr('fill', NEON_COLORS.cyan)
-			.attr('stroke', 'white')
+	chart
+		.selectAll('.pulse-dot')
+		.data(participationData)
+		.enter()
+		.append('circle')
+		.attr('class', 'pulse-dot')
+		.attr('cx', (d) => xScale(d.timestamp))
+		.attr('cy', (d) => yScale(d.submissions))
+		.attr('r', 0)
+		.attr('fill', primary)
+		.attr('stroke', 'white')
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#neon-glow)')
 			.transition()
@@ -302,14 +304,14 @@
 				.attr('class', 'fairness-indicator')
 				.attr('transform', `translate(${innerWidth - 100}, 20)`);
 
-			multiplierGroup
-				.append('rect')
-				.attr('width', 90)
-				.attr('height', 40)
-				.attr('rx', 5)
-				.attr('fill', 'rgba(0, 0, 0, 0.7)')
-				.attr('stroke', NEON_COLORS.lime)
-				.attr('stroke-width', 1);
+		multiplierGroup
+			.append('rect')
+			.attr('width', 90)
+			.attr('height', 40)
+			.attr('rx', 5)
+			.attr('fill', 'hsl(var(--surface) / 0.92)')
+			.attr('stroke', themeColors.accentWarm)
+			.attr('stroke-width', 1);
 
 			multiplierGroup
 				.append('text')
@@ -321,16 +323,16 @@
 				.attr('font-size', '10px')
 				.text('Fairness');
 
-			multiplierGroup
-				.append('text')
-				.attr('x', 45)
-				.attr('y', 30)
-				.attr('text-anchor', 'middle')
-				.attr('fill', NEON_COLORS.lime)
-				.attr('font-family', 'Orbitron, sans-serif')
-				.attr('font-size', '12px')
-				.attr('font-weight', 'bold')
-				.text(`×${latestData.fairnessMultiplier.toFixed(1)}`);
+		multiplierGroup
+			.append('text')
+			.attr('x', 45)
+			.attr('y', 30)
+			.attr('text-anchor', 'middle')
+			.attr('fill', themeColors.accentWarm)
+			.attr('font-family', 'Orbitron, sans-serif')
+			.attr('font-size', '12px')
+			.attr('font-weight', 'bold')
+			.text(`×${latestData.fairnessMultiplier.toFixed(1)}`);
 		}
 	}
 

@@ -96,7 +96,7 @@
 			case 'live':
 				return 'text-green-400 bg-green-400/10';
 			case 'done':
-				return 'text-blue-400 bg-blue-400/10';
+				return 'text-brand bg-brand/10';
 			case 'planned':
 				return 'text-yellow-400 bg-yellow-400/10';
 			default:
@@ -141,7 +141,7 @@
 					<p class="text-secondary mt-1">Comprehensive workshop analytics and session management</p>
 				</div>
 				<button
-					class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
+					class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
 					on:click={() => (window.location.href = '/facilitator')}
 				>
 					<Target class="h-4 w-4" />
@@ -151,11 +151,11 @@
 
 			{#if error}
 				<div class="flex items-center justify-center py-12">
-					<div class="text-center surface rounded-xl border border-surface-accent p-8 shadow-sm">
-						<div class="text-red-600 mb-2 font-semibold">⚠️ Error loading dashboard</div>
+					<div class="text-center surface rounded-xl border border-line p-8 shadow-sm">
+						<div class="text-accent-critical mb-2 font-semibold">⚠️ Error loading dashboard</div>
 						<div class="text-secondary text-sm">{error}</div>
 						<button
-							class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
+							class="mt-4 px-4 py-2 bg-brand text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
 							on:click={() => {
 								error = '';
 								loading = true;
@@ -173,10 +173,10 @@
 			{:else}
 				<!-- Key Metrics -->
 				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
-								class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600"
+								class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-brand"
 							>
 								<BarChart class="h-5 w-5" />
 							</div>
@@ -187,7 +187,7 @@
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 text-green-600"
@@ -203,7 +203,7 @@
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600"
@@ -217,10 +217,10 @@
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
-								class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-orange-600"
+								class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-accent-critical"
 							>
 								<TrendingUp class="h-5 w-5" />
 							</div>
@@ -231,10 +231,10 @@
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
-								class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600"
+								class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-accent-critical"
 							>
 								<Clock class="h-5 w-5" />
 							</div>
@@ -250,16 +250,16 @@
 				<div class="grid gap-8 lg:grid-cols-3">
 					<!-- Session List -->
 					<div class="lg:col-span-1">
-						<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm">
+						<div class="surface rounded-xl border border-line p-6 shadow-sm">
 							<h2 class="text-lg font-semibold text-primary mb-6">Recent Sessions</h2>
 							<div class="space-y-4">
 								{#each sessions as session}
 									<button
 										type="button"
-										class="w-full text-left p-4 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 {selectedSession?.code ===
+										class="w-full text-left p-4 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-ring {selectedSession?.code ===
 										session.code
 											? 'bg-blue-50 border-blue-200'
-											: 'border-surface-accent hover:bg-surface-muted'}"
+											: 'border-line hover:bg-surface-muted'}"
 										on:click={() => loadSessionDetails(session)}
 										disabled={loadingSession}
 									>
@@ -288,13 +288,13 @@
 					<!-- Session Details -->
 					<div class="lg:col-span-2">
 						{#if loadingSession}
-							<div class="surface rounded-xl border border-surface-accent p-12 text-center shadow-sm">
+							<div class="surface rounded-xl border border-line p-12 text-center shadow-sm">
 								<div class="text-secondary">Loading session details...</div>
 							</div>
 						{:else if selectedSession}
 							<div class="space-y-6">
 								<!-- Session Header -->
-								<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm">
+								<div class="surface rounded-xl border border-line p-6 shadow-sm">
 									<div class="flex items-center justify-between mb-4">
 										<div>
 											<h2 class="text-xl font-semibold text-primary">{selectedSession.name}</h2>
@@ -302,14 +302,14 @@
 										</div>
 										<div class="flex items-center gap-2">
 											<button
-												class="inline-flex items-center gap-2 rounded-lg border border-surface-accent surface px-3 py-2 text-sm font-medium text-primary hover:bg-surface-muted transition-colors shadow-sm"
+												class="inline-flex items-center gap-2 rounded-lg border border-line surface px-3 py-2 text-sm font-medium text-primary hover:bg-surface-muted transition-colors shadow-sm"
 												on:click={() => (window.location.href = `/session/${selectedSession.code}`)}
 											>
 												<Eye class="h-4 w-4" />
 												View Live
 											</button>
 											<button
-												class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
+												class="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
 												on:click={() => exportSessionData(selectedSession.code)}
 											>
 												<Download class="h-4 w-4" />
@@ -348,14 +348,14 @@
 								</div>
 
 								<!-- Leaderboard -->
-								<div class="surface rounded-xl border border-surface-accent p-6 shadow-sm">
+								<div class="surface rounded-xl border border-line p-6 shadow-sm">
 									<h3 class="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
 										<Trophy class="h-5 w-5 text-yellow-500" />
 										Leaderboard
 									</h3>
 									<div class="space-y-3">
 										{#each leaderboard.slice(0, 5) as participant, index}
-											<div class="flex items-center gap-4 p-3 rounded-lg border border-surface-accent hover:bg-surface-muted transition-colors">
+											<div class="flex items-center gap-4 p-3 rounded-lg border border-line hover:bg-surface-muted transition-colors">
 												<div class="flex items-center gap-3">
 													<span class="text-lg font-semibold text-primary w-6 text-center"
 														>#{index + 1}</span
@@ -388,7 +388,7 @@
 															{/if}
 														</div>
 													{/if}
-													<span class="text-lg font-semibold text-blue-600">{participant.score}</span>
+													<span class="text-lg font-semibold text-brand">{participant.score}</span>
 												</div>
 											</div>
 										{/each}
@@ -396,7 +396,7 @@
 								</div>
 							</div>
 						{:else}
-							<div class="surface rounded-xl border border-surface-accent p-12 text-center shadow-sm">
+							<div class="surface rounded-xl border border-line p-12 text-center shadow-sm">
 								<div class="text-secondary">
 									<BarChart class="h-12 w-12 mx-auto mb-4 opacity-50" />
 									<p>Select a session to view detailed analytics</p>

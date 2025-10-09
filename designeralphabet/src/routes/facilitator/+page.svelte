@@ -459,7 +459,7 @@
 		<div class="flex items-center justify-center min-h-screen">
 			<div class="text-center">
 				<div
-					class="w-16 h-16 border-4 border-neon-cyan border-t-transparent rounded-full animate-spin mx-auto mb-6"
+					class="w-16 h-16 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-6"
 				></div>
 				<h2 class="text-2xl font-semibold text-primary mb-2">Launching Session</h2>
 				<p class="text-secondary">Setting up your immersive facilitation environment...</p>
@@ -469,7 +469,7 @@
 		<div class="max-w-7xl mx-auto">
 			<header class="text-center mb-8">
 				<h1
-					class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-retro-purple mb-4"
+					class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand to-retro-purple mb-4"
 				>
 					{currentView === 'setup' ? 'Design Session Console' : 'Session Orchestration'}
 				</h1>
@@ -482,7 +482,7 @@
 				{#if currentView === 'orchestration'}
 					<div class="flex items-center justify-center gap-4 mt-6">
 						<button
-							class="flex items-center gap-2 px-4 py-2 border border-surface-accent rounded-lg text-secondary hover:border-neon-cyan transition-colors"
+							class="flex items-center gap-2 px-4 py-2 border border-line rounded-lg text-secondary hover:border-brand transition-colors"
 							on:click={backToSetup}
 						>
 							← Back to Setup
@@ -498,7 +498,7 @@
 				<!-- Setup Form -->
 				<div class="panel p-6">
 					<h2 class="text-2xl font-semibold text-primary mb-6 flex items-center gap-2">
-						<Settings class="w-6 h-6 text-neon-cyan" />
+						<Settings class="w-6 h-6 text-brand" />
 						Session Setup
 					</h2>
 
@@ -512,7 +512,7 @@
 								type="text"
 								bind:value={facilitatorName}
 								placeholder="Enter your name"
-								class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent"
+								class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
 								required
 							/>
 						</div>
@@ -526,7 +526,7 @@
 								type="email"
 								bind:value={facilitatorEmail}
 								placeholder="you@example.org"
-								class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent"
+								class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
 								required
 							/>
 						</div>
@@ -540,7 +540,7 @@
 								type="text"
 								bind:value={sessionTitle}
 								placeholder="e.g., Inclusive Roadmap Session — Product Team"
-								class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent"
+								class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
 								required
 							/>
 						</div>
@@ -554,7 +554,7 @@
 								rows="3"
 								bind:value={sessionChallenge}
 								placeholder="e.g., Align our cross-functional team on equitable AI guardrails for the next release."
-								class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent resize-none"
+								class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent resize-none"
 							></textarea>
 							<p class="mt-2 text-xs text-secondary">
 								Pulled from the template by default—edit to match the specific opportunity you're
@@ -571,7 +571,7 @@
 									id="sessionCode"
 									type="text"
 									bind:value={sessionCode}
-									class="flex-1 px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent font-mono text-lg"
+									class="flex-1 px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent font-mono text-lg"
 									required
 								/>
 								<button
@@ -587,7 +587,7 @@
 						<button
 							type="submit"
 							disabled={loading || !selectedTemplate}
-							class="w-full px-6 py-3 bg-gradient-to-r from-neon-cyan to-retro-purple hover:from-neon-cyan/80 hover:to-retro-purple/80 text-primary font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+							class="w-full px-6 py-3 bg-gradient-to-r from-brand to-retro-purple hover:from-brand/80 hover:to-retro-purple/80 text-primary font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{#if loading}
 								<div
@@ -628,7 +628,7 @@
 									class="w-full text-left p-4 rounded-lg border-2 transition-all duration-200 {selectedTemplate?._id ===
 									template._id
 										? 'border-retro-purple bg-retro-purple/10'
-										: 'border-surface-accent hover:border-retro-purple/50 surface-input/50'}"
+										: 'border-line hover:border-retro-purple/50 surface-input/50'}"
 								>
 									<h3 class="font-semibold text-primary mb-2">{template.title}</h3>
 									<p class="text-sm text-secondary mb-3">
@@ -651,7 +651,7 @@
 											<span class="text-secondary">Lenses:</span>
 											<div class="flex flex-wrap gap-1 mt-1">
 												{#each template.lenses ?? [] as lens}
-													<span class="px-2 py-1 bg-neon-cyan/20 text-neon-cyan rounded">{lens}</span>
+													<span class="px-2 py-1 bg-brand/20 text-brand rounded">{lens}</span>
 												{/each}
 											</div>
 										</div>
@@ -695,7 +695,7 @@
 												</span>
 											{/if}
 											{#if template.visuals?.charts && template.visuals.charts.length > 0}
-												<span class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded">
+												<span class="px-2 py-1 bg-brand/20 text-brand rounded">
 													📊 Data Viz
 												</span>
 											{/if}
@@ -713,7 +713,7 @@
 				<div class="flex items-center justify-between mb-4">
 					<h2 class="text-xl font-semibold text-primary">Recent Active Sessions</h2>
 					<button
-						class="text-sm text-neon-cyan hover:text-neon-pink transition-colors"
+						class="text-sm text-brand hover:text-neon-pink transition-colors"
 						type="button"
 						on:click={loadActiveSessions}
 					>
@@ -724,7 +724,7 @@
 				{#if activeLoading}
 					<div class="flex items-center justify-center py-8">
 						<div
-							class="w-6 h-6 border-2 border-neon-cyan border-t-transparent rounded-full animate-spin"
+							class="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin"
 						></div>
 						<span class="ml-3 text-secondary">Loading active sessions...</span>
 					</div>
@@ -745,7 +745,7 @@
 						{#each activeSessions as session}
 							<button
 								type="button"
-								class="flex items-center justify-between p-4 rounded-lg border border-surface-accent hover:border-neon-cyan/50 surface-input/50 hover:bg-surface-accent/10 transition-all text-left"
+								class="flex items-center justify-between p-4 rounded-lg border border-line hover:border-brand/50 surface-input/50 hover:bg-surface-accent/10 transition-all text-left"
 								on:click={() => chooseActiveSession(session)}
 							>
 								<div class="flex-1">
@@ -769,7 +769,7 @@
 										<span>{new Date(session.created_at).toLocaleDateString()}</span>
 									</div>
 								</div>
-								<div class="text-neon-cyan text-sm">Enter →</div>
+								<div class="text-brand text-sm">Enter →</div>
 							</button>
 						{/each}
 					</div>
@@ -787,13 +787,13 @@
 						<div class="grid md:grid-cols-3 gap-6">
 							<!-- Facilitation Details -->
 							<div class="surface-muted rounded-lg p-4">
-								<h4 class="font-semibold text-neon-cyan mb-3">Facilitation</h4>
+								<h4 class="font-semibold text-brand mb-3">Facilitation</h4>
 								<div class="space-y-2 text-sm">
 									<div>
 										<span class="text-secondary">Roles:</span>
 										<div class="flex flex-wrap gap-1 mt-1">
 											{#each selectedTemplate.facilitation?.roles ?? [] as role}
-												<span class="px-2 py-1 bg-neon-cyan/20 text-cyan-300 rounded text-xs"
+												<span class="px-2 py-1 bg-brand/20 text-brand rounded text-xs"
 													>{role}</span
 												>
 											{/each}
@@ -846,7 +846,7 @@
 											<span class="text-secondary">Charts:</span>
 											<div class="flex flex-wrap gap-1 mt-1">
 												{#each selectedTemplate.visuals.charts as chart}
-													<span class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs"
+													<span class="px-2 py-1 bg-brand/20 text-brand rounded text-xs"
 														>{chart}</span
 													>
 												{/each}
@@ -894,7 +894,7 @@
 									<div class="surface-muted rounded-lg p-4">
 										<div class="flex items-center gap-3 mb-3">
 											<span
-												class="w-8 h-8 bg-gradient-to-r from-neon-cyan to-retro-purple text-surface rounded-full flex items-center justify-center text-sm font-bold"
+												class="w-8 h-8 bg-gradient-to-r from-brand to-retro-purple text-surface rounded-full flex items-center justify-center text-sm font-bold"
 											>
 												{index + 1}
 											</span>
@@ -976,7 +976,7 @@
 								</div>
 								<div class="space-y-2">
 									<p class="text-sm text-secondary">Access Code</p>
-									<p class="text-neon-cyan font-mono text-lg">{sessionCode}</p>
+									<p class="text-brand font-mono text-lg">{sessionCode}</p>
 								</div>
 								<div class="space-y-2">
 									<p class="text-sm text-secondary">Facilitator</p>
@@ -988,7 +988,7 @@
 								</div>
 							</div>
 							{#if sessionChallenge}
-								<div class="bg-neon-cyan/10 border border-neon-cyan/30 rounded-lg p-4 mb-6">
+								<div class="bg-brand/10 border border-brand/30 rounded-lg p-4 mb-6">
 									<p class="text-xs uppercase tracking-wide text-cyan-200 mb-2">Challenge Focus</p>
 									<div class="text-primary">
 										<PortableText value={sessionChallenge} styleClass="prose-sm prose-slate" />
@@ -1028,14 +1028,14 @@
 									<button
 										class="group w-full text-left border rounded-lg p-4 transition-all {index ===
 										selectedPhaseIndex
-											? 'border-neon-cyan bg-neon-cyan/10'
-											: 'border-surface-accent hover:border-neon-cyan/50'}"
+											? 'border-brand bg-brand/10'
+											: 'border-line hover:border-brand/50'}"
 										on:click={() => previewPhase(index)}
 									>
 										<div class="flex items-center justify-between mb-2">
 											<div class="flex items-center gap-3">
 												<span
-													class="w-8 h-8 rounded-full bg-gradient-to-r from-neon-cyan to-retro-purple text-surface flex items-center justify-center text-sm font-bold"
+													class="w-8 h-8 rounded-full bg-gradient-to-r from-brand to-retro-purple text-surface flex items-center justify-center text-sm font-bold"
 												>
 													{index + 1}
 												</span>
@@ -1130,7 +1130,7 @@
 
 					<!-- Launch Controls -->
 					<div
-						class="bg-gradient-to-r from-neon-cyan/10 to-retro-purple/10 backdrop-blur-sm rounded-xl p-6 border border-neon-cyan/20"
+						class="bg-gradient-to-r from-brand/10 to-retro-purple/10 backdrop-blur-sm rounded-xl p-6 border border-brand/20"
 					>
 						<div class="flex items-center justify-between">
 							<div>
@@ -1141,7 +1141,7 @@
 								</p>
 							</div>
 							<button
-								class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-neon-cyan hover:to-purple-500 text-primary font-semibold rounded-xl transition-all duration-200 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-brand hover:to-purple-500 text-primary font-semibold rounded-xl transition-all duration-200 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
 								on:click={createSession}
 								disabled={loading}
 							>

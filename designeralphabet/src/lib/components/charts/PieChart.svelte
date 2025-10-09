@@ -4,6 +4,7 @@
 	import { scaleOrdinal } from 'd3-scale';
 	import { interpolate } from 'd3-interpolate';
 	import { onMount, afterUpdate } from 'svelte';
+	import { getThemeColors } from '$lib/utils/colors';
 
 	export let data: Array<{ label: string; value: number; percentage: number }> = [];
 	export let width = 400;
@@ -18,24 +19,25 @@
 	$: centerX = width / 2;
 	$: centerY = height / 2;
 
-	const colors = [
-		'#4c6ef5', // ocean blue
-		'#38bdf8', // sky
-		'#2ab3bf', // teal
-		'#22a06b', // mint
-		'#f6b042', // gold
-		'#f7745e', // coral
-		'#9b5de5', // plum
-		'#f472b6', // rose
-		'#64748b' // slate
-	];
-
-	const colorScale = scaleOrdinal<string>().range(colors);
+	const colorScale = scaleOrdinal<string>();
 
 	function updateChart() {
 		if (!svgElement || !chartGroup || data.length === 0) return;
 
 		const chart = select(chartGroup);
+		const theme = getThemeColors();
+
+		const palette = [
+			...theme.chart,
+			theme.accentWarm,
+			theme.accentCritical,
+			theme.brand,
+			theme.brandSoft,
+			theme.ink,
+			theme.ink2
+		];
+
+		colorScale.range(palette);
 
 		// Arc generator for pie slices
 		const arcGenerator = arc<any>()
@@ -69,7 +71,7 @@
 			.append('path')
 			.attr('class', 'slice-path')
 			.attr('fill', (d: any) => colorScale(d.data.label))
-			.attr('stroke', '#e2e8f0')
+			.attr('stroke', theme.surfaceMuted)
 			.attr('stroke-width', 1.5)
 			.style('cursor', 'pointer')
 			.attr('opacity', 0)
@@ -98,6 +100,7 @@
 	}
 
 	function updateCenterText() {
+		const theme = getThemeColors();
 		const chart = select(chartGroup);
 		const totalCount = data.reduce((sum, d) => sum + d.value, 0);
 
@@ -114,7 +117,7 @@
 			.append('text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '-0.3em')
-			.attr('fill', '#0f172a')
+			.attr('fill', theme.ink)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '32px')
 			.attr('font-weight', 'bold')
@@ -128,7 +131,7 @@
 			.append('text')
 			.attr('text-anchor', 'middle')
 			.attr('dy', '1.2em')
-			.attr('fill', '#64748b')
+			.attr('fill', theme.ink2)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '14px')
 			.attr('opacity', 0)
@@ -237,7 +240,7 @@
 	.legend-title {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: #64748b;
+		color: hsl(var(--text-muted));
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		margin-bottom: 0.75rem;
@@ -253,7 +256,7 @@
 }
 
 .legend-item:hover {
-	background-color: rgba(148, 163, 184, 0.18);
+	background-color: hsl(var(--surface-muted) / 0.35);
 	transform: translateX(4px);
 	}
 
@@ -267,7 +270,7 @@
 	.legend-label {
 		flex: 1;
 		font-size: 0.875rem;
-		color: rgb(203, 213, 225);
+		color: hsl(var(--text-secondary));
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -276,7 +279,7 @@
 	.legend-value {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: rgb(226, 232, 240);
+		color: hsl(var(--text-primary));
 		tabular-nums: true;
 	}
 
@@ -284,7 +287,7 @@
 		width: 3.5rem;
 		text-align: right;
 		font-size: 0.75rem;
-		color: rgb(148, 163, 184);
+		color: hsl(var(--text-muted));
 		tabular-nums: true;
 	}
 
@@ -296,12 +299,12 @@
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
-		background-color: rgba(15, 23, 42, 0.8);
+		background-color: hsl(var(--surface) / 0.92);
 		backdrop-filter: blur(4px);
 	}
 
 	.empty-text {
-		color: rgb(148, 163, 184);
+		color: hsl(var(--text-secondary));
 		font-size: 0.875rem;
 	}
 

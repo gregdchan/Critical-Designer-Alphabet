@@ -314,16 +314,16 @@
 		</button>
 
 		<div
-			class="panel backdrop-blur-sm rounded-2xl p-8 border border-neon-cyan/20 shadow-2xl"
+			class="panel backdrop-blur-sm rounded-2xl p-8 border border-brand/20 shadow-2xl"
 		>
 			<header class="text-center mb-8">
 				<div
-					class="w-16 h-16 bg-gradient-to-r from-neon-cyan to-retro-purple rounded-full flex items-center justify-center mx-auto mb-4"
+					class="w-16 h-16 bg-gradient-to-r from-brand to-retro-purple rounded-full flex items-center justify-center mx-auto mb-4"
 				>
 					<UserPlus class="w-8 h-8 text-primary" />
 				</div>
 				<h1
-					class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-retro-purple mb-2"
+					class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand to-retro-purple mb-2"
 				>
 					Join Session
 				</h1>
@@ -340,7 +340,7 @@
 						type="text"
 						bind:value={participantName}
 						placeholder="Enter your name"
-						class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent transition-all"
+						class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"
 						required={!joinAsFacilitator}
 					/>
 				</div>
@@ -354,14 +354,14 @@
 						type="text"
 						bind:value={sessionCode}
 						placeholder="Enter 6-character code"
-						class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent font-mono text-lg tracking-wider uppercase transition-all"
+						class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent font-mono text-lg tracking-wider uppercase transition-all"
 						maxlength="6"
 						required
 					/>
 				</div>
 
 				<div
-					class="flex items-center justify-between rounded-lg border border-surface-accent surface-muted px-4 py-3"
+					class="flex items-center justify-between rounded-lg border border-line surface-muted px-4 py-3"
 				>
 					<label class="flex items-center gap-2 text-sm text-secondary">
 						<input type="checkbox" bind:checked={joinAsFacilitator} />
@@ -370,7 +370,7 @@
 					{#if joinAsFacilitator}
 						<button
 							type="button"
-							class="text-xs text-cyan-300 hover:text-cyan-100"
+							class="text-xs text-brand hover:text-cyan-100"
 							on:click={() => activeSessions.length === 0 && loadActiveSessions()}
 						>
 							Refresh sessions
@@ -388,7 +388,7 @@
 							type="email"
 							bind:value={facilitatorEmail}
 							placeholder="you@example.org"
-							class="w-full px-4 py-3 surface-input border border-surface-accent rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent transition-all"
+							class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"
 							required
 						/>
 						<p class="mt-2 text-xs text-secondary">
@@ -413,14 +413,14 @@
 								on:click={() => (selectedColor = color.value)}
 								class="w-12 h-12 rounded-full border-2 transition-all hover:scale-110 {selectedColor ===
 								color.value
-									? 'border-white ring-2 ring-neon-cyan'
-									: 'border-surface-accent'}"
+									? 'border-white ring-2 ring-brand'
+									: 'border-line'}"
 								style="background-color: {color.value}"
 								title={color.name}
 							>
 								{#if selectedColor === color.value}
 									<div class="w-full h-full rounded-full flex items-center justify-center">
-										<div class="w-3 h-3 bg-white rounded-full"></div>
+										<div class="w-3 h-3 bg-surface-elevated rounded-full"></div>
 									</div>
 								{/if}
 							</button>
@@ -435,7 +435,7 @@
 					<button
 						type="submit"
 						disabled={loading}
-						class="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-neon-cyan hover:to-purple-500 text-primary font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+						class="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-brand hover:to-purple-500 text-primary font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
 					>
 						{#if loading}
 							<div
@@ -450,10 +450,10 @@
 				</div>
 			</form>
 
-			<div class="mt-6 rounded-xl border border-surface-accent panel p-4">
+			<div class="mt-6 rounded-xl border border-line panel p-4">
 				{#if previewLoading}
 					<div class="flex items-center gap-3 text-secondary text-sm">
-						<InfoCircle class="w-5 h-5 text-cyan-300 animate-pulse" />
+						<InfoCircle class="w-5 h-5 text-brand animate-pulse" />
 						Loading session blueprint…
 					</div>
 				{:else if previewError}
@@ -472,7 +472,7 @@
 						</div>
 
 						{#if sessionPreview.challenge || templateBlueprint?.challenge}
-							<div class="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 p-3">
+							<div class="rounded-lg border border-brand/30 bg-brand/10 p-3">
 								<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Challenge Focus</p>
 								<p class="mt-2 text-sm text-primary">
 									{sessionPreview.challenge ?? templateBlueprint?.challenge}
@@ -509,18 +509,18 @@
 				{/if}
 			</div>
 
-			<div class="mt-8 pt-6 border-t border-surface-accent">
+			<div class="mt-8 pt-6 border-t border-line">
 				<p class="text-xs text-secondary text-center">
 					Don't have a session code? Contact your session lead.
 				</p>
 			</div>
 		</div>
 
-		<div class="mt-6 rounded-2xl border border-surface-accent panel p-6 shadow-lg">
+		<div class="mt-6 rounded-2xl border border-line panel p-6 shadow-lg">
 			<div class="flex items-center justify-between">
 				<h2 class="text-lg font-semibold text-primary">Recent Active Sessions</h2>
 				<button
-					class="text-xs uppercase tracking-[0.2em] text-cyan-300 hover:text-cyan-100"
+					class="text-xs uppercase tracking-[0.2em] text-brand hover:text-cyan-100"
 					type="button"
 					on:click={loadActiveSessions}
 				>
@@ -530,7 +530,7 @@
 			{#if activeLoading}
 				<div class="flex items-center justify-center py-6">
 					<div
-						class="w-5 h-5 border-2 border-neon-cyan border-t-transparent rounded-full animate-spin"
+						class="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin"
 					></div>
 					<span class="ml-3 text-secondary">Loading sessions...</span>
 				</div>
@@ -553,7 +553,7 @@
 					{#each activeSessions as session}
 						<button
 							type="button"
-							class="flex items-center justify-between rounded-xl border border-surface-accent panel px-4 py-3 text-left transition hover:border-neon-cyan/40 hover:bg-surface-muted"
+							class="flex items-center justify-between rounded-xl border border-line panel px-4 py-3 text-left transition hover:border-brand/40 hover:bg-surface-muted"
 							on:click={() => chooseSession(session.code)}
 						>
 							<div class="flex-1">
@@ -574,7 +574,7 @@
 									<span>{new Date(session.created_at).toLocaleDateString()}</span>
 								</div>
 							</div>
-							<div class="text-neon-cyan text-sm">Join →</div>
+							<div class="text-brand text-sm">Join →</div>
 						</button>
 					{/each}
 				</div>
@@ -582,7 +582,7 @@
 		</div>
 
 		<!-- Preview Avatar -->
-		<div class="mt-6 panel backdrop-blur-sm rounded-xl p-4 border border-surface-accent">
+		<div class="mt-6 panel backdrop-blur-sm rounded-xl p-4 border border-line">
 			<p class="text-sm text-secondary text-center mb-3">Preview:</p>
 			<div class="flex items-center justify-center gap-3">
 				<div

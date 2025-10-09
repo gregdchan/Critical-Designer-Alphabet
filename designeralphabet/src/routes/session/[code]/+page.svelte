@@ -789,9 +789,9 @@
 	>
 		<div class="text-center space-y-4">
 			<div
-				class="w-16 h-16 border-4 border-neon-cyan border-t-transparent rounded-full animate-spin mx-auto"
+				class="w-16 h-16 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto"
 			></div>
-			<p class="text-xl text-cyan-300">Loading session...</p>
+			<p class="text-xl text-brand">Loading session...</p>
 			<p class="text-sm text-secondary">Code: {sessionCode.toUpperCase()}</p>
 		</div>
 	</div>
@@ -816,7 +816,7 @@
 			</div>
 			<div class="flex gap-3 justify-center">
 				<button
-					class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-primary rounded-lg transition"
+					class="px-6 py-3 bg-brand hover:bg-brand text-primary rounded-lg transition"
 					on:click={() => window.location.reload()}
 				>
 					Retry
@@ -838,18 +838,18 @@
 	>
 		<!-- Main Content Area -->
 		<div class={isMobile ? 'w-full' : 'flex-1 overflow-auto'}>
-			<header class="sticky top-0 z-40 border-b border-neon-cyan/20 panel backdrop-blur">
+			<header class="sticky top-0 z-40 border-b border-brand/20 panel backdrop-blur">
 				<div class="mx-auto max-w-7xl px-4 md:px-6 py-3 md:py-4">
 					<div class="flex flex-col gap-2">
 						<div class="flex items-start justify-between gap-4">
 							<div class="flex-1 min-w-0">
-								<p class="text-[10px] md:text-xs uppercase tracking-[0.35em] text-cyan-300">
+								<p class="text-[10px] md:text-xs uppercase tracking-[0.35em] text-brand">
 									Inclusive Planning
 								</p>
 								<h1 class="text-lg md:text-2xl font-semibold text-primary flex flex-wrap items-center gap-2">
 									<span class="truncate">{sessionInfo.title ?? 'Untitled Session'}</span>
 									<span
-										class="rounded-full border border-neon-cyan/30 px-2 md:px-3 py-0.5 md:py-1 text-[10px] md:text-xs uppercase tracking-[0.2em] text-cyan-200 whitespace-nowrap"
+										class="rounded-full border border-brand/30 px-2 md:px-3 py-0.5 md:py-1 text-[10px] md:text-xs uppercase tracking-[0.2em] text-cyan-200 whitespace-nowrap"
 									>
 										{sessionCode}
 									</span>
@@ -871,7 +871,7 @@
 			<main class="mx-auto max-w-full space-y-6 md:space-y-8 px-4 md:px-6 py-6 md:py-8">
 				<!-- Participant View: Show active phase info only -->
 				{#if !isFacilitator() && activePhase}
-					<section class="rounded-2xl border border-neon-cyan/30 panel p-4 md:p-6">
+					<section class="rounded-2xl border border-brand/30 panel p-4 md:p-6">
 						<div class="flex items-center justify-between mb-4">
 							<div>
 								<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Current Phase</p>
@@ -901,7 +901,7 @@
 										Questions
 									</h4>
 									<button
-										class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-4 py-2 text-sm font-medium text-primary hover:from-neon-cyan hover:to-purple-500 transition-colors"
+										class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-4 py-2 text-sm font-medium text-primary hover:from-brand hover:to-purple-500 transition-colors"
 										on:click={() => openResponseModal(null)}
 										disabled={!phaseRemainingMs}
 									>
@@ -911,7 +911,7 @@
 
 								<div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
 									{#each phaseQuestions as question}
-										<div class="rounded-lg border border-surface-accent panel p-4">
+										<div class="rounded-lg border border-line panel p-4">
 											<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
 												<div class="flex-1 min-w-0">
 													<span class="text-xs uppercase tracking-[0.3em] text-cyan-200">
@@ -920,7 +920,7 @@
 													<h5 class="text-sm font-semibold text-primary mt-1 break-words">{question.text}</h5>
 												</div>
 												<button
-													class="rounded-lg border border-neon-cyan/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-300 transition-colors whitespace-nowrap flex-shrink-0 self-start"
+													class="rounded-lg border border-brand/40 px-3 py-1.5 text-xs text-cyan-200 hover:border-cyan-300 transition-colors whitespace-nowrap flex-shrink-0 self-start"
 													on:click={() => openResponseModal(question.id)}
 													disabled={!phaseRemainingMs}
 												>
@@ -938,7 +938,7 @@
 														{@const hasVoted = userVotes.has(response.id)}
 														{@const isOwnResponse = response.participant_id === currentParticipant?.id}
 														{@const votingEnabled = question.enable_voting ?? true}
-														<div class="rounded border border-surface-accent panel p-3 text-xs">
+														<div class="rounded border border-line panel p-3 text-xs">
 															<div class="flex items-center justify-between text-secondary mb-1">
 																<div class="flex items-center gap-2">
 																	<span
@@ -953,8 +953,8 @@
 																	<button
 																		class={`inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors ${
 																			hasVoted
-																				? 'border-neon-cyan bg-neon-cyan/20 text-cyan-100'
-																				: 'border-neon-cyan/40 text-cyan-200 hover:border-cyan-300'
+																				? 'border-brand bg-brand/20 text-cyan-100'
+																				: 'border-brand/40 text-cyan-200 hover:border-cyan-300'
 																		}`}
 																		on:click={() => toggleVote(response.id)}
 																		disabled={!phaseRemainingMs || isOwnResponse}
@@ -975,7 +975,7 @@
 															<!-- {#if response.cards?.length}
 																<div class="mt-2 flex flex-wrap gap-1">
 																	{#each response.cards as card}
-																		<span class="px-1.5 py-0.5 text-xs rounded bg-neon-cyan/20 text-cyan-300"
+																		<span class="px-1.5 py-0.5 text-xs rounded bg-brand/20 text-brand"
 																			>{card}</span
 																		>
 																	{/each}
@@ -992,7 +992,7 @@
 								</div>
 							</div>
 						{:else}
-							<div class="mt-6 rounded-lg border border-surface-accent surface-muted p-6 text-center">
+							<div class="mt-6 rounded-lg border border-line surface-muted p-6 text-center">
 								<p class="text-sm text-secondary">
 									No questions available for this phase yet. The facilitator will add questions soon.
 								</p>
@@ -1001,7 +1001,7 @@
 					</section>
 				{:else if !isFacilitator()}
 					<!-- No active phase message for participants -->
-					<section class="rounded-2xl border border-surface-accent panel p-8 text-center">
+					<section class="rounded-2xl border border-line panel p-8 text-center">
 						<h3 class="text-lg font-semibold text-primary mb-2">Session Starting Soon</h3>
 						<p class="text-sm text-secondary">
 							The facilitator hasn't started a phase yet. Please wait while they set up the session.
@@ -1011,7 +1011,7 @@
 
 				<!-- Facilitator View: Full controls -->
 				{#if isFacilitator()}
-					<section class="rounded-2xl border border-neon-cyan/30 panel p-6 space-y-6">
+					<section class="rounded-2xl border border-brand/30 panel p-6 space-y-6">
 						<div class="flex flex-wrap items-center justify-between gap-4">
 							<div>
 								<h2 class="text-lg font-semibold text-primary">Session Progress</h2>
@@ -1022,7 +1022,7 @@
 							<div class="flex flex-wrap items-center gap-2">
 								{#each sessionStatuses as status}
 									<button
-										class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-cyan-500 text-primary shadow' : 'border border-neon-cyan/40 text-cyan-200 hover:border-cyan-300'}`}
+										class={`rounded-lg px-3 py-2 text-sm font-medium transition ${sessionInfo?.status === status ? 'bg-brand text-primary shadow' : 'border border-brand/40 text-cyan-200 hover:border-cyan-300'}`}
 										on:click={() => changeStatus(status)}
 										disabled={statusUpdating || sessionInfo?.status === status}
 									>
@@ -1030,7 +1030,7 @@
 									</button>
 								{/each}
 								<button
-									class="rounded-lg bg-red-600/80 px-3 py-2 text-sm font-semibold text-primary hover:bg-red-500 transition"
+									class="rounded-lg bg-accent-critical/80 px-3 py-2 text-sm font-semibold text-primary hover:bg-red-500 transition"
 									on:click={() => changeStatus('done')}
 									disabled={statusUpdating || sessionInfo?.status === 'done'}
 								>
@@ -1039,7 +1039,7 @@
 							</div>
 						</div>
 
-						<div class="rounded-xl border border-neon-cyan/20 panel p-4">
+						<div class="rounded-xl border border-brand/20 panel p-4">
 							{#if activePhase}
 								<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 									<div class="space-y-1">
@@ -1088,8 +1088,8 @@
 											phase.status === 'completed'
 												? 'border-emerald-400/30 bg-emerald-500/10'
 												: phase.status === 'active'
-													? 'border-neon-cyan/40 bg-cyan-500/10'
-													: 'border-surface-accent panel hover:border-neon-cyan/30'
+													? 'border-brand/40 bg-brand/10'
+													: 'border-line panel hover:border-brand/30'
 										}`}
 									>
 										<!-- Phase Header -->
@@ -1139,7 +1139,7 @@
 											<div class="mt-4 flex flex-wrap items-center gap-2">
 												{#if phase.status === 'pending'}
 													<button
-														class="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-neon-cyan transition disabled:opacity-50"
+														class="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-primary hover:bg-brand transition disabled:opacity-50"
 														on:click={() => activatePhase(phase)}
 														disabled={phaseUpdating}
 													>
@@ -1155,7 +1155,7 @@
 													</button>
 												{:else}
 													<button
-														class="rounded-lg border border-surface-accent px-3 py-1.5 text-xs text-secondary hover:border-neon-cyan/40 transition"
+														class="rounded-lg border border-line px-3 py-1.5 text-xs text-secondary hover:border-brand/40 transition"
 														on:click={() => activatePhase(phase)}
 														disabled={phaseUpdating}
 													>
@@ -1173,11 +1173,11 @@
 												</p>
 												<div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
 													{#each phase.cards as card}
-														<div class="rounded-lg border border-surface-accent panel p-3">
+														<div class="rounded-lg border border-line panel p-3">
 															<div class="flex items-center gap-2 mb-2">
 																{#if card.letter}
 																	<span
-																		class="flex h-6 w-6 items-center justify-center rounded border border-neon-cyan/40 text-xs font-bold text-neon-cyan"
+																		class="flex h-6 w-6 items-center justify-center rounded border border-brand/40 text-xs font-bold text-brand"
 																	>
 																		{card.letter}
 																	</span>
@@ -1211,7 +1211,7 @@
 													</h4>
 													{#if phase.status === 'active' && !isFacilitator()}
 														<button
-															class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-3 py-1.5 text-xs font-medium text-primary hover:from-neon-cyan hover:to-purple-500 transition-colors"
+															class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 px-3 py-1.5 text-xs font-medium text-primary hover:from-brand hover:to-purple-500 transition-colors"
 															on:click={() => openResponseModal(null)}
 															disabled={!phaseRemainingMs}
 														>
@@ -1223,7 +1223,7 @@
 												<div class="space-y-4">
 													{#each phaseQuestions as question}
 														<div
-															class="rounded-lg border border-surface-accent panel p-4 space-y-3"
+															class="rounded-lg border border-line panel p-4 space-y-3"
 														>
 															<div class="flex items-start justify-between gap-3">
 																<div class="flex-1">
@@ -1233,7 +1233,7 @@
 																		</span>
 																		{#if question.response_type && question.response_type !== 'written'}
 																			<span
-																				class="px-2 py-1 bg-blue-400/20 text-blue-300 rounded text-xs"
+																				class="px-2 py-1 bg-brand/20 text-brand rounded text-xs"
 																			>
 																				{question.response_type}
 																			</span>
@@ -1243,7 +1243,7 @@
 																</div>
 																{#if phase.status === 'active' && !isFacilitator()}
 																	<button
-																		class="rounded-lg border border-neon-cyan/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"
+																		class="rounded-lg border border-brand/40 px-3 py-1 text-xs text-cyan-200 hover:border-cyan-300 transition-colors"
 																		on:click={() => openResponseModal(question.id)}
 																		disabled={!phaseRemainingMs}
 																	>
@@ -1269,7 +1269,7 @@
 																<!-- Vote Summary -->
 																{#if totalVotes > 0 && votingEnabled}
 																	<div
-																		class="mb-3 p-2 rounded bg-neon-cyan/10 border border-neon-cyan/30"
+																		class="mb-3 p-2 rounded bg-brand/10 border border-brand/30"
 																	>
 																		<p class="text-xs font-medium text-cyan-200 mb-2">
 																			Community Insights (Total votes: {totalVotes})
@@ -1296,7 +1296,7 @@
 																<div class="space-y-2 max-h-40 overflow-y-auto">
 																	{#each sortedByVotes as response}
 																		<div
-																			class="rounded border border-surface-accent panel p-2 text-xs"
+																			class="rounded border border-line panel p-2 text-xs"
 																		>
 																			<div
 																				class="flex items-center justify-between text-secondary mb-1"
@@ -1308,7 +1308,7 @@
 																				>
 																				{#if votingEnabled}
 																					<button
-																						class="inline-flex items-center gap-1 rounded border border-neon-cyan/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
+																						class="inline-flex items-center gap-1 rounded border border-brand/40 px-1.5 py-0.5 text-cyan-200 hover:border-cyan-300 transition-colors"
 																						on:click={() => toggleVote(response.id)}
 																						disabled={activePhase && !phaseRemainingMs}
 																					>
@@ -1327,7 +1327,7 @@
 																				<div class="mt-1 flex flex-wrap gap-1">
 																					{#each response.cards as card}
 																						<span
-																							class="px-1 py-0.5 text-xs rounded bg-neon-cyan/20 text-cyan-300"
+																							class="px-1 py-0.5 text-xs rounded bg-brand/20 text-brand"
 																							>{card}</span
 																						>
 																					{/each}
@@ -1351,7 +1351,7 @@
 												<div class="flex flex-wrap gap-2">
 													{#each phase.dashboards as dashboard}
 														<span
-															class="rounded-full border border-neon-cyan/30 px-3 py-1 text-xs text-cyan-200"
+															class="rounded-full border border-brand/30 px-3 py-1 text-xs text-cyan-200"
 															>{dashboardLabels[dashboard] ?? dashboard}</span
 														>
 													{/each}
@@ -1364,14 +1364,14 @@
 						</div>
 
 						<div class="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-							<div class="rounded-xl border border-neon-cyan/20 panel p-4 space-y-4">
+							<div class="rounded-xl border border-brand/20 panel p-4 space-y-4">
 								<div class="flex items-center justify-between">
 									<h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
 										Breakout Rounds
 									</h3>
 									{#if sessionInfo?.active_round}
 										<button
-											class="text-xs rounded-lg border border-neon-cyan/40 px-3 py-1 text-cyan-200 hover:border-cyan-300 transition"
+											class="text-xs rounded-lg border border-brand/40 px-3 py-1 text-cyan-200 hover:border-cyan-300 transition"
 											on:click={clearActiveRound}
 											disabled={roundUpdating}
 										>
@@ -1380,7 +1380,7 @@
 									{/if}
 								</div>
 								{#if sessionInfo?.active_round}
-									<div class="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 p-3">
+									<div class="rounded-lg border border-brand/30 bg-brand/10 p-3">
 										<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">Active Round</p>
 										<p class="mt-2 text-sm font-semibold text-primary">
 											{sessionInfo.active_round}
@@ -1402,7 +1402,7 @@
 									{:else if templateRounds.length}
 										{#each templateRounds as round}
 											<button
-												class="w-full rounded-lg border border-neon-cyan/30 px-3 py-2 text-left text-sm text-cyan-100 hover:border-cyan-300 transition"
+												class="w-full rounded-lg border border-brand/30 px-3 py-2 text-left text-sm text-cyan-100 hover:border-cyan-300 transition"
 												on:click={() => startTemplateRound(round)}
 												disabled={roundUpdating ||
 													sessionInfo?.active_round === (round.name ?? round.key)}
@@ -1428,7 +1428,7 @@
 								<label class="flex flex-col gap-2 text-xs text-secondary">
 									Label
 									<input
-										class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
+										class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
 										placeholder="e.g., Reflection Sprint"
 										bind:value={customLabel}
 									/>
@@ -1436,7 +1436,7 @@
 								<label class="flex flex-col gap-2 text-xs text-secondary">
 									Minutes
 									<input
-										class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
+										class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-retro-purple focus:outline-none"
 										type="number"
 										min="1"
 										step="1"
@@ -1445,7 +1445,7 @@
 									/>
 								</label>
 								<button
-									class="w-full rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-primary hover:from-retro-purple hover:to-neon-cyan transition"
+									class="w-full rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-primary hover:from-retro-purple hover:to-brand transition"
 									on:click={startCustomRound}
 									disabled={roundUpdating}
 								>
@@ -1458,7 +1458,7 @@
 
 				<section class="grid gap-6 md:grid-cols-3">
 					{#if sessionInfo.challenge}
-						<div class="md:col-span-3 rounded-xl border border-neon-cyan/30 bg-neon-cyan/10 p-4">
+						<div class="md:col-span-3 rounded-xl border border-brand/30 bg-brand/10 p-4">
 							<p class="text-xs uppercase tracking-[0.3em] text-cyan-100 mb-2">Challenge Focus</p>
 							<div class="text-base text-primary">
 								<PortableText value={sessionInfo.challenge} styleClass="prose prose-slate" />
@@ -1486,21 +1486,21 @@
 							</p>
 						</div>
 					{/if}
-					<div class="rounded-xl border border-surface-accent panel p-4">
+					<div class="rounded-xl border border-line panel p-4">
 						<p class="text-xs uppercase tracking-[0.3em] text-secondary">Current Step</p>
 						<p class="mt-2 text-lg font-semibold text-primary">{sessionInfo.status ?? 'planned'}</p>
 						<p class="text-sm text-secondary mt-1">
 							The facilitator will cue the next collaborative activity for the group.
 						</p>
 					</div>
-					<div class="rounded-xl border border-surface-accent panel p-4">
+					<div class="rounded-xl border border-line panel p-4">
 						<p class="text-xs uppercase tracking-[0.3em] text-secondary">Active Questions</p>
 						<p class="mt-2 text-lg font-semibold text-primary">{questionsList.length}</p>
 						<p class="text-sm text-secondary mt-1">
 							Reflect across the lenses defined in your session blueprint.
 						</p>
 					</div>
-					<div class="rounded-xl border border-surface-accent panel p-4">
+					<div class="rounded-xl border border-line panel p-4">
 						<p class="text-xs uppercase tracking-[0.3em] text-secondary">Ideas Shared</p>
 						<p class="mt-2 text-lg font-semibold text-primary">{responsesList.length}</p>
 						<p class="text-sm text-secondary mt-1">
@@ -1511,11 +1511,11 @@
 
 				<!-- Dashboard Section: Facilitator Only -->
 				{#if isFacilitator()}
-					<section class="rounded-2xl border border-surface-accent panel p-4 md:p-6">
+					<section class="rounded-2xl border border-line panel p-4 md:p-6">
 						<nav class="flex gap-2 md:gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
 						{#if availableDashboards.includes('roadmap')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'roadmap' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'roadmap')}
 							>
 								<IconMap class="h-4 w-4 flex-shrink-0" />
@@ -1524,7 +1524,7 @@
 						{/if}
 						{#if availableDashboards.includes('wordcloud')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'wordcloud' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'wordcloud' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'wordcloud')}
 							>
 								<IconCloud class="h-4 w-4 flex-shrink-0" />
@@ -1534,7 +1534,7 @@
 						{/if}
 						{#if availableDashboards.includes('response-landscape')}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'response-landscape' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'response-landscape' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'response-landscape')}
 							>
 								<IconChartDots3 class="h-4 w-4 flex-shrink-0" />
@@ -1542,14 +1542,14 @@
 							</button>
 						{/if}
 						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'timeline' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'timeline' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'timeline')}
 						>
 							<IconFlame class="h-4 w-4 flex-shrink-0" />
 							Timeline
 						</button>
 						<button
-							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'chat' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+							class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'chat' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 							on:click={() => (activeTab = 'chat')}
 						>
 							<IconMessage class="h-4 w-4 flex-shrink-0" />
@@ -1558,7 +1558,7 @@
 						</button>
 						{#if isFacilitator()}
 							<button
-								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-cyan-500 text-primary font-semibold' : 'border border-surface-accent text-secondary hover:border-neon-cyan/40 hover:text-cyan-200'}`}
+								class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-brand text-primary font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
 								on:click={() => (activeTab = 'participants')}
 							>
 								<IconUsers class="h-4 w-4 flex-shrink-0" />
@@ -1574,13 +1574,13 @@
 							<div class="space-y-6">
 								<!-- Top Row: Two Smaller Charts Side by Side -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-4 h-80">
+									<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-4 h-80">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Participation Pulse</h3>
 										<div class="w-full h-60">
 											<ParticipationPulse roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
 										</div>
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-4 h-80">
+									<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-4 h-80">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Inclusivity Meter</h3>
 										<div class="w-full h-60">
 											<InclusivityMeter roomCode={sessionCode} width={isMobile ? 320 : 380} height={240} />
@@ -1589,7 +1589,7 @@
 								</div>
 
 								<!-- Main Chart Area: Full Width Below -->
-								<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-6">
+								<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-6">
 									{#if activeTab === 'roadmap'}
 										<h3 class="text-lg font-semibold text-primary mb-4">Roadmap Timeline</h3>
 										<div class="w-full h-[520px] overflow-hidden">
@@ -1642,14 +1642,14 @@
 
 								<!-- Bottom Row: Leaderboard and Chat Side by Side -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-4">
+									<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-4">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Live Leaderboard</h3>
 										<div class="space-y-2 max-h-64 overflow-y-auto">
 											{#if leaderboardList.length > 0}
 												{#each leaderboardList.slice(0, 8) as participant, index}
-													<div class="flex items-center justify-between py-2 border-b border-surface-accent/50 last:border-0">
+													<div class="flex items-center justify-between py-2 border-b border-line/50 last:border-0">
 														<div class="flex items-center gap-2">
-															<span class="text-xs font-bold text-cyan-300">#{index + 1}</span>
+															<span class="text-xs font-bold text-brand">#{index + 1}</span>
 															<span class="text-sm text-primary truncate">{participant.name}</span>
 														</div>
 														<span class="text-xs text-cyan-200">{participant.points}pts</span>
@@ -1660,14 +1660,14 @@
 											{/if}
 										</div>
 									</div>
-									<div class="bg-slate-900/80 rounded-xl border border-neon-cyan/20 p-4">
+									<div class="bg-slate-900/80 rounded-xl border border-brand/20 p-4">
 										<h3 class="text-sm font-semibold text-cyan-200 mb-3">Quick Chat</h3>
 										<div class="h-48 overflow-y-auto mb-3 space-y-2">
 											{#if chatList.length > 0}
 												{#each chatList.slice(-8) as message}
 													{@const participantName = participantsList.find((p) => p.id === message.participant_id)?.name ?? 'Guest'}
 													<div class="text-xs">
-														<span class="text-cyan-300 font-semibold">{participantName}:</span>
+														<span class="text-brand font-semibold">{participantName}:</span>
 														<span class="text-secondary">{message.message}</span>
 													</div>
 												{/each}
@@ -1680,11 +1680,11 @@
 												bind:value={chatMessage}
 												on:keydown={(e) => e.key === 'Enter' && submitChatMessage()}
 												placeholder="Type message..."
-												class="flex-1 surface-muted border border-surface-accent rounded px-3 py-2 text-sm text-primary placeholder:text-secondary"
+												class="flex-1 surface-muted border border-line rounded px-3 py-2 text-sm text-primary placeholder:text-secondary"
 											/>
 											<button
 												on:click={submitChatMessage}
-												class="px-3 py-2 bg-cyan-600 text-primary rounded hover:bg-cyan-500 transition"
+												class="px-3 py-2 bg-brand text-primary rounded hover:bg-brand transition"
 											>
 												<IconSend class="h-4 w-4" />
 											</button>
@@ -1704,7 +1704,7 @@
 							</div>
 						{:else}
 							<!-- Classic Dashboard Layout -->
-							<div class="rounded-xl border border-surface-accent bg-slate-900/80 p-4 overflow-x-auto">
+							<div class="rounded-xl border border-line bg-slate-900/80 p-4 overflow-x-auto">
 								{#if activeTab === 'roadmap'}
 									<div class="min-w-[350px]">
 										<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
@@ -1726,10 +1726,10 @@
 								{:else if activeTab === 'timeline'}
 									<div class="space-y-4">
 										{#each timelineList as item}
-											<div class="rounded-lg border border-surface-accent panel p-4">
+											<div class="rounded-lg border border-line panel p-4">
 												<div class="flex items-center justify-between">
 													<span
-														class="inline-flex items-center gap-2 rounded-full border border-neon-cyan/40 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
+														class="inline-flex items-center gap-2 rounded-full border border-brand/40 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
 														>{item.label}</span
 													>
 													<span class="text-xs text-secondary">{item.created_at}</span>
@@ -1744,7 +1744,7 @@
 										{/each}
 										{#if isFacilitator()}
 											<button
-												class="mt-2 inline-flex items-center gap-2 rounded-lg border border-neon-cyan/40 px-4 py-2 text-sm text-cyan-200 hover:border-cyan-300 transition-colors"
+												class="mt-2 inline-flex items-center gap-2 rounded-lg border border-brand/40 px-4 py-2 text-sm text-cyan-200 hover:border-cyan-300 transition-colors"
 												on:click={() => (timelineModalOpen = true)}
 											>
 												<IconPlus class="h-4 w-4" />
@@ -1756,7 +1756,7 @@
 									<div class="flex flex-col gap-4">
 										<div class="max-h-80 space-y-3 overflow-y-auto pr-2">
 											{#each chatList as entry}
-												<div class="rounded-lg border border-surface-accent panel p-3">
+												<div class="rounded-lg border border-line panel p-3">
 													<div class="flex items-center justify-between text-xs text-secondary">
 														<span
 															>{participantsList.find((p) => p.id === entry.participant_id)?.name ??
@@ -1770,13 +1770,13 @@
 										</div>
 										<form class="flex gap-3" on:submit|preventDefault={submitChatMessage}>
 											<input
-												class="flex-1 rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary placeholder:text-secondary focus:border-neon-cyan focus:outline-none"
+												class="flex-1 rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary placeholder:text-secondary focus:border-brand focus:outline-none"
 												placeholder="Share a quick note for the room"
 												bind:value={chatMessage}
 											/>
 											<button
 												type="submit"
-												class="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-primary hover:bg-neon-cyan transition-colors"
+												class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary hover:bg-brand transition-colors"
 											>
 												<IconSend class="h-4 w-4" />
 												Send
@@ -1805,7 +1805,7 @@
 												</p>
 												<p class="text-xs text-green-100/80">Last 5 minutes</p>
 											</div>
-											<div class="rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 p-3">
+											<div class="rounded-lg border border-brand/30 bg-brand/10 p-3">
 												<p class="text-xs uppercase tracking-wide text-cyan-200">Total Responses</p>
 												<p class="text-xl font-semibold text-primary">
 													{participantActivity.reduce((sum, p) => sum + p.responseCount, 0)}
@@ -1831,7 +1831,7 @@
 										<!-- Participant List -->
 										<div class="space-y-3">
 											{#each participantActivity as participant}
-												<div class="rounded-lg border border-surface-accent panel p-4">
+												<div class="rounded-lg border border-line panel p-4">
 													<div class="flex items-center justify-between">
 														<div class="flex items-center gap-3">
 															<div
@@ -1919,7 +1919,7 @@
 								<div class="mt-4 flex justify-center">
 									<button
 										on:click={() => (dashboardMode = 'immersive')}
-										class="px-4 py-2 bg-cyan-600 text-primary rounded-lg hover:bg-cyan-500 text-sm"
+										class="px-4 py-2 bg-brand text-primary rounded-lg hover:bg-brand text-sm"
 									>
 										Switch to Immersive Dashboard
 									</button>
@@ -1933,7 +1933,7 @@
 				<!-- Leaderboard and QR Code Section: Facilitator Only -->
 				{#if isFacilitator()}
 					<section class="grid gap-6 lg:grid-cols-2">
-					<div class="rounded-2xl border border-surface-accent panel p-6">
+					<div class="rounded-2xl border border-line panel p-6">
 						<h2 class="text-lg font-semibold text-primary">Leaderboard</h2>
 						<p class="text-sm text-secondary">
 							Points reflect contributions, votes earned, and justice prompts.
@@ -1941,12 +1941,12 @@
 						<ul class="mt-4 space-y-3">
 							{#each leaderboardList as player, index}
 								<li
-									class="flex items-center justify-between rounded-lg border border-surface-accent panel px-3 py-2"
+									class="flex items-center justify-between rounded-lg border border-line panel px-3 py-2"
 								>
 									<div class="flex items-center gap-3">
 										<span class="text-xs text-secondary">#{index + 1}</span>
 										<span
-											class="h-8 w-8 rounded-full border border-surface-accent flex items-center justify-center font-semibold"
+											class="h-8 w-8 rounded-full border border-line flex items-center justify-center font-semibold"
 											style={`background:${player.color}`}
 											>{player.name?.charAt(0)?.toUpperCase() ?? '?'}</span
 										>
@@ -1961,13 +1961,13 @@
 						</ul>
 					</div>
 
-					<div class="rounded-2xl border border-surface-accent panel p-6">
+					<div class="rounded-2xl border border-line panel p-6">
 						<h2 class="text-lg font-semibold text-primary">QR Code</h2>
 						<p class="text-sm text-secondary">New participants can scan to join instantly.</p>
 						<div class="mt-4 flex justify-center">
 							{#if qrSrc}
 								<img
-									class="h-40 w-40 rounded-lg border border-surface-accent surface p-2"
+									class="h-40 w-40 rounded-lg border border-line surface p-2"
 									alt="Join session QR code"
 									src={qrSrc}
 								/>
@@ -1985,7 +1985,7 @@
 		<!-- {#if isMobile}
 			<button
 				on:click={() => cardStore.toggleCardPanel()}
-				class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500 text-primary shadow-lg shadow-cyan-500/50 transition hover:bg-neon-cyan active:scale-95"
+				class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-primary shadow-lg shadow-cyan-500/50 transition hover:bg-brand active:scale-95"
 				aria-label="Open card panel"
 			>
 				<IconCards class="h-6 w-6" />
@@ -2027,7 +2027,7 @@
 	<div
 		class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white flex items-center justify-center"
 	>
-		<div class="rounded-2xl border border-surface-accent bg-slate-900/80 px-6 py-10 text-center">
+		<div class="rounded-2xl border border-line bg-slate-900/80 px-6 py-10 text-center">
 			<p class="text-sm text-secondary">Loading session…</p>
 		</div>
 	</div>
@@ -2060,9 +2060,9 @@
 		color: hsl(var(--text-secondary)) !important;
 	}
 
-	.session-shell :global(.border-surface-accent),
-	.session-shell :global(.border-surface-accent),
-	.session-shell :global(.border-surface-accent) {
+	.session-shell :global(.border-line),
+	.session-shell :global(.border-line),
+	.session-shell :global(.border-line) {
 		border-color: hsl(var(--border-subtle)) !important;
 	}
 
@@ -2093,7 +2093,7 @@
 </style>
 {#if responseModalOpen}
 	<div class="fixed inset-0 z-50 flex items-center justify-center panel backdrop-blur">
-		<div class="w-full max-w-xl rounded-2xl border border-surface-accent bg-slate-900/90 p-6">
+		<div class="w-full max-w-xl rounded-2xl border border-line bg-slate-900/90 p-6">
 			<h2 class="text-lg font-semibold text-primary">Share your response</h2>
 			<p class="mt-1 text-sm text-secondary">
 				Link cards to earn bonus points and center your thinking.
@@ -2101,11 +2101,11 @@
 			<div class="mt-4 space-y-4">
 				<div class="flex flex-col gap-2 text-sm text-secondary">
 					Prompt
-					<div class="rounded-lg border border-surface-accent panel px-3 py-2">
+					<div class="rounded-lg border border-line panel px-3 py-2">
 						<p class="text-sm text-primary leading-relaxed">
 							{#if currentQuestion}
 								{#if currentQuestion.section}
-									<strong class="text-cyan-300 mr-1">{currentQuestion.section}:</strong>
+									<strong class="text-brand mr-1">{currentQuestion.section}:</strong>
 								{/if}
 								{currentQuestion.text}
 							{:else}
@@ -2129,7 +2129,7 @@
 							/>
 							<div class="flex justify-between text-xs">
 								<span class="text-secondary">{scaleMinLabel}</span>
-								<span class="text-cyan-300 font-bold text-lg">{responseText || scaleMin}</span>
+								<span class="text-brand font-bold text-lg">{responseText || scaleMin}</span>
 								<span class="text-secondary">{scaleMaxLabel}</span>
 							</div>
 						</div>
@@ -2141,7 +2141,7 @@
 						Select one option
 						<div class="space-y-2">
 							{#each modalOptions as option}
-								<label class="flex items-center gap-2 p-2 rounded border border-surface-accent bg-slate-900/50 hover:border-neon-cyan/50 cursor-pointer">
+								<label class="flex items-center gap-2 p-2 rounded border border-line bg-slate-900/50 hover:border-brand/50 cursor-pointer">
 									<input
 										type="radio"
 										name="response-choice"
@@ -2162,7 +2162,7 @@
 						Select all that apply
 						<div class="space-y-2 max-h-64 overflow-y-auto">
 							{#each modalOptions as option}
-								<label class="flex items-center gap-2 p-2 rounded border border-surface-accent bg-slate-900/50 hover:border-neon-cyan/50 cursor-pointer">
+								<label class="flex items-center gap-2 p-2 rounded border border-line bg-slate-900/50 hover:border-brand/50 cursor-pointer">
 									<input
 										type="checkbox"
 										value={option}
@@ -2190,7 +2190,7 @@
 							Label your position (optional)
 							<input
 								type="text"
-								class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+								class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 								placeholder="Brief description..."
 								value={landscapeLabel}
 								on:input={handleLandscapeLabelInput}
@@ -2198,7 +2198,7 @@
 						</label>
 						<div class="flex flex-col gap-2">
 							<label class="text-sm text-secondary">
-								{landscapeXLabel}: <span class="text-cyan-300 font-bold">{landscapeX}</span>
+								{landscapeXLabel}: <span class="text-brand font-bold">{landscapeX}</span>
 								<input
 									type="range"
 									min={landscapeMinX}
@@ -2210,7 +2210,7 @@
 								/>
 							</label>
 							<label class="text-sm text-secondary">
-								{landscapeYLabel}: <span class="text-cyan-300 font-bold">{landscapeY}</span>
+								{landscapeYLabel}: <span class="text-brand font-bold">{landscapeY}</span>
 								<input
 									type="range"
 									min={landscapeMinY}
@@ -2229,7 +2229,7 @@
 					<label class="flex flex-col gap-2 text-sm text-secondary">
 						Your idea or insight
 						<textarea
-							class="min-h-[120px] rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+							class="min-h-[120px] rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 							placeholder="Describe your thought, story, or challenge…"
 							bind:value={responseText}
 						/>
@@ -2244,7 +2244,7 @@
 							<button
 								type="button"
 								on:click={() => (isMobile ? cardStore.setCardPanelOpen(true) : null)}
-								class="text-xs text-neon-cyan hover:text-cyan-300"
+								class="text-xs text-brand hover:text-brand"
 							>
 								{isMobile ? 'View all cards' : 'See panel →'}
 							</button>
@@ -2252,9 +2252,9 @@
 						<div class="flex flex-wrap gap-2">
 							{#each selectedCards as card}
 								<div
-									class="flex items-center gap-2 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-3 py-1.5"
+									class="flex items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-3 py-1.5"
 								>
-									<span class="text-xs font-bold text-cyan-300">{card.letter}</span>
+									<span class="text-xs font-bold text-brand">{card.letter}</span>
 									<span class="text-xs text-cyan-200">{card.title}</span>
 								</div>
 							{/each}
@@ -2267,13 +2267,13 @@
 			</div>
 			<div class="mt-6 flex items-center justify-end gap-3">
 				<button
-					class="rounded-lg border border-surface-accent px-4 py-2 text-sm text-secondary hover:border-slate-500"
+					class="rounded-lg border border-line px-4 py-2 text-sm text-secondary hover:border-slate-500"
 					on:click={() => (responseModalOpen = false)}
 				>
 					Cancel
 				</button>
 				<button
-					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-primary hover:bg-neon-cyan disabled:opacity-50 disabled:cursor-not-allowed"
+					class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-primary hover:bg-brand disabled:opacity-50 disabled:cursor-not-allowed"
 					on:click={submitResponse}
 					disabled={activePhase && !phaseRemainingMs}
 				>
@@ -2286,13 +2286,13 @@
 
 {#if timelineModalOpen}
 	<div class="fixed inset-0 z-50 flex items-center justify-center panel backdrop-blur">
-		<div class="w-full max-w-lg rounded-2xl border border-surface-accent bg-slate-900/90 p-6">
+		<div class="w-full max-w-lg rounded-2xl border border-line bg-slate-900/90 p-6">
 			<h2 class="text-lg font-semibold text-primary">Add roadmap entry</h2>
 			<div class="mt-4 space-y-4">
 				<label class="flex flex-col gap-2 text-sm text-secondary">
 					Phase
 					<select
-						class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-primary focus:border-neon-cyan focus:outline-none"
+						class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-primary focus:border-brand focus:outline-none"
 						bind:value={timelineLabel}
 					>
 						<option value="Now">Now</option>
@@ -2303,7 +2303,7 @@
 				<label class="flex flex-col gap-2 text-sm text-secondary">
 					Item description
 					<textarea
-						class="min-h-[100px] rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+						class="min-h-[100px] rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 						placeholder="What should we take forward?"
 						bind:value={timelineText}
 					/>
@@ -2312,7 +2312,7 @@
 					<label class="flex flex-col gap-2 text-sm text-secondary">
 						Owner
 						<input
-							class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+							class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 							placeholder="Optional"
 							bind:value={timelineOwner}
 						/>
@@ -2320,7 +2320,7 @@
 					<label class="flex flex-col gap-2 text-sm text-secondary">
 						Metric
 						<input
-							class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+							class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 							placeholder="Optional"
 							bind:value={timelineMetric}
 						/>
@@ -2329,7 +2329,7 @@
 				<label class="flex flex-col gap-2 text-sm text-secondary">
 					Risk note
 					<input
-						class="rounded-lg border border-surface-accent bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-neon-cyan focus:outline-none"
+						class="rounded-lg border border-line bg-slate-900/80 px-3 py-2 text-sm text-primary focus:border-brand focus:outline-none"
 						placeholder="Optional"
 						bind:value={timelineRisk}
 					/>
@@ -2337,13 +2337,13 @@
 			</div>
 			<div class="mt-6 flex items-center justify-end gap-3">
 				<button
-					class="rounded-lg border border-surface-accent px-4 py-2 text-sm text-secondary hover:border-slate-500"
+					class="rounded-lg border border-line px-4 py-2 text-sm text-secondary hover:border-slate-500"
 					on:click={() => (timelineModalOpen = false)}
 				>
 					Cancel
 				</button>
 				<button
-					class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-primary hover:bg-neon-cyan"
+					class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-primary hover:bg-brand"
 					on:click={submitTimelineItem}
 				>
 					Add to roadmap

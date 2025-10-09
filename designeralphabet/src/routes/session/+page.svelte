@@ -73,7 +73,7 @@
 
 {#if $sessionInfo}
 	<div
-		class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-brand/20 surface/85 px-4 py-2 text-sm text-primary shadow-sm backdrop-blur"
+		class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-brand/20 bg-surface/85 px-4 py-2 text-sm text-primary shadow-sm backdrop-blur"
 	>
 		<div class="flex items-center gap-2">
 			<span class="inline-block h-3 w-3 rounded-full bg-success animate-pulse"></span>

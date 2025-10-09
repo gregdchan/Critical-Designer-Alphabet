@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import * as d3 from 'd3';
+	import { getThemeColors } from '$lib/utils/colors';
 
 	type WordCloudResponse = {
 		id: string;
@@ -17,15 +18,15 @@
 	let svg: SVGSVGElement;
 	let mounted = false;
 
-	const lensPalette: Record<string, string> = {
-		Risk: '#f97316',
-		Work: '#38bdf8',
-		Sustainability: '#22d3ee',
-		Ethics: '#a855f7',
-		Community: '#bef264',
-		Justice: '#f472b6',
-		Agency: '#22c55e'
-	};
+	const lensOrder = [
+		'Risk',
+		'Work',
+		'Sustainability',
+		'Ethics',
+		'Community',
+		'Justice',
+		'Agency'
+	] as const;
 
 	type WordBubble = {
 		id: string;
@@ -40,7 +41,16 @@
 		participant: string;
 	};
 
-	function calculateWordBubbles(data: WordCloudResponse[]): WordBubble[] {
+	function normaliseLens(raw?: string) {
+		if (!raw) return 'General';
+		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+		return match ?? raw;
+	}
+
+	function calculateWordBubbles(
+		data: WordCloudResponse[],
+		theme: ReturnType<typeof getThemeColors>
+	): WordBubble[] {
 		if (data.length === 0) return [];
 
 		// Calculate total votes
@@ -51,11 +61,42 @@
 		const maxRadius = 80;
 
 		// Map responses to bubbles with vote percentages
+		const basePalette = Object.fromEntries(
+			(lensOrder as readonly string[]).map((lens, idx) => [
+				lens,
+				theme.chart[idx % theme.chart.length] ?? theme.brand
+			])
+		);
+		const fallbackPalette = [
+			...theme.chart,
+			theme.brand,
+			theme.brandSoft,
+			theme.accentWarm,
+			theme.accentCritical,
+			theme.ink
+		];
+		const lensColors = new Map<string, string>();
+		let fallbackIndex = 0;
+
+		const resolveLensColor = (lensLabel: string) => {
+			if (lensColors.has(lensLabel)) return lensColors.get(lensLabel)!;
+			const base = basePalette[lensLabel];
+			if (base) {
+				lensColors.set(lensLabel, base);
+				return base;
+			}
+			const color = fallbackPalette[fallbackIndex % fallbackPalette.length] ?? theme.brand;
+			fallbackIndex += 1;
+			lensColors.set(lensLabel, color);
+			return color;
+		};
+
 		const bubbles = data
 			.filter((r) => r.text && r.text.trim().length > 0)
 			.map((response) => {
 				const votes = response.votes || 0;
 				const votePercentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
+				const lensLabel = normaliseLens(response.lens);
 
 				// Scale radius based on vote percentage (0-100%)
 				// Even 0 votes get minimum size
@@ -63,9 +104,7 @@
 					? minRadius + (votePercentage / 100) * (maxRadius - minRadius)
 					: minRadius;
 
-				const lensColor = response.lens
-					? lensPalette[response.lens] || '#94a3b8'
-					: '#94a3b8';
+				const lensColor = resolveLensColor(lensLabel);
 
 				return {
 					id: response.id,
@@ -76,7 +115,7 @@
 					x: 0,
 					y: 0,
 					color: lensColor,
-					lens: response.lens || 'General',
+					lens: lensLabel || 'General',
 					participant: response.participantName || 'Anonymous'
 				};
 			});
@@ -115,10 +154,17 @@
 	function renderWordCloud() {
 		if (!mounted || !svg) return;
 
-		const wordBubbles = calculateWordBubbles(responses);
+		const theme = getThemeColors();
+		const wordBubbles = calculateWordBubbles(responses, theme);
 		if (wordBubbles.length === 0) return;
 
 		const positionedBubbles = packBubbles(wordBubbles, width, height);
+		const lensColorByName = new Map<string, string>();
+		positionedBubbles.forEach((bubble) => {
+			if (!lensColorByName.has(bubble.lens)) {
+				lensColorByName.set(bubble.lens, bubble.color);
+			}
+		});
 
 		// Clear previous content
 		d3.select(svg).selectAll('*').remove();
@@ -143,7 +189,7 @@
 			.attr('r', (d: any) => d.radius)
 			.attr('fill', (d: any) => d.color)
 			.attr('opacity', 0.75)
-			.attr('stroke', '#fff')
+			.attr('stroke', 'hsl(var(--surface-elevated))')
 			.attr('stroke-width', 2)
 			.style('cursor', 'pointer')
 			.on('mouseenter', function (event: any, d: any) {
@@ -160,14 +206,14 @@
 					.append('div')
 					.attr('class', 'word-cloud-tooltip')
 					.style('position', 'absolute')
-					.style('background', 'rgba(15, 23, 42, 0.95)')
-					.style('color', '#fff')
+					.style('background', 'hsl(var(--surface) / 0.95)')
+					.style('color', 'hsl(var(--text-on-teal))')
 					.style('padding', '12px')
 					.style('border-radius', '8px')
-					.style('border', '1px solid #475569')
+					.style('border', '1px solid hsl(var(--border-subtle))')
 					.style('pointer-events', 'none')
 					.style('font-size', '12px')
-					.style('box-shadow', '0 4px 12px rgba(0,0,0,0.5)')
+					.style('box-shadow', '0 4px 12px hsl(var(--brand-soft) / 0.35)')
 					.style('backdrop-filter', 'blur(8px)')
 					.style('z-index', '1000');
 
@@ -176,10 +222,10 @@
 				tooltipMerge
 					.html(
 						`
-						<div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; color: #e2e8f0;">${d.text}</div>
-						<div style="color: #cbd5e1; margin-bottom: 4px;">By: ${d.participant}</div>
-						<div style="color: #94a3b8; margin-bottom: 4px;">Lens: ${d.lens}</div>
-						<div style="color: #06b6d4; font-weight: 600; margin-top: 8px; padding-top: 8px; border-top: 1px solid #334155;">
+						<div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; color: ${theme.ink};">${d.text}</div>
+						<div style="color: ${theme.ink2}; margin-bottom: 4px;">By: ${d.participant}</div>
+						<div style="color: ${theme.inkMuted}; margin-bottom: 4px;">Lens: ${d.lens}</div>
+						<div style="color: ${theme.brand}; font-weight: 600; margin-top: 8px; padding-top: 8px; border-top: 1px solid hsl(var(--border-subtle));">
 							${d.votes} votes (${d.votePercentage.toFixed(1)}%)
 						</div>
 					`
@@ -209,7 +255,7 @@
 			.append('text')
 			.attr('text-anchor', 'middle')
 			.attr('dominant-baseline', 'middle')
-			.attr('fill', '#fff')
+			.attr('fill', 'hsl(var(--text-on-teal))')
 			.attr('font-weight', '600')
 			.attr('pointer-events', 'none')
 			.style('user-select', 'none')
@@ -278,8 +324,8 @@
 			.attr('cx', (d: any) => d.radius * 0.6)
 			.attr('cy', (d: any) => -d.radius * 0.6)
 			.attr('r', (d: any) => Math.min(d.radius * 0.25, 20))
-			.attr('fill', '#06b6d4')
-			.attr('stroke', '#fff')
+			.attr('fill', theme.brand)
+			.attr('stroke', 'hsl(var(--surface-elevated))')
 			.attr('stroke-width', 2);
 
 		bubbleGroups
@@ -289,7 +335,7 @@
 			.attr('y', (d: any) => -d.radius * 0.6)
 			.attr('text-anchor', 'middle')
 			.attr('dominant-baseline', 'middle')
-			.attr('fill', '#fff')
+			.attr('fill', 'hsl(var(--text-on-teal))')
 			.attr('font-size', (d: any) => Math.min(d.radius * 0.2, 12) + 'px')
 			.attr('font-weight', '700')
 			.attr('pointer-events', 'none')
@@ -300,7 +346,7 @@
 			.attr('x', width / 2)
 			.attr('y', 20)
 			.attr('text-anchor', 'middle')
-			.attr('fill', '#f1f5f9')
+			.attr('fill', theme.ink)
 			.attr('font-size', '16px')
 			.attr('font-weight', '700')
 			.text('Response Word Cloud');
@@ -322,14 +368,14 @@
 				item
 					.append('circle')
 					.attr('r', 6)
-					.attr('fill', lensPalette[lens] || '#94a3b8')
+					.attr('fill', lensColorByName.get(lens) ?? theme.ink2)
 					.attr('opacity', 0.75);
 
 				item
 					.append('text')
 					.attr('x', 12)
 					.attr('y', 4)
-					.attr('fill', '#cbd5e1')
+					.attr('fill', theme.ink2)
 					.attr('font-size', '11px')
 					.text(lens);
 			});
@@ -339,7 +385,7 @@
 		g.append('text')
 			.attr('x', 10)
 			.attr('y', height - 10)
-			.attr('fill', '#94a3b8')
+			.attr('fill', theme.inkMuted)
 			.attr('font-size', '11px')
 			.attr('font-weight', '600')
 			.text(`${positionedBubbles.length} responses · ${totalVotes} total votes`);
@@ -367,7 +413,11 @@
 
 <style>
 	svg {
-		background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--surface-muted)) 0%,
+			hsl(var(--surface)) 100%
+		);
 		border-radius: 12px;
 	}
 </style>

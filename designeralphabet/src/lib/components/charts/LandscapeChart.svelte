@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import * as d3 from 'd3';
+	import { getThemeColors } from '$lib/utils/colors';
 
 	type LandscapeResponse = {
 		id: string;
@@ -25,15 +26,15 @@
 	let tooltipEl: HTMLDivElement;
 	let mounted = false;
 
-	const lensPalette: Record<string, string> = {
-		Risk: '#f97316',
-		Work: '#38bdf8',
-		Sustainability: '#22d3ee',
-		Ethics: '#a855f7',
-		Community: '#bef264',
-		Justice: '#f472b6',
-		Agency: '#22c55e'
-	};
+	const lensOrder = [
+		'Risk',
+		'Work',
+		'Sustainability',
+		'Ethics',
+		'Community',
+		'Justice',
+		'Agency'
+	] as const;
 
 	type PlotPoint = {
 		id: string;
@@ -46,6 +47,12 @@
 		color: string;
 		votes: number;
 	};
+
+	function normaliseLens(raw?: string) {
+		if (!raw) return 'General';
+		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+		return match ?? raw;
+	}
 
 	function parseResponseData(response: LandscapeResponse): PlotPoint | null {
 		// Try to parse coordinates from metadata or text
@@ -72,9 +79,7 @@
 			}
 		}
 
-		const lensColor = response.lens
-			? lensPalette[response.lens] || '#94a3b8'
-			: '#94a3b8';
+		const lensLabel = normaliseLens(response.lens);
 
 		return {
 			id: response.id,
@@ -83,8 +88,8 @@
 			label: label || response.text?.slice(0, 30) || 'Response',
 			text: response.text,
 			participant: response.participantName || 'Anonymous',
-			lens: response.lens || 'General',
-			color: lensColor,
+			lens: lensLabel,
+			color: '',
 			votes: response.votes || 0
 		};
 	}
@@ -184,6 +189,40 @@
 
 		if (parsedPoints.length === 0) return;
 
+		const theme = getThemeColors();
+		const basePalette = Object.fromEntries(
+			(lensOrder as readonly string[]).map((lens, idx) => [
+				lens,
+				theme.chart[idx % theme.chart.length] ?? theme.brand
+			])
+		);
+		const fallbackPalette = [
+			...theme.chart,
+			theme.brand,
+			theme.brandSoft,
+			theme.accentWarm,
+			theme.accentCritical,
+			theme.ink
+		];
+		const lensColors = new Map<string, string>();
+		let fallbackIndex = 0;
+		const resolveLensColor = (lensLabel: string) => {
+			if (lensColors.has(lensLabel)) return lensColors.get(lensLabel)!;
+			const base = basePalette[lensLabel];
+			if (base) {
+				lensColors.set(lensLabel, base);
+				return base;
+			}
+			const color = fallbackPalette[fallbackIndex % fallbackPalette.length] ?? theme.brand;
+			fallbackIndex += 1;
+			lensColors.set(lensLabel, color);
+			return color;
+		};
+
+		parsedPoints.forEach((point) => {
+			point.color = resolveLensColor(point.lens);
+		});
+
 		const margin = { top: 60, right: 120, bottom: 80, left: 80 };
 		const chartWidth = width - margin.left - margin.right;
 		const chartHeight = height - margin.top - margin.bottom;
@@ -213,7 +252,7 @@
 			.attr('x2', (d) => xScale(d))
 			.attr('y1', 0)
 			.attr('y2', chartHeight)
-			.attr('stroke', 'rgba(148, 163, 184, 0.1)')
+			.attr('stroke', 'hsl(var(--border-subtle) / 0.25)')
 			.attr('stroke-width', 1);
 
 		g.append('g')
@@ -226,7 +265,7 @@
 			.attr('x2', chartWidth)
 			.attr('y1', (d) => yScale(d))
 			.attr('y2', (d) => yScale(d))
-			.attr('stroke', 'rgba(148, 163, 184, 0.1)')
+			.attr('stroke', 'hsl(var(--border-subtle) / 0.25)')
 			.attr('stroke-width', 1);
 
 		// Draw density contours
@@ -247,7 +286,7 @@
 			const contourColorScale = d3
 				.scaleSequential()
 				.domain([0, contours.length - 1])
-				.interpolator(d3.interpolateRgb('rgba(6, 182, 212, 0.05)', 'rgba(6, 182, 212, 0.3)'));
+				.interpolator(d3.interpolateRgb(theme.brandSoft, theme.brand));
 
 			// Draw contour paths
 			g.append('g')
@@ -257,9 +296,9 @@
 				.join('path')
 				.attr('d', geoPath as any)
 				.attr('fill', (d, i) => contourColorScale(i))
-				.attr('stroke', 'rgba(6, 182, 212, 0.4)')
+				.attr('stroke', theme.brand)
 				.attr('stroke-width', 1)
-				.attr('opacity', 0.8);
+				.attr('opacity', 0.3);
 		}
 
 		// Calculate and draw trend line
@@ -276,7 +315,7 @@
 				.attr('y1', yScale(lineData[0].y))
 				.attr('x2', xScale(lineData[1].x))
 				.attr('y2', yScale(lineData[1].y))
-				.attr('stroke', '#06b6d4')
+				.attr('stroke', theme.brand)
 				.attr('stroke-width', 2)
 				.attr('stroke-dasharray', '5,5')
 				.attr('opacity', 0.6);
@@ -286,7 +325,7 @@
 				.attr('x', chartWidth - 10)
 				.attr('y', 10)
 				.attr('text-anchor', 'end')
-				.attr('fill', '#06b6d4')
+				.attr('fill', theme.brand)
 				.attr('font-size', '12px')
 				.attr('font-weight', '600')
 				.text(`Trend: R² = ${r2.toFixed(3)}`);
@@ -297,7 +336,7 @@
 				.attr('x', chartWidth - 10)
 				.attr('y', 30)
 				.attr('text-anchor', 'end')
-				.attr('fill', '#94a3b8')
+				.attr('fill', theme.inkMuted)
 				.attr('font-size', '11px')
 				.text(`Slope: ${slope.toFixed(2)} ${direction}`);
 		}
@@ -310,13 +349,13 @@
 			.attr('transform', `translate(0,${chartHeight})`)
 			.call(xAxis)
 			.selectAll('text')
-			.attr('fill', '#cbd5e1')
+			.attr('fill', theme.ink2)
 			.attr('font-size', '11px');
 
 		g.append('g')
 			.call(yAxis)
 			.selectAll('text')
-			.attr('fill', '#cbd5e1')
+			.attr('fill', theme.ink2)
 			.attr('font-size', '11px');
 
 		// Axis labels
@@ -324,7 +363,7 @@
 			.attr('x', chartWidth / 2)
 			.attr('y', chartHeight + 50)
 			.attr('text-anchor', 'middle')
-			.attr('fill', '#e2e8f0')
+			.attr('fill', theme.ink)
 			.attr('font-size', '13px')
 			.attr('font-weight', '600')
 			.text(xLabel);
@@ -334,7 +373,7 @@
 			.attr('x', -chartHeight / 2)
 			.attr('y', -55)
 			.attr('text-anchor', 'middle')
-			.attr('fill', '#e2e8f0')
+			.attr('fill', theme.ink)
 			.attr('font-size', '13px')
 			.attr('font-weight', '600')
 			.text(yLabel);
@@ -353,7 +392,7 @@
 			.attr('r', (d) => Math.max(5, Math.min(15, 5 + d.votes)))
 			.attr('fill', (d) => d.color)
 			.attr('opacity', 0.7)
-			.attr('stroke', '#fff')
+			.attr('stroke', 'hsl(var(--surface-elevated))')
 			.attr('stroke-width', 2)
 			.style('cursor', 'pointer');
 
@@ -363,7 +402,7 @@
 			.attr('x', 0)
 			.attr('y', (d) => -Math.max(5, Math.min(15, 5 + d.votes)) - 8)
 			.attr('text-anchor', 'middle')
-			.attr('fill', '#e2e8f0')
+			.attr('fill', theme.ink)
 			.attr('font-size', '10px')
 			.attr('font-weight', '500')
 			.text((d) => d.label.slice(0, 20));
@@ -374,11 +413,11 @@
 				d3.select(this).select('circle').attr('opacity', 1).attr('stroke-width', 3);
 
 				tooltipEl.innerHTML = `
-					<div class="text-xs font-semibold text-white mb-1">${d.label}</div>
-					<div class="text-xs text-slate-300 mb-2">${d.participant}</div>
-					<div class="text-xs text-slate-400 mb-1">Position: (${d.x.toFixed(1)}, ${d.y.toFixed(1)})</div>
-					<div class="text-xs text-slate-400">Lens: ${d.lens}</div>
-					<div class="text-xs text-slate-400">Votes: ${d.votes}</div>
+					<div class="text-xs font-semibold mb-1" style="color:${theme.ink};">${d.label}</div>
+					<div class="text-xs mb-2" style="color:${theme.ink2};">${d.participant}</div>
+					<div class="text-xs mb-1" style="color:${theme.inkMuted};">Position: (${d.x.toFixed(1)}, ${d.y.toFixed(1)})</div>
+					<div class="text-xs" style="color:${theme.inkMuted};">Lens: ${d.lens}</div>
+					<div class="text-xs" style="color:${theme.inkMuted};">Votes: ${d.votes}</div>
 				`;
 				tooltipEl.style.display = 'block';
 				tooltipEl.style.left = `${event.pageX + 10}px`;
@@ -406,14 +445,14 @@
 				item
 					.append('circle')
 					.attr('r', 5)
-					.attr('fill', lensPalette[lens] || '#94a3b8')
+					.attr('fill', lensColors.get(lens) ?? theme.ink2)
 					.attr('opacity', 0.7);
 
 				item
 					.append('text')
 					.attr('x', 12)
 					.attr('y', 4)
-					.attr('fill', '#cbd5e1')
+					.attr('fill', theme.ink2)
 					.attr('font-size', '11px')
 					.text(lens);
 			});
@@ -423,7 +462,7 @@
 			.attr('x', chartWidth / 2)
 			.attr('y', -30)
 			.attr('text-anchor', 'middle')
-			.attr('fill', '#f1f5f9')
+			.attr('fill', theme.ink)
 			.attr('font-size', '16px')
 			.attr('font-weight', '700')
 			.text('Response Landscape');
@@ -435,7 +474,7 @@
 
 		stats
 			.append('text')
-			.attr('fill', '#94a3b8')
+			.attr('fill', theme.inkMuted)
 			.attr('font-size', '10px')
 			.attr('font-weight', '600')
 			.text(`n = ${parsedPoints.length}`);
@@ -445,7 +484,7 @@
 			stats
 				.append('text')
 				.attr('y', 15)
-				.attr('fill', '#94a3b8')
+				.attr('fill', theme.inkMuted)
 				.attr('font-size', '10px')
 				.text(`${correlation} correlation`);
 		}
@@ -476,7 +515,11 @@
 
 <style>
 	svg {
-		background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--surface-muted)) 0%,
+			hsl(var(--surface)) 100%
+		);
 		border-radius: 12px;
 	}
 </style>

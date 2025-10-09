@@ -2,8 +2,9 @@
 	import { select } from 'd3-selection';
 	import { scaleLinear } from 'd3-scale';
 	import { line, curveMonotoneX, area } from 'd3-shape';
-	import { extent, max } from 'd3-array';
+	import { max } from 'd3-array';
 	import { onMount, afterUpdate } from 'svelte';
+	import { getThemeColors } from '$lib/utils/colors';
 
 	export let data: Array<{ value: number; count: number }> = [];
 	export let scaleSettings = { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
@@ -23,6 +24,7 @@
 
 		const chart = select(chartGroup);
 		chart.selectAll('*').remove();
+		const theme = getThemeColors();
 
 		// Scales
 		const xScale = scaleLinear()
@@ -45,7 +47,7 @@
 			.attr('x2', innerWidth)
 			.attr('y1', (d) => yScale(d))
 			.attr('y2', (d) => yScale(d))
-			.attr('stroke', 'rgb(51, 65, 85)')
+			.attr('stroke', 'hsl(var(--border-subtle) / 0.6)')
 			.attr('stroke-width', 0.5)
 			.attr('opacity', 0.5);
 
@@ -78,7 +80,7 @@
 			.datum(data)
 			.attr('class', 'line')
 			.attr('fill', 'none')
-			.attr('stroke', '#10b981')
+			.attr('stroke', theme.brand)
 			.attr('stroke-width', 3)
 			.attr('filter', 'url(#line-glow)')
 			.attr('d', lineGenerator);
@@ -102,8 +104,8 @@
 			.attr('cx', (d) => xScale(d.value))
 			.attr('cy', (d) => yScale(d.count))
 			.attr('r', 0)
-			.attr('fill', '#10b981')
-			.attr('stroke', '#0f172a')
+			.attr('fill', theme.brand)
+			.attr('stroke', theme.ink)
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#line-glow)')
 			.style('cursor', 'pointer');
@@ -130,14 +132,14 @@
 					.attr('y', -25)
 					.attr('width', 80)
 					.attr('height', 20)
-					.attr('fill', 'rgba(0, 0, 0, 0.9)')
+					.attr('fill', 'hsl(var(--surface) / 0.92)')
 					.attr('rx', 4);
 
 				tooltip
 					.append('text')
 					.attr('text-anchor', 'middle')
 					.attr('dy', '-0.8em')
-					.attr('fill', '#10b981')
+					.attr('fill', theme.brand)
 					.attr('font-family', 'Orbitron, sans-serif')
 					.attr('font-size', '12px')
 					.attr('font-weight', 'bold')
@@ -158,7 +160,7 @@
 			.append('line')
 			.attr('x1', 0)
 			.attr('x2', innerWidth)
-			.attr('stroke', 'rgb(100, 116, 139)')
+			.attr('stroke', 'hsl(var(--border-strong))')
 			.attr('stroke-width', 2);
 
 		// X-axis labels
@@ -169,7 +171,7 @@
 				.attr('x', xScale(tick))
 				.attr('y', 25)
 				.attr('text-anchor', 'middle')
-				.attr('fill', 'rgb(203, 213, 225)')
+				.attr('fill', theme.ink)
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-size', '13px')
 				.attr('font-weight', '600')
@@ -183,7 +185,7 @@
 				.attr('x', xScale(scaleSettings.min))
 				.attr('y', 45)
 				.attr('text-anchor', 'middle')
-				.attr('fill', 'rgb(148, 163, 184)')
+				.attr('fill', theme.inkMuted)
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-size', '11px')
 				.text(scaleSettings.minLabel);
@@ -195,7 +197,7 @@
 				.attr('x', xScale(scaleSettings.max))
 				.attr('y', 45)
 				.attr('text-anchor', 'middle')
-				.attr('fill', 'rgb(148, 163, 184)')
+				.attr('fill', theme.inkMuted)
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-size', '11px')
 				.text(scaleSettings.maxLabel);
@@ -208,7 +210,7 @@
 			.append('line')
 			.attr('y1', 0)
 			.attr('y2', innerHeight)
-			.attr('stroke', 'rgb(100, 116, 139)')
+			.attr('stroke', 'hsl(var(--border-strong))')
 			.attr('stroke-width', 2);
 
 		// Y-axis labels
@@ -219,7 +221,7 @@
 				.attr('y', yScale(tick))
 				.attr('dy', '0.35em')
 				.attr('text-anchor', 'end')
-				.attr('fill', 'rgb(203, 213, 225)')
+				.attr('fill', theme.ink)
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-size', '12px')
 				.text(tick);
@@ -232,7 +234,7 @@
 			.attr('x', -innerHeight / 2)
 			.attr('y', -45)
 			.attr('text-anchor', 'middle')
-			.attr('fill', 'rgb(148, 163, 184)')
+			.attr('fill', theme.inkMuted)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '13px')
 			.text('Responses');
@@ -254,8 +256,8 @@
 				.attr('width', 120)
 				.attr('height', 24)
 				.attr('rx', 12)
-				.attr('fill', 'rgba(16, 185, 129, 0.1)')
-				.attr('stroke', 'rgba(16, 185, 129, 0.3)')
+				.attr('fill', 'hsl(var(--brand) / 0.1)')
+				.attr('stroke', 'hsl(var(--brand) / 0.3)')
 				.attr('stroke-width', 1);
 
 			badge
@@ -264,7 +266,7 @@
 				.attr('y', 12)
 				.attr('dy', '0.35em')
 				.attr('text-anchor', 'middle')
-				.attr('fill', '#10b981')
+				.attr('fill', theme.brand)
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-size', '11px')
 				.attr('font-weight', '600')
@@ -290,9 +292,9 @@
 <div class="line-chart-container">
 	<svg bind:this={svgElement} {width} {height} class="line-chart">
 		<defs>
-			<linearGradient id="line-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-				<stop offset="0%" style="stop-color:#10b981;stop-opacity:0.8" />
-				<stop offset="100%" style="stop-color:#10b981;stop-opacity:0.1" />
+			<linearGradient id="line-gradient" x1="0" x2="1">
+				<stop offset="0%" stop-color="hsl(var(--brand-soft))" stop-opacity="0.9" />
+				<stop offset="100%" stop-color="hsl(var(--brand))" stop-opacity="1" />
 			</linearGradient>
 			<filter id="line-glow">
 				<feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -327,12 +329,12 @@
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
-		background-color: rgba(15, 23, 42, 0.8);
+		background-color: hsl(var(--surface) / 0.9);
 		backdrop-filter: blur(4px);
 	}
 
 	.empty-text {
-		color: rgb(148, 163, 184);
+		color: hsl(var(--text-secondary));
 		font-size: 0.875rem;
 	}
 
@@ -346,6 +348,6 @@
 	}
 
 	:global(.line-chart .data-point:hover) {
-		filter: drop-shadow(0 0 8px #10b981);
+		filter: drop-shadow(0 0 8px hsl(var(--brand)));
 	}
 </style>

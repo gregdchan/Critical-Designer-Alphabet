@@ -1,98 +1,100 @@
-// Insightful color palette constants tuned for the lighter theme
+// Unified theme colors driven by CSS variables for accessibility + brand consistency.
+type ThemeColors = {
+  brand: string;
+  brandSoft: string;
+  surface: string;
+  surfaceElevated: string;
+  surfaceMuted: string;
+  ink: string;
+  ink2: string;
+  inkMuted: string;
+  accentCritical: string;
+  accentWarm: string;
+  chart: string[];
+  risk: { low: string; medium: string; high: string; critical: string };
+  maturity: string[];
+};
+
+function cssVar(name: string, fallback: string): string {
+  if (typeof document === 'undefined') return fallback;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
+export function getThemeColors(): ThemeColors {
+  return {
+    brand: `hsl(${cssVar('--brand', '180 100% 22%')})`,
+    brandSoft: `hsl(${cssVar('--brand-soft', '184 95% 17%')})`,
+    surface: `hsl(${cssVar('--surface', '10 40% 98%')})`,
+    surfaceElevated: `hsl(${cssVar('--surface-elevated', '0 0% 100%')})`,
+    surfaceMuted: `hsl(${cssVar('--surface-muted', '10 30% 95%')})`,
+    ink: `hsl(${cssVar('--text-primary', '0 0% 10%')})`,
+    ink2: `hsl(${cssVar('--text-secondary', '0 0% 30%')})`,
+    inkMuted: `hsl(${cssVar('--text-muted', '0 0% 50%')})`,
+    accentCritical: `hsl(${cssVar('--accent-critical', '21 96% 43%')})`,
+    accentWarm: `hsl(${cssVar('--accent-warm', '32 88% 54%')})`,
+    chart: [
+      cssVar('--chart-1', '#007172'),
+      cssVar('--chart-2', '#F29325'),
+      cssVar('--chart-3', '#025259'),
+      cssVar('--chart-4', '#D94F04'),
+      cssVar('--chart-5', '#F4E2DE'),
+      cssVar('--chart-6', '#00a0a3'),
+      cssVar('--chart-7', '#ff9f1c'),
+      cssVar('--chart-8', '#013840'),
+    ],
+    risk: {
+      low: cssVar('--risk-low', '#22a06b'),
+      medium: cssVar('--risk-medium', '#f6b042'),
+      high: cssVar('--risk-high', '#f7745e'),
+      critical: cssVar('--risk-critical', '#d63f5c'),
+    },
+    maturity: [
+      cssVar('--maturity-1', '#94a3b8'),
+      cssVar('--maturity-2', '#4c6ef5'),
+      cssVar('--maturity-3', '#22a06b'),
+      cssVar('--maturity-4', '#f6b042'),
+      cssVar('--maturity-5', '#9b5de5'),
+    ],
+  };
+}
+
+// Backwards-compat exports kept for now
 export const INSIGHT_COLORS = {
-	ocean: '#4c6ef5',
-	sky: '#38bdf8',
-	teal: '#2ab3bf',
-	mint: '#22a06b',
-	gold: '#f6b042',
-	coral: '#f7745e',
-	plum: '#9b5de5',
-	rose: '#f472b6'
+  ocean: '#4c6ef5',
+  sky: '#38bdf8',
+  teal: '#2ab3bf',
+  mint: '#22a06b',
+  gold: '#f6b042',
+  coral: '#f7745e',
+  plum: '#9b5de5',
+  rose: '#f472b6'
 } as const;
 
 export const BACKGROUND_COLORS = {
-	base: '#eef1f5',
-	surface: '#f8fafc',
-	card: '#ffffff',
-	strong: '#e2e7f0'
+  base: 'var(--surface, #eef1f5)',
+  surface: 'var(--surface-elevated, #ffffff)',
+  card: 'var(--surface-elevated, #ffffff)',
+  muted: 'var(--surface-muted, #f8fafc)'
 } as const;
-
-// Lens color mapping
-export const LENS_COLORS = {
-	Risk: INSIGHT_COLORS.coral,
-	Work: INSIGHT_COLORS.sky,
-	Sustainability: INSIGHT_COLORS.mint,
-	Ethics: INSIGHT_COLORS.plum,
-	Justice: INSIGHT_COLORS.gold,
-	Culture: INSIGHT_COLORS.ocean,
-	Innovation: INSIGHT_COLORS.teal,
-	Governance: INSIGHT_COLORS.rose
-} as const;
-
-// Risk matrix colors
-export const RISK_COLORS = {
-	low: '#22a06b', // Meadow
-	medium: '#f6b042', // Amber
-	high: '#f7745e', // Coral
-	critical: '#d63f5c' // Deep rose
-} as const;
-
-// Maturity stage colors
-export const MATURITY_COLORS = [
-	'#94a3b8', // Slate - Foundational
-	INSIGHT_COLORS.ocean, // Developing
-	INSIGHT_COLORS.mint, // Proficient
-	INSIGHT_COLORS.gold, // Advanced
-	INSIGHT_COLORS.plum // Aspirational
-] as const;
-
-// Color scales for heatmaps
-export const HEATMAP_SCALE = [
-	'#e7f0ff', // Very low
-	'#c5e1f7', // Low
-	'#7ec9d9', // Medium
-	'#3a94c2', // High
-	'#1d4ed8' // Very high
-] as const;
-
-// Backwards compatibility export for existing imports
-export const NEON_COLORS = INSIGHT_COLORS;
-
-// Utility functions
-export function getLensColor(lens: string): string {
-	return LENS_COLORS[lens as keyof typeof LENS_COLORS] || INSIGHT_COLORS.sky;
-}
 
 export function getRiskColor(impact: number, likelihood: number): string {
-	const score = impact * likelihood;
-	if (score <= 4) return RISK_COLORS.low;
-	if (score <= 9) return RISK_COLORS.medium;
-	if (score <= 16) return RISK_COLORS.high;
-	return RISK_COLORS.critical;
+  const score = impact * likelihood;
+  const t = getThemeColors();
+  if (score <= 4) return t.risk.low;
+  if (score <= 9) return t.risk.medium;
+  if (score <= 16) return t.risk.high;
+  return t.risk.critical;
 }
 
 export function getMaturityColor(level: number): string {
-	return MATURITY_COLORS[Math.max(0, Math.min(4, level - 1))];
+  const t = getThemeColors();
+  const idx = Math.max(0, Math.min(4, level - 1));
+  return t.maturity[idx];
 }
 
 export function interpolateNeonGradient(t: number): string {
-	// Create gradient from ocean blue to warm coral
-	const start = [76, 110, 245]; // ocean
-	const end = [247, 116, 94]; // coral
-	const r = Math.round(start[0] + t * (end[0] - start[0]));
-	const g = Math.round(start[1] + t * (end[1] - start[1]));
-	const b = Math.round(start[2] + t * (end[2] - start[2]));
-	return `rgb(${r}, ${g}, ${b})`;
-}
-
-// Generate accessible color palette
-export function generateAccessiblePalette(count: number): string[] {
-	const colors = Object.values(INSIGHT_COLORS);
-	const result: string[] = [];
-
-	for (let i = 0; i < count; i++) {
-		result.push(colors[i % colors.length]);
-	}
-
-	return result;
+  const theme = getThemeColors();
+  const tt = Math.max(0, Math.min(1, t));
+  return `linear-gradient(90deg, ${theme.brandSoft} 0%, ${theme.brand} 100%)`;
 }

@@ -106,7 +106,7 @@
 	.spinner {
 		width: 2rem;
 		height: 2rem;
-		border: 4px solid rgb(6, 182, 212);
+		border: 4px solid hsl(var(--brand));
 		border-top-color: transparent;
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
@@ -120,11 +120,11 @@
 
 	.loading-state p,
 	.error-state p {
-		color: rgb(148, 163, 184);
+		color: hsl(var(--text-secondary));
 		font-size: 0.875rem;
 	}
 
 	.error-state p {
-		color: rgb(239, 68, 68);
+		color: hsl(var(--accent-critical));
 	}
 </style>

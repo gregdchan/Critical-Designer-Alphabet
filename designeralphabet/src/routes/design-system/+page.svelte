@@ -81,7 +81,7 @@
 			label: 'Text Primary',
 			value: '#f8fafc',
 			usage: 'Headings & key copy',
-			swatch: 'bg-slate-100'
+			swatch: 'bg-surface-muted'
 		},
 		{
 			token: 'text-secondary',
@@ -101,13 +101,13 @@
 		},
 		{
 			label: 'Body / Base',
-			className: 'text-base leading-relaxed text-slate-300',
+			className: 'text-base leading-relaxed text-ink-muted',
 			preview: 'A collaborative workshop platform for inclusive design thinking.',
 			usage: 'Paragraph copy, supporting text'
 		},
 		{
 			label: 'Mono / Data',
-			className: 'font-mono text-sm uppercase tracking-widest text-slate-400',
+			className: 'font-mono text-sm uppercase tracking-widest text-ink-muted',
 			preview: 'SESSION · CODE · ZX3K82',
 			usage: 'Room codes, statistics, chips'
 		}
@@ -138,7 +138,7 @@
 		{
 			name: 'Primary',
 			className:
-				'inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700',
+				'inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700',
 			usage: 'Start Session, main CTAs'
 		},
 		{
@@ -150,7 +150,7 @@
 		{
 			name: 'Ghost',
 			className:
-				'inline-flex items-center gap-2 rounded-md bg-slate-800/70 px-4 py-2 text-sm font-medium text-blue-300 transition hover:bg-slate-700',
+				'inline-flex items-center gap-2 rounded-md bg-slate-800/70 px-4 py-2 text-sm font-medium text-brand transition hover:bg-slate-700',
 			usage: 'Low-emphasis actions on dark surfaces'
 		}
 	];
@@ -163,21 +163,21 @@
 		<div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
 			<div class="space-y-6">
 				<span
-					class="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-600/10 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-blue-300"
+					class="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-brand/10 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-brand"
 				>
 					<IconSparkle class="h-4 w-4" /> Design System Overview
 				</span>
 				<h1 class="text-3xl font-semibold text-slate-100 sm:text-4xl">
 					Critical Designer Alphabet UI Kit
 				</h1>
-				<p class="max-w-2xl text-base leading-relaxed text-slate-300">
+				<p class="max-w-2xl text-base leading-relaxed text-ink-muted">
 					This page mirrors the production experience—Inter-first typography, slate gradients,
 					accessible blues, and session-focused interactions. Use it to snapshot current tokens,
 					components, and layout patterns as we continue evolving the MariaDB-powered collaboration
 					suite.
 				</p>
 				<div
-					class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.25em] text-slate-400"
+					class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.25em] text-ink-muted"
 				>
 					<span>Review · {new Date().toLocaleDateString()}</span>
 					<span>Framework · SvelteKit + Tailwind</span>
@@ -186,13 +186,13 @@
 			</div>
 			<div class="rounded-lg border border-slate-600 bg-slate-900/80 p-6 shadow-inner">
 				<p class="text-sm font-semibold text-slate-100">Hero Snapshot</p>
-				<p class="mt-3 text-sm text-slate-300">
+				<p class="mt-3 text-sm text-ink-muted">
 					Primary CTAs sit on blue gradients, secondary actions use slate outlines, and supporting
 					copy holds a 1.6 line height. This card matches the home hero shell for rapid visual QA.
 				</p>
 				<div class="mt-6 flex flex-wrap items-center gap-3">
 					<span
-						class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white"
+						class="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white"
 						>Primary Action</span
 					>
 					<span
@@ -207,7 +207,7 @@
 
 	<section id="colors" class="rounded-lg border border-slate-700 bg-slate-900/90 p-8 shadow">
 		<h2 class="text-lg font-semibold text-slate-100">Color Tokens</h2>
-		<p class="mt-2 text-sm text-slate-400">
+		<p class="mt-2 text-sm text-ink-muted">
 			Defined in <code class="code">tailwind.config.cjs</code>. Core palette leans on accessible
 			blues and violets with legacy neon hues available when extra pop is required.
 		</p>
@@ -217,15 +217,15 @@
 				<div class="rounded-lg border border-slate-700 bg-slate-800/80 p-5">
 					<div class={`h-16 w-full rounded-md ${swatch.swatch}`} aria-hidden="true" />
 					<p class="mt-4 text-sm font-medium text-slate-100">{swatch.label}</p>
-					<p class="text-xs text-slate-400">
+					<p class="text-xs text-ink-muted">
 						Token <code class="code">{swatch.token}</code> · {swatch.value}
 					</p>
-					<p class="text-xs text-slate-500 mt-1">{swatch.usage}</p>
+					<p class="text-xs text-ink-2 mt-1">{swatch.usage}</p>
 				</div>
 			{/each}
 		</div>
 
-		<h3 class="mt-10 text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+		<h3 class="mt-10 text-sm font-semibold uppercase tracking-[0.2em] text-ink-muted">
 			Neutrals &amp; Text
 		</h3>
 		<div class="mt-4 grid gap-4 md:grid-cols-3">
@@ -233,8 +233,8 @@
 				<div class="rounded-lg border border-slate-700 bg-slate-800/80 p-4">
 					<div class={`h-12 w-full rounded ${swatch.swatch}`} aria-hidden="true" />
 					<p class="mt-3 text-sm font-medium text-slate-100">{swatch.label}</p>
-					<p class="text-xs text-slate-500">{swatch.value}</p>
-					<p class="text-xs text-slate-500 mt-1">{swatch.usage}</p>
+					<p class="text-xs text-ink-2">{swatch.value}</p>
+					<p class="text-xs text-ink-2 mt-1">{swatch.usage}</p>
 				</div>
 			{/each}
 		</div>
@@ -245,20 +245,20 @@
 	>
 		<div class="space-y-6">
 			<h2 class="text-lg font-semibold text-slate-100">Typography</h2>
-			<p class="text-sm text-slate-400">
+			<p class="text-sm text-ink-muted">
 				Inter is the primary stack; JetBrains Mono handles codes and data. Maintain 1.6 line-height
 				for paragraphs and tighter headings for emphasis.
 			</p>
 			{#each typography as sample}
 				<div class="rounded-lg border border-slate-700 bg-slate-800/70 p-4">
-					<p class="text-xs font-medium uppercase tracking-[0.3em] text-slate-500">
+					<p class="text-xs font-medium uppercase tracking-[0.3em] text-ink-2">
 						{sample.label}
 					</p>
 					<p class={`mt-2 ${sample.className}`}>{sample.preview}</p>
-					<p class="mt-2 text-xs text-slate-500">{sample.usage}</p>
+					<p class="mt-2 text-xs text-ink-2">{sample.usage}</p>
 				</div>
 			{/each}
-			<div class="rounded-lg border border-blue-500/30 bg-blue-600/10 p-4 text-xs text-blue-200">
+			<div class="rounded-lg border border-blue-500/30 bg-brand/10 p-4 text-xs text-blue-200">
 				Fonts are loaded via Google Fonts in <code class="code">src/app.html</code>. Prefer
 				<code class="code">font-semibold</code>
 				for headings and <code class="code">font-medium</code> for body.
@@ -269,24 +269,24 @@
 			<h2 class="text-lg font-semibold text-slate-100">Hero + Stat Composition</h2>
 			<div class="rounded-lg border border-slate-700 bg-slate-800 p-6">
 				<span
-					class="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-600/10 px-3 py-1 text-xs font-medium text-blue-300"
+					class="inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-brand/10 px-3 py-1 text-xs font-medium text-brand"
 				>
 					Inclusive Planning Platform
 				</span>
 				<h3 class="mt-4 text-2xl font-semibold text-slate-100">Critical Designer Alphabet</h3>
-				<p class="mt-3 text-sm text-slate-300 leading-relaxed">
+				<p class="mt-3 text-sm text-ink-muted leading-relaxed">
 					A collaborative planning platform for inclusive design thinking. Create real-time
 					sessions, explore design cards, and visualize inclusive data.
 				</p>
 				<div class="mt-5 grid gap-3 sm:grid-cols-3">
 					{#each statTiles as tile}
 						<div class="rounded-md border border-slate-700 bg-slate-900/80 p-4">
-							<div class="flex items-center gap-2 text-slate-400">
+							<div class="flex items-center gap-2 text-ink-muted">
 								<svelte:component this={tile.icon} class="h-4 w-4" />
 								<span class="text-xs uppercase tracking-[0.2em]">{tile.label}</span>
 							</div>
 							<p class="mt-2 text-2xl font-semibold text-slate-100">{tile.value}</p>
-							<p class="text-xs text-slate-500">{tile.description}</p>
+							<p class="text-xs text-ink-2">{tile.description}</p>
 						</div>
 					{/each}
 				</div>
@@ -296,7 +296,7 @@
 
 	<section class="rounded-lg border border-slate-700 bg-slate-900/90 p-8">
 		<h2 class="text-lg font-semibold text-slate-100">Buttons &amp; Interactions</h2>
-		<p class="mt-2 text-sm text-slate-400">
+		<p class="mt-2 text-sm text-ink-muted">
 			Rounded-md corners align with cards and drawers. Shadows stay subtle to preserve legibility on
 			dark backgrounds.
 		</p>
@@ -304,11 +304,11 @@
 		<div class="mt-6 grid gap-4 md:grid-cols-3">
 			{#each buttonVariants as variant}
 				<div class="rounded-lg border border-slate-700 bg-slate-800/70 p-5 space-y-3">
-					<span class="text-xs font-medium uppercase tracking-[0.2em] text-slate-400"
+					<span class="text-xs font-medium uppercase tracking-[0.2em] text-ink-muted"
 						>{variant.name}</span
 					>
 					<button type="button" class={variant.className}>{variant.name}</button>
-					<p class="text-xs text-slate-500">{variant.usage}</p>
+					<p class="text-xs text-ink-2">{variant.usage}</p>
 				</div>
 			{/each}
 		</div>
@@ -316,28 +316,28 @@
 		<div class="mt-8 grid gap-6 lg:grid-cols-2">
 			<div class="rounded-lg border border-slate-700 bg-slate-800/70 p-6">
 				<p class="text-sm font-semibold text-slate-200">Form Controls</p>
-				<div class="mt-4 space-y-4 text-sm text-slate-300">
+				<div class="mt-4 space-y-4 text-sm text-ink-muted">
 					<div>
 						<label
 							for="ds-session-code"
-							class="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-slate-400"
+							class="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-ink-muted"
 							>Session Code</label
 						>
 						<input
 							id="ds-session-code"
-							class="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 font-mono text-sm uppercase tracking-widest text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 font-mono text-sm uppercase tracking-widest text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-ring"
 							placeholder="ZX3K82"
 						/>
 					</div>
 					<div>
 						<label
 							for="ds-select"
-							class="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-slate-400"
+							class="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-ink-muted"
 							>Lens</label
 						>
 						<select
 							id="ds-select"
-							class="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-ring"
 						>
 							<option>Justice</option>
 							<option>Ethics</option>
@@ -351,23 +351,23 @@
 				<div class="mt-4 rounded-lg border border-slate-700 bg-slate-900/70 p-5">
 					<div class="flex items-start gap-3">
 						<span
-							class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600/20 font-mono text-sm text-blue-300"
+							class="flex h-10 w-10 items-center justify-center rounded-full bg-brand/20 font-mono text-sm text-brand"
 							>A</span
 						>
 						<div class="flex-1">
-							<p class="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Theory</p>
+							<p class="text-xs font-medium uppercase tracking-[0.2em] text-ink-muted">Theory</p>
 							<h3 class="text-lg font-semibold text-slate-100">Agency</h3>
-							<p class="text-xs text-slate-500">Card ID · AGY-01</p>
+							<p class="text-xs text-ink-2">Card ID · AGY-01</p>
 						</div>
-						<span class="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300"
+						<span class="rounded-md border border-slate-700 px-2 py-1 text-xs text-ink-muted"
 							>Details</span
 						>
 					</div>
-					<p class="mt-4 text-sm text-slate-300 leading-relaxed">
+					<p class="mt-4 text-sm text-ink-muted leading-relaxed">
 						Explore how power shows up in your product decisions and map pathways to redistribute
 						agency across your team and stakeholders.
 					</p>
-					<div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-400">
+					<div class="mt-4 flex flex-wrap gap-2 text-xs text-ink-muted">
 						{#each cardTags as tag}
 							<span class="rounded-full border border-slate-600 px-3 py-1">{tag}</span>
 						{/each}
@@ -381,16 +381,16 @@
 		<h2 class="text-lg font-semibold text-slate-100">Layout Surfaces &amp; Patterns</h2>
 		<div class="mt-6 grid gap-6 lg:grid-cols-3">
 			<div class="rounded-lg border border-slate-700 bg-slate-800/70 p-5">
-				<IconLayoutDashboard class="h-5 w-5 text-blue-300" />
+				<IconLayoutDashboard class="h-5 w-5 text-brand" />
 				<h3 class="mt-3 text-sm font-semibold text-slate-100">Container</h3>
-				<p class="mt-2 text-xs text-slate-500">
+				<p class="mt-2 text-xs text-ink-2">
 					Max width 72rem, 24px horizontal padding, 64px top spacing.
 				</p>
 			</div>
 			<div class="rounded-lg border border-slate-700 bg-slate-800/70 p-5">
-				<IconMessage class="h-5 w-5 text-cyan-300" />
+				<IconMessage class="h-5 w-5 text-brand" />
 				<h3 class="mt-3 text-sm font-semibold text-slate-100">Right Drawer</h3>
-				<p class="mt-2 text-xs text-slate-500">
+				<p class="mt-2 text-xs text-ink-2">
 					Backdrop blur, slate 900 surface, 24px padding, toggled via <code class="code"
 						>SimpleDrawer</code
 					>.
@@ -399,7 +399,7 @@
 			<div class="rounded-lg border border-slate-700 bg-slate-800/70 p-5">
 				<IconChartBar class="h-5 w-5 text-violet-300" />
 				<h3 class="mt-3 text-sm font-semibold text-slate-100">Data Viz</h3>
-				<p class="mt-2 text-xs text-slate-500">
+				<p class="mt-2 text-xs text-ink-2">
 					D3 charts use Accent Cyan glows and mono axis labels. Keep max drop shadow at 8px blur.
 				</p>
 			</div>
@@ -409,7 +409,7 @@
 	<section class="rounded-lg border border-slate-700 bg-slate-900/90 p-8">
 		<h2 class="text-lg font-semibold text-slate-100">Accessibility &amp; Motion</h2>
 		<div class="mt-6 grid gap-6 md:grid-cols-3">
-			<div class="rounded-lg border border-blue-500/30 bg-blue-600/10 p-5 text-xs text-blue-200">
+			<div class="rounded-lg border border-blue-500/30 bg-brand/10 p-5 text-xs text-blue-200">
 				<IconActivity class="h-4 w-4" />
 				<p class="mt-3 font-semibold text-blue-100">Focus States</p>
 				<p class="mt-2 text-blue-100/80">
@@ -417,7 +417,7 @@
 					on slate surfaces.
 				</p>
 			</div>
-			<div class="rounded-lg border border-slate-700 bg-slate-800/80 p-5 text-xs text-slate-300">
+			<div class="rounded-lg border border-slate-700 bg-slate-800/80 p-5 text-xs text-ink-muted">
 				<p class="font-semibold text-slate-100">Motion</p>
 				<p class="mt-2">
 					Animations run under 200ms and respect reduced-motion. Use opacity/scale combos; avoid

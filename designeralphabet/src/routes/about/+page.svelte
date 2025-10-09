@@ -113,7 +113,7 @@
 
 	const accentStyles = {
 		blue: {
-			header: 'bg-blue-600/20 text-blue-300',
+			header: 'bg-brand/20 text-brand',
 			border: 'border-blue-500/40'
 		},
 		purple: {
@@ -121,7 +121,7 @@
 			border: 'border-purple-500/40'
 		},
 		cyan: {
-			header: 'bg-cyan-600/20 text-cyan-300',
+			header: 'bg-brand/20 text-brand',
 			border: 'border-cyan-500/40'
 		},
 		amber: {
@@ -190,7 +190,7 @@
 	   >
 		   <div class="flex items-start gap-4 mb-6">
 			   <div
-				   class={`flex h-12 w-12 items-center justify-center rounded-lg ${section.styles?.header ?? 'bg-neon-cyan/20 text-neon-cyan'}`}
+				   class={`flex h-12 w-12 items-center justify-center rounded-lg ${section.styles?.header ?? 'bg-brand/20 text-brand'}`}
 			   >
 				   <svelte:component this={section.icon ?? icons[index % icons.length]} class="h-6 w-6" />
 			   </div>

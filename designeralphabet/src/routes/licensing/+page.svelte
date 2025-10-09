@@ -19,7 +19,7 @@
 	<!-- Header -->
 	<div class="text-center">
 		<h1 class="text-4xl font-bold text-slate-100 mb-4">Licensing & Attribution</h1>
-		<p class="text-lg text-slate-400 max-w-3xl mx-auto">
+		<p class="text-lg text-ink-muted max-w-3xl mx-auto">
 			Important information about the intellectual property, licensing, and resources behind this
 			platform.
 		</p>
@@ -29,17 +29,17 @@
 	<section class="bg-slate-800 rounded-lg border border-slate-600 p-8">
 		<div class="flex items-start gap-4 mb-6">
 			<div
-				class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600/20 text-blue-400"
+				class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand/20 text-brand"
 			>
 				<Scale class="h-6 w-6" />
 			</div>
 			<div>
 				<h2 class="text-2xl font-semibold text-slate-100 mb-2">The Designer's Critical Alphabet</h2>
-				<p class="text-slate-400">Original physical card deck and intellectual foundation</p>
+				<p class="text-ink-muted">Original physical card deck and intellectual foundation</p>
 			</div>
 		</div>
 
-		<div class="space-y-4 text-slate-300">
+		<div class="space-y-4 text-ink-muted">
 			<p>
 				The foundational ideas behind this platform are inspired by <strong
 					>The Designer's Critical Alphabet</strong
@@ -55,14 +55,14 @@
 
 			<div class="bg-slate-700 rounded-lg p-4 mt-6">
 				<p class="text-slate-200 font-medium mb-2">Creator of the physical deck:</p>
-				<p class="text-blue-400">Dr. Lesley-Ann Noel</p>
+				<p class="text-brand">Dr. Lesley-Ann Noel</p>
 
 				<p class="text-slate-200 font-medium mb-2 mt-4">More information:</p>
 				<a
 					href="https://www.lesleyannnoel.com"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+					class="inline-flex items-center gap-2 text-brand hover:text-brand transition-colors"
 				>
 					https://www.lesleyannnoel.com
 					<ExternalLink class="h-4 w-4" />
@@ -81,11 +81,11 @@
 			</div>
 			<div>
 				<h2 class="text-2xl font-semibold text-slate-100 mb-2">🕹️ The Gamified Platform</h2>
-				<p class="text-slate-400">Digital workshop application and facilitation environment</p>
+				<p class="text-ink-muted">Digital workshop application and facilitation environment</p>
 			</div>
 		</div>
 
-		<div class="space-y-4 text-slate-300">
+		<div class="space-y-4 text-ink-muted">
 			<p>
 				This digital web application and gamified facilitation environment—which adapts the Critical
 				Alphabet into a real-time design thinking and policy workshop tool—was created and developed
@@ -97,7 +97,7 @@
 				Alphabet while extending it into:
 			</p>
 
-			<ul class="list-disc list-inside space-y-2 ml-4 text-slate-300">
+			<ul class="list-disc list-inside space-y-2 ml-4 text-ink-muted">
 				<li>A facilitator portal for workshop setup and rules</li>
 				<li>Live participant input and breakout sessions</li>
 				<li>Gamified scoring, badges, and engagement mechanics</li>
@@ -117,7 +117,7 @@
 			</div>
 			<div>
 				<h2 class="text-2xl font-semibold text-slate-100 mb-2">⚖️ Licensing</h2>
-				<p class="text-slate-400">Important legal and attribution requirements</p>
+				<p class="text-ink-muted">Important legal and attribution requirements</p>
 			</div>
 		</div>
 
@@ -136,7 +136,7 @@
 				</p>
 			</div>
 
-			<div class="space-y-3 text-slate-300">
+			<div class="space-y-3 text-ink-muted">
 				<p>
 					• The digital platform may not be copied, distributed, or commercialized without express
 					permission.
@@ -161,7 +161,7 @@
 				<h2 class="text-2xl font-semibold text-slate-100 mb-2">
 					🌍 Resources for Inclusive & Pluriversal Design
 				</h2>
-				<p class="text-slate-400">
+				<p class="text-ink-muted">
 					Globally recognized spaces and networks advancing justice-centered design
 				</p>
 			</div>
@@ -171,14 +171,14 @@
 			<div class="space-y-4">
 				<div class="border-l-4 border-blue-500 pl-4">
 					<h3 class="font-semibold text-slate-200 mb-2">Pluriversal Design SIG</h3>
-					<p class="text-sm text-slate-400 mb-2">
+					<p class="text-sm text-ink-muted mb-2">
 						A global community exploring pluriversal approaches to design research and education.
 					</p>
 					<a
 						href="https://pluriversal.design"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+						class="inline-flex items-center gap-1 text-brand hover:text-brand text-sm"
 					>
 						pluriversal.design <ExternalLink class="h-3 w-3" />
 					</a>
@@ -186,14 +186,14 @@
 
 				<div class="border-l-4 border-pink-500 pl-4">
 					<h3 class="font-semibold text-slate-200 mb-2">Design Justice Network</h3>
-					<p class="text-sm text-slate-400 mb-2">
+					<p class="text-sm text-ink-muted mb-2">
 						Principles and practices centering marginalized voices in design.
 					</p>
 					<a
 						href="https://designjustice.org"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+						class="inline-flex items-center gap-1 text-brand hover:text-brand text-sm"
 					>
 						designjustice.org <ExternalLink class="h-3 w-3" />
 					</a>
@@ -201,14 +201,14 @@
 
 				<div class="border-l-4 border-lime-500 pl-4">
 					<h3 class="font-semibold text-slate-200 mb-2">Liberatory Design</h3>
-					<p class="text-sm text-slate-400 mb-2">
+					<p class="text-sm text-ink-muted mb-2">
 						Tools and mindsets for resisting oppression and fostering equitable collaboration.
 					</p>
 					<a
 						href="https://www.design.school/liberatory-design"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+						class="inline-flex items-center gap-1 text-brand hover:text-brand text-sm"
 					>
 						design.school/liberatory-design <ExternalLink class="h-3 w-3" />
 					</a>
@@ -216,14 +216,14 @@
 
 				<div class="border-l-4 border-purple-500 pl-4">
 					<h3 class="font-semibold text-slate-200 mb-2">Decolonising Design Group</h3>
-					<p class="text-sm text-slate-400 mb-2">
+					<p class="text-sm text-ink-muted mb-2">
 						Scholarly and activist perspectives on decolonial and pluriversal approaches to design.
 					</p>
 					<a
 						href="https://decolonisingdesign.org"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+						class="inline-flex items-center gap-1 text-brand hover:text-brand text-sm"
 					>
 						decolonisingdesign.org <ExternalLink class="h-3 w-3" />
 					</a>
@@ -233,14 +233,14 @@
 			<div class="space-y-4">
 				<div class="border-l-4 border-cyan-500 pl-4">
 					<h3 class="font-semibold text-slate-200 mb-2">World Design Organization (WDO)</h3>
-					<p class="text-sm text-slate-400 mb-2">
+					<p class="text-sm text-ink-muted mb-2">
 						International hub supporting socially responsible design practices.
 					</p>
 					<a
 						href="https://wdo.org"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+						class="inline-flex items-center gap-1 text-brand hover:text-brand text-sm"
 					>
 						wdo.org <ExternalLink class="h-3 w-3" />
 					</a>
@@ -248,14 +248,14 @@
 
 				<div class="border-l-4 border-orange-500 pl-4">
 					<h3 class="font-semibold text-slate-200 mb-2">Pluriversal Radio / Medium</h3>
-					<p class="text-sm text-slate-400 mb-2">
+					<p class="text-sm text-ink-muted mb-2">
 						Essays and conversations on design for a world of many worlds.
 					</p>
 					<a
 						href="https://medium.com/pluriversal-design"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+						class="inline-flex items-center gap-1 text-brand hover:text-brand text-sm"
 					>
 						medium.com/pluriversal-design <ExternalLink class="h-3 w-3" />
 					</a>
@@ -263,14 +263,14 @@
 
 				<div class="border-l-4 border-teal-500 pl-4">
 					<h3 class="font-semibold text-slate-200 mb-2">Global Pluralism & Design</h3>
-					<p class="text-sm text-slate-400 mb-2">
+					<p class="text-sm text-ink-muted mb-2">
 						Broader resource on pluralism and inclusive approaches that can inspire design practice.
 					</p>
 					<a
 						href="https://www.pluralism.ca"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+						class="inline-flex items-center gap-1 text-brand hover:text-brand text-sm"
 					>
 						pluralism.ca <ExternalLink class="h-3 w-3" />
 					</a>
@@ -288,7 +288,7 @@
 			🙏 Acknowledgements
 		</h2>
 
-		<div class="space-y-3 text-slate-300">
+		<div class="space-y-3 text-ink-muted">
 			<p><strong>Dr. Lesley-Ann Noel</strong> — creator of The Designer's Critical Alphabet</p>
 			<p>
 				<strong>Design Justice Network and Liberatory Design</strong> — frameworks shaping equity-centered
@@ -304,7 +304,7 @@
 		</div>
 
 		<div class="mt-8 pt-6 border-t border-slate-600">
-			<p class="text-center text-slate-300 italic">
+			<p class="text-center text-ink-muted italic">
 				✨ The physical cards were created by Dr. Noel. This digital workshop platform—its design,
 				code, and game mechanics—was created by Gregory D. Chan, inspired by pluriversal and
 				inclusive design theory.

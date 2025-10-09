@@ -2,10 +2,10 @@
 	import { select } from 'd3-selection';
 	import { forceSimulation, forceManyBody, forceCenter, forceX, forceY } from 'd3-force';
 	import { scaleSqrt } from 'd3-scale';
-	import BaseChart from './BaseChart.svelte';
-	import { useResponses } from '$lib/hooks/useSupabaseRealtime';
-	import { getLensColor } from '$lib/utils/colors';
-	import type { BubbleDatum, ChartDimensions } from '$lib/types/charts';
+import BaseChart from './BaseChart.svelte';
+import { useResponses } from '$lib/hooks/useSupabaseRealtime';
+import { getThemeColors } from '$lib/utils/colors';
+import type { BubbleDatum, ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let theme: 'dark' | 'light' = 'dark';
@@ -39,16 +39,35 @@
 	let bubbles: any;
 
 	// Lens centers for force positioning
-	const lensPositions = {
-		Risk: { x: 0.2, y: 0.3 },
-		Work: { x: 0.8, y: 0.3 },
-		Sustainability: { x: 0.2, y: 0.7 },
-		Ethics: { x: 0.8, y: 0.7 },
-		Justice: { x: 0.5, y: 0.2 },
-		Culture: { x: 0.5, y: 0.8 },
-		Innovation: { x: 0.1, y: 0.5 },
-		Governance: { x: 0.9, y: 0.5 }
-	};
+const lensPositions = {
+	Risk: { x: 0.2, y: 0.3 },
+	Work: { x: 0.8, y: 0.3 },
+	Sustainability: { x: 0.2, y: 0.7 },
+	Ethics: { x: 0.8, y: 0.7 },
+	Justice: { x: 0.5, y: 0.2 },
+	Culture: { x: 0.5, y: 0.8 },
+	Innovation: { x: 0.1, y: 0.5 },
+	Governance: { x: 0.9, y: 0.5 }
+};
+
+const lensColorCache = new Map<string, string>();
+
+function resolveLensColor(lens: string) {
+	const key = normaliseLens(lens);
+	if (lensColorCache.has(key)) return lensColorCache.get(key)!;
+	const themeColors = getThemeColors();
+	const palette = [
+		...themeColors.chart,
+		themeColors.brand,
+		themeColors.brandSoft,
+		themeColors.accentWarm,
+		themeColors.accentCritical,
+		themeColors.ink
+	];
+	const color = palette[lensColorCache.size % palette.length] ?? themeColors.brand;
+	lensColorCache.set(key, color);
+	return color;
+}
 
 	// Set up realtime data subscription
 	useResponses(roomCode, (state) => {
@@ -65,14 +84,14 @@
 		}
 
 		// Group responses by lens and aggregate
-		const lensGroups = responses.reduce((acc, response) => {
-			const lens = response.questions?.lens || 'Unknown';
-			if (!acc[lens]) {
-				acc[lens] = [];
-			}
-			acc[lens].push(response);
-			return acc;
-		}, {});
+	const lensGroups = responses.reduce((acc, response) => {
+		const lens = normaliseLens(response.questions?.lens);
+		if (!acc[lens]) {
+			acc[lens] = [];
+		}
+		acc[lens].push(response);
+		return acc;
+	}, {});
 
 		// Create bubble data
 		bubbleData = Object.entries(lensGroups).map(([lens, items]: [string, any[]]) => {
@@ -86,15 +105,16 @@
 				.map((item) => item.text)
 				.join('; ');
 
-			return {
-				id: lens,
-				lens,
-				text: representativeText,
-				votes: totalVotes,
-				cardsCount: totalCards,
-				count: items.length
-			};
-		});
+		return {
+			id: lens,
+			lens,
+			text: representativeText,
+			votes: totalVotes,
+			cardsCount: totalCards,
+			count: items.length,
+			color: resolveLensColor(lens)
+		};
+	});
 
 		if (svgElement && dimensions) {
 			updateVisualization();
@@ -105,7 +125,6 @@
 		if (!svgElement || !dimensions || !bubbleData.length) return;
 
 		const { innerWidth, innerHeight } = dimensions;
-
 		// Scales
 		const radiusScale = scaleSqrt()
 			.domain([0, Math.max(...bubbleData.map((d) => d.votes + d.cardsCount + d.count))])
@@ -169,8 +188,8 @@
 			.append('circle')
 			.attr('class', 'bubble')
 			.attr('r', 0)
-			.attr('fill', (d) => getLensColor(d.lens))
-			.attr('stroke', (d) => getLensColor(d.lens))
+			.attr('fill', (d) => d.color ?? resolveLensColor(d.lens))
+			.attr('stroke', (d) => d.color ?? resolveLensColor(d.lens))
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#neon-glow)')
 			.style('cursor', 'pointer');
@@ -328,10 +347,10 @@
 	<svelte:fragment slot="tooltip">
 		{#if tooltip.show && tooltip.data}
 			<div
-				class="tooltip bg-gray-900 text-white p-3 rounded-lg shadow-lg border border-neon-cyan max-w-xs"
+				class="tooltip bg-gray-900 text-white p-3 rounded-lg shadow-lg border border-brand max-w-xs"
 				style="transform: translate({tooltip.x + 10}px, {tooltip.y - 10}px)"
 			>
-				<div class="font-bold text-sm mb-1" style="color: {getLensColor(tooltip.data.lens)}">
+				<div class="font-bold text-sm mb-1" style="color: {resolveLensColor(tooltip.data.lens)}">
 					{tooltip.data.lens}
 				</div>
 				<div class="text-xs mb-2">

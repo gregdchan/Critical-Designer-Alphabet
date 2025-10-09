@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import * as d3 from 'd3';
+	import { getThemeColors } from '$lib/utils/colors';
 
 	type RoadmapResponse = {
 		text?: string;
@@ -21,15 +22,15 @@
 	const phases = ['Now', 'Next', 'Later', 'Signal'] as const;
 	const laneFallbacks = ['Infrastructure', 'Practice', 'Policy', 'Community'];
 
-	const lensColor: Record<string, string> = {
-		Risk: '#f97316',
-		Work: '#38bdf8',
-		Sustainability: '#22d3ee',
-		Ethics: '#a855f7',
-		Community: '#bef264',
-		Justice: '#f472b6',
-		Agency: '#22c55e'
-	};
+	const lensOrder = [
+		'Risk',
+		'Work',
+		'Sustainability',
+		'Ethics',
+		'Community',
+		'Justice',
+		'Agency'
+	] as const;
 
 	type RoadmapCard = {
 		id: string;
@@ -46,7 +47,7 @@
 
 	function normaliseLens(raw?: string) {
 		if (!raw) return 'Community';
-		const match = Object.keys(lensColor).find((key) => key.toLowerCase() === raw.toLowerCase());
+		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
 		return match ?? raw;
 	}
 
@@ -63,11 +64,43 @@
 		return 'Watch';
 	}
 
-	function buildCards(data: RoadmapResponse[]): RoadmapCard[] {
+	function buildCards(
+		data: RoadmapResponse[],
+		theme: ReturnType<typeof getThemeColors>
+	): RoadmapCard[] {
+		const basePalette = Object.fromEntries(
+			(lensOrder as readonly string[]).map((lens, idx) => [
+				lens,
+				theme.chart[idx % theme.chart.length] ?? theme.brand
+			])
+		);
+		const fallbackPalette = [
+			...theme.chart,
+			theme.brand,
+			theme.brandSoft,
+			theme.accentWarm,
+			theme.accentCritical,
+			theme.ink
+		];
+		const lensColors = new Map<string, string>();
+		let fallbackIndex = 0;
+		const resolveLensColor = (lens: string) => {
+			if (lensColors.has(lens)) return lensColors.get(lens)!;
+			const base = basePalette[lens];
+			if (base) {
+				lensColors.set(lens, base);
+				return base;
+			}
+			const color = fallbackPalette[fallbackIndex % fallbackPalette.length] ?? theme.brand;
+			fallbackIndex += 1;
+			lensColors.set(lens, color);
+			return color;
+		};
+
 		return data.map((response, index) => {
 			const votes = Math.max(0, response.votes ?? 0);
 			const lens = normaliseLens(response.lens);
-			const color = lensColor[lens] ?? '#38bdf8';
+			const color = resolveLensColor(lens);
 			const text = response.text?.trim() ?? 'Idea pending detail';
 
 			return {
@@ -88,9 +121,16 @@
 	function renderChart() {
 		if (!mounted || !svg || !tooltipEl) return;
 
-		const cards = buildCards(responses);
+		const theme = getThemeColors();
+		const cards = buildCards(responses, theme);
 		const uniqueLanes = Array.from(new Set(cards.map((card) => card.lane)));
 		const lanes = uniqueLanes.length ? uniqueLanes : laneFallbacks;
+		const laneColors = new Map<string, string>();
+		cards.forEach((card) => {
+			if (!laneColors.has(card.lane)) {
+				laneColors.set(card.lane, card.color);
+			}
+		});
 
 		const margin = { top: 80, right: 56, bottom: 80, left: 160 };
 		const chartWidth = width - margin.left - margin.right;
@@ -112,8 +152,8 @@
 			.attr('y1', '0%')
 			.attr('y2', '100%');
 
-		bgGradient.append('stop').attr('offset', '0%').attr('stop-color', 'rgba(8, 47, 73, 0.95)');
-		bgGradient.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(6, 12, 24, 0.98)');
+		bgGradient.append('stop').attr('offset', '0%').attr('stop-color', 'hsl(var(--surface) / 0.95)');
+		bgGradient.append('stop').attr('offset', '100%').attr('stop-color', 'hsl(var(--surface-muted) / 0.98)');
 
 		const glow = defs
 			.append('filter')
@@ -138,7 +178,7 @@
 			.attr('height', chartHeight)
 			.attr('rx', 28)
 			.attr('fill', 'url(#roadmap-background)')
-			.attr('stroke', 'rgba(59, 130, 246, 0.25)')
+			.attr('stroke', 'hsl(var(--brand) / 0.25)')
 			.attr('stroke-width', 1.4)
 			.style('filter', 'url(#roadmap-glow)');
 
@@ -155,7 +195,7 @@
 				.attr('x2', x)
 				.attr('y1', 16)
 				.attr('y2', chartHeight - 16)
-				.attr('stroke', 'rgba(148, 163, 184, 0.18)')
+				.attr('stroke', 'hsl(var(--border-subtle) / 0.35)')
 				.attr('stroke-width', index === 0 ? 0 : 1.2)
 				.attr('stroke-dasharray', '6 12');
 
@@ -164,7 +204,7 @@
 				.attr('x', x + columnWidth / 2)
 				.attr('y', -28)
 				.attr('text-anchor', 'middle')
-				.attr('fill', '#38bdf8')
+				.attr('fill', theme.brand)
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-size', 14)
 				.attr('letter-spacing', 2)
@@ -181,7 +221,7 @@
 				.attr('y', y)
 				.attr('dy', '0.35em')
 				.attr('text-anchor', 'end')
-				.attr('fill', lensColor[lane] ?? '#94a3b8')
+				.attr('fill', laneColors.get(lane) ?? theme.ink2)
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-weight', 600)
 				.attr('font-size', 12)
@@ -193,7 +233,7 @@
 				.attr('y1', y)
 				.attr('x2', chartWidth - 10)
 				.attr('y2', y)
-				.attr('stroke', 'rgba(148, 163, 184, 0.12)')
+				.attr('stroke', 'hsl(var(--border-subtle) / 0.25)')
 				.attr('stroke-dasharray', '4 10');
 		});
 
@@ -202,7 +242,7 @@
 			.attr('x', chartWidth / 2)
 			.attr('y', -48)
 			.attr('text-anchor', 'middle')
-			.attr('fill', 'rgba(224, 231, 255, 0.92)')
+			.attr('fill', theme.ink)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 18)
 			.attr('font-weight', 600)
@@ -213,7 +253,7 @@
 			.attr('x', chartWidth / 2)
 			.attr('y', -26)
 			.attr('text-anchor', 'middle')
-			.attr('fill', 'rgba(148, 163, 184, 0.75)')
+			.attr('fill', theme.inkMuted)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 12)
 			.text('Votes move cards forward; lens color telegraphs stewardship.');
@@ -253,10 +293,11 @@
 					.attr('width', cardWidth)
 					.attr('height', cardHeightBase)
 					.attr('rx', 14)
-					.attr('fill', 'rgba(15, 23, 42, 0.82)')
-					.attr('stroke', `${card.color}80`)
+					.attr('fill', 'hsl(var(--surface) / 0.9)')
+					.attr('stroke', card.color)
 					.attr('stroke-width', 1.5)
-					.style('filter', 'drop-shadow(0 14px 24px rgba(8, 145, 178, 0.25))');
+					.attr('stroke-opacity', 0.55)
+					.style('filter', 'drop-shadow(0 14px 24px hsl(var(--brand-soft) / 0.25))');
 
 				cardGroup
 					.append('rect')
@@ -270,7 +311,7 @@
 					.append('text')
 					.attr('x', 12)
 					.attr('y', 18)
-					.attr('fill', '#f8fafc')
+					.attr('fill', 'hsl(var(--text-on-teal))')
 					.attr('font-family', 'Orbitron, sans-serif')
 					.attr('font-size', 11)
 					.attr('font-weight', 600)
@@ -280,7 +321,7 @@
 					.append('text')
 					.attr('x', 12)
 					.attr('y', 36)
-					.attr('fill', 'rgba(226, 232, 240, 0.88)')
+					.attr('fill', theme.ink2)
 					.attr('font-family', 'Orbitron, sans-serif')
 					.attr('font-size', 10)
 					.attr('letter-spacing', 0.4)
@@ -290,7 +331,7 @@
 					.append('text')
 					.attr('x', 12)
 					.attr('y', 52)
-					.attr('fill', 'rgba(203, 213, 225, 0.9)')
+					.attr('fill', theme.inkMuted)
 					.attr('font-family', 'Orbitron, sans-serif')
 					.attr('font-size', 9)
 					.attr('opacity', 0.95);
@@ -308,7 +349,7 @@
 					.append('text')
 					.attr('x', 12)
 					.attr('y', cardHeightBase - 12)
-					.attr('fill', 'rgba(148, 163, 184, 0.9)')
+					.attr('fill', theme.inkMuted)
 					.attr('font-family', 'Orbitron, sans-serif')
 					.attr('font-size', 8.5)
 					.text(card.participant);
@@ -320,7 +361,8 @@
 							.transition()
 							.duration(200)
 							.attr('stroke-width', 2.4)
-							.attr('stroke', `${card.color}`);
+							.attr('stroke', card.color)
+							.attr('stroke-opacity', 1);
 
 						const bounds = (svg.parentNode as HTMLElement).getBoundingClientRect();
 						tooltip
@@ -350,7 +392,8 @@
 							.transition()
 							.duration(160)
 							.attr('stroke-width', 1.5)
-							.attr('stroke', `${card.color}80`);
+							.attr('stroke', card.color)
+							.attr('stroke-opacity', 0.55);
 
 						tooltip.style('opacity', 0);
 					});
@@ -361,20 +404,20 @@
 			.append('g')
 			.attr('transform', `translate(${chartWidth - 210}, ${chartHeight + 44})`);
 
-		const legendItems: Array<{ label: string; caption: string; color: string }> = [
-			{ label: 'High', caption: 'Ready to activate', color: '#f97316' },
-			{ label: 'Medium', caption: 'Staging next', color: '#38bdf8' },
-			{ label: 'Watch', caption: 'Signals to nurture', color: '#a855f7' }
-		];
+	const legendItems: Array<{ label: string; caption: string; color: string }> = [
+		{ label: 'High', caption: 'Ready to activate', color: theme.accentWarm },
+		{ label: 'Medium', caption: 'Staging next', color: theme.brand },
+		{ label: 'Watch', caption: 'Signals to nurture', color: theme.accentCritical }
+	];
 
-		legend
-			.append('text')
-			.attr('x', 0)
-			.attr('y', -12)
-			.attr('fill', 'rgba(148, 163, 184, 0.85)')
-			.attr('font-family', 'Orbitron, sans-serif')
-			.attr('font-size', 10)
-			.text('Priority legend');
+	legend
+		.append('text')
+		.attr('x', 0)
+		.attr('y', -12)
+		.attr('fill', theme.inkMuted)
+		.attr('font-family', 'Orbitron, sans-serif')
+		.attr('font-size', 10)
+		.text('Priority legend');
 
 		const legendGroup = legend
 			.selectAll('g')
@@ -388,37 +431,37 @@
 			.attr('r', 6)
 			.attr('fill', (d) => d.color);
 
-		legendGroup
-			.append('text')
-			.attr('x', 12)
-			.attr('y', 0)
-			.attr('dy', '0.35em')
-			.attr('fill', 'rgba(226, 232, 240, 0.9)')
-			.attr('font-family', 'Orbitron, sans-serif')
-			.attr('font-size', 11)
-			.text((d) => d.label);
+	legendGroup
+		.append('text')
+		.attr('x', 12)
+		.attr('y', 0)
+		.attr('dy', '0.35em')
+		.attr('fill', theme.ink)
+		.attr('font-family', 'Orbitron, sans-serif')
+		.attr('font-size', 11)
+		.text((d) => d.label);
 
-		legendGroup
-			.append('text')
-			.attr('x', 60)
-			.attr('y', 0)
-			.attr('dy', '0.35em')
-			.attr('fill', 'rgba(148, 163, 184, 0.8)')
+	legendGroup
+		.append('text')
+		.attr('x', 60)
+		.attr('y', 0)
+		.attr('dy', '0.35em')
+		.attr('fill', theme.inkMuted)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 9)
 			.text((d) => d.caption);
 
-		if (cards.length === 0) {
-			container
-				.append('text')
-				.attr('x', chartWidth / 2)
-				.attr('y', chartHeight / 2)
-				.attr('text-anchor', 'middle')
-				.attr('fill', 'rgba(226, 232, 240, 0.82)')
-				.attr('font-family', 'Orbitron, sans-serif')
-				.attr('font-size', 14)
-				.text('Add responses to populate the roadmap.');
-		}
+	if (cards.length === 0) {
+		container
+			.append('text')
+			.attr('x', chartWidth / 2)
+			.attr('y', chartHeight / 2)
+			.attr('text-anchor', 'middle')
+			.attr('fill', theme.ink2)
+			.attr('font-family', 'Orbitron, sans-serif')
+			.attr('font-size', 14)
+			.text('Add responses to populate the roadmap.');
+	}
 	}
 
 	function wrapText(text: string, width: number) {
@@ -471,12 +514,12 @@
 		padding: 1.8rem;
 		border-radius: 1.5rem;
 		background:
-			radial-gradient(circle at 15% 25%, rgba(16, 185, 129, 0.18), transparent 55%),
-			radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.18), transparent 60%),
-			radial-gradient(circle at 50% 80%, rgba(251, 191, 36, 0.18), transparent 70%),
-			rgba(4, 7, 18, 0.94);
-		border: 1px solid rgba(59, 130, 246, 0.24);
-		box-shadow: 0 34px 72px rgba(15, 118, 110, 0.38);
+			radial-gradient(circle at 15% 25%, hsl(var(--brand) / 0.18), transparent 55%),
+			radial-gradient(circle at 80% 20%, hsl(var(--accent-warm) / 0.18), transparent 60%),
+			radial-gradient(circle at 50% 80%, hsl(var(--accent-critical) / 0.18), transparent 70%),
+			hsl(var(--surface));
+		border: 1px solid hsl(var(--brand) / 0.24);
+		box-shadow: 0 34px 72px hsl(var(--brand-soft) / 0.38);
 	}
 
 	svg {
@@ -490,15 +533,15 @@
 		max-width: 320px;
 		padding: 1rem 1.1rem 1.2rem;
 		border-radius: 1rem;
-		background: rgba(4, 7, 14, 0.98);
-		border: 1px solid rgba(59, 130, 246, 0.35);
-		color: #f8fafc;
+		background: hsl(var(--surface) / 0.98);
+		border: 1px solid hsl(var(--brand) / 0.35);
+		color: hsl(var(--text-on-teal));
 		font-family: 'Orbitron', system-ui, sans-serif;
 		font-size: 0.68rem;
 		line-height: 1.4;
 		pointer-events: none;
 		mix-blend-mode: screen;
-		box-shadow: 0 20px 40px rgba(14, 165, 233, 0.28);
+		box-shadow: 0 20px 40px hsl(var(--brand) / 0.28);
 	}
 
 	:global(.chart-tooltip .tooltip-heading) {
@@ -511,12 +554,14 @@
 	:global(.chart-tooltip .tooltip-body) {
 		font-size: 0.7rem;
 		opacity: 0.85;
+		color: hsl(var(--text-secondary));
 		margin-bottom: 0.6rem;
 	}
 
 	:global(.chart-tooltip .tooltip-meta) {
 		font-size: 0.64rem;
 		opacity: 0.7;
+		color: hsl(var(--text-muted));
 		letter-spacing: 0.08em;
 	}
 </style>

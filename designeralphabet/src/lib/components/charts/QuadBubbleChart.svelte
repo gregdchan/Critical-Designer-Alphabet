@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import * as d3 from 'd3';
+	import { getThemeColors } from '$lib/utils/colors';
 
 	type ResponseNode = {
 		id: string;
@@ -19,15 +20,21 @@
 	let tooltipEl: HTMLDivElement;
 	let mounted = false;
 
-	const lensPalette: Record<string, string> = {
-		Risk: '#f472b6',
-		Work: '#38bdf8',
-		Sustainability: '#22d3ee',
-		Ethics: '#a855f7',
-		Justice: '#f97316',
-		Community: '#bef264',
-		Agency: '#22c55e'
-	};
+const lensOrder = [
+	'Risk',
+	'Work',
+	'Sustainability',
+	'Ethics',
+	'Justice',
+	'Community',
+	'Agency'
+] as const;
+
+function normaliseLens(raw?: string) {
+	if (!raw) return 'General';
+	const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+	return match ?? raw;
+}
 
 	const impactLabels = {
 		high: 'HIGH IMPACT',
@@ -39,19 +46,38 @@
 		low: 'LOW EFFORT'
 	} as const;
 
-	const baseGradientStops = [
-		{ offset: '0%', color: 'rgba(40, 224, 255, 0.35)' },
-		{ offset: '45%', color: 'rgba(168, 85, 247, 0.15)' },
-		{ offset: '100%', color: 'rgba(12, 12, 24, 0.85)' }
-	];
-
-	const lensColor = (lens: string | undefined, fallback: string) => {
-		if (!lens) return fallback;
-		const entry = Object.entries(lensPalette).find(
-			([key]) => key.toLowerCase() === lens.toLowerCase()
+	function createLensColorResolver(theme: ReturnType<typeof getThemeColors>) {
+		const basePalette = Object.fromEntries(
+			(lensOrder as readonly string[]).map((lens, idx) => [
+				lens,
+				theme.chart[idx % theme.chart.length] ?? theme.brand
+			])
 		);
-		return entry ? entry[1] : fallback;
-	};
+		const fallbackPalette = [
+			...theme.chart,
+			theme.brand,
+			theme.brandSoft,
+			theme.accentWarm,
+			theme.accentCritical,
+			theme.ink
+		];
+		const colorMap = new Map<string, string>();
+		let fallbackIndex = 0;
+		const resolve = (lens: string | undefined, fallback: string) => {
+			const key = normaliseLens(lens);
+			if (colorMap.has(key)) return colorMap.get(key)!;
+			const base = basePalette[key as keyof typeof basePalette];
+			if (base) {
+				colorMap.set(key, base);
+				return base;
+			}
+			const next = fallbackPalette[fallbackIndex % fallbackPalette.length] ?? fallback;
+			fallbackIndex += 1;
+			colorMap.set(key, next);
+			return next;
+		};
+		return { resolve, colorMap, fallback: theme.brand };
+	}
 
 	function normalise(values: number[], minRange = 0.08, maxRange = 0.92) {
 		const min = d3.min(values) ?? 0;
@@ -81,8 +107,11 @@
 		vy?: number;
 	} & d3.SimulationNodeDatum;
 
-	function buildNodes(data: ResponseNode[]): BubbleNode[] {
-		if (!data.length) return [];
+function buildNodes(
+	data: ResponseNode[],
+	resolver: ReturnType<typeof createLensColorResolver>
+): BubbleNode[] {
+	if (!data.length) return [];
 
 		const voteValues = data.map((d) => Math.max(0, d.votes ?? 0));
 		const cardValues = data.map((d) => (Array.isArray(d.cards) ? d.cards.length : 0));
@@ -99,30 +128,33 @@
 			.domain([0, d3.max(voteValues) || 1])
 			.range([18, 56]);
 
-		return data.map((response, index) => {
-			const votes = Math.max(0, response.votes ?? 0);
-			const cards = Array.isArray(response.cards) ? response.cards.length : 0;
-			const lens = response.lens ?? 'Inspiration';
-			return {
-				id: response.id ?? `bubble-${index}`,
-				raw: response,
-				label: response.text ?? '—',
-				lens,
-				votes,
-				cards,
-				participant: response.participantName ?? 'Anonymous',
-				targetX: impactScale(votes),
-				targetY: 1 - effortScale(cards * 1.5 + (response.text?.length ?? 0) / 160),
-				radius: radiusScale(votes),
-				baseColor: lensColor(lens, '#14b8a6')
-			} satisfies BubbleNode;
-		});
-	}
+	return data.map((response, index) => {
+		const votes = Math.max(0, response.votes ?? 0);
+		const cards = Array.isArray(response.cards) ? response.cards.length : 0;
+		const lens = normaliseLens(response.lens);
+		return {
+			id: response.id ?? `bubble-${index}`,
+			raw: response,
+			label: response.text ?? '—',
+			lens,
+			votes,
+			cards,
+			participant: response.participantName ?? 'Anonymous',
+			targetX: impactScale(votes),
+			targetY: 1 - effortScale(cards * 1.5 + (response.text?.length ?? 0) / 160),
+			radius: radiusScale(votes),
+			baseColor: resolver.resolve(lens, resolver.fallback)
+		} satisfies BubbleNode;
+	});
+}
 
 	function renderChart() {
 		if (!mounted || !svg || !tooltipEl) return;
 
-		const nodes = buildNodes(responses);
+		const theme = getThemeColors();
+		const resolver = createLensColorResolver(theme);
+		const nodes = buildNodes(responses, resolver);
+		const lensColorMap = resolver.colorMap;
 		const hasData = nodes.length > 0;
 
 		const margin = { top: 56, right: 64, bottom: 64, left: 72 };
@@ -138,16 +170,24 @@
 
 		const defs = root.append('defs');
 
-		const gradient = defs
-			.append('radialGradient')
-			.attr('id', 'quad-bubble-bg')
-			.attr('cx', '50%')
-			.attr('cy', '50%')
-			.attr('r', '85%');
+	const gradient = defs
+		.append('radialGradient')
+		.attr('id', 'quad-bubble-bg')
+		.attr('cx', '50%')
+		.attr('cy', '50%')
+		.attr('r', '85%');
 
-		baseGradientStops.forEach(({ offset, color }) => {
-			gradient.append('stop').attr('offset', offset).attr('stop-color', color);
-		});
+	[
+		{ offset: '0%', color: theme.brand, opacity: 0.35 },
+		{ offset: '45%', color: theme.accentCritical, opacity: 0.18 },
+		{ offset: '100%', color: theme.surface, opacity: 0.96 }
+	].forEach(({ offset, color, opacity }) => {
+		gradient
+			.append('stop')
+			.attr('offset', offset)
+			.attr('stop-color', color)
+			.attr('stop-opacity', opacity);
+	});
 
 		const glow = defs
 			.append('filter')
@@ -167,15 +207,15 @@
 			.append('g')
 			.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-		container
-			.append('rect')
-			.attr('width', chartWidth)
-			.attr('height', chartHeight)
-			.attr('rx', 24)
-			.attr('fill', 'url(#quad-bubble-bg)')
-			.attr('stroke', 'rgba(148, 163, 184, 0.45)')
-			.attr('stroke-opacity', 0.4)
-			.attr('stroke-width', 1.5);
+	container
+		.append('rect')
+		.attr('width', chartWidth)
+		.attr('height', chartHeight)
+		.attr('rx', 24)
+		.attr('fill', 'url(#quad-bubble-bg)')
+		.attr('stroke', 'hsl(var(--border-subtle) / 0.45)')
+		.attr('stroke-opacity', 0.4)
+		.attr('stroke-width', 1.5);
 
 		if (hasData) {
 			const grid = container.append('g').attr('class', 'gridlines');
@@ -194,75 +234,75 @@
 				.attr('class', 'grid-y')
 				.call(effortAxis.tickSize(-chartWidth).tickFormat(() => ''));
 
-			grid
-				.selectAll('line')
-				.attr('stroke', 'rgba(148, 163, 184, 0.18)')
-				.attr('stroke-dasharray', '4 10');
+		grid
+			.selectAll('line')
+			.attr('stroke', 'hsl(var(--border-subtle) / 0.25)')
+			.attr('stroke-dasharray', '4 10');
 		}
 
-		container
-			.append('line')
-			.attr('x1', chartWidth / 2)
-			.attr('y1', 24)
-			.attr('x2', chartWidth / 2)
-			.attr('y2', chartHeight - 24)
-			.attr('stroke', 'rgba(255, 255, 255, 0.16)')
+	container
+		.append('line')
+		.attr('x1', chartWidth / 2)
+		.attr('y1', 24)
+		.attr('x2', chartWidth / 2)
+		.attr('y2', chartHeight - 24)
+		.attr('stroke', 'hsl(var(--surface-elevated) / 0.16)')
 			.attr('stroke-width', 1.5)
 			.attr('stroke-dasharray', '6 14');
 
-		container
-			.append('line')
-			.attr('x1', 24)
-			.attr('y1', chartHeight / 2)
-			.attr('x2', chartWidth - 24)
-			.attr('y2', chartHeight / 2)
-			.attr('stroke', 'rgba(255, 255, 255, 0.16)')
+	container
+		.append('line')
+		.attr('x1', 24)
+		.attr('y1', chartHeight / 2)
+		.attr('x2', chartWidth - 24)
+		.attr('y2', chartHeight / 2)
+		.attr('stroke', 'hsl(var(--surface-elevated) / 0.16)')
 			.attr('stroke-width', 1.5)
 			.attr('stroke-dasharray', '6 14');
 
 		const titleGroup = container.append('g');
 
-		titleGroup
-			.append('text')
-			.attr('x', chartWidth / 2)
-			.attr('y', -24)
-			.attr('text-anchor', 'middle')
-			.attr('fill', '#f8fafc')
+	titleGroup
+		.append('text')
+		.attr('x', chartWidth / 2)
+		.attr('y', -24)
+		.attr('text-anchor', 'middle')
+		.attr('fill', 'hsl(var(--text-on-teal))')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-weight', 600)
 			.attr('font-size', 18)
 			.text('Impact vs. Effort — Neon Quad');
 
-		titleGroup
-			.append('text')
-			.attr('x', chartWidth / 2)
-			.attr('y', -4)
-			.attr('text-anchor', 'middle')
-			.attr('fill', 'rgba(203, 213, 225, 0.75)')
+	titleGroup
+		.append('text')
+		.attr('x', chartWidth / 2)
+		.attr('y', -4)
+		.attr('text-anchor', 'middle')
+		.attr('fill', theme.ink2)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 12)
 			.text('Vote-weighted bubbles sized by community energy');
 
 		const axisLabelGroup = container.append('g');
 
-		axisLabelGroup
-			.append('text')
-			.attr('x', chartWidth / 2)
-			.attr('y', chartHeight + 36)
-			.attr('text-anchor', 'middle')
-			.attr('fill', '#38bdf8')
+	axisLabelGroup
+		.append('text')
+		.attr('x', chartWidth / 2)
+		.attr('y', chartHeight + 36)
+		.attr('text-anchor', 'middle')
+		.attr('fill', theme.brand)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 13)
 			.attr('letter-spacing', 2)
 			.text(`${impactLabels.low} ↔ ${impactLabels.high}`);
 
-		axisLabelGroup
-			.append('text')
-			.attr('x', -44)
-			.attr('y', chartHeight / 2)
-			.attr('transform', `rotate(-90, ${-44}, ${chartHeight / 2})`)
-			.attr('text-anchor', 'middle')
-			.attr('fill', '#a855f7')
+	axisLabelGroup
+		.append('text')
+		.attr('x', -44)
+		.attr('y', chartHeight / 2)
+		.attr('transform', `rotate(-90, ${-44}, ${chartHeight / 2})`)
+		.attr('text-anchor', 'middle')
+		.attr('fill', theme.accentCritical)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 13)
 			.attr('letter-spacing', 2)
@@ -276,7 +316,7 @@
 				.attr('x', chartWidth / 2)
 				.attr('y', chartHeight / 2)
 				.attr('text-anchor', 'middle')
-				.attr('fill', 'rgba(226, 232, 240, 0.8)')
+				.attr('fill', theme.ink2)
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-size', 14)
 				.text('Add responses to watch the quad light up.');
@@ -336,11 +376,11 @@
 			.duration(900)
 			.attr('r', (d) => d.radius + 10);
 
-		nodeGroup
-			.append('text')
-			.attr('text-anchor', 'middle')
-			.attr('dy', '0.35em')
-			.attr('fill', '#f8fafc')
+	nodeGroup
+		.append('text')
+		.attr('text-anchor', 'middle')
+		.attr('dy', '0.35em')
+		.attr('fill', 'hsl(var(--text-on-teal))')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-weight', 600)
 			.attr('font-size', 12)
@@ -418,13 +458,13 @@
 			.attr('class', 'legend')
 			.attr('transform', `translate(${chartWidth - 200}, ${chartHeight - 120})`);
 
-		legend
-			.append('text')
-			.attr('fill', 'rgba(226, 232, 240, 0.85)')
-			.attr('font-size', 12)
-			.attr('font-family', 'Orbitron, sans-serif')
-			.attr('font-weight', 600)
-			.text('Lens palette');
+	legend
+		.append('text')
+		.attr('fill', theme.ink)
+		.attr('font-size', 12)
+		.attr('font-family', 'Orbitron, sans-serif')
+		.attr('font-weight', 600)
+		.text('Lens palette');
 
 		const legendItems = legend
 			.append('g')
@@ -435,26 +475,26 @@
 			.append('g')
 			.attr('transform', (_, i) => `translate(0, ${i * 20})`);
 
-		legendItems
-			.append('circle')
-			.attr('r', 5)
-			.attr('fill', (lens) => lensColor(lens, '#38bdf8'));
+	legendItems
+		.append('circle')
+		.attr('r', 5)
+		.attr('fill', (lens) => lensColorMap.get(lens) ?? theme.ink2);
 
-		legendItems
-			.append('text')
-			.attr('x', 12)
-			.attr('y', 0)
-			.attr('dy', '0.35em')
-			.attr('fill', 'rgba(226, 232, 240, 0.88)')
-			.attr('font-size', 11)
-			.attr('font-family', 'Orbitron, sans-serif')
-			.text((lens) => lens);
+	legendItems
+		.append('text')
+		.attr('x', 12)
+		.attr('y', 0)
+		.attr('dy', '0.35em')
+		.attr('fill', theme.ink2)
+		.attr('font-size', 11)
+		.attr('font-family', 'Orbitron, sans-serif')
+		.text((lens) => lens);
 
-		legend
-			.append('text')
-			.attr('x', 0)
-			.attr('y', legendItems.size() * 20 + 20)
-			.attr('fill', 'rgba(148, 163, 184, 0.9)')
+	legend
+		.append('text')
+		.attr('x', 0)
+		.attr('y', legendItems.size() * 20 + 20)
+		.attr('fill', theme.inkMuted)
 			.attr('font-size', 10)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.text('Ring thickness shows linked cards.');
@@ -489,12 +529,12 @@
 		padding: 1.75rem;
 		border-radius: 1.25rem;
 		background:
-			radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.18), transparent 55%),
-			radial-gradient(circle at 80% 25%, rgba(236, 72, 153, 0.18), transparent 55%),
-			radial-gradient(circle at 50% 80%, rgba(34, 197, 94, 0.16), transparent 65%),
-			rgba(8, 11, 24, 0.92);
-		border: 1px solid rgba(148, 163, 184, 0.25);
-		box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+			radial-gradient(circle at 20% 20%, hsl(var(--brand) / 0.18), transparent 55%),
+			radial-gradient(circle at 80% 25%, hsl(var(--accent-critical) / 0.18), transparent 55%),
+			radial-gradient(circle at 50% 80%, hsl(var(--accent-warm) / 0.16), transparent 65%),
+			hsl(var(--surface));
+		border: 1px solid hsl(var(--border-subtle) / 0.35);
+		box-shadow: 0 30px 60px hsl(var(--brand-soft) / 0.45);
 	}
 
 	svg {
@@ -508,15 +548,15 @@
 		max-width: 280px;
 		padding: 0.9rem 1.1rem;
 		border-radius: 0.85rem;
-		background: rgba(12, 14, 24, 0.95);
-		border: 1px solid rgba(148, 163, 184, 0.4);
-		color: #f8fafc;
+		background: hsl(var(--surface) / 0.95);
+		border: 1px solid hsl(var(--brand) / 0.35);
+		color: hsl(var(--text-on-teal));
 		font-family: 'Orbitron', system-ui, sans-serif;
 		font-size: 0.72rem;
 		line-height: 1.4;
 		pointer-events: none;
 		mix-blend-mode: screen;
-		box-shadow: 0 12px 32px rgba(14, 116, 144, 0.25);
+		box-shadow: 0 12px 32px hsl(var(--brand) / 0.25);
 		transition: opacity 120ms ease;
 	}
 
@@ -533,6 +573,7 @@
 		margin-top: 0.45rem;
 		font-size: 0.68rem;
 		opacity: 0.75;
+		color: hsl(var(--text-secondary));
 	}
 
 	:global(.chart-tooltip .tooltip-footer) {
@@ -540,5 +581,6 @@
 		font-size: 0.65rem;
 		letter-spacing: 0.06em;
 		opacity: 0.7;
+		color: hsl(var(--text-muted));
 	}
 </style>

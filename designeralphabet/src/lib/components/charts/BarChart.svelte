@@ -3,6 +3,7 @@
 	import { scaleLinear, scaleBand } from 'd3-scale';
 	import { max } from 'd3-array';
 	import { onMount, afterUpdate } from 'svelte';
+	import { getThemeColors } from '$lib/utils/colors';
 
 	export let data: Array<{ label: string; value: number; percentage: number }> = [];
 	export let width = 800;
@@ -21,6 +22,7 @@
 		if (!svgElement || !data.length) return;
 
 		const chart = select(chartGroup);
+		const theme = getThemeColors();
 		chart.selectAll('*').remove();
 
 		// Scales
@@ -49,7 +51,7 @@
 				.attr('y', (d) => yScale(d.label) || 0)
 				.attr('width', innerWidth)
 				.attr('height', yScale.bandwidth())
-				.attr('fill', 'rgba(148, 163, 184, 0.25)')
+				.attr('fill', 'hsl(var(--text-muted) / 0.25)')
 				.attr('rx', 6);
 
 		// Animated bars
@@ -78,7 +80,7 @@
 			.attr('y', (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
 			.attr('dy', '0.35em')
 			.attr('text-anchor', 'end')
-			.attr('fill', '#0f172a')
+			.attr('fill', 'hsl(var(--text-on-teal))')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '14px')
 			.attr('font-weight', 'bold')
@@ -97,7 +99,7 @@
 			.attr('y', (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
 			.attr('dy', '0.35em')
 			.attr('text-anchor', 'start')
-			.attr('fill', '#475569')
+			.attr('fill', theme.ink2)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '12px')
 			.attr('opacity', 0)
@@ -118,7 +120,7 @@
 			.attr('y', (d) => (yScale(d.label) || 0) + yScale.bandwidth() / 2)
 			.attr('dy', '0.35em')
 			.attr('text-anchor', 'end')
-			.attr('fill', '#1f2937')
+			.attr('fill', theme.ink)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '13px')
 			.attr('font-weight', '500')
@@ -154,19 +156,19 @@
 </script>
 
 <div class="bar-chart-container">
-		<svg bind:this={svgElement} {width} {height} class="bar-chart">
+	<svg bind:this={svgElement} {width} {height} class="bar-chart">
 		<defs>
-				<linearGradient id="bar-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-					<stop offset="0%" style="stop-color:#4c6ef5;stop-opacity:1" />
-					<stop offset="100%" style="stop-color:#38bdf8;stop-opacity:1" />
-				</linearGradient>
-				<filter id="bar-glow">
-					<feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-					<feMerge>
-						<feMergeNode in="coloredBlur" />
-						<feMergeNode in="SourceGraphic" />
-					</feMerge>
-				</filter>
+			<linearGradient id="bar-gradient" x1="0" x2="1">
+				<stop offset="0%" stop-color="hsl(var(--brand-soft))" stop-opacity="0.9" />
+				<stop offset="100%" stop-color="hsl(var(--brand))" stop-opacity="1" />
+			</linearGradient>
+			<filter id="bar-glow">
+				<feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+				<feMerge>
+					<feMergeNode in="coloredBlur" />
+					<feMergeNode in="SourceGraphic" />
+				</feMerge>
+			</filter>
 		</defs>
 		<g bind:this={chartGroup} transform="translate({margin.left}, {margin.top})" />
 	</svg>
@@ -193,15 +195,15 @@
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
-		background-color: rgba(255, 255, 255, 0.82);
-		border: 1px solid rgba(148, 163, 184, 0.35);
+		background-color: hsl(var(--surface-elevated) / 0.82);
+		border: 1px solid hsl(var(--text-muted) / 0.35);
 		border-radius: 1rem;
-		color: #475569;
+		color: hsl(var(--text-secondary));
 		backdrop-filter: blur(6px);
 	}
 
 	.empty-text {
-		color: #475569;
+		color: hsl(var(--text-secondary));
 		font-size: 0.875rem;
 	}
 

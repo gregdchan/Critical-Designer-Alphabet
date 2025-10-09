@@ -30,10 +30,16 @@
 		method: 'orange'
 	};
 
-	function getCardClass(card: Card): string {
-		const variant = card.category ? CATEGORY_VARIANTS[card.category as CategoryType] : 'cyan';
-		return `card-${variant}`;
-	}
+function getCardClass(card: Card): string {
+	const variant = card.category ? CATEGORY_VARIANTS[card.category as CategoryType] : 'cyan';
+	return `card-${variant}`;
+}
+
+function variantClass(card: Card | null, role: string): string {
+	if (!card) return '';
+	const variant = card.category ? CATEGORY_VARIANTS[card.category as CategoryType] : 'cyan';
+	return `card-${variant}-${role}`;
+}
 
 	let cards: Card[] = [];
 	let loading = true;
@@ -173,7 +179,7 @@
 		<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 			<div class="space-y-3">
 				<p
-					class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-white/85"
+					class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-surface-elevated/5 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-white/85"
 				>
 					<Sparkles class="h-4 w-4 text-neonCyan" /> Retro Card Library
 				</p>
@@ -196,7 +202,7 @@
 					Clear filters
 				</button>
 				<button
-					class="rounded-full border border-neonCyan/40 bg-neonCyan/15 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neonCyan shadow-neon-cyan transition hover:bg-neonCyan/25 disabled:cursor-not-allowed disabled:border-white/10 disabled:text-white/40"
+					class="rounded-full border border-neonCyan/40 bg-neonCyan/15 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neonCyan shadow-brand transition hover:bg-neonCyan/25 disabled:cursor-not-allowed disabled:border-white/10 disabled:text-white/40"
 					type="button"
 					on:click={randomDraw}
 					disabled={loading || !cards.length}
@@ -243,7 +249,7 @@
 					<button
 						class={`rounded-full border px-4 py-2 transition ${
 							categoryFilter === category
-								? 'border-neonCyan/60 bg-neonCyan/20 text-neonCyan shadow-neon-cyan'
+								? 'border-neonCyan/60 bg-neonCyan/20 text-neonCyan shadow-brand'
 								: 'border-white/15 bg-black/40 text-white/65 hover:border-neonCyan/40 hover:text-neonCyan'
 						}`}
 						type="button"
@@ -296,9 +302,9 @@
 				<div
 					class="animate-pulse rounded-[2rem] border border-white/10 bg-black/40 p-6 shadow-[0_0_30px_rgba(255,255,255,0.04)]"
 				>
-					<div class="h-6 w-24 rounded-full bg-white/10"></div>
-					<div class="mt-4 h-4 w-full rounded-full bg-white/10"></div>
-					<div class="mt-2 h-4 w-5/6 rounded-full bg-white/10"></div>
+					<div class="h-6 w-24 rounded-full bg-surface-elevated/10"></div>
+					<div class="mt-4 h-4 w-full rounded-full bg-surface-elevated/10"></div>
+					<div class="mt-2 h-4 w-5/6 rounded-full bg-surface-elevated/10"></div>
 				</div>
 			{/each}
 		</div>
@@ -520,7 +526,7 @@
 			{/if}
 			<footer class="mt-auto space-y-3 text-xs text-white/80">
 				<button
-					class="w-full rounded-full border border-neonCyan/40 bg-neonCyan/20 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neonCyan shadow-neon-cyan transition hover:bg-neonCyan/30"
+					class="w-full rounded-full border border-neonCyan/40 bg-neonCyan/20 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neonCyan shadow-brand transition hover:bg-neonCyan/30"
 					type="button"
 					on:click={() => activeCard && toggleCard(activeCard)}
 				>

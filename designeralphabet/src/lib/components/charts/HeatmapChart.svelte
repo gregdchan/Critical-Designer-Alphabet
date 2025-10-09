@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import * as d3 from 'd3';
+	import { getThemeColors } from '$lib/utils/colors';
 
 	type Response = {
 		lens?: string;
@@ -32,16 +33,6 @@
 		maturity: string;
 		count: number;
 		responses: Response[];
-	};
-
-	const lensPalette: Record<string, string> = {
-		Risk: '#f97316',
-		Work: '#38bdf8',
-		Sustainability: '#22d3ee',
-		Ethics: '#a855f7',
-		Community: '#bef264',
-		Justice: '#f472b6',
-		Agency: '#22c55e'
 	};
 
 	function getMaturityBucket(votes: number | undefined) {
@@ -84,15 +75,22 @@
 	}
 
 	function normaliseLens(raw: string) {
-		const match = Object.keys(lensPalette).find((key) => key.toLowerCase() === raw.toLowerCase());
+		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
 		return match ?? raw;
 	}
 
 	function renderChart() {
 		if (!mounted || !svg || !tooltipEl) return;
 
-		const data = prepareData(responses);
-		const chartLenses = Array.from(new Set(data.map((d) => d.lens)));
+	const data = prepareData(responses);
+	const chartLenses = Array.from(new Set(data.map((d) => d.lens)));
+	const theme = getThemeColors();
+	const lensPalette = Object.fromEntries(
+		(lensOrder as readonly string[]).map((lens, idx) => [
+			lens,
+			theme.chart[idx % theme.chart.length] ?? theme.brand
+		])
+	);
 
 		const margin = { top: 72, right: 48, bottom: 96, left: 132 };
 		const chartWidth = width - margin.left - margin.right;
@@ -105,9 +103,15 @@
 			.padding(0.12);
 		const yScale = d3.scaleBand<string>().domain(chartLenses).range([0, chartHeight]).padding(0.18);
 
-		const maxCount = d3.max(data, (d) => d.count) ?? 1;
-
-		const fillScale = d3.scaleSequential(d3.interpolateTurbo).domain([0, Math.max(4, maxCount)]);
+	const maxCount = d3.max(data, (d) => d.count) ?? 1;
+	const fillStops = theme.chart.length
+		? theme.chart
+		: [theme.surfaceMuted, theme.accentWarm, theme.accentCritical];
+	const maxRange = Math.max(4, maxCount);
+	const domainStops = fillStops.map((_, idx) =>
+		idx === fillStops.length - 1 ? maxRange : (idx / Math.max(1, fillStops.length - 1)) * maxRange
+	);
+	const fillScale = d3.scaleLinear<string>().domain(domainStops).range(fillStops);
 
 		const root = d3.select(svg);
 		root.selectAll('*').remove();
@@ -125,12 +129,12 @@
 		backgroundGradient
 			.append('stop')
 			.attr('offset', '0%')
-			.attr('stop-color', 'rgba(15, 23, 42, 0.95)');
+			.attr('stop-color', 'hsl(var(--surface) / 0.95)');
 
 		backgroundGradient
 			.append('stop')
 			.attr('offset', '100%')
-			.attr('stop-color', 'rgba(8, 15, 32, 0.98)');
+			.attr('stop-color', 'hsl(var(--surface-muted) / 0.98)');
 
 		const glow = defs
 			.append('filter')
@@ -155,7 +159,7 @@
 			.attr('height', chartHeight)
 			.attr('rx', 24)
 			.attr('fill', 'url(#heatmap-background)')
-			.attr('stroke', 'rgba(148, 163, 184, 0.35)')
+			.attr('stroke', 'hsl(var(--border-subtle) / 0.35)')
 			.attr('stroke-width', 1.2)
 			.style('filter', 'url(#heatmap-glow)');
 
@@ -169,7 +173,7 @@
 				.attr('x2', (xScale(tick) ?? 0) + xScale.bandwidth() / 2)
 				.attr('y1', 12)
 				.attr('y2', chartHeight - 12)
-				.attr('stroke', 'rgba(148, 163, 184, 0.12)')
+				.attr('stroke', 'hsl(var(--border-subtle) / 0.2)')
 				.attr('stroke-dasharray', '4 10');
 		});
 
@@ -180,7 +184,7 @@
 				.attr('y2', (yScale(tick) ?? 0) + yScale.bandwidth() / 2)
 				.attr('x1', 12)
 				.attr('x2', chartWidth - 12)
-				.attr('stroke', 'rgba(148, 163, 184, 0.12)')
+				.attr('stroke', 'hsl(var(--border-subtle) / 0.2)')
 				.attr('stroke-dasharray', '4 10');
 		});
 
@@ -199,10 +203,12 @@
 			.attr('width', xScale.bandwidth())
 			.attr('height', yScale.bandwidth())
 			.attr('rx', 10)
-			.attr('fill', (d) => (d.count === 0 ? 'rgba(140, 148, 190, 0.12)' : fillScale(d.count)))
-			.attr('fill-opacity', (d) => (d.count === 0 ? 0.18 : 0.88))
+			.attr('fill', (d) =>
+				d.count === 0 ? 'hsl(var(--surface-muted) / 0.35)' : fillScale(d.count)
+			)
+			.attr('fill-opacity', (d) => (d.count === 0 ? 0.28 : 0.88))
 			.attr('stroke', (d) =>
-				d.count === 0 ? 'rgba(148, 163, 184, 0.25)' : 'rgba(255,255,255,0.15)'
+				d.count === 0 ? 'hsl(var(--border-subtle) / 0.4)' : 'hsl(var(--surface-elevated) / 0.15)'
 			)
 			.attr('stroke-width', 1.2)
 			.style('cursor', 'pointer')
@@ -211,7 +217,7 @@
 				rect
 					.transition()
 					.duration(200)
-					.attr('stroke', 'rgba(255,255,255,0.65)')
+					.attr('stroke', 'hsl(var(--surface-elevated) / 0.75)')
 					.attr('stroke-width', 2);
 
 				cells.classed('dimmed', (cell) => cell.lens !== d.lens && cell.maturity !== d.maturity);
@@ -253,7 +259,7 @@
 				d3.select(this)
 					.transition()
 					.duration(180)
-					.attr('stroke', 'rgba(255,255,255,0.15)')
+					.attr('stroke', 'hsl(var(--surface-elevated) / 0.15)')
 					.attr('stroke-width', 1.2);
 
 				cells.classed('dimmed', false).classed('highlighted', false);
@@ -265,7 +271,7 @@
 			.attr('x', xScale.bandwidth() / 2)
 			.attr('y', yScale.bandwidth() / 2 - 2)
 			.attr('text-anchor', 'middle')
-			.attr('fill', 'rgba(248, 250, 252, 0.94)')
+			.attr('fill', 'hsl(var(--text-on-teal))')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-weight', 600)
 			.attr('font-size', 14)
@@ -276,7 +282,7 @@
 			.attr('x', xScale.bandwidth() / 2)
 			.attr('y', yScale.bandwidth() / 2 + 16)
 			.attr('text-anchor', 'middle')
-			.attr('fill', 'rgba(226, 232, 240, 0.75)')
+			.attr('fill', 'hsl(var(--text-on-teal) / 0.75)')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 9)
 			.text((d) => (d.count > 1 ? 'voices' : d.count === 1 ? 'voice' : ''));
@@ -290,7 +296,7 @@
 			.attr('x', (d) => (xScale(d) ?? 0) + xScale.bandwidth() / 2)
 			.attr('y', 32)
 			.attr('text-anchor', 'middle')
-			.attr('fill', '#38bdf8')
+			.attr('fill', theme.brand)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 12)
 			.text((d) => d.toUpperCase());
@@ -305,7 +311,7 @@
 			.attr('y', (d) => (yScale(d) ?? 0) + yScale.bandwidth() / 2)
 			.attr('dy', '0.35em')
 			.attr('text-anchor', 'end')
-			.attr('fill', (d) => lensPalette[d] ?? '#94a3b8')
+			.attr('fill', (d) => lensPalette[d] ?? theme.ink2)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-weight', 600)
 			.attr('font-size', 12)
@@ -316,7 +322,7 @@
 			.attr('x', chartWidth / 2)
 			.attr('y', -28)
 			.attr('text-anchor', 'middle')
-			.attr('fill', 'rgba(224, 231, 255, 0.92)')
+			.attr('fill', theme.ink)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 18)
 			.attr('font-weight', 600)
@@ -327,7 +333,7 @@
 			.attr('x', chartWidth / 2)
 			.attr('y', -8)
 			.attr('text-anchor', 'middle')
-			.attr('fill', 'rgba(148, 163, 184, 0.75)')
+			.attr('fill', theme.inkMuted)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 12)
 			.text('Votes steer maturity; hover for representative voices.');
@@ -363,18 +369,18 @@
 			.attr('transform', 'translate(0, 12)')
 			.call(legendAxis)
 			.selectAll('text')
-			.attr('fill', 'rgba(226, 232, 240, 0.8)')
+			.attr('fill', theme.ink2)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 10);
 
-		legend.selectAll('path,line').attr('stroke', 'rgba(94, 234, 212, 0.4)');
+		legend.selectAll('path,line').attr('stroke', 'hsl(var(--brand) / 0.4)');
 		legend.select('g').select('.domain').attr('stroke-width', 0);
 
 		legend
 			.append('text')
 			.attr('x', 0)
 			.attr('y', -8)
-			.attr('fill', 'rgba(148, 163, 184, 0.85)')
+			.attr('fill', theme.inkMuted)
 			.attr('font-size', 10)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.text('Response density');
@@ -406,12 +412,12 @@
 		padding: 1.75rem;
 		border-radius: 1.5rem;
 		background:
-			radial-gradient(circle at 15% 20%, rgba(59, 130, 246, 0.18), transparent 60%),
-			radial-gradient(circle at 78% 18%, rgba(236, 72, 153, 0.14), transparent 55%),
-			radial-gradient(circle at 50% 80%, rgba(45, 212, 191, 0.2), transparent 70%),
-			rgba(5, 8, 18, 0.94);
-		border: 1px solid rgba(94, 234, 212, 0.2);
-		box-shadow: 0 30px 60px rgba(7, 89, 133, 0.35);
+			radial-gradient(circle at 15% 20%, hsl(var(--brand) / 0.18), transparent 60%),
+			radial-gradient(circle at 78% 18%, hsl(var(--accent-critical) / 0.14), transparent 55%),
+			radial-gradient(circle at 50% 80%, hsl(var(--accent-warm) / 0.2), transparent 70%),
+			hsl(var(--surface));
+		border: 1px solid hsl(var(--border-strong) / 0.35);
+		box-shadow: 0 30px 60px hsl(var(--brand-soft) / 0.35);
 	}
 
 	svg {
@@ -425,14 +431,14 @@
 		max-width: 320px;
 		padding: 1rem 1.1rem 1.1rem;
 		border-radius: 0.9rem;
-		background: rgba(4, 7, 14, 0.95);
-		border: 1px solid rgba(94, 234, 212, 0.35);
-		color: #f8fafc;
+		background: hsl(var(--surface) / 0.95);
+		border: 1px solid hsl(var(--brand) / 0.35);
+		color: hsl(var(--text-on-teal));
 		font-family: 'Orbitron', system-ui, sans-serif;
 		font-size: 0.7rem;
 		line-height: 1.45;
 		pointer-events: none;
-		box-shadow: 0 18px 38px rgba(45, 212, 191, 0.28);
+		box-shadow: 0 18px 38px hsl(var(--brand) / 0.28);
 		mix-blend-mode: screen;
 	}
 

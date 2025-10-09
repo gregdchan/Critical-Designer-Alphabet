@@ -27,7 +27,7 @@
    <!-- The Designer's Critical Alphabet -->
    <section class="panel p-8">
 		   <div class="flex items-start gap-4 mb-6">
-			   <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-neon-cyan/20 text-neon-cyan">
+			   <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand/20 text-brand">
 				   <Scale class="h-6 w-6" />
 			   </div>
 			   <div>
@@ -52,14 +52,14 @@
 
 			   <div class="surface-muted rounded-lg p-4 mt-6">
 				   <p class="text-primary font-medium mb-2">Creator of the physical deck:</p>
-				   <p class="text-neon-cyan">Dr. Lesley-Ann Noel</p>
+				   <p class="text-brand">Dr. Lesley-Ann Noel</p>
 
 				   <p class="text-primary font-medium mb-2 mt-4">More information:</p>
 				   <a
 					   href="https://www.lesleyannnoel.com"
 					   target="_blank"
 					   rel="noopener noreferrer"
-					   class="inline-flex items-center gap-2 text-neon-cyan hover:text-neon-pink transition-colors"
+					   class="inline-flex items-center gap-2 text-brand hover:text-neon-pink transition-colors"
 				   >
 					   https://www.lesleyannnoel.com
 					   <ExternalLink class="h-4 w-4" />
@@ -115,8 +115,8 @@
 		   </div>
 
 		   <div class="space-y-4">
-			   <div class="surface-muted border border-neon-cyan/30 rounded-lg p-4">
-				   <p class="text-neon-cyan">
+			   <div class="surface-muted border border-brand/30 rounded-lg p-4">
+				   <p class="text-brand">
 					   <strong>The Designer's Critical Alphabet</strong> (physical deck) remains the intellectual
 					   property of Dr. Lesley-Ann Noel. Please credit her when referencing or using the original cards.
 				   </p>
@@ -160,7 +160,7 @@
 
 		   <div class="grid gap-6 md:grid-cols-2">
 			<div class="space-y-4">
-				   <div class="border-l-4 border-neon-cyan pl-4">
+				   <div class="border-l-4 border-brand pl-4">
 					   <h3 class="font-semibold text-primary mb-2">Pluriversal Design SIG</h3>
 					   <p class="text-sm text-secondary mb-2">
 						   A global community exploring pluriversal approaches to design research and education.
@@ -169,7 +169,7 @@
 						   href="https://pluriversal.design"
 						   target="_blank"
 						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-neon-cyan hover:text-neon-pink text-sm"
+						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
 					   >
 						   pluriversal.design <ExternalLink class="h-3 w-3" />
 					   </a>
@@ -184,7 +184,7 @@
 						   href="https://designjustice.org"
 						   target="_blank"
 						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-neon-cyan hover:text-neon-pink text-sm"
+						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
 					   >
 						   designjustice.org <ExternalLink class="h-3 w-3" />
 					   </a>
@@ -199,7 +199,7 @@
 						   href="https://www.design.school/liberatory-design"
 						   target="_blank"
 						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-neon-cyan hover:text-neon-pink text-sm"
+						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
 					   >
 						   design.school/liberatory-design <ExternalLink class="h-3 w-3" />
 					   </a>
@@ -214,7 +214,7 @@
 						   href="https://decolonisingdesign.org"
 						   target="_blank"
 						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-neon-cyan hover:text-neon-pink text-sm"
+						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
 					   >
 						   decolonisingdesign.org <ExternalLink class="h-3 w-3" />
 					   </a>
@@ -222,7 +222,7 @@
 			</div>
 
 			<div class="space-y-4">
-				   <div class="border-l-4 border-neon-cyan pl-4">
+				   <div class="border-l-4 border-brand pl-4">
 					   <h3 class="font-semibold text-primary mb-2">World Design Organization (WDO)</h3>
 					   <p class="text-sm text-secondary mb-2">
 						   International hub supporting socially responsible design practices.
@@ -231,7 +231,7 @@
 						   href="https://wdo.org"
 						   target="_blank"
 						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-neon-cyan hover:text-neon-pink text-sm"
+						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
 					   >
 						   wdo.org <ExternalLink class="h-3 w-3" />
 					   </a>
@@ -246,13 +246,13 @@
 						   href="https://medium.com/pluriversal-design"
 						   target="_blank"
 						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-neon-cyan hover:text-neon-pink text-sm"
+						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
 					   >
 						   medium.com/pluriversal-design <ExternalLink class="h-3 w-3" />
 					   </a>
 				   </div>
 
-				   <div class="border-l-4 border-neon-cyan pl-4">
+				   <div class="border-l-4 border-brand pl-4">
 					   <h3 class="font-semibold text-primary mb-2">Global Pluralism & Design</h3>
 					   <p class="text-sm text-secondary mb-2">
 						   Broader resource on pluralism and inclusive approaches that can inspire design practice.
@@ -261,7 +261,7 @@
 						   href="https://www.pluralism.ca"
 						   target="_blank"
 						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-neon-cyan hover:text-neon-pink text-sm"
+						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
 					   >
 						   pluralism.ca <ExternalLink class="h-3 w-3" />
 					   </a>
@@ -272,7 +272,7 @@
 
 	<!-- Acknowledgements -->
 	   <section
-		   class="panel bg-gradient-to-r from-neon-cyan/10 to-retro-purple/10 p-8"
+		   class="panel bg-gradient-to-r from-brand/10 to-retro-purple/10 p-8"
 	   >
 		   <h2 class="text-2xl font-semibold text-primary mb-6 flex items-center gap-2">
 			   <Heart class="h-6 w-6 text-neon-pink" />
@@ -294,7 +294,7 @@
 			   </p>
 		   </div>
 
-		   <div class="mt-8 pt-6 border-t border-neon-cyan/30">
+		   <div class="mt-8 pt-6 border-t border-brand/30">
 			   <p class="text-center text-secondary italic">
 				   ✨ The physical cards were created by Dr. Noel. This digital workshop platform—its design,
 				   code, and game mechanics—was created by Gregory D. Chan, inspired by pluriversal and
