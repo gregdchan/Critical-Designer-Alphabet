@@ -95,12 +95,12 @@ function resolveLensColor(lens: string) {
 
 		// Create bubble data
 		bubbleData = Object.entries(lensGroups).map(([lens, items]: [string, any[]]) => {
-			const totalVotes = items.reduce((sum, item) => sum + (item.votes?.length || 0), 0);
+			const totalVotes = items.reduce((sum, item) => sum + (Number(item.votes) || 0), 0);
 			const totalCards = items.reduce((sum, item) => sum + (item.cards?.length || 0), 0);
 
 			// Sample representative text
 			const representativeText = items
-				.sort((a, b) => (b.votes?.length || 0) - (a.votes?.length || 0))
+				.sort((a, b) => (Number(b.votes) || 0) - (Number(a.votes) || 0))
 				.slice(0, 3)
 				.map((item) => item.text)
 				.join('; ');

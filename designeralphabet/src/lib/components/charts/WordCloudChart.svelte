@@ -9,6 +9,8 @@
 		votes?: number;
 		lens?: string;
 		participantName?: string;
+		participantColor?: string;
+		participant_id?: string;
 	};
 
 	export let responses: WordCloudResponse[] = [];
@@ -121,7 +123,10 @@
 					radius = minRadius + Math.min(15, Math.sqrt(textLen) * 2);
 				}
 
+				// Use participant color if available, otherwise fall back to lens color
+				const participantColor = response.participantColor;
 				const lensColor = resolveLensColor(lensLabel);
+				const bubbleColor = participantColor || lensColor;
 
 				return {
 					id: response.id,
@@ -131,7 +136,7 @@
 					radius,
 					x: 0,
 					y: 0,
-					color: lensColor,
+					color: bubbleColor,
 					lens: lensLabel || 'General',
 					participant: response.participantName || 'Anonymous'
 				};

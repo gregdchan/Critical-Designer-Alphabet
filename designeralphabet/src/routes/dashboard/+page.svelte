@@ -330,14 +330,14 @@
 										</div>
 										<div class="text-center">
 											<p class="text-2xl font-semibold text-primary">
-												{responses.reduce((sum, r) => sum + (r.votes?.length || 0), 0)}
+												{responses.reduce((sum, r) => sum + (Number(r.votes) || 0), 0)}
 											</p>
 											<p class="text-sm text-secondary">Total Votes</p>
 										</div>
 										<div class="text-center">
 											<p class="text-2xl font-semibold text-primary">
 												{Math.round(
-													(responses.reduce((sum, r) => sum + (r.votes?.length || 0), 0) /
+													(responses.reduce((sum, r) => sum + (Number(r.votes) || 0), 0) /
 														responses.length) *
 														10
 												) / 10 || 0}

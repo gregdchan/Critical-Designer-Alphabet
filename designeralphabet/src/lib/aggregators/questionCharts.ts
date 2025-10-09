@@ -161,7 +161,7 @@ export function buildChartForQuestion(
           title: question?.text ?? question?.section ?? 'Responses',
           series: [{ id: question.id, points }],
           total,
-          meta: { kind: 'multipleChoice' }
+          meta: { kind: 'multipleChoice', totalResponses: responses?.length || 0 }
         }
       };
     }
@@ -195,7 +195,7 @@ export function buildChartForQuestion(
           title: question?.text ?? 'Rating',
           series: [{ id: question.id, points }],
           total,
-          meta: { kind: 'rating', scaleSettings }
+          meta: { kind: 'rating', scaleSettings, totalResponses: responses?.length || 0 }
         }
       };
     }
@@ -220,7 +220,7 @@ export function buildChartForQuestion(
           title: question?.text ?? 'Yes/No',
           series: [{ id: question.id, points }],
           total,
-          meta: { kind: 'boolean' }
+          meta: { kind: 'boolean', totalResponses: responses?.length || 0 }
         }
       };
     }

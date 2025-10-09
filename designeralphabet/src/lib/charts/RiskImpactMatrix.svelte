@@ -58,7 +58,7 @@ import { getRiskColor, getThemeColors } from '$lib/utils/colors';
 			// Calculate impact and likelihood based on response characteristics
 			// This is a simplified calculation - in reality, these might be set by facilitators
 			const textLength = response.text.length;
-			const voteCount = response.votes?.length || 0;
+			const voteCount = Number(response.votes) || 0;
 
 			// Impact: based on votes and text complexity (1-5 scale)
 			const impact = Math.min(

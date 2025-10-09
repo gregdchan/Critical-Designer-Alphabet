@@ -5,7 +5,7 @@
 	 * Each question gets its own chart based on Sanity configuration
 	 */
 	import { browser } from '$app/environment';
-    import { responses, questions, phases } from '$lib/realtime';
+    import { responses, questions, phases, participants } from '$lib/realtime';
     import { buildChartForQuestion, type InferredQuestionType } from '$lib/aggregators/questionCharts';
     import BarChart from '$lib/components/charts/BarChart.svelte';
     import PieChart from '$lib/components/charts/PieChart.svelte';
@@ -64,6 +64,18 @@ $: chartEntries = ((): ChartEntry[] => {
 
 // Get phase info
 $: phase = $phases.find(p => p.phase_key === phaseKey || p.id === phaseKey);
+
+// Helper to enrich responses with participant data
+function enrichResponses(responses: any[]) {
+    return responses.map(r => {
+        const participant = $participants.find(p => p.id === r.participant_id);
+        return {
+            ...r,
+            participantName: participant?.name,
+            participantColor: participant?.color
+        };
+    });
+}
 </script>
 
 {#if browser}
@@ -112,15 +124,17 @@ $: phase = $phases.find(p => p.phase_key === phaseKey || p.id === phaseKey);
                 />
             {:else if type === 'voting' || type === 'openText'}
                 <WordCloudChart
-                    responses={$responses.filter(r => r.question_id === question.id)}
+                    responses={enrichResponses($responses.filter(r => r.question_id === question.id))}
                     {width}
                     {height}
                     question={question.text || ''}
                 />
             {:else if type === 'multipleChoice' && data}
-                <BarChart data={data} {width} {height} />
-            {:else if (type === 'rating' || type === 'boolean') && data}
-                <PieChart data={data} {width} {height} />
+                <BarChart data={data} title={question.text || ''} />
+            {:else if type === 'rating' && data}
+                <LineChart data={data} title={question.text || ''} />
+            {:else if type === 'boolean' && data}
+                <PieChart data={data} title={question.text || ''} />
             {:else}
                 <div class="no-data panel p-8 text-center">
                     <p class="text-xs text-secondary">No responses yet</p>

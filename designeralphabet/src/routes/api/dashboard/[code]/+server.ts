@@ -99,7 +99,7 @@ export const GET: RequestHandler = async ({ params }) => {
 				const question = Array.isArray(response.questions)
 					? response.questions[0]
 					: response.questions;
-				const voteCount = Array.isArray(response.votes) ? response.votes.length : 0;
+				const voteCount = Number(response.votes ?? 0);
 				const responseLength = response.text?.length || 0;
 
 				// Calculate meaningful metrics instead of random values
@@ -116,7 +116,7 @@ export const GET: RequestHandler = async ({ params }) => {
 					lens: question?.section || 'Unknown',
 					type: question?.response_type || 'written',
 					mapType: question?.map_type || 'responses',
-					votes: Array.isArray(response.votes) ? response.votes : [],
+					votes: voteCount,
 					cards: Array.isArray(response.cards) ? response.cards : [],
 					createdAt: response.created_at,
 					// Add fields needed for visualizations - ensure no NaN values
@@ -134,7 +134,7 @@ export const GET: RequestHandler = async ({ params }) => {
 					const participantResponses =
 						responses?.filter((r) => r.participant_id === participant.id) || [];
 					const totalVotes = participantResponses.reduce((sum, r) => {
-						const voteCount = Array.isArray(r.votes) ? r.votes.length : 0;
+						const voteCount = Number(r.votes ?? 0);
 						return sum + voteCount;
 					}, 0);
 
