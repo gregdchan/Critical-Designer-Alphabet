@@ -8,9 +8,9 @@
   color-scheme: light;
 
   /* Brand palette (HSL triplets, so we can use / <alpha>) */
-  --teal-dark: 184 95% 17%;
-  --teal:      180 100% 22%;
-  --teal-lite: 180 100% 35%;
+  --teal-dark: 220 80% 18%;
+  --teal:      220 82% 28%;
+  --teal-lite: 220 80% 40%;
   --orange:    32  88% 54%;
   --orange-dk: 21  96% 43%;
   --cream:     10  50% 91%;
