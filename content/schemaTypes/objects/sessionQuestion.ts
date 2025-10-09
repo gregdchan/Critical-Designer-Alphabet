@@ -248,14 +248,36 @@ export const sessionQuestion = defineField({
       name: 'recommendedDashboards',
       type: 'array',
       title: 'Dashboards to Display',
-      description: `Select which visualizations to show for this question. Note compatibility:
-      • Written: Overview, Heatmap, Roadmap, Quad Bubbles, Word Cloud, Timeline, Leaderboard, Chat
-      • Landscape (2D): Overview, Response Landscape, Timeline, Leaderboard, Chat
-      • Scale: Overview, Line Chart, Timeline, Leaderboard, Chat
-      • Single/Multi Choice: Overview, Bar Chart, Pie Chart, Heatmap, Timeline, Leaderboard, Chat
-      • Risk Assessment: Overview, Risk Impact Matrix, Timeline, Leaderboard, Chat
-      • Maturity Dial: Overview, Maturity Dial, Timeline, Leaderboard, Chat
-      • Inclusivity Meter: Overview, Inclusivity Meter, Timeline, Leaderboard, Chat`,
+      description: `Select which visualizations to show for this question. Defaults are automatically set based on response type.
+      • Written: Heatmap, Word Cloud
+      • Landscape (2D): Response Landscape
+      • Scale: Line Chart
+      • Single/Multi Choice: Bar Chart, Pie Chart
+      • Risk Assessment: Risk Impact Matrix
+      • Maturity Dial: Maturity Dial
+      • Inclusivity Meter: Inclusivity Meter`,
+      initialValue: (context: any) => {
+        const parent = context?.parent;
+        const responseType = parent?.responseType || 'written';
+        switch (responseType) {
+          case 'singleChoice':
+          case 'multiSelect':
+            return ['barChart', 'pieChart'];
+          case 'scale':
+            return ['lineChart'];
+          case 'landscape':
+            return ['response-landscape'];
+          case 'riskAssessment':
+            return ['riskImpactMatrix'];
+          case 'maturityDial':
+            return ['maturityDial'];
+          case 'inclusivityMeter':
+            return ['inclusivityMeter'];
+          case 'written':
+          default:
+            return ['heatmap', 'wordcloud'];
+        }
+      },
       of: [
         {
           type: 'string',

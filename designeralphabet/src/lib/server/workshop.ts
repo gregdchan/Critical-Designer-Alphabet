@@ -494,6 +494,37 @@ export async function addQuestion({
 	recommendedDashboards?: string[];
 	enableVoting?: boolean | null;
 }) {
+	// Auto-infer recommended dashboards if not provided
+	let dashboards = recommendedDashboards ?? [];
+	if (dashboards.length === 0 && responseType) {
+		// Auto-set sensible defaults based on response type
+		switch (responseType) {
+			case 'singleChoice':
+			case 'multiSelect':
+				dashboards = ['barChart', 'pieChart'];
+				break;
+			case 'scale':
+				dashboards = ['lineChart'];
+				break;
+			case 'landscape':
+				dashboards = ['response-landscape'];
+				break;
+			case 'riskAssessment':
+				dashboards = ['riskImpactMatrix'];
+				break;
+			case 'maturityDial':
+				dashboards = ['maturityDial'];
+				break;
+			case 'inclusivityMeter':
+				dashboards = ['inclusivityMeter'];
+				break;
+			case 'written':
+			default:
+				dashboards = ['heatmap', 'wordcloud'];
+				break;
+		}
+	}
+
 	const response = await supabaseAdmin
 		.from('questions')
 		.insert({
@@ -506,7 +537,7 @@ export async function addQuestion({
 			config: config ?? {},
 			phase_key: phaseKey ?? null,
 			order_index: typeof orderIndex === 'number' ? orderIndex : null,
-			recommended_dashboards: recommendedDashboards ?? [],
+			recommended_dashboards: dashboards,
 			enable_voting: enableVoting ?? true
 		})
 		.select()

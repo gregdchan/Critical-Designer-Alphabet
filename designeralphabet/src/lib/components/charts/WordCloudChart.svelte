@@ -67,12 +67,14 @@
 	): WordBubble[] {
 		if (data.length === 0) return [];
 
-		// Calculate total votes
+		// Calculate total votes and max votes for better scaling
 		const totalVotes = data.reduce((sum, r) => sum + (r.votes || 0), 0);
+		const maxVotes = Math.max(...data.map(r => r.votes || 0), 1);
+		const minVotes = Math.min(...data.map(r => r.votes || 0).filter(v => v > 0), 0);
 
-		// Bubble sizing
-		const minRadius = 20;
-		const maxRadius = 60;
+		// Bubble sizing - more dramatic range to emphasize top items
+		const minRadius = 18;
+		const maxRadius = 80;
 
 		// Map responses to bubbles with vote percentages
 		const basePalette = Object.fromEntries(
@@ -112,15 +114,17 @@
 				const votePercentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
 				const lensLabel = normaliseLens(response.lens);
 
-				// Scale radius based on vote percentage
+				// Scale radius based on votes with exponential curve for more dramatic differences
 				let radius: number;
-				if (totalVotes > 0) {
-					// Vote-based sizing
-					radius = minRadius + (votePercentage / 100) * (maxRadius - minRadius);
+				if (totalVotes > 0 && maxVotes > 0) {
+					// Exponential vote-based sizing for more emphasis on popular items
+					const normalizedVotes = votes / maxVotes; // 0 to 1
+					const exponentialScale = Math.pow(normalizedVotes, 0.6); // Soften but still emphasize top
+					radius = minRadius + exponentialScale * (maxRadius - minRadius);
 				} else {
 					// Equal sizing with some variation based on text length
 					const textLen = response.text?.length || 10;
-					radius = minRadius + Math.min(15, Math.sqrt(textLen) * 2);
+					radius = minRadius + Math.min(12, Math.sqrt(textLen) * 1.5);
 				}
 
 				// Use participant color if available, otherwise fall back to lens color
@@ -205,14 +209,24 @@
 			.attr('class', 'bubble')
 			.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
 
+		// Calculate top tier for visual emphasis
+		const sortedByVotes = [...positionedBubbles].sort((a, b) => b.votes - a.votes);
+		const topTierThreshold = sortedByVotes[Math.floor(sortedByVotes.length * 0.2)]?.votes || 0;
+
 		// Add circles
 		bubbleGroups
 			.append('circle')
 			.attr('r', (d: any) => d.radius)
 			.attr('fill', (d: any) => d.color)
-			.attr('opacity', 0.75)
-			.attr('stroke', 'hsl(var(--surface-elevated))')
-			.attr('stroke-width', 2)
+			.attr('opacity', (d: any) => {
+				// Top 20% get full opacity, rest get reduced
+				return d.votes >= topTierThreshold ? 0.9 : 0.65;
+			})
+			.attr('stroke', (d: any) => {
+				// Top items get highlighted stroke
+				return d.votes >= topTierThreshold ? theme.brand : 'hsl(var(--surface-elevated))';
+			})
+			.attr('stroke-width', (d: any) => d.votes >= topTierThreshold ? 3 : 2)
 			.style('cursor', 'pointer')
 			.on('mouseenter', function (event: any, d: any) {
 				d3.select(this)
@@ -263,12 +277,13 @@
 					.style('left', event.pageX + 15 + 'px')
 					.style('top', event.pageY - 10 + 'px');
 			})
-			.on('mouseleave', function () {
+			.on('mouseleave', function (event: any, d: any) {
+				const isTopTier = d.votes >= topTierThreshold;
 				d3.select(this)
 					.transition()
 					.duration(200)
-					.attr('opacity', 0.75)
-					.attr('stroke-width', 2);
+					.attr('opacity', isTopTier ? 0.9 : 0.65)
+					.attr('stroke-width', isTopTier ? 3 : 2);
 
 				d3.select('body').selectAll('.word-cloud-tooltip').remove();
 			});

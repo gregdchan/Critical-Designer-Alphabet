@@ -17,7 +17,8 @@
     import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
-	import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
+	import SupercloudChart from '$lib/components/charts/SupercloudChart.svelte';
+	import SuperlineChart from '$lib/components/charts/SuperlineChart.svelte';
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import PieChart from '$lib/components/charts/PieChart.svelte';
 	import LineChart from '$lib/components/charts/LineChart.svelte';
@@ -51,6 +52,7 @@
 		| 'heatmap'
 		| 'roadmap'
 		| 'supercloud'
+		| 'superline'
 		| 'barChart'
 		| 'pieChart'
 		| 'lineChart'
@@ -98,7 +100,13 @@
 		supercloud: {
 			id: 'supercloud',
 			label: 'Supercloud',
-			description: 'All words and responses from the entire session in one view.',
+			description: 'Multi-chart aggregation: responses, choices, and scales combined.',
+			layout: 'main'
+		},
+		superline: {
+			id: 'superline',
+			label: 'Superline',
+			description: 'All scale/slider questions overlaid for comparative trend analysis.',
 			layout: 'main'
 		},
 		barChart: {
@@ -175,6 +183,7 @@
 		'timeline',
 		'leaderboard',
 		'supercloud',
+		'superline',
 		'barChart',
 		'pieChart',
 		'lineChart',
@@ -806,11 +815,11 @@
 										✨ Supercloud
 									</h2>
 									<p class="text-sm text-ink-muted mt-2">
-										All words and responses from the entire session in one view.
+										Multi-chart aggregation: Responses sized by votes, choices by frequency, scales by count.
 									</p>
 								</header>
 								<div class="w-full h-[700px] overflow-hidden">
-									<WordCloudChart responses={responsesForViz} width={1400} height={700} question="All Session Responses" />
+									<SupercloudChart responses={responsesForViz} questions={questionsList} />
 								</div>
 							</div>
 						{/key}
@@ -977,6 +986,29 @@
 								{:else}
 									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
 										No scale questions in this phase.
+									</div>
+								{/if}
+							{:else if boardId === 'superline'}
+								{@const scaleQuestions = questionsList.filter(q => q.response_type === 'scale')}
+								{#if scaleQuestions.length > 0}
+									<div
+										class="presentation-panel rounded-2xl border border-teal-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(20,184,166,0.2)]"
+									>
+										<header class="mb-4">
+											<h2 class="text-xl font-semibold text-slate-100">
+												{BOARD_DEFINITIONS[boardId].label}
+											</h2>
+											<p class="text-sm text-ink-muted">
+												{BOARD_DEFINITIONS[boardId].description}
+											</p>
+										</header>
+										<div class="w-full h-[600px]">
+											<SuperlineChart responses={responsesForViz} questions={questionsList} />
+										</div>
+									</div>
+								{:else}
+									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
+										No scale/slider questions in this session.
 									</div>
 								{/if}
 								{:else if boardId === 'quadBubbles' || boardId === 'participationPulse' || boardId === 'riskImpactMatrix'}
