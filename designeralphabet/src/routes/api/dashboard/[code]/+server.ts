@@ -91,7 +91,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			throw new Error(chatError.message);
 		}
 
-		// Transform responses for visualization
+		// Transform responses to include both snake_case and camelCase for compatibility
 		const transformedResponses =
 			responses?.map((response) => {
 				const participant = participants?.find((p) => p.id === response.participant_id);
@@ -110,7 +110,10 @@ export const GET: RequestHandler = async ({ params }) => {
 
 				return {
 					id: response.id,
-					participantId: response.participant_id,
+					room_code: code.toUpperCase(),
+					question_id: response.question_id,
+					participant_id: response.participant_id, // snake_case for gamification.ts
+					participantId: response.participant_id, // camelCase for existing code compatibility
 					participantName: participant?.name || 'Anonymous',
 					text: response.text || '',
 					lens: question?.section || 'Unknown',
@@ -118,63 +121,21 @@ export const GET: RequestHandler = async ({ params }) => {
 					mapType: question?.map_type || 'responses',
 					votes: voteCount,
 					cards: Array.isArray(response.cards) ? response.cards : [],
-					createdAt: response.created_at,
+					created_at: response.created_at, // snake_case for gamification.ts
+					createdAt: response.created_at, // camelCase for existing code compatibility
+					metadata: null,
 					// Add fields needed for visualizations - ensure no NaN values
 					impact: isNaN(impact) ? 5 : impact,
 					effort: isNaN(effort) ? 5 : effort,
 					urgency: isNaN(urgency) ? 5 : urgency,
-					feasibility: isNaN(feasibility) ? 5 : feasibility
+					feasibility: isNaN(feasibility) ? 5 : feasibility,
+					// Include questions data for badge calculations
+					questions: question
 				};
 			}) || [];
 
-		// Create participant leaderboard data
-		const participantStats =
-			participants
-				?.map((participant) => {
-					const participantResponses =
-						responses?.filter((r) => r.participant_id === participant.id) || [];
-					const totalVotes = participantResponses.reduce((sum, r) => {
-						const voteCount = Number(r.votes ?? 0);
-						return sum + voteCount;
-					}, 0);
-
-					const participantTimeline = timeline?.filter((t) => t.owner === participant.name) || [];
-					const participantChat = chat?.filter((c) => c.participant_id === participant.id) || [];
-
-					// Calculate engagement score
-					const responseScore = participantResponses.length * 10;
-					const voteScore = totalVotes * 2;
-					const timelineScore = participantTimeline.length * 15;
-					const chatScore = participantChat.length * 5;
-					const pointsScore = participant.points || 0;
-
-					const totalScore = responseScore + voteScore + timelineScore + chatScore + pointsScore;
-
-					return {
-						id: participant.id,
-						name: participant.name,
-						role: participant.role,
-						avatarColor: participant.color,
-						joinedAt: participant.created_at,
-						contributionCount: participantResponses.length,
-						votesReceived: totalVotes,
-						timelineEntries: participantTimeline.length,
-						chatMessages: participantChat.length,
-						points: participant.points || 0,
-						score: totalScore,
-						badges: participant.badges || [],
-						// Calculate recent activity
-						lastActivity: Math.max(
-							...[
-								...participantResponses.map((r) => new Date(r.created_at).getTime()),
-								...participantTimeline.map((t) => new Date(t.created_at).getTime()),
-								...participantChat.map((c) => new Date(c.created_at).getTime())
-							].filter(Boolean),
-							new Date(participant.created_at).getTime()
-						)
-					};
-				})
-				.sort((a, b) => b.score - a.score) || [];
+		// Don't calculate scores in API - let dashboard use gamification.ts for consistent scoring
+		// Return raw participants so getLeaderboard() can calculate accurate scores with badges
 
 		// Transform timeline for better display
 		const transformedTimeline =
@@ -198,7 +159,7 @@ export const GET: RequestHandler = async ({ params }) => {
 				challenge: session.challenge,
 				createdAt: session.created_at
 			},
-			participants: participantStats,
+			participants: participants || [],
 			responses: transformedResponses,
 			timeline: transformedTimeline,
 			questions: questions || [],
