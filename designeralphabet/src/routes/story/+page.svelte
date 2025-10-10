@@ -83,13 +83,15 @@
   $: participantResponses = (responses || []).filter((r) => r.participant_id === selectedParticipantId);
 
   // Pull query params to prefill
+  let hasLoadedFromParams = false;
   $: {
     const url = $page?.url;
-    if (url) {
+    if (url && !hasLoadedFromParams) {
       const code = url.searchParams.get('code');
       const pid = url.searchParams.get('participant');
       if (code && code !== sessionCode) {
         sessionCode = code;
+        hasLoadedFromParams = true;
         // load session automatically
         loadSession();
       }
