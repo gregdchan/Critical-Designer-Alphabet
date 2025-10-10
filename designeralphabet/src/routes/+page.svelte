@@ -76,11 +76,11 @@
 					Inclusive Planning Platform
 				</span>
 				<h1 class="text-3xl font-bold leading-tight text-ink sm:text-4xl">
-					Critical Designer Alphabet
+					Critical Designer Planner
 				</h1>
 				<p class="max-w-2xl text-lg leading-relaxed text-ink-2">
-					A collaborative planning platform for inclusive design thinking. Create live sessions,
-					explore design cards, and visualize insights through interactive data storytelling.
+					Facilitate justice-centered design sessions with inclusive prompts, real-time
+					collaboration, and gamified interactions that make every voice heard.
 				</p>
 				<div class="flex flex-wrap items-center gap-4">
 					<a
@@ -135,24 +135,20 @@
 	<div class="flex flex-col gap-10 lg:flex-row">
 		<div class="flex-1 space-y-6">
 			<h2 class="font-retro text-xl uppercase tracking-[0.4em] text-brand">
-				Gamified Justice Loop
+				Critical Design Engagement Loop
 			</h2>
 			<p class="max-w-xl text-sm text-ink-2">
-				Every session combines thoughtful design prompts with engaging interactions. Earn points for
-				inclusive participation, unlock achievement badges, and enjoy smooth animations that keep
-				everyone engaged and accessible.
+				This platform empowers teams to surface, explore, and engage in strategic conversations around critical design. Through deeply inclusive prompts and collaborative tools, teams can co-create, share values, and address concerns in real time.
 			</p>
 			<ul class="space-y-4 text-xs uppercase tracking-[0.25em] text-ink-2">
 				<li class="flex items-center gap-3 text-rose-500">
-					<span class="h-2 w-8 rounded-full bg-rose-400" /> Interactive prompts that adapt to your team's
-					needs
+					<span class="h-2 w-8 rounded-full bg-rose-400" /> Adaptive prompts that spark meaningful, justice-centered dialogue
 				</li>
 				<li class="flex items-center gap-3 text-brand">
-					<span class="h-2 w-8 rounded-full bg-brand" /> Live timers that keep everyone synchronized
+					<span class="h-2 w-8 rounded-full bg-brand" /> Gamified design stages to encourage inclusive participation
 				</li>
 				<li class="flex items-center gap-3 text-emerald-500">
-					<span class="h-2 w-8 rounded-full bg-emerald-400" /> Achievement system with inclusive design
-					challenges
+					<span class="h-2 w-8 rounded-full bg-emerald-400" /> Achievement badges for surfacing shared values and addressing issues
 				</li>
 			</ul>
 		</div>
@@ -161,7 +157,7 @@
 				class="surface rounded-[1.75rem] p-6 shadow-lg"
 			>
 				<h3 class="font-techno text-sm uppercase tracking-[0.3em] text-ink">Badge Deck</h3>
-				<p class="mt-2 text-xs text-ink-2">Stack accolades for inclusive facilitation feats.</p>
+				<p class="mt-2 text-xs text-ink-2">Earn recognition for inclusive facilitation and strategic co-creation.</p>
 				<div class="mt-6 grid gap-4 md:grid-cols-3">
 					{#each badgeDeck as badge}
 						<div
@@ -178,8 +174,7 @@
 			<div
 				class="rounded-[1.75rem] border border-rose-200 bg-rose-50 px-6 py-5 text-xs uppercase tracking-[0.25em] text-rose-500 shadow-sm"
 			>
-				Real-time collaboration, multilingual support, and engaging interactions help teams break
-				through traditional barriers.
+				Real-time collaboration, multilingual support, and accessible design help teams break through barriers and co-create with intention.
 			</div>
 		</div>
 	</div>
@@ -189,17 +184,16 @@
 	<div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 		<div class="space-y-5">
 			<h2 class="font-retro text-xl uppercase tracking-[0.4em] text-emerald-500">
-				Inclusive Arcade Checklist
+				Inclusive Planning Checklist
 			</h2>
 			<p class="text-sm text-ink-2">
-				High contrast design, keyboard navigation, motion controls, and multilingual support ensure
-				everyone can participate fully in collaborative sessions.
+				Designed for accessibility and inclusion, this tool ensures every voice is heard and every idea is valued throughout the design process.
 			</p>
 			<ul class="space-y-3 text-xs uppercase tracking-[0.3em] text-ink-2">
 				<li>Multilingual prompts and descriptions</li>
 				<li>Right-to-left language support</li>
-				<li>Clear focus indicators and easy navigation</li>
-				<li>Secure team collaboration features</li>
+				<li>Clear focus indicators and keyboard navigation</li>
+				<li>Secure, transparent team collaboration</li>
 			</ul>
 		</div>
 		<div
@@ -210,17 +204,13 @@
 			</h3>
 			<div class="mt-4 space-y-4 text-xs text-ink-2">
 				<p class="leading-relaxed">
-					<strong class="text-ink">Live Collaboration:</strong> See teammates join, chat in
-					real-time, and work through
-					prompts together.
+					<strong class="text-ink">Facilitated Collaboration:</strong> Teams explore ideas, themes, and concerns together with real-time feedback and shared prompts.
 				</p>
 				<p class="leading-relaxed">
-					<strong class="text-ink">Customizable Content:</strong> Themed sessions, achievement badges,
-					and localized prompts.
+					<strong class="text-ink">Strategic Co-Creation:</strong> Gamified sessions, achievement badges, and inclusive design challenges drive engagement and shared understanding.
 				</p>
 				<p class="leading-relaxed">
-					<strong class="text-ink">Easy Sharing:</strong> Export session summaries and insights for
-					follow-up discussions.
+					<strong class="text-ink">Insightful Summaries:</strong> Export session insights to support ongoing change management and design planning.
 				</p>
 			</div>
 		</div>
