@@ -2,7 +2,8 @@
 	import { onDestroy, onMount } from 'svelte';
 	import * as d3 from 'd3';
 	import { getThemeColors } from '$lib/utils/colors';
-	import type { Question } from '$lib/types/workshop';
+	// Accept minimal Question shape from either realtime/workshop sources
+	type AnyQuestion = { id: string; text?: string; response_type?: string | null; config?: any };
 
 	type Response = {
 		id: string;
@@ -16,7 +17,7 @@
 	};
 
 	export let responses: Response[] = [];
-	export let questions: Question[] = [];
+	export let questions: AnyQuestion[] = [];
 
 	let container: HTMLDivElement | null = null;
 	let width = 900;

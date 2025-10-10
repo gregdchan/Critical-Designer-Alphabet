@@ -395,7 +395,7 @@
 		// Collect dashboards from manually selected dashboards in Sanity
 		phaseQuestions.forEach((q) => {
 			// Check for field (supports both snake_case from DB and camelCase from Sanity)
-			const selectedDashboards = q.recommendedDashboards || q.recommended_dashboards;
+			const selectedDashboards = (q as any).recommendedDashboards ?? q.recommended_dashboards;
 
 			if (Array.isArray(selectedDashboards) && selectedDashboards.length > 0) {
 				selectedDashboards.forEach((d: string) => {

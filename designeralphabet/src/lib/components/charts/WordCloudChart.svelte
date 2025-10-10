@@ -17,8 +17,8 @@
 	export let question = '';
 
 	let container: HTMLDivElement | null = null;
-	let width = 900;
-	let height = 600;
+	export let width: number = 900;
+	export let height: number = 600;
 	let svg: SVGSVGElement;
 	let mounted = false;
 
