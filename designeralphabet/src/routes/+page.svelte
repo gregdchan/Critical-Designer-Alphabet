@@ -65,8 +65,8 @@
     ];
 </script>
 
-<section class="surface rounded-3xl px-8 py-12 shadow-xl">
-	<div class="grid gap-12 lg:grid-cols-2">
+<section class="surface rounded-3xl shadow-xl p-8">
+	<div class="grid gap-8 lg:grid-cols-2">
 		<div class="space-y-8">
 			<div class="space-y-6">
 				<span
@@ -110,11 +110,11 @@
 			</div>
 		</div>
 
-		<div class="surface rounded-3xl p-6">
+		<div class="surface-elevated rounded-2xl p-6 border border-line">
 			<h2 class="mb-6 text-lg font-semibold text-ink">Session Features</h2>
 			<div class="space-y-4">
 				{#each playModes as mode}
-					<div class="flex gap-4 rounded-lg border border-line bg-surface-elevated p-4">
+					<div class="flex gap-4 rounded-lg border border-line bg-surface p-4">
 						<div
 							class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-brand"
 						>
@@ -131,14 +131,14 @@
 	</div>
 </section>
 
-<section class="surface mt-16 rounded-[2.5rem] px-6 py-12 sm:px-10">
+<section class="surface mt-16 rounded-[2.5rem] p-8">
 	<div class="flex flex-col gap-10 lg:flex-row">
 		<div class="flex-1 space-y-6">
             <h2 class="font-retro text-xl uppercase tracking-[0.4em] text-brand">
                 Justice‑Centered Engagement Loop
             </h2>
             <p class="max-w-xl text-sm text-ink-2">
-                Use simple prompts and live facilitation to gather everyone’s input, decide what matters, and plan next steps together.
+                Use simple prompts and live facilitation to gather everyone's input, decide what matters, and plan next steps together.
             </p>
             <ul class="space-y-4 text-xs uppercase tracking-[0.25em] text-ink-2">
                 <li class="flex items-center gap-3 text-rose-500">
@@ -154,7 +154,7 @@
 		</div>
 		<div class="flex-1 space-y-5">
 			<div
-				class="surface rounded-[1.75rem] p-6 shadow-lg"
+				class="surface-elevated rounded-[1.75rem] p-6 shadow-lg border border-line"
 			>
 				<h3 class="font-techno text-sm uppercase tracking-[0.3em] text-ink">Badge Deck</h3>
             <p class="mt-2 text-xs text-ink-2">Earn recognition for thoughtful facilitation and helpful collaboration.</p>
@@ -180,7 +180,7 @@
 	</div>
 </section>
 
-<section class="surface mt-16 rounded-[2.5rem] px-6 py-12 sm:px-10">
+<section class="surface mt-16 rounded-[2.5rem] p-8">
 	<div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 		<div class="space-y-5">
             <h2 class="font-retro text-xl uppercase tracking-[0.4em] text-emerald-500">
@@ -198,7 +198,7 @@
             </ul>
 		</div>
 		<div
-			class="surface rounded-[2rem] p-6 shadow-lg"
+			class="surface-elevated rounded-[2rem] p-6 shadow-lg border border-line"
 		>
             <h3 class="font-techno text-sm uppercase tracking-[0.3em] text-rose-500">
                 Platform Capabilities
