@@ -11,7 +11,8 @@
   import type { ChartData } from '$lib/types/charts';
 
   const chartMap = {
-    multipleChoice: BarChart,
+    multipleChoiceBar: BarChart,
+    multipleChoicePie: PieChart,
     rating: LineChart,
     boolean: PieChart,
     voting: WordCloudChart,

@@ -14,16 +14,5 @@
 				Designer Alphabet.
 			</p>
 		</div>
-		<div
-			class="flex flex-wrap items-center gap-4 text-[0.65rem] uppercase tracking-[0.2em] text-ink-muted"
-		>
-			<span>The Designer’s Critical Alphabet is by Dr. Lesley-Ann Noel.</span>
-			<a
-				class="rounded-full border border-transparent px-3 py-1 text-brand transition hover:border-blue-300 hover:bg-blue-50 hover:text-brand"
-				href="/credits"
-			>
-				Credits &amp; Licensing
-			</a>
-		</div>
 	</div>
 </footer>

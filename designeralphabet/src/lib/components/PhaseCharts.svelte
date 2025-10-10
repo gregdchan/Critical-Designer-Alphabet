@@ -20,7 +20,8 @@ export let height = 520;
 
 // Map inferred types to components
 const componentMap: Record<InferredQuestionType, any> = {
-    multipleChoice: BarChart,
+    multipleChoiceBar: BarChart,
+    multipleChoicePie: PieChart,
     rating: LineChart,
     boolean: PieChart,
     voting: WordCloudChart,
@@ -148,8 +149,10 @@ function enrichResponses(responses: any[], question: any) {
                     {height}
                     question={question.text || ''}
                 />
-            {:else if type === 'multipleChoice' && data}
+            {:else if type === 'multipleChoiceBar' && data}
                 <BarChart data={data} title={question.text || ''} />
+            {:else if type === 'multipleChoicePie' && data}
+                <PieChart data={data} title={question.text || ''} />
             {:else if type === 'rating' && data}
                 <LineChart data={data} title={question.text || ''} />
             {:else if type === 'boolean' && data}
@@ -163,7 +166,7 @@ function enrichResponses(responses: any[], question: any) {
 						<!-- Chart Type Badge -->
 						<div class="mt-3 flex items-center justify-between">
                     <span class="px-2 py-1 bg-brand/10 text-brand text-xs rounded font-medium">
-                        {type}
+                        {type === 'multipleChoiceBar' ? 'bar' : type === 'multipleChoicePie' ? 'pie' : type}
                     </span>
                     <span class="text-xs text-secondary">
                         {data?.meta?.totalResponses ?? $responses.filter(r => r.question_id === question.id).length} responses

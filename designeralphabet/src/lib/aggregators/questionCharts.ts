@@ -3,7 +3,8 @@ import type { Response } from '$lib/gamification';
 import type { ChartData, ChartPoint } from '$lib/types/charts';
 
 export type InferredQuestionType =
-  | 'multipleChoice'
+  | 'multipleChoiceBar'
+  | 'multipleChoicePie'
   | 'rating'
   | 'boolean'
   | 'voting'
@@ -59,8 +60,8 @@ export function inferQuestionType(question: Question, responses: Response[]): In
   if (Array.isArray(recommended) && recommended.length > 0) {
     const chart = recommended[0].toLowerCase();
     if (chart === 'line' || chart === 'linechart') return 'rating';
-    if (chart === 'pie' || chart === 'piechart') return 'multipleChoice';
-    if (chart === 'bar' || chart === 'barchart') return 'multipleChoice';
+    if (chart === 'pie' || chart === 'piechart') return 'multipleChoicePie';
+    if (chart === 'bar' || chart === 'barchart') return 'multipleChoiceBar';
     if (chart === 'wordcloud' || chart === 'word cloud') return 'openText';
   }
 
@@ -69,7 +70,7 @@ export function inferQuestionType(question: Question, responses: Response[]): In
   if (explicit) {
     // Normalize common values into our set
     const norm = explicit.toLowerCase();
-    if (['multiple_choice', 'multiselect', 'singlechoice', 'singlechoice', 'choice'].includes(norm)) return 'multipleChoice';
+    if (['multiple_choice', 'multiselect', 'singlechoice', 'singlechoice', 'choice'].includes(norm)) return 'multipleChoiceBar';
     if (['scale', 'rating', 'number', 'numeric'].includes(norm)) return 'rating';
     if (['boolean', 'yesno', 'yes_no'].includes(norm)) return 'boolean';
     if (['voting', 'vote'].includes(norm)) return 'voting';
@@ -77,7 +78,7 @@ export function inferQuestionType(question: Question, responses: Response[]): In
   }
 
   const options = getOptionsFromConfig(question);
-  if (options.length > 0) return 'multipleChoice';
+  if (options.length > 0) return 'multipleChoiceBar';
 
   // Extract raw values from responses
   const texts = (responses ?? [])
@@ -88,14 +89,14 @@ export function inferQuestionType(question: Question, responses: Response[]): In
   const hasVotes = (responses ?? []).some((r) => (r?.votes ?? 0) > 0) || Boolean(question?.enable_voting);
   if (hasVotes) return 'voting';
 
-  if (texts.length === 0) return 'multipleChoice';
+  if (texts.length === 0) return 'multipleChoiceBar';
 
   if (looksBoolean(texts)) return 'boolean';
   if (looksNumeric(texts)) return 'rating';
   if (hasLongText(texts)) return 'openText';
 
   // Default
-  return 'multipleChoice';
+  return 'multipleChoiceBar';
 }
 
 export function buildChartForQuestion(
@@ -111,7 +112,8 @@ export function buildChartForQuestion(
 
   // Build chart data per inferred type
   switch (type) {
-    case 'multipleChoice': {
+    case 'multipleChoiceBar':
+    case 'multipleChoicePie': {
       const options = getOptionsFromConfig(question);
       const counts = new Map<string, number>();
 
@@ -162,7 +164,7 @@ export function buildChartForQuestion(
           title: question?.text ?? question?.section ?? 'Responses',
           series: [{ id: question.id, points }],
           total,
-          meta: { kind: 'multipleChoice', totalResponses: responses?.length || 0 }
+          meta: { kind: 'multipleChoice', viz: type === 'multipleChoicePie' ? 'pie' : 'bar', totalResponses: responses?.length || 0 }
         }
       };
     }
@@ -230,7 +232,6 @@ export function buildChartForQuestion(
       // Word cloud uses raw responses; UI will pass filtered responses directly
       return { type, data: null };
     default:
-      return { type: 'multipleChoice', data: null };
+      return { type: 'multipleChoiceBar', data: null };
   }
 }
-

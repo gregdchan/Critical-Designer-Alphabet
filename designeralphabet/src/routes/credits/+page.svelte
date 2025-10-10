@@ -8,298 +8,222 @@
 </script>
 
 <svelte:head>
-	<title>Credits & Attribution - Critical Designer Alphabet</title>
+	<title>Credits & Attribution - Critical Design Planner</title>
 	<meta
 		name="description"
-		content="Credits and attribution for The Designer's Critical Alphabet workshop platform."
+		content="Credits and attribution for the Critical Design Planner workshop platform."
 	/>
 </svelte:head>
 
-<div class="space-y-12">
-   <!-- Header -->
-   <div class="text-center">
-	   <h1 class="text-4xl font-bold text-primary mb-4">Credits & Attribution</h1>
-	   <p class="text-lg text-secondary max-w-3xl mx-auto">
-		   Acknowledging the intellectual foundations and contributors behind this platform.
-	   </p>
-   </div>
+<div class="space-y-16 max-w-5xl mx-auto px-4 py-12">
+	<!-- Header -->
+	<header class="text-center mb-10">
+		<h1 class="text-5xl font-extrabold text-primary mb-3 tracking-tight">Credits & Attribution</h1>
+		<p class="text-lg text-secondary max-w-2xl mx-auto">
+			Recognizing the foundations, creators, and communities that inspire the Critical Design Planner.
+		</p>
+	</header>
 
-   <!-- The Designer's Critical Alphabet -->
-   <section class="panel p-8">
-		   <div class="flex items-start gap-4 mb-6">
-			   <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand/20 text-brand">
-				   <Scale class="h-6 w-6" />
-			   </div>
-			   <div>
-				   <h2 class="text-2xl font-semibold text-primary mb-2">The Designer's Critical Alphabet</h2>
-				   <p class="text-secondary">Original physical card deck and intellectual foundation</p>
-			   </div>
-		   </div>
-
-		   <div class="space-y-4 text-secondary">
+	<!-- Intellectual Foundations -->
+	<section class="panel p-8 rounded-2xl shadow-lg bg-white/80">
+		<div class="flex items-center gap-5 mb-6">
+			<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-brand/15 text-brand">
+				<Scale class="h-7 w-7" />
+			</div>
+			<div>
+				<h2 class="text-2xl font-bold text-primary mb-1">Intellectual Foundations</h2>
+				<p class="text-secondary text-base">
+					Inspired by <strong>The Designer's Critical Alphabet</strong> by <span class="text-brand font-medium">Dr. Lesley-Ann Noel</span>
+				</p>
+			</div>
+		</div>
+		<div class="space-y-4 text-secondary text-base">
 			<p>
-				The foundational ideas behind this platform are inspired by <strong
-					>The Designer's Critical Alphabet</strong
-				>, a deck of physical cards created by <strong>Dr. Lesley-Ann Noel</strong>, Dean of Design
-				at OCAD University, educator, and advocate for inclusive and critical design practices.
+				The Critical Design Planner builds on the concepts introduced in <strong>The Designer's Critical Alphabet</strong>, a card deck created by <span class="text-brand font-medium">Dr. Lesley-Ann Noel</span>—Dean of Design at OCAD University and advocate for inclusive, justice-centered design.
 			</p>
-
 			<p>
-				The Critical Alphabet invites designers to reflect on issues such as power, bias,
-				sustainability, and justice in their creative work. Each card introduces a concept and a
-				prompt for deeper thinking.
+				Her work encourages designers to reflect on power, bias, sustainability, and justice. The digital platform adapts these prompts for collaborative, real-time workshops.
 			</p>
-
-			   <div class="surface-muted rounded-lg p-4 mt-6">
-				   <p class="text-primary font-medium mb-2">Creator of the physical deck:</p>
-				   <p class="text-brand">Dr. Lesley-Ann Noel</p>
-
-				   <p class="text-primary font-medium mb-2 mt-4">More information:</p>
-				   <a
-					   href="https://www.lesleyannnoel.com"
-					   target="_blank"
-					   rel="noopener noreferrer"
-					   class="inline-flex items-center gap-2 text-brand hover:text-neon-pink transition-colors"
-				   >
-					   https://www.lesleyannnoel.com
-					   <ExternalLink class="h-4 w-4" />
-				   </a>
-			   </div>
+			<div class="flex flex-wrap gap-4 mt-6">
+				<a
+					href="https://www.ocadu.ca/academics/explore-faculty/lnoel"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="inline-flex items-center gap-2 text-brand hover:text-neon-pink transition-colors font-medium"
+				>
+					OCADU Profile <ExternalLink class="h-4 w-4" />
+				</a>
+				<a
+					href="https://linkedin.com/in/lesleyannnoel?originalSubdomain=ca"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="inline-flex items-center gap-2 text-brand hover:text-neon-pink transition-colors font-medium"
+				>
+					LinkedIn <ExternalLink class="h-4 w-4" />
+				</a>
+			</div>
 		</div>
 	</section>
 
-	<!-- The Gamified Platform -->
-		<section class="panel p-8">
-		   <div class="flex items-start gap-4 mb-6">
-			   <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-retro-purple/20 text-retro-purple">
-				   <Users class="h-6 w-6" />
-			   </div>
-			   <div>
-				   <h2 class="text-2xl font-semibold text-primary mb-2">🕹️ The Gamified Platform</h2>
-				   <p class="text-secondary">Digital workshop application and facilitation environment</p>
-			   </div>
-		   </div>
-
-		   <div class="space-y-4 text-secondary">
+	<!-- Platform Credits -->
+	<section class="panel p-8 rounded-2xl shadow-lg bg-white/80">
+		<div class="flex items-center gap-5 mb-6">
+			<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-retro-purple/15 text-retro-purple">
+				<Users class="h-7 w-7" />
+			</div>
+			<div>
+				<h2 class="text-2xl font-bold text-primary mb-1">About the Platform</h2>
+				<p class="text-secondary text-base">Critical Design Planner – digital facilitation & gamified workshops</p>
+			</div>
+		</div>
+		<div class="space-y-4 text-secondary text-base">
 			<p>
-				This digital web application and gamified facilitation environment—which adapts the Critical
-				Alphabet into a real-time design thinking and policy workshop tool—was created and developed
-				by <strong>Gregory D. Chan</strong>.
+				Designed and developed by <span class="font-medium text-retro-purple">Gregory D. Chan</span>, this platform transforms the Critical Alphabet into an interactive, real-time workshop tool for design thinking and policy innovation.
 			</p>
-
-			<p>
-				This platform is an original work, building on the intellectual inspiration of the Critical
-				Alphabet while extending it into:
-			</p>
-
-			   <ul class="list-disc list-inside space-y-2 ml-4 text-secondary">
-				<li>A facilitator portal for workshop setup and rules</li>
+			<ul class="list-disc list-inside space-y-2 ml-4">
+				<li>Facilitator dashboard for session setup and rules</li>
 				<li>Live participant input and breakout sessions</li>
-				<li>Gamified scoring, badges, and engagement mechanics</li>
-				<li>Real-time data visualizations of group insights</li>
+				<li>Gamified scoring, badges, and engagement</li>
+				<li>Real-time group insights and data visualizations</li>
 				<li>Templates for organizational strategy and policy design</li>
 			</ul>
 		</div>
 	</section>
 
 	<!-- Licensing -->
-		<section class="panel p-8">
-		   <div class="flex items-start gap-4 mb-6">
-			   <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-pastel-orange/30 text-pastel-orange">
-				   <Scale class="h-6 w-6" />
-			   </div>
-			   <div>
-				   <h2 class="text-2xl font-semibold text-primary mb-2">⚖️ Licensing</h2>
-				   <p class="text-secondary">Important legal and attribution requirements</p>
-			   </div>
-		   </div>
-
-		   <div class="space-y-4">
-			   <div class="surface-muted border border-brand/30 rounded-lg p-4">
-				   <p class="text-brand">
-					   <strong>The Designer's Critical Alphabet</strong> (physical deck) remains the intellectual
-					   property of Dr. Lesley-Ann Noel. Please credit her when referencing or using the original cards.
-				   </p>
-			   </div>
-
-			   <div class="surface-muted border border-retro-purple/30 rounded-lg p-4">
-				   <p class="text-retro-purple">
-					   This web application and gamified workshop system are <strong>© Gregory D. Chan</strong>.
-					   All rights reserved.
-				   </p>
-			   </div>
-
-			   <div class="space-y-3 text-secondary">
-				   <p>
-					   • The digital platform may not be copied, distributed, or commercialized without express
-					   permission.
-				   </p>
-				   <p>
-					   • Workshops that include the physical Critical Alphabet should acknowledge Dr. Noel as the
-					   creator of the deck.
-				   </p>
-			   </div>
-		   </div>
+	<section class="panel p-8 rounded-2xl shadow-lg bg-white/80">
+		<div class="flex items-center gap-5 mb-6">
+			<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-pastel-orange/20 text-pastel-orange">
+				<Scale class="h-7 w-7" />
+			</div>
+			<div>
+				<h2 class="text-2xl font-bold text-primary mb-1">Licensing & Attribution</h2>
+				<p class="text-secondary text-base">Please respect intellectual property and attribution</p>
+			</div>
+		</div>
+		<div class="space-y-4">
+			<div class="surface-muted border border-brand/30 rounded-lg p-4 text-brand">
+				<strong>The Designer's Critical Alphabet</strong> (physical deck) is the intellectual property of Dr. Lesley-Ann Noel. Always credit her when referencing or using the original cards.
+			</div>
+			<div class="surface-muted border border-retro-purple/30 rounded-lg p-4 text-retro-purple">
+				Critical Design Planner web application &copy; Gregory D. Chan. All rights reserved.
+			</div>
+			<ul class="space-y-2 text-secondary text-base mt-2">
+				<li>• Do not copy, distribute, or commercialize this platform without permission.</li>
+				<li>• Workshops using the physical deck must acknowledge Dr. Noel as creator.</li>
+			</ul>
+		</div>
 	</section>
 
 	<!-- Resources -->
-		<section class="panel p-8">
-		   <div class="flex items-start gap-4 mb-6">
-			   <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-pastel-green/30 text-pastel-green">
-				   <Heart class="h-6 w-6" />
-			   </div>
-			   <div>
-				   <h2 class="text-2xl font-semibold text-primary mb-2">
-					   🌍 Resources for Inclusive & Pluriversal Design
-				   </h2>
-				   <p class="text-secondary">
-					   Globally recognized spaces and networks advancing justice-centered design
-				   </p>
-			   </div>
-		   </div>
-
-		   <div class="grid gap-6 md:grid-cols-2">
-			<div class="space-y-4">
-				   <div class="border-l-4 border-brand pl-4">
-					   <h3 class="font-semibold text-primary mb-2">Pluriversal Design SIG</h3>
-					   <p class="text-sm text-secondary mb-2">
-						   A global community exploring pluriversal approaches to design research and education.
-					   </p>
-					   <a
-						   href="https://pluriversal.design"
-						   target="_blank"
-						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
-					   >
-						   pluriversal.design <ExternalLink class="h-3 w-3" />
-					   </a>
-				   </div>
-
-				   <div class="border-l-4 border-neon-pink pl-4">
-					   <h3 class="font-semibold text-primary mb-2">Design Justice Network</h3>
-					   <p class="text-sm text-secondary mb-2">
-						   Principles and practices centering marginalized voices in design.
-					   </p>
-					   <a
-						   href="https://designjustice.org"
-						   target="_blank"
-						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
-					   >
-						   designjustice.org <ExternalLink class="h-3 w-3" />
-					   </a>
-				   </div>
-
-				   <div class="border-l-4 border-neon-lime pl-4">
-					   <h3 class="font-semibold text-primary mb-2">Liberatory Design</h3>
-					   <p class="text-sm text-secondary mb-2">
-						   Tools and mindsets for resisting oppression and fostering equitable collaboration.
-					   </p>
-					   <a
-						   href="https://www.design.school/liberatory-design"
-						   target="_blank"
-						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
-					   >
-						   design.school/liberatory-design <ExternalLink class="h-3 w-3" />
-					   </a>
-				   </div>
-
-				   <div class="border-l-4 border-retro-purple pl-4">
-					   <h3 class="font-semibold text-primary mb-2">Decolonising Design Group</h3>
-					   <p class="text-sm text-secondary mb-2">
-						   Scholarly and activist perspectives on decolonial and pluriversal approaches to design.
-					   </p>
-					   <a
-						   href="https://decolonisingdesign.org"
-						   target="_blank"
-						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
-					   >
-						   decolonisingdesign.org <ExternalLink class="h-3 w-3" />
-					   </a>
-				   </div>
+	<section class="panel p-8 rounded-2xl shadow-lg bg-white/80">
+		<div class="flex items-center gap-5 mb-6">
+			<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-pastel-green/30 text-pastel-green">
+				<Heart class="h-7 w-7" />
 			</div>
-
-			<div class="space-y-4">
-				   <div class="border-l-4 border-brand pl-4">
-					   <h3 class="font-semibold text-primary mb-2">World Design Organization (WDO)</h3>
-					   <p class="text-sm text-secondary mb-2">
-						   International hub supporting socially responsible design practices.
-					   </p>
-					   <a
-						   href="https://wdo.org"
-						   target="_blank"
-						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
-					   >
-						   wdo.org <ExternalLink class="h-3 w-3" />
-					   </a>
-				   </div>
-
-				   <div class="border-l-4 border-pastel-orange pl-4">
-					   <h3 class="font-semibold text-primary mb-2">Pluriversal Radio / Medium</h3>
-					   <p class="text-sm text-secondary mb-2">
-						   Essays and conversations on design for a world of many worlds.
-					   </p>
-					   <a
-						   href="https://medium.com/pluriversal-design"
-						   target="_blank"
-						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
-					   >
-						   medium.com/pluriversal-design <ExternalLink class="h-3 w-3" />
-					   </a>
-				   </div>
-
-				   <div class="border-l-4 border-brand pl-4">
-					   <h3 class="font-semibold text-primary mb-2">Global Pluralism & Design</h3>
-					   <p class="text-sm text-secondary mb-2">
-						   Broader resource on pluralism and inclusive approaches that can inspire design practice.
-					   </p>
-					   <a
-						   href="https://www.pluralism.ca"
-						   target="_blank"
-						   rel="noopener noreferrer"
-						   class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm"
-					   >
-						   pluralism.ca <ExternalLink class="h-3 w-3" />
-					   </a>
-				   </div>
+			<div>
+				<h2 class="text-2xl font-bold text-primary mb-1">🌍 Resources for Inclusive & Pluriversal Design</h2>
+				<p class="text-secondary text-base">
+					Communities and networks advancing justice-centered design
+				</p>
+			</div>
+		</div>
+		<div class="grid gap-8 md:grid-cols-2">
+			<div class="space-y-5">
+				<ResourceCard
+					title="Pluriversal Design SIG"
+					desc="A global community exploring pluriversal approaches to design research and education."
+					url="https://pluriversal.design"
+					border="border-brand"
+				/>
+				<ResourceCard
+					title="Design Justice Network"
+					desc="Principles and practices centering marginalized voices in design."
+					url="https://designjustice.org"
+					border="border-neon-pink"
+				/>
+				<ResourceCard
+					title="Liberatory Design"
+					desc="Tools and mindsets for resisting oppression and fostering equitable collaboration."
+					url="https://www.design.school/liberatory-design"
+					border="border-neon-lime"
+				/>
+				<ResourceCard
+					title="Decolonising Design Group"
+					desc="Scholarly and activist perspectives on decolonial and pluriversal approaches to design."
+					url="https://decolonisingdesign.org"
+					border="border-retro-purple"
+				/>
+			</div>
+			<div class="space-y-5">
+				<ResourceCard
+					title="World Design Organization (WDO)"
+					desc="International hub supporting socially responsible design practices."
+					url="https://wdo.org"
+					border="border-brand"
+				/>
+				<ResourceCard
+					title="Pluriversal Radio / Medium"
+					desc="Essays and conversations on design for a world of many worlds."
+					url="https://medium.com/pluriversal-design"
+					border="border-pastel-orange"
+				/>
+				<ResourceCard
+					title="Global Pluralism & Design"
+					desc="Broader resource on pluralism and inclusive approaches that can inspire design practice."
+					url="https://www.pluralism.ca"
+					border="border-brand"
+				/>
 			</div>
 		</div>
 	</section>
 
 	<!-- Acknowledgements -->
-	   <section
-		   class="panel bg-gradient-to-r from-brand/10 to-retro-purple/10 p-8"
-	   >
-		   <h2 class="text-2xl font-semibold text-primary mb-6 flex items-center gap-2">
-			   <Heart class="h-6 w-6 text-neon-pink" />
-			   🙏 Acknowledgements
-		   </h2>
-
-		   <div class="space-y-3 text-secondary">
-			   <p><strong>Dr. Lesley-Ann Noel</strong> — creator of The Designer's Critical Alphabet</p>
-			   <p>
-				   <strong>Design Justice Network and Liberatory Design</strong> — frameworks shaping equity-centered
-				   practice
-			   </p>
-			   <p>
-				   <strong>Pluriversal Design SIG and Decolonising Design Group</strong> — international research
-				   collectives expanding design theory
-			   </p>
-			   <p>
-				   <strong>Open-source communities</strong> behind SvelteKit, TailwindCSS, D3.js, and MariaDB
-			   </p>
-		   </div>
-
-		   <div class="mt-8 pt-6 border-t border-brand/30">
-			   <p class="text-center text-secondary italic">
-				   ✨ The physical cards were created by Dr. Noel. This digital workshop platform—its design,
-				   code, and game mechanics—was created by Gregory D. Chan, inspired by pluriversal and
-				   inclusive design theory.
-			   </p>
-		   </div>
-	   </section>
+	<section class="panel bg-gradient-to-r from-brand/10 to-retro-purple/10 p-8 rounded-2xl shadow-lg">
+		<h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+			<Heart class="h-7 w-7 text-neon-pink" />
+			Acknowledgements
+		</h2>
+		<div class="space-y-3 text-secondary text-base">
+			<p>
+				<span class="font-medium text-brand">Dr. Lesley-Ann Noel</span> — for the original Critical Alphabet and her leadership in inclusive design.
+			</p>
+			<p>
+				<span class="font-medium">Design Justice Network, Liberatory Design, Pluriversal Design SIG, Decolonising Design Group</span> — for frameworks and research shaping equity-centered practice.
+			</p>
+			<p>
+				<span class="font-medium">Open-source communities</span> — SvelteKit, TailwindCSS, D3.js, MariaDB.
+			</p>
+		</div>
+		<div class="mt-8 pt-6 border-t border-brand/30">
+			<p class="text-center text-secondary italic">
+				✨ The Critical Design Planner is an original digital platform by Gregory D. Chan, inspired by pluriversal and inclusive design theory, and the foundational work of Dr. Lesley-Ann Noel.
+			</p>
+		</div>
+	</section>
 </div>
+
+<!-- ResourceCard component (inline for brevity, or move to a separate file if preferred) -->
+<script lang="ts">
+	export let title: string;
+	export let desc: string;
+	export let url: string;
+	export let border: string;
+</script>
+
+<!-- Only render ResourceCard if props are present (for inline use) -->
+{#if title && desc && url && border}
+	<div class={`border-l-4 ${border} pl-4`}>
+		<h3 class="font-semibold text-primary mb-1">{title}</h3>
+		<p class="text-sm text-secondary mb-2">{desc}</p>
+		<a
+			href={url}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm font-medium"
+		>
+			{url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+			<ExternalLink class="h-3 w-3" />
+		</a>
+	</div>
+{/if}

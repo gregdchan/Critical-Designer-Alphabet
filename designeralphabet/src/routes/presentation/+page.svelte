@@ -894,7 +894,7 @@
 										<div class="space-y-8">
 											{#each choiceQuestions as question}
 												{@const qRows = responsesList.filter(r => r.question_id === question.id)}
-												{@const built = buildChartForQuestion(question, qRows)}
+									{@const built = buildChartForQuestion(question, qRows)}
 												{@const chart = built.data}
 												<div class="space-y-3">
 													<div class="flex items-center justify-between mb-2">
