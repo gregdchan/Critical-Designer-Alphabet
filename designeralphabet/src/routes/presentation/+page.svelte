@@ -869,7 +869,14 @@
 									const recommended = q.recommended_dashboards || [];
 									// Only show if explicitly set to barChart (not if empty or set to other charts)
 									const isBarChart = Array.isArray(recommended) && recommended.some(d => ['bar', 'barchart', 'barChart'].includes(d));
-									console.log('[BarChart Filter]', q.text?.substring(0, 50), { recommended, isBarChart, responseType: q.response_type });
+									console.log('[BarChart Filter]', q.text?.substring(0, 50), {
+										recommended,
+										recommendedType: typeof recommended,
+										isArray: Array.isArray(recommended),
+										stringified: JSON.stringify(recommended),
+										isBarChart,
+										responseType: q.response_type
+									});
 									return isBarChart;
 								})}
 								{#if choiceQuestions.length > 0}
@@ -913,7 +920,14 @@
 								{@const choiceQuestions = phaseQuestions.filter(q => {
 									const recommended = q.recommended_dashboards || [];
 									const isPieChart = Array.isArray(recommended) && recommended.some(d => ['pie', 'piechart', 'pieChart'].includes(d));
-									console.log('[PieChart Filter]', q.text?.substring(0, 50), { recommended, isPieChart, responseType: q.response_type });
+									console.log('[PieChart Filter]', q.text?.substring(0, 50), {
+										recommended,
+										recommendedType: typeof recommended,
+										isArray: Array.isArray(recommended),
+										stringified: JSON.stringify(recommended),
+										isPieChart,
+										responseType: q.response_type
+									});
 									return isPieChart;
 								})}
 								{#if choiceQuestions.length > 0}

@@ -562,7 +562,15 @@ export async function getQuestions(code: string): Promise<Question[]> {
 		.eq('room_code', code)
 		.order('created_at', { ascending: true });
 
-	return ensureArray(response, 'getQuestions') as Question[];
+	const questions = ensureArray(response, 'getQuestions');
+
+	// Ensure recommended_dashboards is always an array (Supabase auto-parses JSONB)
+	return questions.map(q => ({
+		...q,
+		recommended_dashboards: Array.isArray(q.recommended_dashboards)
+			? q.recommended_dashboards
+			: []
+	})) as Question[];
 }
 
 export async function addResponse({
