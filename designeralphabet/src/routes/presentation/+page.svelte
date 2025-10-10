@@ -716,43 +716,43 @@
 	{:else}
 		<main class="mx-auto px-2 sm:px-4 md:px-6 py-6 md:py-8" style="max-width: 95vw;">
 			<!-- Session Status Notice -->
-			{#if isSessionEnded}
-				<div class="mb-6 rounded-xl border border-slate-700 bg-slate-900/80 p-4 shadow-lg">
-					<div class="flex items-center gap-3">
-						<div class="rounded-full bg-slate-800 p-2">
-							<IconClock class="h-5 w-5 text-slate-400" />
-						</div>
-						<div>
-							<h3 class="text-sm font-semibold text-slate-200">Session Ended</h3>
-							<p class="text-xs text-slate-400">Showing final results from Supabase. Data is no longer updating in real-time.</p>
-						</div>
+		{#if isSessionEnded}
+			<div class="mb-6 rounded-xl border border-rose-700 bg-rose-600 p-4 shadow-lg shadow-rose-600/25">
+				<div class="flex items-center gap-3">
+					<div class="rounded-full bg-rose-700/40 p-2">
+						<IconClock class="h-5 w-5 text-white" />
+					</div>
+					<div>
+						<h3 class="text-sm font-semibold text-white">Session Ended</h3>
+						<p class="text-xs text-white/90">Showing final results from Supabase. Data is no longer updating in real-time.</p>
 					</div>
 				</div>
-			{:else if isSessionPlanned}
-				<div class="mb-6 rounded-xl border border-cyan-400/30 bg-slate-900/80 p-4 shadow-lg">
-					<div class="flex items-center gap-3">
-						<div class="rounded-full bg-cyan-900/30 p-2">
-							<IconClock class="h-5 w-5 text-cyan-400" />
-						</div>
-						<div>
-							<h3 class="text-sm font-semibold text-cyan-200">Planned Session</h3>
-							<p class="text-xs text-cyan-300/80">This session hasn't started yet. Data will update in real-time once the session goes live.</p>
-						</div>
+			</div>
+		{:else if isSessionPlanned}
+			<div class="mb-6 rounded-xl border border-amber-700 bg-amber-500 p-4 shadow-lg shadow-amber-500/25">
+				<div class="flex items-center gap-3">
+					<div class="rounded-full bg-amber-700/40 p-2">
+						<IconClock class="h-5 w-5 text-white" />
+					</div>
+					<div>
+						<h3 class="text-sm font-semibold text-white">Planned Session</h3>
+						<p class="text-xs text-white/90">This session hasn't started yet. Data will update in real-time once the session goes live.</p>
 					</div>
 				</div>
-			{:else if isSessionLive}
-				<div class="mb-6 rounded-xl border border-green-400/30 bg-slate-900/80 p-4 shadow-lg">
-					<div class="flex items-center gap-3">
-						<div class="rounded-full bg-green-900/30 p-2">
-							<span class="h-2 w-2 rounded-full bg-green-400 animate-pulse inline-block"></span>
-						</div>
-						<div>
-							<h3 class="text-sm font-semibold text-green-200">Live Session</h3>
-							<p class="text-xs text-green-300/80">Data is updating in real-time as participants engage.</p>
-						</div>
+			</div>
+		{:else if isSessionLive}
+			<div class="mb-6 rounded-xl border border-green-700 bg-green-600 p-4 shadow-lg shadow-green-600/25">
+				<div class="flex items-center gap-3">
+					<div class="rounded-full bg-green-700/40 p-2">
+						<span class="h-2 w-2 rounded-full bg-white animate-pulse inline-block"></span>
+					</div>
+					<div>
+						<h3 class="text-sm font-semibold text-white">Live Session</h3>
+						<p class="text-xs text-white/90">Data is updating in real-time as participants engage.</p>
 					</div>
 				</div>
-			{/if}
+			</div>
+		{/if}
 
 			<!-- Phase Navigation -->
 			{#if phasesList.length > 0}

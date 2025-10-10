@@ -11,7 +11,6 @@
 		participantName?: string;
 		participantColor?: string;
 		participant_id?: string | null;
-		questionType?: string; // Add question type for color coding
 	};
 
 	export let responses: WordCloudResponse[] = [];
@@ -57,10 +56,8 @@
 		x: number;
 		y: number;
 		color: string;
-		lensColor: string;
 		lens: string;
 		participant: string;
-		questionType: string;
 	};
 
 	function normaliseLens(raw?: string) {
@@ -83,15 +80,6 @@
 		// Bubble sizing - more dramatic range to emphasize top items
 		const minRadius = 18;
 		const maxRadius = 80;
-
-		// Define more diverse colors for different response types
-		const responseTypeColors = {
-			response: '#8B5CF6', // Purple - for open text responses
-			choice: '#3B82F6',   // Blue - for multiple choice
-			scale: '#10B981',    // Green - for scale/rating
-			voting: '#F59E0B',   // Amber - for voting responses
-			default: '#6366F1'   // Indigo - fallback
-		};
 
 		// Map responses to bubbles with vote percentages
 		const basePalette = Object.fromEntries(
@@ -130,7 +118,6 @@
 				const votes = response.votes || 0;
 				const votePercentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
 				const lensLabel = normaliseLens(response.lens);
-				const questionType = response.questionType || 'response';
 
 				// Scale radius based on votes with exponential curve for more dramatic differences
 				let radius: number;
@@ -145,9 +132,7 @@
 					radius = minRadius + Math.min(12, Math.sqrt(textLen) * 1.5);
 				}
 
-				// Get color based on question type for more diversity
-				const typeColor = responseTypeColors[questionType as keyof typeof responseTypeColors] || responseTypeColors.default;
-				const lensColor = resolveLensColor(lensLabel);
+				const color = resolveLensColor(lensLabel);
 
 				return {
 					id: response.id,
@@ -157,11 +142,9 @@
 					radius,
 					x: 0,
 					y: 0,
-					color: typeColor,
-					lensColor: lensColor,
+					color,
 					lens: lensLabel || 'General',
-					participant: response.participantName || 'Anonymous',
-					questionType
+					participant: response.participantName || 'Anonymous'
 				};
 			});
 
@@ -203,7 +186,14 @@
 		const wordBubbles = calculateWordBubbles(responses, theme);
 		if (wordBubbles.length === 0) return;
 
-		const positionedBubbles = packBubbles(wordBubbles, width, height);
+		// Reserve space for legend (right side) and title/stats (top/bottom)
+		const legendWidth = 170;
+		const topMargin = 40;
+		const bottomMargin = 30;
+		const chartWidth = Math.max(400, width - legendWidth);
+		const chartHeight = Math.max(300, height - topMargin - bottomMargin);
+
+		const positionedBubbles = packBubbles(wordBubbles, chartWidth, chartHeight);
 		const lensColorByName = new Map<string, string>();
 		positionedBubbles.forEach((bubble) => {
 			if (!lensColorByName.has(bubble.lens)) {
@@ -214,26 +204,37 @@
 		// Clear previous content
 		d3.select(svg).selectAll('*').remove();
 
-		const g = d3
+		const svgSel = d3
 			.select(svg)
 			.attr('width', width)
-			.attr('height', height)
-			.append('g');
+			.attr('height', height);
 
-		rootGroup = g;
+		// Create INTERACTIVE layer (bubbles) - this will be zoomed/panned
+		const interactiveGroup = svgSel
+			.append('g')
+			.attr('class', 'interactive-layer')
+			.attr('transform', `translate(0, ${topMargin})`);
+
+		rootGroup = interactiveGroup;
 		// preserve previous pan/zoom
-		rootGroup.attr('transform', currentTransform.toString());
+		rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
 
-		// enable pinch zoom and panning
+		// Create FIXED UI layer (title, legend, stats) - this stays put
+		const uiGroup = svgSel
+			.append('g')
+			.attr('class', 'ui-layer')
+			.style('pointer-events', 'none'); // Don't block interactions with bubbles
+
+		// enable pinch zoom and panning ONLY on interactive layer
 		const pad = 0.5;
 		const translateExtent: [[number, number], [number, number]] = [
-			[-width * pad, -height * pad],
-			[width * (1 + pad), height * (1 + pad)]
+			[-chartWidth * pad, -chartHeight * pad],
+			[chartWidth * (1 + pad), chartHeight * (1 + pad)]
 		];
 
 		zoomBehavior = d3
 			.zoom<SVGSVGElement, unknown>()
-			.scaleExtent([0.7, 5])
+			.scaleExtent([0.5, 8]) // Increased zoom range
 			.translateExtent(translateExtent)
 			// Ignore mouse wheel to avoid fighting page scroll; still allows touch pinch
 			.filter((event: any) => {
@@ -243,10 +244,12 @@
 			})
 			.on('zoom', (event: any) => {
 				currentTransform = event.transform;
-				if (rootGroup) rootGroup.attr('transform', currentTransform.toString());
+				if (rootGroup) {
+					rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
+				}
 			});
 
-		const svgSel = d3.select(svg)
+		svgSel
 			.on('.zoom', null)
 			.call(zoomBehavior as any)
 			.on('dblclick.zoom', null)
@@ -257,8 +260,8 @@
 			.on('mousedown.dragcursor touchstart.dragcursor', () => svgSel.style('cursor', 'grabbing'))
 			.on('mouseup.dragcursor touchend.dragcursor mouseleave.dragcursor', () => svgSel.style('cursor', 'grab'));
 
-		// Create bubble groups
-		const bubbleGroups = g
+		// Create bubble groups in INTERACTIVE layer
+		const bubbleGroups = interactiveGroup
 			.selectAll('.bubble')
 			.data(positionedBubbles)
 			.join('g')
@@ -269,16 +272,7 @@
 		const sortedByVotes = [...positionedBubbles].sort((a, b) => b.votes - a.votes);
 		const topTierThreshold = sortedByVotes[Math.floor(sortedByVotes.length * 0.2)]?.votes || 0;
 
-		// Add outer lens ring first (so it's behind the main circle)
-		bubbleGroups
-			.append('circle')
-			.attr('r', (d: any) => d.radius + 3)
-			.attr('fill', 'none')
-			.attr('stroke', (d: any) => d.lensColor)
-			.attr('stroke-width', 4)
-			.attr('opacity', 0.8);
-
-		// Add main circles with response type color
+		// Add circles
 		bubbleGroups
 			.append('circle')
 			.attr('r', (d: any) => d.radius)
@@ -323,16 +317,7 @@
 						${question ? `<div style="font-size: 11px; font-weight: 600; color: ${theme.brand}; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid hsl(var(--border-subtle));">${question}</div>` : ''}
 						<div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; color: ${theme.ink};">${d.text}</div>
 						<div style="color: ${theme.ink2}; margin-bottom: 4px; font-size: 11px;">By: ${d.participant}</div>
-						<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-							<div style="display: flex; align-items: center; gap: 4px;">
-								<div style="width: 12px; height: 12px; border-radius: 50%; background: ${d.color};"></div>
-								<span style="color: ${theme.inkMuted}; font-size: 11px; text-transform: capitalize;">${d.questionType}</span>
-							</div>
-							<div style="display: flex; align-items: center; gap: 4px;">
-								<div style="width: 12px; height: 12px; border-radius: 50%; border: 3px solid ${d.lensColor};"></div>
-								<span style="color: ${theme.inkMuted}; font-size: 11px;">Lens: ${d.lens}</span>
-							</div>
-						</div>
+						<div style="color: ${theme.inkMuted}; font-size: 11px; margin-bottom: 4px;">Lens: ${d.lens}</div>
 						<div style="color: ${theme.brand}; font-weight: 600; margin-top: 8px; padding-top: 8px; border-top: 1px solid hsl(var(--border-subtle));">
 							${d.votes} votes (${d.votePercentage.toFixed(1)}%)
 						</div>
@@ -444,95 +429,45 @@
 			.attr('pointer-events', 'none')
 			.text((d: any) => d.votes);
 
-		// Add title
-		g.append('text')
+		// ===== FIXED UI LAYER (title, legend, stats) =====
+		// Add title to fixed UI layer
+		uiGroup.append('text')
 			.attr('x', width / 2)
-			.attr('y', 20)
+			.attr('y', 25)
 			.attr('text-anchor', 'middle')
 			.attr('fill', theme.ink)
 			.attr('font-size', '16px')
 			.attr('font-weight', '700')
 			.text('Response Word Cloud');
 
-		// Add legends - Response Types and Lenses
-		const legendX = width - 160;
-		const legendY = 40;
-
-		// Response Type Legend
-		const responseTypeLegend = g
-			.append('g')
-			.attr('transform', `translate(${legendX}, ${legendY})`);
-
-		responseTypeLegend
-			.append('text')
-			.attr('x', 0)
-			.attr('y', 0)
-			.attr('fill', theme.ink)
-			.attr('font-size', '12px')
-			.attr('font-weight', '700')
-			.text('Response Types');
-
-		const responseTypes = [
-			{ type: 'response', label: 'Open Text', color: '#8B5CF6' },
-			{ type: 'choice', label: 'Multiple Choice', color: '#3B82F6' },
-			{ type: 'scale', label: 'Scale/Rating', color: '#10B981' },
-			{ type: 'voting', label: 'Voting', color: '#F59E0B' }
-		];
-
-		responseTypeLegend
-			.selectAll('.type-legend-item')
-			.data(responseTypes)
-			.join('g')
-			.attr('class', 'type-legend-item')
-			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
-			.each(function (item: any) {
-				const g = d3.select(this);
-				g.append('circle')
-					.attr('r', 6)
-					.attr('fill', item.color)
-					.attr('opacity', 0.8);
-
-				g.append('text')
-					.attr('x', 12)
-					.attr('y', 4)
-					.attr('fill', theme.ink2)
-					.attr('font-size', '10px')
-					.text(item.label);
-			});
-
-		// Lens Legend
-		const lensLegendY = legendY + responseTypes.length * 20 + 40;
+		// Add legend to fixed UI layer
 		const uniqueLenses = Array.from(new Set(positionedBubbles.map((b: any) => b.lens)));
-		const lensLegend = g
+		const legend = uiGroup
 			.append('g')
-			.attr('transform', `translate(${legendX}, ${lensLegendY})`);
+			.attr('transform', `translate(${width - 160}, 50)`);
 
-		lensLegend
+		legend
 			.append('text')
 			.attr('x', 0)
 			.attr('y', 0)
 			.attr('fill', theme.ink)
 			.attr('font-size', '12px')
 			.attr('font-weight', '700')
-			.text('Lenses (Ring)');
+			.text('Lenses');
 
-		lensLegend
-			.selectAll('.lens-legend-item')
+		legend
+			.selectAll('.legend-item')
 			.data(uniqueLenses)
 			.join('g')
-			.attr('class', 'lens-legend-item')
+			.attr('class', 'legend-item')
 			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
 			.each(function (lens: any) {
 				const item = d3.select(this);
 				const lensColor = lensColorByName.get(lens) ?? theme.ink2;
-				
-				// Show ring style to match bubbles
 				item
 					.append('circle')
 					.attr('r', 6)
-					.attr('fill', 'none')
-					.attr('stroke', lensColor)
-					.attr('stroke-width', 3)
+					.attr('fill', lensColor)
 					.attr('opacity', 0.8);
 
 				item
@@ -544,9 +479,9 @@
 					.text(lens);
 			});
 
-		// Add stats
+		// Add stats to fixed UI layer
 		const totalVotes = positionedBubbles.reduce((sum: number, b: any) => sum + b.votes, 0);
-		g.append('text')
+		uiGroup.append('text')
 			.attr('x', 10)
 			.attr('y', height - 10)
 			.attr('fill', theme.inkMuted)

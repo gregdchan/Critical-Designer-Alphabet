@@ -966,38 +966,38 @@
 			<main class="mx-auto max-w-full space-y-6 md:space-y-8 px-4 md:px-6 py-6 md:py-8">
 				<!-- Session Status Notice -->
 				{#if isSessionEnded}
-					<div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4 shadow-lg">
+					<div class="rounded-xl border border-rose-700 bg-rose-600 p-4 shadow-lg shadow-rose-600/25">
 						<div class="flex items-center gap-3">
-							<div class="rounded-full bg-slate-800 p-2">
-								<IconClock class="h-5 w-5 text-slate-400" />
+							<div class="rounded-full bg-rose-700/40 p-2">
+								<IconClock class="h-5 w-5 text-white" />
 							</div>
 							<div>
-								<h3 class="text-sm font-semibold text-slate-200">Session Ended</h3>
-								<p class="text-xs text-slate-400">This session has concluded. You can review the final results below.</p>
+								<h3 class="text-sm font-semibold text-white">Session Ended</h3>
+								<p class="text-xs text-white/90">This session has concluded. You can review the final results below.</p>
 							</div>
 						</div>
 					</div>
 				{:else if isSessionPlanned}
-					<div class="rounded-xl border border-cyan-400/30 bg-slate-900/80 p-4 shadow-lg">
+					<div class="rounded-xl border border-amber-700 bg-amber-500 p-4 shadow-lg shadow-amber-500/25">
 						<div class="flex items-center gap-3">
-							<div class="rounded-full bg-cyan-900/30 p-2">
-								<IconClock class="h-5 w-5 text-cyan-400" />
+							<div class="rounded-full bg-amber-700/40 p-2">
+								<IconClock class="h-5 w-5 text-white" />
 							</div>
 							<div>
-								<h3 class="text-sm font-semibold text-cyan-200">Session Not Started</h3>
-								<p class="text-xs text-cyan-300/80">This session is scheduled but hasn't started yet. Please wait for the facilitator to begin.</p>
+								<h3 class="text-sm font-semibold text-white">Session Not Started</h3>
+								<p class="text-xs text-white/90">This session is scheduled but hasn't started yet. Please wait for the facilitator to begin.</p>
 							</div>
 						</div>
 					</div>
 				{:else if isSessionLive}
-					<div class="rounded-xl border border-green-400/30 bg-slate-900/80 p-4 shadow-lg">
+					<div class="rounded-xl border border-green-700 bg-green-600 p-4 shadow-lg shadow-green-600/25">
 						<div class="flex items-center gap-3">
-							<div class="rounded-full bg-green-900/30 p-2 flex items-center justify-center">
-								<span class="h-2 w-2 rounded-full bg-green-400 animate-pulse inline-block"></span>
+							<div class="rounded-full bg-green-700/40 p-2 flex items-center justify-center">
+								<span class="h-2 w-2 rounded-full bg-white animate-pulse inline-block"></span>
 							</div>
 							<div>
-								<h3 class="text-sm font-semibold text-green-200">Session In Progress</h3>
-								<p class="text-xs text-green-300/80">This session is live. Your responses will be visible in real-time.</p>
+								<h3 class="text-sm font-semibold text-white">Session In Progress</h3>
+								<p class="text-xs text-white/90">This session is live. Your responses will be visible in real-time.</p>
 							</div>
 						</div>
 					</div>

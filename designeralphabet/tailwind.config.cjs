@@ -51,24 +51,22 @@ module.exports = {
 					8: 'var(--chart-8)',
 				},
 
-				/* Legacy aliases to avoid breakage */
-				'teal-dark': '#025259',
-				teal: '#007172',
-				'teal-light': '#00a0a3',
-				orange: '#F29325',
-				'orange-dark': '#D94F04',
-				cream: '#F4E2DE',
+			/* Legacy aliases to avoid breakage */
+			'teal-dark': '#025259',
+			teal: '#007172',
+			'teal-light': '#00a0a3',
+			orange: '#F29325',
+			'orange-dark': '#D94F04',
+			cream: '#F4E2DE',
 
-				'neon-cyan': 'hsl(var(--brand))',
+			'neon-cyan': 'hsl(var(--brand))',
 
-				primary: 'hsl(var(--brand))',
-				secondary: 'hsl(var(--accent-warm))',
-				accent: 'hsl(var(--accent-critical))',
-				success: 'hsl(var(--teal-lite))',
-				warning: 'hsl(var(--accent-warm))',
-				error: 'hsl(var(--accent-critical))',
-
-				darkBg: 'hsl(var(--surface-muted))',
+			primary: 'hsl(var(--brand))',
+			secondary: 'hsl(var(--text-secondary))', // Changed from accent-warm to text-secondary
+			accent: 'hsl(var(--accent-critical))',
+			success: 'hsl(var(--teal-lite))',
+			warning: 'hsl(var(--accent-warm))',
+			error: 'hsl(var(--accent-critical))',				darkBg: 'hsl(var(--surface-muted))',
 				surfaceBase: 'hsl(var(--surface-elevated))',
 				card: 'hsl(var(--surface-elevated))',
 				midnight: 'hsl(var(--brand-soft))',

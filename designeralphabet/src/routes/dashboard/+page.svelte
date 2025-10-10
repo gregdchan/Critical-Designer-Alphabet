@@ -94,13 +94,13 @@
 	function getStatusColor(status: string): string {
 		switch (status) {
 			case 'live':
-				return 'text-green-400 bg-green-400/10';
+				return 'bg-green-600 text-white border border-green-700 shadow-[0_0_20px_rgba(34,197,94,0.25)]';
 			case 'done':
-				return 'text-brand bg-brand/10';
+				return 'bg-rose-600 text-white border border-rose-700 shadow-[0_0_20px_rgba(244,63,94,0.25)]';
 			case 'planned':
-				return 'text-yellow-400 bg-yellow-400/10';
+				return 'bg-amber-500 text-white border border-amber-700 shadow-[0_0_20px_rgba(245,158,11,0.25)]';
 			default:
-				return 'text-secondary surface-muted';
+				return 'surface-muted text-secondary border border-line';
 		}
 	}
 

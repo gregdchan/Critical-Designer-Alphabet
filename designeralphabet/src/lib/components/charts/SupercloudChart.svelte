@@ -14,6 +14,7 @@
 		participantColor?: string;
 		participant_id?: string | null;
 		question_id?: string;
+		questionType?: string; // Added for response type tracking
 	};
 
 	export let responses: Response[] = [];
@@ -40,26 +41,83 @@
 			})
 		: null;
 
+	const lensOrder = [
+		'Risk',
+		'Work',
+		'Sustainability',
+		'Ethics',
+		'Community',
+		'Justice',
+		'Agency'
+	] as const;
+
+	function normaliseLens(raw?: string) {
+		if (!raw) return 'General';
+		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+		return match ?? raw;
+	}
+
 	type AggregatedBubble = {
 		id: string;
 		text: string;
 		value: number; // votes for written, count for choice, avg for scale
 		type: 'written' | 'choice' | 'scale';
+		lens: string; // Added lens field
 		questionText: string;
 		radius: number;
 		x: number;
 		y: number;
 		color: string;
+		lensColor: string; // Added for lens ring
 		metadata: string; // extra info for tooltip
 	};
 
 	function aggregateData(
 		responses: Response[],
-		questions: Question[],
+		questions: AnyQuestion[],
 		theme: ReturnType<typeof getThemeColors>
 	): AggregatedBubble[] {
 		const bubbles: AggregatedBubble[] = [];
 		const questionMap = new Map(questions.map(q => [q.id, q]));
+
+		// Define diverse colors for different response types
+		const responseTypeColors = {
+			written: '#8B5CF6',  // Purple - for open text responses
+			choice: '#3B82F6',   // Blue - for multiple choice
+			scale: '#10B981',    // Green - for scale/rating
+			default: '#6366F1'   // Indigo - fallback
+		};
+
+		// Lens color mapping
+		const basePalette = Object.fromEntries(
+			(lensOrder as readonly string[]).map((lens, idx) => [
+				lens,
+				theme.chart[idx % theme.chart.length] ?? theme.brand
+			])
+		);
+		const fallbackPalette = [
+			...theme.chart,
+			theme.brand,
+			theme.brandSoft,
+			theme.accentWarm,
+			theme.accentCritical,
+			theme.ink
+		];
+		const lensColors = new Map<string, string>();
+		let fallbackIndex = 0;
+
+		const resolveLensColor = (lensLabel: string) => {
+			if (lensColors.has(lensLabel)) return lensColors.get(lensLabel)!;
+			const base = basePalette[lensLabel];
+			if (base) {
+				lensColors.set(lensLabel, base);
+				return base;
+			}
+			const color = fallbackPalette[fallbackIndex % fallbackPalette.length] ?? theme.brand;
+			fallbackIndex += 1;
+			lensColors.set(lensLabel, color);
+			return color;
+		};
 
 		// 1. Written responses (sized by votes)
 		const writtenResponses = responses.filter(r => {
@@ -69,16 +127,19 @@
 
 		writtenResponses.forEach(r => {
 			const q = questionMap.get(r.question_id || '');
+			const lensLabel = normaliseLens(r.lens);
 			bubbles.push({
 				id: r.id,
 				text: r.text,
 				value: r.votes || 0,
 				type: 'written',
+				lens: lensLabel,
 				questionText: q?.text || 'Unknown',
 				radius: 0, // will be calculated
 				x: 0,
 				y: 0,
-				color: r.participantColor || theme.chart[0],
+				color: responseTypeColors.written,
+				lensColor: resolveLensColor(lensLabel),
 				metadata: `${r.votes || 0} votes`
 			});
 		});
@@ -90,18 +151,20 @@
 		});
 
 		// Count occurrences
-		const choiceCounts = new Map<string, { count: number; questionId: string; questionText: string }>();
+		const choiceCounts = new Map<string, { count: number; questionId: string; questionText: string; lens: string }>();
 		choiceResponses.forEach(r => {
 			const key = `${r.question_id}:${r.text}`;
 			const existing = choiceCounts.get(key);
 			const q = questionMap.get(r.question_id || '');
+			const lensLabel = normaliseLens(r.lens);
 			if (existing) {
 				existing.count++;
 			} else {
 				choiceCounts.set(key, {
 					count: 1,
 					questionId: r.question_id || '',
-					questionText: q?.text || 'Unknown'
+					questionText: q?.text || 'Unknown',
+					lens: lensLabel
 				});
 			}
 		});
@@ -113,11 +176,13 @@
 				text,
 				value: data.count,
 				type: 'choice',
+				lens: data.lens,
 				questionText: data.questionText,
 				radius: 0,
 				x: 0,
 				y: 0,
-				color: theme.chart[1],
+				color: responseTypeColors.choice,
+				lensColor: resolveLensColor(data.lens),
 				metadata: `${data.count} selections`
 			});
 		});
@@ -128,20 +193,22 @@
 			return q?.response_type === 'scale';
 		});
 
-		const scaleByQuestion = new Map<string, { values: number[]; questionText: string }>();
+		const scaleByQuestion = new Map<string, { values: number[]; questionText: string; lens: string }>();
 		scaleResponses.forEach(r => {
 			const q = questionMap.get(r.question_id || '');
 			if (!q) return;
 			const value = parseFloat(r.text);
 			if (isNaN(value)) return;
 
+			const lensLabel = normaliseLens(r.lens);
 			const existing = scaleByQuestion.get(r.question_id || '');
 			if (existing) {
 				existing.values.push(value);
 			} else {
 				scaleByQuestion.set(r.question_id || '', {
 					values: [value],
-					questionText: q.text || 'Unknown'
+					questionText: q.text || 'Unknown',
+					lens: lensLabel
 				});
 			}
 		});
@@ -156,11 +223,13 @@
 				text: `${data.questionText.substring(0, 30)}...`,
 				value: data.values.length, // size by response count
 				type: 'scale',
+				lens: data.lens,
 				questionText: data.questionText,
 				radius: 0,
 				x: 0,
 				y: 0,
-				color: theme.chart[2],
+				color: responseTypeColors.scale,
+				lensColor: resolveLensColor(data.lens),
 				metadata: `Avg: ${avg.toFixed(1)}/${scaleMax} (${data.values.length} responses)`
 			});
 		});
@@ -210,33 +279,50 @@
 		const theme = getThemeColors();
 		const aggregated = aggregateData(responses, questions, theme);
 		const sized = calculateSizes(aggregated);
-		const positioned = packBubbles(sized, width, height);
+
+		// Reserve space for legends (right side) and stats (bottom)
+		const legendWidth = 180;
+		const topMargin = 20;
+		const bottomMargin = 35;
+		const chartWidth = Math.max(400, width - legendWidth);
+		const chartHeight = Math.max(300, height - topMargin - bottomMargin);
+
+		const positioned = packBubbles(sized, chartWidth, chartHeight);
 
 		// Clear previous
 		d3.select(svg).selectAll('*').remove();
 
-
-		// Root group for all chart elements (so we can pan it)
-		const g = d3
+		const svgSel = d3
 			.select(svg)
 			.attr('width', width)
-			.attr('height', height)
-			.append('g');
+			.attr('height', height);
 
-		rootGroup = g;
+		// Create INTERACTIVE layer (bubbles) - this will be zoomed/panned
+		const interactiveGroup = svgSel
+			.append('g')
+			.attr('class', 'interactive-layer')
+			.attr('transform', `translate(0, ${topMargin})`);
+
+		rootGroup = interactiveGroup;
 		// Preserve existing transform between renders
-		rootGroup.attr('transform', currentTransform.toString());
+		rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
+
+		// Create FIXED UI layer (legends, stats) - this stays put
+		const uiGroup = svgSel
+			.append('g')
+			.attr('class', 'ui-layer')
+			.style('pointer-events', 'none'); // Don't block interactions with bubbles
 
 		// Initialize/update zoom behavior for panning-only
 		const translateExtentPadding = 0.5; // allow slight overscroll
-		const txMin = -width * translateExtentPadding;
-		const tyMin = -height * translateExtentPadding;
-		const txMax = width * (1 + translateExtentPadding);
-		const tyMax = height * (1 + translateExtentPadding);
+		const txMin = -chartWidth * translateExtentPadding;
+		const tyMin = -chartHeight * translateExtentPadding;
+		const txMax = chartWidth * (1 + translateExtentPadding);
+		const tyMax = chartHeight * (1 + translateExtentPadding);
 
 		zoomBehavior = d3
 			.zoom<SVGSVGElement, unknown>()
-			.scaleExtent([0.7, 3]) // allow pinch-zoom while keeping reasonable bounds
+			.scaleExtent([0.5, 8]) // Increased zoom range for better exploration
 			.translateExtent([
 				[txMin, tyMin],
 				[txMax, tyMax]
@@ -249,11 +335,13 @@
 			})
 			.on('zoom', (event: any) => {
 				currentTransform = event.transform;
-				if (rootGroup) rootGroup.attr('transform', currentTransform.toString());
+				if (rootGroup) {
+					rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
+				}
 			});
 
 		// Bind zoom to the SVG (clear prior handlers first)
-		const svgSel = d3.select(svg)
+		svgSel
 			.on('.zoom', null)
 			.call(zoomBehavior as any)
 			.on('dblclick.zoom', null) // disable double-click zoom behavior
@@ -264,43 +352,132 @@
 			.on('mousedown.dragcursor touchstart.dragcursor', () => svgSel.style('cursor', 'grabbing'))
 			.on('mouseup.dragcursor touchend.dragcursor mouseleave.dragcursor', () => svgSel.style('cursor', 'grab'));
 
-		// Type legend
-		const typeColors = {
-			written: theme.chart[0],
-			choice: theme.chart[1],
-			scale: theme.chart[2]
-		};
-
-		const legend = g.append('g').attr('transform', `translate(${width - 150}, 20)`);
-
-		Object.entries(typeColors).forEach(([type, color], i) => {
-			const item = legend.append('g').attr('transform', `translate(0, ${i * 25})`);
-			item.append('circle').attr('r', 6).attr('fill', color).attr('opacity', 0.8);
-			item.append('text')
-				.attr('x', 12)
-				.attr('y', 4)
-				.attr('fill', theme.ink2)
-				.attr('font-size', '11px')
-				.text(type === 'written' ? '💬 Responses (votes)' : type === 'choice' ? '☑️ Choices (freq)' : '📊 Scales (avg)');
+		// Create lensColorByName map for legend
+		const lensColorByName = new Map<string, string>();
+		positioned.forEach((bubble) => {
+			if (!lensColorByName.has(bubble.lens)) {
+				lensColorByName.set(bubble.lens, bubble.lensColor);
+			}
 		});
 
-		// Bubbles
-		const bubbleGroups = g
+		// ===== FIXED UI LAYER (legends, stats) =====
+		// Legends - Response Types and Lenses
+		const legendX = width - 170;
+		const legendY = 50;
+
+		// Response Type Legend
+		const responseTypeLegend = uiGroup
+			.append('g')
+			.attr('transform', `translate(${legendX}, ${legendY})`);
+
+		responseTypeLegend
+			.append('text')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('fill', theme.ink)
+			.attr('font-size', '12px')
+			.attr('font-weight', '700')
+			.text('Response Types');
+
+		const responseTypes = [
+			{ type: 'written', label: '💬 Responses', color: '#8B5CF6' },
+			{ type: 'choice', label: '☑️ Choices', color: '#3B82F6' },
+			{ type: 'scale', label: '📊 Scales', color: '#10B981' }
+		];
+
+		responseTypeLegend
+			.selectAll('.type-legend-item')
+			.data(responseTypes)
+			.join('g')
+			.attr('class', 'type-legend-item')
+			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.each(function (item: any) {
+				const g = d3.select(this);
+				g.append('circle')
+					.attr('r', 6)
+					.attr('fill', item.color)
+					.attr('opacity', 0.8);
+
+				g.append('text')
+					.attr('x', 12)
+					.attr('y', 4)
+					.attr('fill', theme.ink2)
+					.attr('font-size', '10px')
+					.text(item.label);
+			});
+
+		// Lens Legend
+		const lensLegendY = legendY + responseTypes.length * 20 + 40;
+		const uniqueLenses = Array.from(new Set(positioned.map((b: any) => b.lens)));
+		const lensLegend = uiGroup
+			.append('g')
+			.attr('transform', `translate(${legendX}, ${lensLegendY})`);
+
+		lensLegend
+			.append('text')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('fill', theme.ink)
+			.attr('font-size', '12px')
+			.attr('font-weight', '700')
+			.text('Lenses (Ring)');
+
+		lensLegend
+			.selectAll('.lens-legend-item')
+			.data(uniqueLenses)
+			.join('g')
+			.attr('class', 'lens-legend-item')
+			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.each(function (lens: any) {
+				const item = d3.select(this);
+				const lensColor = lensColorByName.get(lens) ?? theme.ink2;
+				
+				// Show ring style to match bubbles
+				item
+					.append('circle')
+					.attr('r', 6)
+					.attr('fill', 'none')
+					.attr('stroke', lensColor)
+					.attr('stroke-width', 3)
+					.attr('opacity', 0.8);
+
+				item
+					.append('text')
+					.attr('x', 14)
+					.attr('y', 4)
+					.attr('fill', theme.ink2)
+					.attr('font-size', '10px')
+					.text(lens);
+			});
+
+		// ===== INTERACTIVE LAYER (bubbles) =====
+		// Bubbles in interactive layer
+		const bubbleGroups = interactiveGroup
 			.selectAll('.bubble')
 			.data(positioned)
 			.join('g')
 			.attr('class', 'bubble')
 			.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
 
-		// Circles
+		// Calculate top tier for visual emphasis
 		const topTierThreshold = positioned.sort((a, b) => b.value - a.value)[Math.floor(positioned.length * 0.2)]?.value || 0;
 
+		// Add outer lens ring first (so it's behind the main circle)
+		bubbleGroups
+			.append('circle')
+			.attr('r', (d: any) => d.radius + 3)
+			.attr('fill', 'none')
+			.attr('stroke', (d: any) => d.lensColor)
+			.attr('stroke-width', 4)
+			.attr('opacity', 0.8);
+
+		// Add main circles with response type color
 		bubbleGroups
 			.append('circle')
 			.attr('r', (d: any) => d.radius)
 			.attr('fill', (d: any) => d.color)
-			.attr('opacity', (d: any) => d.value >= topTierThreshold ? 0.9 : 0.65)
-			.attr('stroke', (d: any) => d.value >= topTierThreshold ? theme.brand : 'hsl(var(--surface-elevated))')
+			.attr('opacity', (d: any) => d.value >= topTierThreshold ? 0.9 : 0.7)
+			.attr('stroke', (d: any) => d.value >= topTierThreshold ? 'hsl(var(--brand))' : 'hsl(var(--surface-elevated))')
 			.attr('stroke-width', (d: any) => d.value >= topTierThreshold ? 3 : 2)
 			.style('cursor', 'pointer')
 			.on('mouseenter', function (event: any, d: any) {
@@ -331,6 +508,16 @@
 						`
 						<div style="font-size: 11px; font-weight: 600; color: ${theme.brand}; margin-bottom: 8px;">${d.questionText}</div>
 						<div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; color: ${theme.ink};">${d.text}</div>
+						<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+							<div style="display: flex; align-items: center; gap: 4px;">
+								<div style="width: 12px; height: 12px; border-radius: 50%; background: ${d.color};"></div>
+								<span style="color: ${theme.inkMuted}; font-size: 11px; text-transform: capitalize;">${d.type}</span>
+							</div>
+							<div style="display: flex; align-items: center; gap: 4px;">
+								<div style="width: 12px; height: 12px; border-radius: 50%; border: 3px solid ${d.lensColor};"></div>
+								<span style="color: ${theme.inkMuted}; font-size: 11px;">Lens: ${d.lens}</span>
+							</div>
+						</div>
 						<div style="color: ${theme.brand}; font-weight: 600; margin-top: 8px; padding-top: 8px; border-top: 1px solid hsl(var(--border-subtle));">
 							${d.metadata}
 						</div>
@@ -412,8 +599,8 @@
 				});
 			});
 
-		// Stats
-		g.append('text')
+		// Stats in fixed UI layer
+		uiGroup.append('text')
 			.attr('x', 10)
 			.attr('y', height - 10)
 			.attr('fill', theme.inkMuted)
