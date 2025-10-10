@@ -379,8 +379,8 @@
 														</p>
 													</div>
 												</div>
-												<div class="ml-auto flex items-center gap-2">
-													{#if participant.badges && participant.badges.length > 0}
+                <div class="ml-auto flex items-center gap-2">
+                  {#if participant.badges && participant.badges.length > 0}
 														<div class="flex -space-x-1">
 															{#each participant.badges.slice(0, 3) as badge}
 																<span class="inline-block text-sm" title={badge.name || badge}
@@ -394,8 +394,13 @@
 															{/if}
 														</div>
 													{/if}
-													<span class="text-lg font-semibold text-brand">{participant.score}</span>
-												</div>
+                  <span class="text-lg font-semibold text-brand">{participant.score}</span>
+                  <a
+                    class="rounded-md border border-line px-2 py-1 text-xs text-ink-2 hover:bg-surface-muted"
+                    href={`/story?code=${selectedSession.code}&participant=${participant.id}`}
+                    title="Open participant story"
+                  >Story</a>
+                </div>
 											</div>
 										{/each}
 									</div>

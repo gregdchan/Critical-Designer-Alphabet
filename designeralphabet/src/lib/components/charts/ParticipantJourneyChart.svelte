@@ -9,6 +9,7 @@
     lens: string; // categorical
     text?: string; // question text
     votes?: number;
+    phase?: string;
   };
 
   export let title = 'Journey by Lens';
@@ -86,7 +87,7 @@
       .attr('cx', (d) => x(d.i) || 0)
       .attr('cy', (d) => y(d.lens) || 0)
       .attr('r', (d) => r(d.votes || 0))
-      .attr('fill', 'var(--chart-1)')
+      .attr('fill', (d:any) => d.phase ? `var(--chart-${(Math.abs(d.phase?.split('').reduce((a,c)=>a+c.charCodeAt(0),0)) % 6) + 2})` : 'var(--chart-1)')
       .attr('stroke', 'hsl(var(--surface))')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer')
@@ -139,4 +140,3 @@
     /* ensure tooltip stays within frame on mobile */
   }
 </style>
-

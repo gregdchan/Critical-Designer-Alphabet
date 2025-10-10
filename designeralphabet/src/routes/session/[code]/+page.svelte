@@ -1786,7 +1786,13 @@
 															<span class="text-xs font-bold text-brand">#{index + 1}</span>
 															<span class="text-sm text-primary truncate">{participant.name}</span>
 														</div>
-													<span class="text-xs text-cyan-200 flex-shrink-0 ml-auto">{participant.score ?? participant.points ?? 0} pts</span>
+                              <div class="flex items-center gap-2 ml-auto">
+                                <span class="text-xs text-cyan-200 flex-shrink-0">{participant.score ?? participant.points ?? 0} pts</span>
+                                <a
+                                  class="rounded border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-ink-2 hover:bg-surface-muted"
+                                  href={`/story?code=${sessionCode}&participant=${participant.id}`}
+                                >Story</a>
+                              </div>
 													</div>
 												{/each}
 											{:else}

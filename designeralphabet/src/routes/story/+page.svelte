@@ -3,6 +3,9 @@
   import PieChart from '$lib/components/charts/PieChart.svelte';
   import ParticipantJourneyChart from '$lib/components/charts/ParticipantJourneyChart.svelte';
   import type { ChartData } from '$lib/types/charts';
+  import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
+  import RatingsBeeswarm from '$lib/components/charts/RatingsBeeswarm.svelte';
+  import { page } from '$app/stores';
 
   type ApiResponse = {
     success: boolean;
@@ -28,6 +31,7 @@
   let participants: Array<{ id: string; name: string; color?: string }> = [];
   let responses: ApiResponse['responses'] = [];
   let selectedParticipantId: string | null = null;
+  let questions: any[] = [];
 
   $: selectedParticipant = participants.find((p) => p.id === selectedParticipantId) || null;
 
@@ -46,6 +50,7 @@
       }
       participants = data.participants || [];
       responses = data.responses || [];
+      questions = data.questions || [];
       // Preselect first participant if available
       selectedParticipantId = participants[0]?.id ?? null;
     } catch (e: any) {
@@ -57,6 +62,23 @@
 
   // Derived data for charts
   $: participantResponses = (responses || []).filter((r) => r.participant_id === selectedParticipantId);
+
+  // Pull query params to prefill
+  $: {
+    const url = $page?.url;
+    if (url) {
+      const code = url.searchParams.get('code');
+      const pid = url.searchParams.get('participant');
+      if (code && code !== sessionCode) {
+        sessionCode = code;
+        // load session automatically
+        loadSession();
+      }
+      if (pid && pid !== selectedParticipantId) {
+        selectedParticipantId = pid;
+      }
+    }
+  }
 
   // Lens donut data (PieChart)
   $: lensDonut: ChartData = {
@@ -78,14 +100,46 @@
   };
 
   // Journey points
+  const qPhaseMap = () => {
+    const map = new Map<string, string>();
+    for (const q of questions || []) {
+      if (q?.id && q?.phase_key) map.set(q.id, q.phase_key);
+    }
+    return map;
+  };
+
   $: journeyPoints = participantResponses
     .map((r) => ({
       t: new Date(r.createdAt || r.created_at || Date.now()),
       lens: (r.questions?.section || 'General') as string,
       text: r.questions?.text || r.text,
-      votes: r.votes || 0
+      votes: r.votes || 0,
+      phase: qPhaseMap().get(r.question_id) || undefined
     }))
     .sort((a, b) => a.t.getTime() - b.t.getTime());
+
+  // Ratings beeswarm points
+  $: ratingPoints = participantResponses
+    .filter((r) => (r as any)?.questions?.response_type === 'scale')
+    .map((r) => ({
+      value: parseFloat(r.text),
+      lens: (r.questions?.section || 'General') as string,
+      question: r.questions?.text || '',
+      t: new Date(r.createdAt || r.created_at || Date.now())
+    }))
+    .filter((p) => Number.isFinite(p.value));
+
+  // Landscape responses with participant spotlight
+  $: landscapeAll = (responses || []).map((r) => ({
+    id: r.id,
+    text: r.text,
+    participantName: participants.find((p) => p.id === r.participant_id)?.name || 'Anonymous',
+    participantId: r.participant_id || undefined,
+    lens: r.questions?.section || undefined,
+    votes: r.votes || 0,
+    // metadata may already be JSON; pass-through
+    metadata: null
+  }));
 </script>
 
 <section class="mx-auto max-w-[1200px] px-4 py-8 space-y-6">
@@ -141,6 +195,35 @@
       </div>
     </div>
 
+    <!-- Ratings Beeswarm (if any rating answers exist) -->
+    {#if ratingPoints.length > 0}
+      <div class="rounded-2xl border border-line bg-surface-elevated p-4 mt-6">
+        <h2 class="mb-3 text-sm font-semibold text-ink">Ratings Beeswarm</h2>
+        <div class="h-[280px]">
+          <RatingsBeeswarm title="Ratings" points={ratingPoints} min={0} max={10} />
+        </div>
+      </div>
+    {/if}
+
+    <!-- Landscape spotlight overlay -->
+    <div class="rounded-2xl border border-line bg-surface-elevated p-4 mt-6">
+      <h2 class="mb-3 text-sm font-semibold text-ink">Landscape (spotlight)</h2>
+      <div class="h-[380px]">
+        <LandscapeChart
+          responses={landscapeAll}
+          width={1000}
+          height={360}
+          xLabel="X"
+          yLabel="Y"
+          minX={0}
+          maxX={10}
+          minY={0}
+          maxY={10}
+          highlightParticipantId={selectedParticipantId}
+        />
+      </div>
+    </div>
+
     {#if selectedParticipant}
       <div class="mt-4 text-xs text-ink-2">Showing responses for <span class="text-ink font-medium">{selectedParticipant.name}</span></div>
     {/if}
@@ -153,4 +236,3 @@
   .bg-surface-elevated { background: hsl(var(--surface-elevated)); }
   .border-line { border-color: hsl(var(--border-subtle)); }
 </style>
-

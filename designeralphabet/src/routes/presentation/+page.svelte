@@ -1194,13 +1194,21 @@
 										<div class="space-y-3">
 											{#each leaderboardList.slice(0, 5) as participant, index}
 												<div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">
-													<div class="flex items-center gap-2">
-														<span class="text-xs font-bold text-brand">#{index + 1}</span>
-														<span class="text-sm text-white truncate max-w-[140px]"
-															>{participant.name ?? 'Participant'}</span
-														>
-													</div>
-													<span class="text-xs text-cyan-200 flex-shrink-0 ml-auto">{participant.score ?? participant.points ?? 0} pts</span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-brand">#{index + 1}</span>
+                      <span class="text-sm text-white truncate max-w-[140px]"
+                        >{participant.name ?? 'Participant'}</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2 ml-auto">
+                      <span class="text-xs text-cyan-200 flex-shrink-0">{participant.score ?? participant.points ?? 0} pts</span>
+                      {#if activeCode}
+                        <a
+                          class="rounded border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-ink-2 hover:bg-surface-muted"
+                          href={`/story?code=${activeCode}&participant=${participant.id}`}
+                        >Story</a>
+                      {/if}
+                    </div>
 												</div>
 											{/each}
 										</div>

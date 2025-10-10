@@ -8,11 +8,13 @@
 		text: string;
 		metadata?: Record<string, any> | null;
 		participantName?: string;
+		participantId?: string;
 		lens?: string;
 		votes?: number;
 	};
 
-	export let responses: LandscapeResponse[] = [];
+export let responses: LandscapeResponse[] = [];
+export let highlightParticipantId: string | null = null;
 	export let width = 900;
 	export let height = 600;
 	export let xLabel = 'X Axis';
@@ -36,17 +38,18 @@
 		'Agency'
 	] as const;
 
-	type PlotPoint = {
-		id: string;
-		x: number;
-		y: number;
-		label: string;
-		text: string;
-		participant: string;
-		lens: string;
-		color: string;
-		votes: number;
-	};
+    type PlotPoint = {
+        id: string;
+        x: number;
+        y: number;
+        label: string;
+        text: string;
+        participant: string;
+        participantId?: string;
+        lens: string;
+        color: string;
+        votes: number;
+    };
 
 	function normaliseLens(raw?: string) {
 		if (!raw) return 'General';
@@ -81,17 +84,18 @@
 
 		const lensLabel = normaliseLens(response.lens);
 
-		return {
-			id: response.id,
-			x,
-			y,
-			label: label || response.text?.slice(0, 30) || 'Response',
-			text: response.text,
-			participant: response.participantName || 'Anonymous',
-			lens: lensLabel,
-			color: '',
-			votes: response.votes || 0
-		};
+        return {
+            id: response.id,
+            x,
+            y,
+            label: label || response.text?.slice(0, 30) || 'Response',
+            text: response.text,
+            participant: response.participantName || 'Anonymous',
+            participantId: response.participantId,
+            lens: lensLabel,
+            color: '',
+            votes: response.votes || 0
+        };
 	}
 
 	function calculateTrendLine(points: PlotPoint[]): { slope: number; intercept: number; r2: number } | null {
@@ -388,13 +392,13 @@
 
 		// Point circles (size based on votes)
 		pointGroup
-			.append('circle')
-			.attr('r', (d) => Math.max(5, Math.min(15, 5 + d.votes)))
-			.attr('fill', (d) => d.color)
-			.attr('opacity', 0.7)
-			.attr('stroke', 'hsl(var(--surface-elevated))')
-			.attr('stroke-width', 2)
-			.style('cursor', 'pointer');
+        .append('circle')
+        .attr('r', (d) => Math.max(5, Math.min(15, 5 + d.votes)))
+        .attr('fill', (d) => d.color)
+        .attr('opacity', (d:any) => highlightParticipantId ? (d.participantId === highlightParticipantId ? 1 : 0.15) : 0.7)
+        .attr('stroke', 'hsl(var(--surface-elevated))')
+        .attr('stroke-width', 2)
+        .style('cursor', 'pointer');
 
 		// Point labels
 		pointGroup
