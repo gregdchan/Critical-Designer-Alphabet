@@ -4,7 +4,7 @@ import { addResponse } from '$lib/server/workshop';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { code, questionId, participantId, text, cards } = await request.json();
+		const { code, questionId, participantId, text, cards, metadata } = await request.json();
 		if (!code || !questionId || !text) {
 			return json(
 				{ success: false, error: 'code, questionId, and text are required' },
@@ -17,7 +17,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			questionId: String(questionId),
 			participantId: participantId ? String(participantId) : null,
 			text,
-			cards: Array.isArray(cards) ? cards : []
+			cards: Array.isArray(cards) ? cards : [],
+			metadata: metadata || null
 		});
 
 		return json({ success: true, response });

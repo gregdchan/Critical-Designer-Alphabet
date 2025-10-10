@@ -570,13 +570,15 @@ export async function addResponse({
 	questionId,
 	participantId,
 	text,
-	cards
+	cards,
+	metadata
 }: {
 	code: string;
 	questionId: string;
 	participantId: string | null;
 	text: string;
 	cards: string[];
+	metadata?: any;
 }) {
 	// Log the incoming response data for debugging
 	console.log('[addResponse] Creating response:', {
@@ -584,7 +586,8 @@ export async function addResponse({
 		questionId,
 		participantId,
 		hasText: !!text,
-		cardsCount: cards?.length || 0
+		cardsCount: cards?.length || 0,
+		hasMetadata: !!metadata
 	});
 
 	if (!participantId) {
@@ -598,7 +601,8 @@ export async function addResponse({
 			question_id: questionId,
 			participant_id: participantId,
 			text,
-			cards
+			cards,
+			metadata: metadata || null
 		})
 		.select()
 		.single();
@@ -608,7 +612,8 @@ export async function addResponse({
 	console.log('[addResponse] Response created:', {
 		id: result.id,
 		participant_id: result.participant_id,
-		question_id: result.question_id
+		question_id: result.question_id,
+		hasMetadata: !!result.metadata
 	});
 
 	broadcast(code, { type: 'RESPONSE_ADDED', response: result });

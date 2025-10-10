@@ -444,7 +444,7 @@ export function stopRealtimeSession() {
 
 export async function addResponse(
 	code: string,
-	payload: { questionId: string; participantId: string | null; text: string; cards?: string[] }
+	payload: { questionId: string; participantId: string | null; text: string; cards?: string[]; metadata?: any }
 ) {
 	try {
 		const res = await fetch('/api/responses/add', {

@@ -34,6 +34,11 @@
 	import MaturityDial from '$lib/charts/MaturityDial.svelte';
 	import ParticipationPulse from '$lib/charts/ParticipationPulse.svelte';
 	import InclusivityMeter from '$lib/charts/InclusivityMeter.svelte';
+	// Response input components
+	import RiskAssessmentInput from '$lib/components/responses/RiskAssessmentInput.svelte';
+	import MaturityDialInput from '$lib/components/responses/MaturityDialInput.svelte';
+	import InclusivityMeterInput from '$lib/components/responses/InclusivityMeterInput.svelte';
+	import LandscapeInput from '$lib/components/responses/LandscapeInput.svelte';
 	import RiskImpactMatrix from '$lib/charts/RiskImpactMatrix.svelte';
 	import {
 		IconUsers,
@@ -70,6 +75,7 @@
 	let responseModalOpen = false;
 	let selectedQuestionId: string | null = null;
 	let responseText = '';
+	let responseMetadata: any = null;
 	// let linkedCardsText = ''; // Temporarily hidden - not usable with current exercise
 	let currentQuestion: Record<string, unknown> | null = null;
 	let currentQuestionConfig: Record<string, unknown> = {};
@@ -240,6 +246,13 @@
 		}
 		updateLandscapeResponse();
 	};
+
+	// Handler for advanced response components (riskAssessment, maturityDial, inclusivityMeter, landscape)
+	function handleAdvancedResponseSubmit(event: CustomEvent<{ text: string; metadata: any }>) {
+		responseText = event.detail.text;
+		responseMetadata = event.detail.metadata;
+		submitResponse();
+	}
 
 	$: {
 		scaleMin = numberOr((currentQuestionConfig as { min?: unknown }).min, 0);
@@ -721,10 +734,12 @@
 			questionId: selectedQuestionId,
 			participantId: currentParticipant.id,
 			text: normalizedResponseText,
-			cards: [] // Temporarily empty - cards feature hidden
+			cards: [], // Temporarily empty - cards feature hidden
+			metadata: responseMetadata
 		});
 		responseModalOpen = false;
 		responseText = '';
+		responseMetadata = null;
 		// linkedCardsText = ''; // Temporarily commented out
 		selectedQuestionId = null;
 	}
@@ -2341,6 +2356,27 @@
 						</div>
 					</div>
 
+				{:else if modalResponseType === 'riskAssessment'}
+					<!-- Risk Assessment Response -->
+					<RiskAssessmentInput
+						question={currentQuestion}
+						on:submit={handleAdvancedResponseSubmit}
+					/>
+
+				{:else if modalResponseType === 'maturityDial'}
+					<!-- Maturity Dial Response -->
+					<MaturityDialInput
+						question={currentQuestion}
+						on:submit={handleAdvancedResponseSubmit}
+					/>
+
+				{:else if modalResponseType === 'inclusivityMeter'}
+					<!-- Inclusivity Meter Response -->
+					<InclusivityMeterInput
+						question={currentQuestion}
+						on:submit={handleAdvancedResponseSubmit}
+					/>
+
 				{:else}
 					<!-- Written / Text Response (default) -->
 					<label class="flex flex-col gap-2 text-sm text-secondary">
@@ -2382,20 +2418,33 @@
 					</div>
 				{/if} -->
 			</div>
-			<div class="mt-6 flex items-center justify-end gap-3">
-				<button
-					class="rounded-lg border border-line px-4 py-2 text-sm text-secondary hover:border-slate-500"
-					on:click={() => (responseModalOpen = false)}
-				>
-					Cancel
-				</button>
-				<button
-					class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-primary hover:bg-brand disabled:opacity-50 disabled:cursor-not-allowed"
-					on:click={submitResponse}
-					disabled={activePhase && !phaseRemainingMs}
-				>
-					{activePhase && !phaseRemainingMs ? 'Time Up' : 'Share idea'}
-				</button>
+			<!-- Submit buttons (hidden for advanced response types which have their own) -->
+			{#if !['riskAssessment', 'maturityDial', 'inclusivityMeter'].includes(modalResponseType)}
+				<div class="mt-6 flex items-center justify-end gap-3">
+					<button
+						class="rounded-lg border border-line px-4 py-2 text-sm text-secondary hover:border-slate-500"
+						on:click={() => (responseModalOpen = false)}
+					>
+						Cancel
+					</button>
+					<button
+						class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-primary hover:bg-brand disabled:opacity-50 disabled:cursor-not-allowed"
+						on:click={submitResponse}
+						disabled={activePhase && !phaseRemainingMs}
+					>
+						{activePhase && !phaseRemainingMs ? 'Time Up' : 'Share idea'}
+					</button>
+				</div>
+			{:else}
+				<div class="mt-6 flex items-center justify-end">
+					<button
+						class="rounded-lg border border-line px-4 py-2 text-sm text-secondary hover:border-slate-500"
+						on:click={() => (responseModalOpen = false)}
+					>
+						Cancel
+					</button>
+				</div>
+			{/if}
 			</div>
 		</div>
 	</div>
