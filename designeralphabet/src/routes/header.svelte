@@ -62,8 +62,8 @@
 				<img src={logo} alt="Designer's Critical Alphabet" class="h-7 w-7" />
 			</span>
 			<div class="flex flex-col text-left">
-				<span class="text-sm font-semibold">Critical Alphabet</span>
-				<span class="text-xs text-secondary">Inclusive Planning</span>
+				<span class="text-sm font-semibold">Critical Design Planner</span>
+				<span class="text-xs text-secondary">Build Inclusive Strategies</span>
 			</div>
 		</a>
 

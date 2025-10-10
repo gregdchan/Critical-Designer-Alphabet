@@ -16,7 +16,7 @@
 	const page = data.page;
 
 	const heroTitle =
-		page?.heroTitle ?? page?.title ?? 'About the Critical Designer Alphabet Platform';
+		page?.heroTitle ?? page?.title ?? 'About the Critical Designer Planner Platform';
 	const heroSubtitle =
 		page?.heroSubtitle ??
 		page?.localizedHeroSubtitle?.en ??

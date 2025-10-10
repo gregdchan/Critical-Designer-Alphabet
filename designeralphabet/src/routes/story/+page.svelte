@@ -4,6 +4,7 @@
   import ParticipantJourneyChart from '$lib/components/charts/ParticipantJourneyChart.svelte';
   import type { ChartData } from '$lib/types/charts';
   import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
+  import PhaseStackedBar from '$lib/components/charts/PhaseStackedBar.svelte';
   import RatingsBeeswarm from '$lib/components/charts/RatingsBeeswarm.svelte';
   import { page } from '$app/stores';
 
@@ -168,6 +169,27 @@
     // metadata may already be JSON; pass-through
     metadata: null
   }));
+
+  // Phase engagement stacked data
+  $: phaseStacks = (() => {
+    const map = new Map<string, Map<string, number>>(); // phase -> lens -> count
+    const phaseMap = qPhaseMap();
+    for (const r of participantResponses) {
+      const phase = phaseMap.get(r.question_id) || 'Unassigned';
+      const lens = (r.questions?.section || 'General') as string;
+      if (!map.has(phase)) map.set(phase, new Map());
+      const inner = map.get(phase)!;
+      inner.set(lens, (inner.get(lens) || 0) + 1);
+    }
+    // preserve discovery order by first appearance time
+    const order = Array.from(new Set(participantResponses.map((r) => phaseMap.get(r.question_id) || 'Unassigned')));
+    return order
+      .filter((p) => !!p)
+      .map((phase) => ({
+        phase: phase as string,
+        stacks: Array.from(map.get(phase as string)?.entries() || []).map(([lens, value]) => ({ lens, value }))
+      }));
+  })();
 </script>
 
 <section class="mx-auto max-w-[1200px] px-4 py-8 space-y-6">
@@ -234,24 +256,15 @@
       </div>
     {/if}
 
-    <!-- Landscape spotlight overlay -->
-    <div class="rounded-2xl border border-line bg-surface-elevated p-4 mt-6">
-      <h2 class="mb-3 text-sm font-semibold text-ink">Landscape (spotlight)</h2>
-      <div class="h-[380px]">
-        <LandscapeChart
-          responses={landscapeAll}
-          width={1000}
-          height={360}
-          xLabel="X"
-          yLabel="Y"
-          minX={0}
-          maxX={10}
-          minY={0}
-          maxY={10}
-          highlightParticipantId={selectedParticipantId}
-        />
+    <!-- Phase engagement skew -->
+    {#if phaseStacks.length > 0}
+      <div class="rounded-2xl border border-line bg-surface-elevated p-4 mt-6">
+        <h2 class="mb-3 text-sm font-semibold text-ink">Phase Engagement</h2>
+        <div class="h-[320px]">
+          <PhaseStackedBar title="Phase Engagement" data={phaseStacks} />
+        </div>
       </div>
-    </div>
+    {/if}
 
     {#if selectedParticipant}
       <div class="mt-4 text-xs text-ink-2">Showing responses for <span class="text-ink font-medium">{selectedParticipant.name}</span></div>
