@@ -16,7 +16,7 @@
 		<Header />
 		<main
 			id="main-content"
-			class="surface mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-8 text-primary focus:outline-none sm:px-8"
+			class="surface mx-auto w-full max-w-6xl flex-1 px-2 sm:px-6 md:px-8 pb-12 md:pb-16 pt-3 sm:pt-6 text-primary focus:outline-none"
 			tabindex="-1"
 		>
 			<slot />

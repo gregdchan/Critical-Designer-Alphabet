@@ -1724,18 +1724,18 @@
 								<div class="bg-surface-muted rounded-xl border border-brand/20 p-6">
 									{#if activeTab === 'roadmap'}
 										<h3 class="text-lg font-semibold text-primary mb-4">Roadmap Timeline</h3>
-										<div class="w-full h-[520px] overflow-hidden">
-											<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
-										</div>
+									<div class="w-full md:h-[520px] h-[70dvh] overflow-hidden">
+										<RoadmapChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									</div>
 									{:else if activeTab === 'wordcloud'}
 										<h3 class="text-lg font-semibold text-primary mb-4">Response Word Cloud</h3>
-										<div class="w-full h-[520px] overflow-hidden">
-											<WordCloudChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
-										</div>
+									<div class="w-full md:h-[520px] h-[70dvh] overflow-hidden">
+										<WordCloudChart responses={responsesForViz} width={isMobile ? 350 : 900} height={isMobile ? 400 : 520} />
+									</div>
 									{:else if activeTab === 'response-landscape'}
 										<h3 class="text-lg font-semibold text-primary mb-4">Response Landscape</h3>
-										<div class="w-full h-[520px] overflow-hidden">
-											<LandscapeChart
+									<div class="w-full md:h-[520px] h-[70dvh] overflow-hidden">
+										<LandscapeChart
 												responses={responsesForViz}
 												width={isMobile ? 350 : 900}
 												height={isMobile ? 400 : 520}

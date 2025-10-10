@@ -22,6 +22,11 @@
 	let svg: SVGSVGElement;
 	let mounted = false;
 
+	// Zoom/pan support
+	let zoomBehavior: d3.ZoomBehavior<SVGSVGElement, unknown> | null = null;
+	let rootGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
+	let currentTransform = d3.zoomIdentity;
+
 	const ro = typeof ResizeObserver !== 'undefined'
 		? new ResizeObserver((entries) => {
 				const r = entries[0]?.contentRect;
@@ -200,6 +205,43 @@
 			.attr('width', width)
 			.attr('height', height)
 			.append('g');
+
+		rootGroup = g;
+		// preserve previous pan/zoom
+		rootGroup.attr('transform', currentTransform.toString());
+
+		// enable pinch zoom and panning
+		const pad = 0.5;
+		const translateExtent: [[number, number], [number, number]] = [
+			[-width * pad, -height * pad],
+			[width * (1 + pad), height * (1 + pad)]
+		];
+
+		zoomBehavior = d3
+			.zoom<SVGSVGElement, unknown>()
+			.scaleExtent([0.7, 5])
+			.translateExtent(translateExtent)
+			// Ignore mouse wheel to avoid fighting page scroll; still allows touch pinch
+			.filter((event: any) => {
+				// Allow touch + trackpad pinch (wheel with ctrlKey), but block regular wheel scroll
+				if (event.type === 'wheel') return !!event.ctrlKey;
+				return true;
+			})
+			.on('zoom', (event: any) => {
+				currentTransform = event.transform;
+				if (rootGroup) rootGroup.attr('transform', currentTransform.toString());
+			});
+
+		const svgSel = d3.select(svg)
+			.on('.zoom', null)
+			.call(zoomBehavior as any)
+			.on('dblclick.zoom', null)
+			.style('cursor', 'grab');
+
+		// Drag cursor feedback
+		svgSel
+			.on('mousedown.dragcursor touchstart.dragcursor', () => svgSel.style('cursor', 'grabbing'))
+			.on('mouseup.dragcursor touchend.dragcursor mouseleave.dragcursor', () => svgSel.style('cursor', 'grab'));
 
 		// Create bubble groups
 		const bubbleGroups = g
@@ -450,13 +492,19 @@
 		width: 100%;
 		max-width: 100%;
 		overflow: hidden;
+		/* Allow flexible height with aspect fallback */
+		height: 100%;
 		aspect-ratio: 16/9; /* Landscape on desktop */
+		/* Allow touch gestures (pan/pinch) without page scrolling */
+		touch-action: none;
 	}
 
 	/* Portrait on mobile */
 	@media (max-width: 768px) {
 		.word-cloud-container {
-			aspect-ratio: 3/4;
+			height: 70dvh;
+			min-height: 360px;
+			aspect-ratio: auto;
 		}
 	}
 

@@ -686,7 +686,7 @@
 						{/each}
 					</div>
 				{:else}
-					<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-8 text-center">
+						<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 md:p-8 text-center">
 						<p class="text-ink-muted">No active sessions found. Enter a code manually below.</p>
 					</div>
 				{/if}
@@ -714,7 +714,7 @@
 			</div>
 		</div>
 	{:else}
-		<main class="mx-auto px-4 md:px-6 py-8" style="max-width: 95vw;">
+		<main class="mx-auto px-2 sm:px-4 md:px-6 py-6 md:py-8" style="max-width: 95vw;">
 			<!-- Session Status Notice -->
 			{#if isSessionEnded}
 				<div class="mb-6 rounded-xl border border-slate-700 bg-slate-900/80 p-4 shadow-lg">
@@ -783,7 +783,7 @@
 			{/if}
 
 			{#if activeBoards.length === 0}
-				<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-10 text-center">
+								<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 md:p-10 text-center">
 					<div class="space-y-4">
 						<h3 class="text-lg font-semibold text-slate-200">Waiting for content...</h3>
 						<div class="space-y-2 text-sm text-ink-muted">
@@ -804,12 +804,12 @@
 				</div>
 			{:else}
 			<!-- Single column layout for better visibility -->
-			<div class="max-w-[1600px] mx-auto space-y-6 px-4">
+			<div class="max-w-[1600px] mx-auto space-y-6 px-2 sm:px-4">
 				<!-- Phase-based charts for selected phase OR Supercloud -->
 				{#if selectedPhaseKey && browser}
 					{#if selectedPhaseKey === 'supercloud'}
 						{#key chartRefreshKey}
-							<div class="presentation-panel rounded-2xl border border-amber-400/20 bg-slate-900/70 p-8 shadow-[0_0_40px_rgba(251,191,36,0.2)]">
+								<div class="presentation-panel rounded-2xl border border-amber-400/20 bg-slate-900/70 p-4 md:p-8 shadow-[0_0_40px_rgba(251,191,36,0.2)]">
 								<header class="mb-6">
 									<h2 class="text-2xl font-bold text-slate-100">
 										✨ Supercloud
@@ -825,7 +825,7 @@
 						{/key}
 					{:else}
 						{#key chartRefreshKey}
-							<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
+							<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-4 md:p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
 								<PhaseCharts phaseKey={selectedPhaseKey} width={1400} height={600} />
 							</div>
 						{/key}
@@ -834,7 +834,7 @@
 					{#each mainBoards as boardId}
 							{#if boardId === 'heatmap'}
 								<div
-									class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
+									class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-4 md:p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
 								>
 									<header class="mb-4">
 										<h2 class="text-xl font-semibold text-slate-100">
@@ -850,7 +850,7 @@
 								</div>
 							{:else if boardId === 'roadmap'}
 								<div
-									class="presentation-panel rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+									class="presentation-panel rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-4 md:p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
 								>
 									<header class="mb-4">
 										<h2 class="text-xl font-semibold text-slate-100">

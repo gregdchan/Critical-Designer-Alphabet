@@ -1,66 +1,57 @@
 <script lang="ts">
 	import {
-		IconStar as Sparkles,
 		IconUsers as Users,
-		IconMessage as MessageSquare
+		IconMessage as MessageSquare,
+		IconChecklist as Checklist
 	} from '@tabler/icons-svelte';
 
-	const arcadeMetrics = [
+	const metrics = [
 		{
 			label: 'Inclusive prompts',
-			value: '142',
-			valueClass: 'text-neonPink',
-			shadowClass: 'hover:shadow-neon-pink'
+			value: '142'
 		},
 		{
-			label: 'Live collab rooms',
-			value: '32',
-			valueClass: 'text-neonCyan',
-			shadowClass: 'hover:shadow-brand'
+			label: 'Active collaboration spaces',
+			value: '32'
 		},
 		{
-			label: 'Unlocked badges',
-			value: '580',
-			valueClass: 'text-neonLime',
-			shadowClass: 'hover:shadow-neon-lime'
+			label: 'Recognition badges earned',
+			value: '580'
 		}
 	];
 
-	const playModes = [
+	const features = [
 		{
-			title: 'Retro Session Engine',
-			copy: 'Co-create in synchronized stages with neon timers, shared decks, and positionality prompts that keep justice centered.',
-			icon: Sparkles,
-			accent: 'from-neonPink via-retroPurple to-neonCyan'
+			title: 'Collaborative Planning',
+			copy: 'Facilitate real-time, accessible planning sessions where every voice is valued and equity is prioritized.',
+			icon: Users
 		},
 		{
-			title: 'Arcade Chat',
-			copy: 'Drop pixel-emoji reactions, collaborate in real-time chat threads, and keep the vibe inclusive with moderated prompts.',
-			icon: MessageSquare,
-			accent: 'from-neonCyan via-neonLime to-retroPurple'
+			title: 'Justice-Informed Dialogue',
+			copy: 'Guide teams through structured prompts and reflection tools that center justice and inclusion in every decision.',
+			icon: MessageSquare
 		},
 		{
-			title: 'Presence Radar',
-			copy: 'See teammates pop in as neon avatars, pair up for side quests, and keep the tempo with gamified facilitators controls.',
-			icon: Users,
-			accent: 'from-retroPurple via-neonPink to-neonLime'
+			title: 'Strategic Action Mapping',
+			copy: 'Transform insights into actionable strategies with transparent tracking and shared accountability.',
+			icon: Checklist
 		}
 	];
 
 	const badgeDeck = [
 		{
-			title: 'Neon Connector',
+			title: 'Equity Advocate',
 			description:
-				'Link three or more justice lenses in one story and watch your neon multiplier kick in.'
+				'Champion inclusive practices and ensure marginalized perspectives are centered in planning.'
 		},
 		{
-			title: 'Critical Thinker',
+			title: 'Justice Facilitator',
 			description:
-				'Finish Positionality + Justice steps without skipping, and unlock a shimmering cyan flourish.'
+				'Lead sessions that surface systemic barriers and co-create solutions for lasting impact.'
 		},
 		{
-			title: 'Retro Hero',
-			description: 'Hold the room from start to finish—no missed stages, no skipped voices.'
+			title: 'Collaborative Strategist',
+			description: 'Foster open dialogue and collective ownership of design outcomes.'
 		}
 	];
 </script>
@@ -72,34 +63,33 @@
 				<span
 					class="inline-flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm text-brand"
 				>
-					<Sparkles class="h-4 w-4" />
-					Inclusive Planning Platform
+					<Checklist class="h-4 w-4" />
+					Inclusive Design Planning Tool
 				</span>
 				<h1 class="text-3xl font-bold leading-tight text-ink sm:text-4xl">
-					Critical Designer Planner
+					Equity-Focused Strategy Facilitator
 				</h1>
 				<p class="max-w-2xl text-lg leading-relaxed text-ink-2">
-					Facilitate justice-centered design sessions with inclusive prompts, real-time
-					collaboration, and gamified interactions that make every voice heard.
+					Empower your team to plan, reflect, and act with intention. This platform supports justice-informed design, inclusive facilitation, and transparent collaboration for equitable outcomes.
 				</p>
 				<div class="flex flex-wrap items-center gap-4">
 					<a
 						class="inline-flex items-center gap-2 rounded-md bg-brand px-6 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
 						href="/session"
 					>
-						Start Session
+						Start Planning
 					</a>
 					<a
 						class="inline-flex items-center gap-2 rounded-md border border-line px-6 py-3 text-sm font-medium text-ink-2 transition hover:bg-surface-muted hover:text-ink"
 						href="/cards"
 					>
-						Browse Cards
+						Explore Prompts
 					</a>
 				</div>
 			</div>
 
 			<div class="grid gap-4 sm:grid-cols-3">
-				{#each arcadeMetrics as metric}
+				{#each metrics as metric}
 					<div
 						class="surface-muted rounded-lg px-5 py-4 transition hover:shadow-sm"
 					>
@@ -111,18 +101,18 @@
 		</div>
 
 		<div class="surface rounded-3xl p-6">
-			<h2 class="mb-6 text-lg font-semibold text-ink">Session Features</h2>
+			<h2 class="mb-6 text-lg font-semibold text-ink">Key Features</h2>
 			<div class="space-y-4">
-				{#each playModes as mode}
+				{#each features as feature}
 					<div class="flex gap-4 rounded-lg border border-line bg-surface-elevated p-4">
 						<div
 							class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-brand"
 						>
-							<svelte:component this={mode.icon} class="h-5 w-5" />
+							<svelte:component this={feature.icon} class="h-5 w-5" />
 						</div>
 						<div>
-							<p class="text-sm font-medium text-ink">{mode.title}</p>
-							<p class="mt-1 text-sm text-ink-2">{mode.copy}</p>
+							<p class="text-sm font-medium text-ink">{feature.title}</p>
+							<p class="mt-1 text-sm text-ink-2">{feature.copy}</p>
 						</div>
 					</div>
 				{/each}
@@ -135,20 +125,20 @@
 	<div class="flex flex-col gap-10 lg:flex-row">
 		<div class="flex-1 space-y-6">
 			<h2 class="font-retro text-xl uppercase tracking-[0.4em] text-brand">
-				Critical Design Engagement Loop
+				Justice-Centered Engagement Loop
 			</h2>
 			<p class="max-w-xl text-sm text-ink-2">
-				This platform empowers teams to surface, explore, and engage in strategic conversations around critical design. Through deeply inclusive prompts and collaborative tools, teams can co-create, share values, and address concerns in real time.
+				Support your team in surfacing lived experiences, exploring equity challenges, and co-creating strategies for meaningful change. Our tools foster open dialogue, shared learning, and collective action.
 			</p>
 			<ul class="space-y-4 text-xs uppercase tracking-[0.25em] text-ink-2">
-				<li class="flex items-center gap-3 text-rose-500">
-					<span class="h-2 w-8 rounded-full bg-rose-400" /> Adaptive prompts that spark meaningful, justice-centered dialogue
+				<li class="flex items-center gap-3 text-blue-600">
+					<span class="h-2 w-8 rounded-full bg-blue-400" /> Adaptive prompts for equity-focused conversations
 				</li>
 				<li class="flex items-center gap-3 text-brand">
-					<span class="h-2 w-8 rounded-full bg-brand" /> Gamified design stages to encourage inclusive participation
+					<span class="h-2 w-8 rounded-full bg-brand" /> Collaborative facilitation and transparent decision-making
 				</li>
-				<li class="flex items-center gap-3 text-emerald-500">
-					<span class="h-2 w-8 rounded-full bg-emerald-400" /> Achievement badges for surfacing shared values and addressing issues
+				<li class="flex items-center gap-3 text-emerald-600">
+					<span class="h-2 w-8 rounded-full bg-emerald-400" /> Recognition for inclusive leadership and shared progress
 				</li>
 			</ul>
 		</div>
@@ -156,8 +146,8 @@
 			<div
 				class="surface rounded-[1.75rem] p-6 shadow-lg"
 			>
-				<h3 class="font-techno text-sm uppercase tracking-[0.3em] text-ink">Badge Deck</h3>
-				<p class="mt-2 text-xs text-ink-2">Earn recognition for inclusive facilitation and strategic co-creation.</p>
+				<h3 class="font-techno text-sm uppercase tracking-[0.3em] text-ink">Recognition Badges</h3>
+				<p class="mt-2 text-xs text-ink-2">Celebrate inclusive facilitation, equity advocacy, and collaborative strategy.</p>
 				<div class="mt-6 grid gap-4 md:grid-cols-3">
 					{#each badgeDeck as badge}
 						<div
@@ -172,9 +162,9 @@
 				</div>
 			</div>
 			<div
-				class="rounded-[1.75rem] border border-rose-200 bg-rose-50 px-6 py-5 text-xs uppercase tracking-[0.25em] text-rose-500 shadow-sm"
+				class="rounded-[1.75rem] border border-blue-200 bg-blue-50 px-6 py-5 text-xs uppercase tracking-[0.25em] text-blue-600 shadow-sm"
 			>
-				Real-time collaboration, multilingual support, and accessible design help teams break through barriers and co-create with intention.
+				Real-time collaboration, multilingual support, and accessible design empower teams to co-create with purpose and equity.
 			</div>
 		</div>
 	</div>
@@ -183,14 +173,14 @@
 <section class="surface mt-16 rounded-[2.5rem] px-6 py-12 sm:px-10">
 	<div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 		<div class="space-y-5">
-			<h2 class="font-retro text-xl uppercase tracking-[0.4em] text-emerald-500">
+			<h2 class="font-retro text-xl uppercase tracking-[0.4em] text-emerald-600">
 				Inclusive Planning Checklist
 			</h2>
 			<p class="text-sm text-ink-2">
-				Designed for accessibility and inclusion, this tool ensures every voice is heard and every idea is valued throughout the design process.
+				Designed for accessibility and equity, this tool ensures all perspectives are valued and every idea is considered throughout the design process.
 			</p>
 			<ul class="space-y-3 text-xs uppercase tracking-[0.3em] text-ink-2">
-				<li>Multilingual prompts and descriptions</li>
+				<li>Multilingual prompts and resources</li>
 				<li>Right-to-left language support</li>
 				<li>Clear focus indicators and keyboard navigation</li>
 				<li>Secure, transparent team collaboration</li>
@@ -199,18 +189,18 @@
 		<div
 			class="surface rounded-[2rem] p-6 shadow-lg"
 		>
-			<h3 class="font-techno text-sm uppercase tracking-[0.3em] text-rose-500">
-				Platform Features
+			<h3 class="font-techno text-sm uppercase tracking-[0.3em] text-blue-600">
+				Platform Capabilities
 			</h3>
 			<div class="mt-4 space-y-4 text-xs text-ink-2">
 				<p class="leading-relaxed">
-					<strong class="text-ink">Facilitated Collaboration:</strong> Teams explore ideas, themes, and concerns together with real-time feedback and shared prompts.
+					<strong class="text-ink">Facilitated Collaboration:</strong> Teams explore ideas, challenges, and opportunities together with real-time feedback and inclusive prompts.
 				</p>
 				<p class="leading-relaxed">
-					<strong class="text-ink">Strategic Co-Creation:</strong> Gamified sessions, achievement badges, and inclusive design challenges drive engagement and shared understanding.
+					<strong class="text-ink">Strategic Co-Creation:</strong> Structured sessions, recognition badges, and equity-focused challenges drive engagement and shared understanding.
 				</p>
 				<p class="leading-relaxed">
-					<strong class="text-ink">Insightful Summaries:</strong> Export session insights to support ongoing change management and design planning.
+					<strong class="text-ink">Insightful Summaries:</strong> Export session insights to support ongoing equity work and strategic planning.
 				</p>
 			</div>
 		</div>

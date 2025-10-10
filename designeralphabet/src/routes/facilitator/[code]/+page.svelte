@@ -82,7 +82,7 @@
             </div>
 
             {#if chartType === 'voting' || chartType === 'openText'}
-              <div class="w-full" style="height:520px">
+              <div class="w-full md:h-[520px] h-[70dvh]">
                 <WordCloudChart
                   responses={qResponses}
                   width={1300}
@@ -91,7 +91,7 @@
                 />
               </div>
             {:else if built?.data}
-              <div class="w-full" style="height:520px">
+              <div class="w-full md:h-[520px] h-[70dvh]">
                 <ChartComp data={built.data} title={q.text || ''} />
               </div>
             {:else}

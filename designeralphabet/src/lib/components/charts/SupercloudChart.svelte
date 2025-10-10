@@ -235,11 +235,17 @@
 
 		zoomBehavior = d3
 			.zoom<SVGSVGElement, unknown>()
-			.scaleExtent([1, 1]) // pan only; no zoom scaling
+			.scaleExtent([0.7, 3]) // allow pinch-zoom while keeping reasonable bounds
 			.translateExtent([
 				[txMin, tyMin],
 				[txMax, tyMax]
 			])
+			// Ignore mouse wheel zoom to avoid interfering with page scroll; allow touch pinch and drag
+			.filter((event: any) => {
+				// Allow touch + trackpad pinch (wheel with ctrlKey), but block regular wheel scroll
+				if (event.type === 'wheel') return !!event.ctrlKey;
+				return true;
+			})
 			.on('zoom', (event: any) => {
 				currentTransform = event.transform;
 				if (rootGroup) rootGroup.attr('transform', currentTransform.toString());
