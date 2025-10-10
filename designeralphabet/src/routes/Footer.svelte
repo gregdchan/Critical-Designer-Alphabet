@@ -18,9 +18,6 @@
 			<a href="/credits" class="text-ink-2 hover:text-brand transition-colors">
 				Credits & Acknowledgements
 			</a>
-			<a href="/licensing" class="text-ink-2 hover:text-brand transition-colors">
-				Licensing
-			</a>
 		</nav>
 	</div>
 </footer>
