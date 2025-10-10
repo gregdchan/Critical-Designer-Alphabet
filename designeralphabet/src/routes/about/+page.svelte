@@ -71,7 +71,7 @@
 			title: 'Shared Insights & Data',
 			subtitle: 'Ground decisions in transparent, equitable evidence',
 			body: [
-				'Participants contribute stories, risks, and opportunities which are logged in MariaDB and surfaced through accessible data visualizations. Every insight is traceable back to the cards and voices that inspired it.'
+				'Participants contribute stories, risks, and opportunities which are logged and surfaced through accessible data visualizations. Every insight is traceable back to the voices that inspired it.'
 			],
 			bullets: [
 				'D3-driven heatmaps and scoreboards tuned for dark-mode clarity',
@@ -102,9 +102,7 @@
 				'Need workshop guidance or partnership? Reach out to co-create facilitation roadmaps, integrate the platform into your organization, or explore bespoke justice-centered engagements.'
 			],
 			bullets: [
-				'Email: hello@criticalalphabet.app',
-				'Updates and roadmap: dashboard notifications & design system page',
-				'Attribution: Always credit Dr. Lesley-Ann Noel for the original deck'
+				'Email: gregdchan@gmail.com'
 			],
 			accent: 'emerald',
 			icon: IconLifebuoy
