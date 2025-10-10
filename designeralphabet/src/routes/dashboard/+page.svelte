@@ -220,7 +220,7 @@
 					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
 						<div class="flex items-center gap-3">
 							<div
-								class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-accent-critical"
+								class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10 text-brand"
 							>
 								<TrendingUp class="h-5 w-5" />
 							</div>

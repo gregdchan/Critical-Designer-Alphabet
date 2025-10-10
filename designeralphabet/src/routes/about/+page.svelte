@@ -124,9 +124,9 @@
 			header: 'bg-brand/20 text-brand',
 			border: 'border-cyan-500/40'
 		},
-		amber: {
-			header: 'bg-amber-600/20 text-amber-300',
-			border: 'border-amber-500/40'
+			amber: {
+			header: 'bg-brand/20 text-brand',
+			border: 'border-brand/40'
 		},
 		emerald: {
 			header: 'bg-emerald-600/20 text-emerald-300',
@@ -180,7 +180,7 @@
 			   {/each}
 		   </div>
 	   {:else if data.error}
-		   <p class="text-sm text-amber-300">{data.error}</p>
+		   <p class="text-sm text-brand">{data.error}</p>
 	   {/if}
    </div>
 

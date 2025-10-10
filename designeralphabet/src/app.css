@@ -104,19 +104,23 @@ body {
     hsl(var(--surface-subtle)) 100%
   );
   color: hsl(var(--text-primary));
-  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  /* Functional, clean system stack */
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Orbitron', 'Poppins', sans-serif;
-  font-weight: 800;
-  letter-spacing: 0.01em;
+  /* Align headings with body for cleaner look */
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+  font-weight: 700;
+  letter-spacing: 0;
   color: hsl(var(--text-primary));
 }
 
 a:hover,
 a:focus-visible {
-	color: hsl(var(--accent-warm));
+	/* Use brand for emphasis; keep underline for affordance */
+	color: hsl(var(--brand));
+	text-decoration: underline;
 	text-decoration-color: currentColor;
 }
 
@@ -126,7 +130,7 @@ a:focus-visible {
 }
 
 ::selection {
-	background: hsl(var(--orange) / 0.25);
+	background: hsl(var(--brand) / 0.2);
 	color: hsl(var(--text-primary));
 }
 
@@ -583,18 +587,16 @@ a:focus-visible {
 /* Text colors for badges */
 :global(.text-green-300),
 :global(.text-green-400) {
-	color: #ffffff !important;
+	color: #16a34a !important; /* readable green */
 }
 
 :global(.text-yellow-300),
 :global(.text-yellow-400) {
-	color: #0f172a !important;
+	color: #854d0e !important; /* readable dark amber */
 }
 
-:global(.text-brand),
-:global(.text-brand) {
-	color: #ffffff !important;
-}
+/* Ensure brand text renders as brand color, not forced white */
+:global(.text-brand) { color: hsl(var(--brand)) !important; }
 
 /* Icon backgrounds */
 :global(.bg-blue-50) {
@@ -603,10 +605,7 @@ a:focus-visible {
 	border: 2px solid #025259 !important;
 }
 
-:global(.text-brand),
-:global(.text-brand) {
-	color: #ffffff !important;
-}
+/* Remove forced white brand text on purple/teal icon backgrounds */
 
 :global(.bg-green-50) {
 	background-color: #00a0a3 !important;

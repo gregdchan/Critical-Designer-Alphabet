@@ -774,7 +774,7 @@
 					<button
 						on:click={() => (selectedPhaseKey = 'supercloud')}
 						class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {selectedPhaseKey === 'supercloud'
-							? 'bg-amber-500 text-white'
+							? 'bg-brand text-white'
 							: 'bg-surface-muted text-secondary hover:bg-surface-elevated'}"
 					>
 						✨ Supercloud
@@ -809,7 +809,7 @@
 				{#if selectedPhaseKey && browser}
 					{#if selectedPhaseKey === 'supercloud'}
 						{#key chartRefreshKey}
-								<div class="presentation-panel rounded-2xl border border-amber-400/20 bg-slate-900/70 p-4 md:p-8 shadow-[0_0_40px_rgba(251,191,36,0.2)]">
+								<div class="presentation-panel rounded-2xl border border-brand/20 bg-slate-900/70 p-4 md:p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
 								<header class="mb-6">
 									<h2 class="text-2xl font-bold text-slate-100">
 										✨ Supercloud
@@ -1188,7 +1188,7 @@
 										<h3 class="text-lg font-semibold text-white">
 											{BOARD_DEFINITIONS[boardId].label}
 										</h3>
-										<IconStar class="h-4 w-4 text-amber-400" />
+											<IconStar class="h-4 w-4 text-brand" />
 									</header>
 									{#if leaderboardList.length > 0}
 										<div class="space-y-3">

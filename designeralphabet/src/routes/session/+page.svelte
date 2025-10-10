@@ -90,7 +90,7 @@
 {/if}
 
 <div
-	class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-pastel-orange/20 flex items-center justify-center p-6"
+	class="min-h-screen bg-gradient-to-br from-surface-muted via-surface to-surface-subtle flex items-center justify-center p-6"
 >
 	<div class="max-w-4xl w-full space-y-10 text-center">
 		<div class="space-y-4">

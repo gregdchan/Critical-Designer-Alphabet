@@ -1257,7 +1257,7 @@
 														</div>
 													{/if}
 													<button
-														class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-amber-400 transition"
+													class="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand transition"
 														on:click={() => resetPhaseTimer(phase)}
 													>
 														Reset Timer

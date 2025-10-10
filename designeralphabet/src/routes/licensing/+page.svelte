@@ -111,7 +111,7 @@
 	<section class="bg-slate-800 rounded-lg border border-slate-600 p-8">
 		<div class="flex items-start gap-4 mb-6">
 			<div
-				class="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-600/20 text-amber-400"
+				class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand/20 text-brand"
 			>
 				<Scale class="h-6 w-6" />
 			</div>
@@ -246,7 +246,7 @@
 					</a>
 				</div>
 
-				<div class="border-l-4 border-orange-500 pl-4">
+				<div class="border-l-4 border-brand pl-4">
 					<h3 class="font-semibold text-slate-200 mb-2">Pluriversal Radio / Medium</h3>
 					<p class="text-sm text-ink-muted mb-2">
 						Essays and conversations on design for a world of many worlds.

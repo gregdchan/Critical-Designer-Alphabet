@@ -30,7 +30,7 @@
 
 	const CATEGORIES = ['theory', 'practice', 'lens', 'mindset', 'method'];
 const CATEGORY_COLORS: Record<string, string> = {
-	theory: 'text-accent-warm border-line',
+	theory: 'text-primary border-line',
 	practice: 'text-brand border-line',
 	lens: 'text-accent-critical border-line',
 	mindset: 'text-brand border-line',

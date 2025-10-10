@@ -5,6 +5,7 @@
 		IconHeart as Heart,
 		IconUsers as Users
 	} from '@tabler/icons-svelte';
+	import ResourceCard from '$lib/components/ResourceCard.svelte';
 </script>
 
 <svelte:head>
@@ -93,7 +94,7 @@
 	<!-- Licensing -->
 	<section class="panel p-8 rounded-2xl shadow-lg bg-white/80">
 		<div class="flex items-center gap-5 mb-6">
-			<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-pastel-orange/20 text-pastel-orange">
+			<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-brand/20 text-brand">
 				<Scale class="h-7 w-7" />
 			</div>
 			<div>
@@ -202,28 +203,3 @@
 		</div>
 	</section>
 </div>
-
-<!-- ResourceCard component (inline for brevity, or move to a separate file if preferred) -->
-<script lang="ts">
-	export let title: string;
-	export let desc: string;
-	export let url: string;
-	export let border: string;
-</script>
-
-<!-- Only render ResourceCard if props are present (for inline use) -->
-{#if title && desc && url && border}
-	<div class={`border-l-4 ${border} pl-4`}>
-		<h3 class="font-semibold text-primary mb-1">{title}</h3>
-		<p class="text-sm text-secondary mb-2">{desc}</p>
-		<a
-			href={url}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="inline-flex items-center gap-1 text-brand hover:text-neon-pink text-sm font-medium"
-		>
-			{url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-			<ExternalLink class="h-3 w-3" />
-		</a>
-	</div>
-{/if}
