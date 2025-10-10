@@ -252,7 +252,7 @@ export const sessionQuestion = defineField({
       • Written: Heatmap, Word Cloud
       • Landscape (2D): Response Landscape
       • Scale: Line Chart
-      • Single/Multi Choice: Bar Chart, Pie Chart
+      • Single/Multi Choice: Bar Chart (add Pie Chart if desired)
       • Risk Assessment: Risk Impact Matrix
       • Maturity Dial: Maturity Dial
       • Inclusivity Meter: Inclusivity Meter`,
@@ -262,7 +262,7 @@ export const sessionQuestion = defineField({
         switch (responseType) {
           case 'singleChoice':
           case 'multiSelect':
-            return ['barChart', 'pieChart'];
+            return ['barChart']; // Default to barChart only, add pieChart manually if needed
           case 'scale':
             return ['lineChart'];
           case 'landscape':

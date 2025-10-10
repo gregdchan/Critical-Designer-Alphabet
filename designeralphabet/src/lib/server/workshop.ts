@@ -501,7 +501,7 @@ export async function addQuestion({
 		switch (responseType) {
 			case 'singleChoice':
 			case 'multiSelect':
-				dashboards = ['barChart', 'pieChart'];
+				dashboards = ['barChart']; // Default to barChart only, user can add pieChart in Sanity if needed
 				break;
 			case 'scale':
 				dashboards = ['lineChart'];
