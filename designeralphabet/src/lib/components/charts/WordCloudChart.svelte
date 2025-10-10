@@ -11,6 +11,7 @@
 		participantName?: string;
 		participantColor?: string;
 		participant_id?: string | null;
+		questionType?: string; // Add question type for color coding
 	};
 
 	export let responses: WordCloudResponse[] = [];
@@ -56,8 +57,10 @@
 		x: number;
 		y: number;
 		color: string;
+		lensColor: string;
 		lens: string;
 		participant: string;
+		questionType: string;
 	};
 
 	function normaliseLens(raw?: string) {
@@ -80,6 +83,15 @@
 		// Bubble sizing - more dramatic range to emphasize top items
 		const minRadius = 18;
 		const maxRadius = 80;
+
+		// Define more diverse colors for different response types
+		const responseTypeColors = {
+			response: '#8B5CF6', // Purple - for open text responses
+			choice: '#3B82F6',   // Blue - for multiple choice
+			scale: '#10B981',    // Green - for scale/rating
+			voting: '#F59E0B',   // Amber - for voting responses
+			default: '#6366F1'   // Indigo - fallback
+		};
 
 		// Map responses to bubbles with vote percentages
 		const basePalette = Object.fromEntries(
@@ -118,6 +130,7 @@
 				const votes = response.votes || 0;
 				const votePercentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
 				const lensLabel = normaliseLens(response.lens);
+				const questionType = response.questionType || 'response';
 
 				// Scale radius based on votes with exponential curve for more dramatic differences
 				let radius: number;
@@ -132,10 +145,9 @@
 					radius = minRadius + Math.min(12, Math.sqrt(textLen) * 1.5);
 				}
 
-				// Use participant color if available, otherwise fall back to lens color
-				const participantColor = response.participantColor;
+				// Get color based on question type for more diversity
+				const typeColor = responseTypeColors[questionType as keyof typeof responseTypeColors] || responseTypeColors.default;
 				const lensColor = resolveLensColor(lensLabel);
-				const bubbleColor = participantColor || lensColor;
 
 				return {
 					id: response.id,
@@ -145,9 +157,11 @@
 					radius,
 					x: 0,
 					y: 0,
-					color: bubbleColor,
+					color: typeColor,
+					lensColor: lensColor,
 					lens: lensLabel || 'General',
-					participant: response.participantName || 'Anonymous'
+					participant: response.participantName || 'Anonymous',
+					questionType
 				};
 			});
 
@@ -255,20 +269,26 @@
 		const sortedByVotes = [...positionedBubbles].sort((a, b) => b.votes - a.votes);
 		const topTierThreshold = sortedByVotes[Math.floor(sortedByVotes.length * 0.2)]?.votes || 0;
 
-		// Add circles
+		// Add outer lens ring first (so it's behind the main circle)
+		bubbleGroups
+			.append('circle')
+			.attr('r', (d: any) => d.radius + 3)
+			.attr('fill', 'none')
+			.attr('stroke', (d: any) => d.lensColor)
+			.attr('stroke-width', 4)
+			.attr('opacity', 0.8);
+
+		// Add main circles with response type color
 		bubbleGroups
 			.append('circle')
 			.attr('r', (d: any) => d.radius)
 			.attr('fill', (d: any) => d.color)
 			.attr('opacity', (d: any) => {
 				// Top 20% get full opacity, rest get reduced
-				return d.votes >= topTierThreshold ? 0.9 : 0.65;
+				return d.votes >= topTierThreshold ? 0.9 : 0.7;
 			})
-			.attr('stroke', (d: any) => {
-				// Top items get highlighted stroke
-				return d.votes >= topTierThreshold ? theme.brand : 'hsl(var(--surface-elevated))';
-			})
-			.attr('stroke-width', (d: any) => d.votes >= topTierThreshold ? 3 : 2)
+			.attr('stroke', 'hsl(var(--surface-elevated))')
+			.attr('stroke-width', 2)
 			.style('cursor', 'pointer')
 			.on('mouseenter', function (event: any, d: any) {
 				d3.select(this)
@@ -303,7 +323,16 @@
 						${question ? `<div style="font-size: 11px; font-weight: 600; color: ${theme.brand}; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid hsl(var(--border-subtle));">${question}</div>` : ''}
 						<div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; color: ${theme.ink};">${d.text}</div>
 						<div style="color: ${theme.ink2}; margin-bottom: 4px; font-size: 11px;">By: ${d.participant}</div>
-						<div style="color: ${theme.inkMuted}; margin-bottom: 4px; font-size: 11px;">Lens: ${d.lens}</div>
+						<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+							<div style="display: flex; align-items: center; gap: 4px;">
+								<div style="width: 12px; height: 12px; border-radius: 50%; background: ${d.color};"></div>
+								<span style="color: ${theme.inkMuted}; font-size: 11px; text-transform: capitalize;">${d.questionType}</span>
+							</div>
+							<div style="display: flex; align-items: center; gap: 4px;">
+								<div style="width: 12px; height: 12px; border-radius: 50%; border: 3px solid ${d.lensColor};"></div>
+								<span style="color: ${theme.inkMuted}; font-size: 11px;">Lens: ${d.lens}</span>
+							</div>
+						</div>
 						<div style="color: ${theme.brand}; font-weight: 600; margin-top: 8px; padding-top: 8px; border-top: 1px solid hsl(var(--border-subtle));">
 							${d.votes} votes (${d.votePercentage.toFixed(1)}%)
 						</div>
@@ -425,32 +454,93 @@
 			.attr('font-weight', '700')
 			.text('Response Word Cloud');
 
-		// Add legend
-		const uniqueLenses = Array.from(new Set(positionedBubbles.map((b: any) => b.lens)));
-		const legend = g
+		// Add legends - Response Types and Lenses
+		const legendX = width - 160;
+		const legendY = 40;
+
+		// Response Type Legend
+		const responseTypeLegend = g
 			.append('g')
-			.attr('transform', `translate(${width - 120}, 40)`);
+			.attr('transform', `translate(${legendX}, ${legendY})`);
 
-		legend
-			.selectAll('.legend-item')
-			.data(uniqueLenses)
+		responseTypeLegend
+			.append('text')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('fill', theme.ink)
+			.attr('font-size', '12px')
+			.attr('font-weight', '700')
+			.text('Response Types');
+
+		const responseTypes = [
+			{ type: 'response', label: 'Open Text', color: '#8B5CF6' },
+			{ type: 'choice', label: 'Multiple Choice', color: '#3B82F6' },
+			{ type: 'scale', label: 'Scale/Rating', color: '#10B981' },
+			{ type: 'voting', label: 'Voting', color: '#F59E0B' }
+		];
+
+		responseTypeLegend
+			.selectAll('.type-legend-item')
+			.data(responseTypes)
 			.join('g')
-			.attr('class', 'legend-item')
-			.attr('transform', (d: any, i: number) => `translate(0, ${i * 22})`)
-			.each(function (lens: any) {
-				const item = d3.select(this);
-				item
-					.append('circle')
+			.attr('class', 'type-legend-item')
+			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.each(function (item: any) {
+				const g = d3.select(this);
+				g.append('circle')
 					.attr('r', 6)
-					.attr('fill', lensColorByName.get(lens) ?? theme.ink2)
-					.attr('opacity', 0.75);
+					.attr('fill', item.color)
+					.attr('opacity', 0.8);
 
-				item
-					.append('text')
+				g.append('text')
 					.attr('x', 12)
 					.attr('y', 4)
 					.attr('fill', theme.ink2)
-					.attr('font-size', '11px')
+					.attr('font-size', '10px')
+					.text(item.label);
+			});
+
+		// Lens Legend
+		const lensLegendY = legendY + responseTypes.length * 20 + 40;
+		const uniqueLenses = Array.from(new Set(positionedBubbles.map((b: any) => b.lens)));
+		const lensLegend = g
+			.append('g')
+			.attr('transform', `translate(${legendX}, ${lensLegendY})`);
+
+		lensLegend
+			.append('text')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('fill', theme.ink)
+			.attr('font-size', '12px')
+			.attr('font-weight', '700')
+			.text('Lenses (Ring)');
+
+		lensLegend
+			.selectAll('.lens-legend-item')
+			.data(uniqueLenses)
+			.join('g')
+			.attr('class', 'lens-legend-item')
+			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.each(function (lens: any) {
+				const item = d3.select(this);
+				const lensColor = lensColorByName.get(lens) ?? theme.ink2;
+				
+				// Show ring style to match bubbles
+				item
+					.append('circle')
+					.attr('r', 6)
+					.attr('fill', 'none')
+					.attr('stroke', lensColor)
+					.attr('stroke-width', 3)
+					.attr('opacity', 0.8);
+
+				item
+					.append('text')
+					.attr('x', 14)
+					.attr('y', 4)
+					.attr('fill', theme.ink2)
+					.attr('font-size', '10px')
 					.text(lens);
 			});
 

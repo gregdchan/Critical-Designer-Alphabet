@@ -9,7 +9,7 @@
 		responses,
 		timeline,
 		chat,
-		leaderboard,
+		// leaderboard, // use computed leaderboard for accurate scores
 		startRealtimeSession,
 		stopRealtimeSession,
 		addResponse as apiAddResponse,
@@ -61,6 +61,7 @@
 	// import { createSessionCardStore } from '$lib/stores/sessionCards'; // Temporarily hidden - not usable with current exercise
 	// import type { Card } from '$lib/Cards'; // Temporarily hidden - not usable with current exercise
 	import PortableText from '$lib/components/PortableText.svelte';
+	import { getLeaderboard } from '$lib/gamification';
 
 	export let data: { sessionCode: string; role: string };
 
@@ -175,7 +176,8 @@
 	$: responsesList = $responses ?? [];
 	$: timelineList = $timeline ?? [];
 	$: chatList = $chat ?? [];
-	$: leaderboardList = $leaderboard ?? [];
+	// Compute leaderboard with actual points from responses
+	$: leaderboardList = getLeaderboard(participantsList, responsesList, timelineList);
 	$: isSessionLive = sessionInfo?.status === 'live';
 	$: isSessionEnded = sessionInfo?.status === 'done';
 	$: isSessionPlanned = sessionInfo?.status === 'planned';
@@ -1784,7 +1786,7 @@
 															<span class="text-xs font-bold text-brand">#{index + 1}</span>
 															<span class="text-sm text-primary truncate">{participant.name}</span>
 														</div>
-														<span class="text-xs text-cyan-200 flex-shrink-0 ml-auto">{participant.points ?? 0} pts</span>
+													<span class="text-xs text-cyan-200 flex-shrink-0 ml-auto">{participant.score ?? participant.points ?? 0} pts</span>
 													</div>
 												{/each}
 											{:else}
@@ -2025,7 +2027,7 @@
 															<div class="text-xs text-secondary">chats</div>
 														</div>
 														<div class="text-center p-2 rounded surface-muted/60">
-															<div class="font-medium text-primary truncate px-1">{participant.points ?? 0}</div>
+															<div class="font-medium text-primary truncate px-1">{participant.score ?? participant.points ?? 0}</div>
 															<div class="text-xs text-secondary">points</div>
 														</div>
 													</div>
@@ -2087,7 +2089,7 @@
 											<p class="text-xs text-secondary">{player.badges?.length ?? 0} badges</p>
 										</div>
 									</div>
-									<span class="font-mono text-cyan-200">{player.points ?? 0} pts</span>
+									<span class="font-mono text-cyan-200">{player.score ?? player.points ?? 0} pts</span>
 								</li>
 							{/each}
 						</ul>

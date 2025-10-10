@@ -81,8 +81,8 @@
 			questions = data.questions || [];
 			chat = data.chat || [];
 
-			// Use participants array directly as leaderboard since it's already calculated and sorted
-			leaderboard = participants;
+			// Compute leaderboard with scores from responses + timeline
+			leaderboard = getLeaderboard(participants, responses, timeline);
 		} catch (err: any) {
 			console.error('Failed to load session details:', err);
 			error = err.message || 'Failed to load session details';
@@ -354,7 +354,7 @@
 										Leaderboard
 									</h3>
 									<div class="space-y-3">
-										{#each leaderboard.slice(0, 5) as participant, index}
+										{#each leaderboard as participant, index}
 											<div class="flex items-center gap-4 p-3 rounded-lg border border-line hover:bg-surface-muted transition-colors">
 												<div class="flex items-center gap-3">
 													<span class="text-lg font-semibold text-primary w-6 text-center"
