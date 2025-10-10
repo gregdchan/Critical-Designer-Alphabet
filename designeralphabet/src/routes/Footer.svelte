@@ -14,5 +14,13 @@
 				Designer Alphabet.
 			</p>
 		</div>
+		<nav class="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+			<a href="/credits" class="text-ink-2 hover:text-brand transition-colors">
+				Credits & Acknowledgements
+			</a>
+			<a href="/licensing" class="text-ink-2 hover:text-brand transition-colors">
+				Licensing
+			</a>
+		</nav>
 	</div>
 </footer>
