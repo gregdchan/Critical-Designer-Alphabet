@@ -31,6 +31,10 @@
 	let rootGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
 	let currentTransform = d3.zoomIdentity;
 
+	// Filter state for interactive legends
+	let activeTypeFilter: string | null = null; // 'written', 'choice', 'scale', or null (all)
+	let activeLensFilter: string | null = null; // lens name or null (all)
+
 	const ro = typeof ResizeObserver !== 'undefined'
 		? new ResizeObserver((entries) => {
 				const r = entries[0]?.contentRect;
@@ -385,28 +389,41 @@
 			{ type: 'scale', label: '📊 Scales', color: '#10B981' }
 		];
 
-		responseTypeLegend
-			.selectAll('.type-legend-item')
-			.data(responseTypes)
-			.join('g')
-			.attr('class', 'type-legend-item')
-			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
-			.each(function (item: any) {
-				const g = d3.select(this);
-				g.append('circle')
-					.attr('r', 6)
-					.attr('fill', item.color)
-					.attr('opacity', 0.8);
+	responseTypeLegend
+		.selectAll('.type-legend-item')
+		.data(responseTypes)
+		.join('g')
+		.attr('class', 'type-legend-item')
+		.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+		.style('cursor', 'pointer')
+		.on('click', function(_event: any, item: any) {
+			// Toggle filter: click again to deactivate
+			if (activeTypeFilter === item.type) {
+				activeTypeFilter = null;
+			} else {
+				activeTypeFilter = item.type;
+			}
+			renderSupercloud();
+		})
+		.each(function (item: any) {
+			const g = d3.select(this);
+			const isActive = activeTypeFilter === null || activeTypeFilter === item.type;
+			
+			g.append('circle')
+				.attr('r', 6)
+				.attr('fill', item.color)
+				.attr('opacity', isActive ? 0.8 : 0.3)
+				.attr('stroke', activeTypeFilter === item.type ? theme.brand : 'none')
+				.attr('stroke-width', 2);
 
-				g.append('text')
-					.attr('x', 12)
-					.attr('y', 4)
-					.attr('fill', theme.ink2)
-					.attr('font-size', '10px')
-					.text(item.label);
-			});
-
-		// Lens Legend
+			g.append('text')
+				.attr('x', 12)
+				.attr('y', 4)
+				.attr('fill', isActive ? theme.ink2 : theme.inkMuted)
+				.attr('font-size', '10px')
+				.attr('font-weight', activeTypeFilter === item.type ? '700' : '400')
+				.text(item.label);
+		});		// Lens Legend
 		const lensLegendY = legendY + responseTypes.length * 20 + 40;
 		const uniqueLenses = Array.from(new Set(positioned.map((b: any) => b.lens)));
 		const lensLegend = uiGroup
@@ -422,42 +439,63 @@
 			.attr('font-weight', '700')
 			.text('Lenses (Ring)');
 
-		lensLegend
-			.selectAll('.lens-legend-item')
-			.data(uniqueLenses)
-			.join('g')
-			.attr('class', 'lens-legend-item')
-			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
-			.each(function (lens: any) {
-				const item = d3.select(this);
-				const lensColor = lensColorByName.get(lens) ?? theme.ink2;
-				
-				// Show ring style to match bubbles
-				item
-					.append('circle')
-					.attr('r', 6)
-					.attr('fill', 'none')
-					.attr('stroke', lensColor)
-					.attr('stroke-width', 3)
-					.attr('opacity', 0.8);
+	lensLegend
+		.selectAll('.lens-legend-item')
+		.data(uniqueLenses)
+		.join('g')
+		.attr('class', 'lens-legend-item')
+		.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+		.style('cursor', 'pointer')
+		.on('click', function(_event: any, lens: any) {
+			// Toggle filter: click again to deactivate
+			if (activeLensFilter === lens) {
+				activeLensFilter = null;
+			} else {
+				activeLensFilter = lens;
+			}
+			renderSupercloud();
+		})
+		.each(function (lens: any) {
+			const item = d3.select(this);
+			const lensColor = lensColorByName.get(lens) ?? theme.ink2;
+			const isActive = activeLensFilter === null || activeLensFilter === lens;
+			
+			// Show ring style to match bubbles
+			item
+				.append('circle')
+				.attr('r', 6)
+				.attr('fill', 'none')
+				.attr('stroke', lensColor)
+				.attr('stroke-width', activeLensFilter === lens ? 4 : 3)
+				.attr('opacity', isActive ? 0.8 : 0.3);
 
-				item
-					.append('text')
-					.attr('x', 14)
-					.attr('y', 4)
-					.attr('fill', theme.ink2)
-					.attr('font-size', '10px')
-					.text(lens);
-			});
-
-		// ===== INTERACTIVE LAYER (bubbles) =====
+			item
+				.append('text')
+				.attr('x', 14)
+				.attr('y', 4)
+				.attr('fill', isActive ? theme.ink2 : theme.inkMuted)
+				.attr('font-size', '10px')
+				.attr('font-weight', activeLensFilter === lens ? '700' : '400')
+				.text(lens);
+		});		// ===== INTERACTIVE LAYER (bubbles) =====
 		// Bubbles in interactive layer
 		const bubbleGroups = interactiveGroup
 			.selectAll('.bubble')
 			.data(positioned)
 			.join('g')
 			.attr('class', 'bubble')
-			.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+			.attr('transform', (d: any) => `translate(${d.x},${d.y})`)
+			// Apply filtering based on active filters
+			.attr('opacity', (d: any) => {
+				if (activeTypeFilter && d.type !== activeTypeFilter) return 0.05;
+				if (activeLensFilter && d.lens !== activeLensFilter) return 0.05;
+				return 1;
+			})
+			.style('pointer-events', (d: any) => {
+				if (activeTypeFilter && d.type !== activeTypeFilter) return 'none';
+				if (activeLensFilter && d.lens !== activeLensFilter) return 'none';
+				return 'all';
+			});
 
 		// Calculate top tier for visual emphasis
 		const topTierThreshold = positioned.sort((a, b) => b.value - a.value)[Math.floor(positioned.length * 0.2)]?.value || 0;

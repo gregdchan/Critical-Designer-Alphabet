@@ -50,6 +50,7 @@
 
 <style>
   .chart-frame {
+    position: relative;
     overflow: hidden;
   }
   svg {
@@ -58,4 +59,3 @@
     max-height: 100%;
   }
 </style>
-

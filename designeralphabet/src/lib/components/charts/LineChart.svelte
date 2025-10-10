@@ -89,17 +89,26 @@
       .on('mouseover', function (event, d: any) {
         select(this).transition().duration(200).attr('r', 7);
         if (!tooltipEl) return;
-        const { clientX, clientY } = event as MouseEvent;
+        const { pageX, pageY } = event as MouseEvent;
         tooltipEl.style.opacity = '1';
-        tooltipEl.style.transform = `translate(${clientX + 12}px, ${clientY - 12}px)`;
+        tooltipEl.style.left = pageX + 12 + 'px';
+        tooltipEl.style.top = pageY - 12 + 'px';
         const total = points.reduce((s, p) => s + p.count, 0) || 1;
         const pct = ((d.count / total) * 100).toFixed(1);
-        tooltipEl.textContent = `Rating ${d.value}: ${d.count} (${pct}%)`;
+        tooltipEl.innerHTML = `
+          <div style="font-weight:700; margin-bottom:4px;">${title || 'Rating'}</div>
+          <div><strong>Value:</strong> ${d.value}</div>
+          <div><strong>Responses:</strong> ${d.count} <span style="opacity:0.8">(${pct}%)</span></div>
+          <div style="margin-top:4px; font-size:11px; opacity:0.8;">
+            Scale: ${scaleSettings.minLabel ?? 'Min'} – ${scaleSettings.maxLabel ?? 'Max'}
+          </div>
+        `;
       })
       .on('mousemove', function (event) {
         if (!tooltipEl) return;
-        const { clientX, clientY } = event as MouseEvent;
-        tooltipEl.style.transform = `translate(${clientX + 12}px, ${clientY - 12}px)`;
+        const { pageX, pageY } = event as MouseEvent;
+        tooltipEl.style.left = pageX + 12 + 'px';
+        tooltipEl.style.top = pageY - 12 + 'px';
       })
       .on('mouseout', function () {
         select(this).transition().duration(200).attr('r', 4);
@@ -131,6 +140,30 @@
         .text(tick);
     });
 
+    // Low/High labels at the ends of the x-axis for clarity
+    if (scaleSettings?.minLabel) {
+      xAxis
+        .append('text')
+        .attr('x', 0)
+        .attr('y', 36)
+        .attr('text-anchor', 'start')
+        .attr('fill', 'hsl(var(--text-secondary))')
+        .attr('font-size', '11px')
+        .style('font-weight', '600')
+        .text(scaleSettings.minLabel);
+    }
+    if (scaleSettings?.maxLabel) {
+      xAxis
+        .append('text')
+        .attr('x', innerWidth)
+        .attr('y', 36)
+        .attr('text-anchor', 'end')
+        .attr('fill', 'hsl(var(--text-secondary))')
+        .attr('font-size', '11px')
+        .style('font-weight', '600')
+        .text(scaleSettings.maxLabel);
+    }
+
     // Y-axis
     const yAxis = g.append('g');
     yAxis
@@ -158,5 +191,5 @@
   <g bind:this={rootEl}>
     {@html (render(rootEl, innerWidth, innerHeight, chartPoints), '')}
   </g>
-  <div slot="tooltip" bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:4px;padding:6px 10px;font-size:12px;color:hsl(var(--text-primary));white-space:nowrap" />
+  <div slot="tooltip" bind:this={tooltipEl} style="position:fixed;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:8px;padding:8px 10px;font-size:12px;color:hsl(var(--text-primary));white-space:nowrap;box-shadow:0 6px 18px hsl(var(--brand) / 0.15)" />
 </ChartFrame>

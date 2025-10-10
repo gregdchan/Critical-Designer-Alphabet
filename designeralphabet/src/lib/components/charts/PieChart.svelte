@@ -23,13 +23,15 @@
     const centerX = innerWidth / 2;
     const centerY = innerHeight / 2;
 
+    const isMobile = Math.min(innerWidth, innerHeight) < 420; // compact labels on small screens
+
     const pieGen = pie<any>().sort(null).value((d: any) => Math.max(0, d.value));
     const arcs = pieGen(points);
     const arcGen = arc<any>().innerRadius(radius * 0.5).outerRadius(radius);
 
     const rootG = g.append('g').attr('transform', `translate(${centerX},${centerY})`).attr('data-testid', 'pie-root');
 
-    rootG
+    const slices = rootG
       .selectAll('path')
       .data(arcs)
       .join('path')
@@ -39,18 +41,29 @@
       .attr('stroke-width', '2')
       .attr('cursor', 'pointer')
       .attr('opacity', (d: any) => selectedSlice && selectedSlice.id === d.data.id ? 1 : 0.85)
+      .on('mouseover', function () {
+        select(this).transition().duration(120).attr('stroke-width', '3');
+      })
       .on('click', (event, d: any) => {
         selectedSlice = selectedSlice?.id === d.data.id ? null : d.data;
       })
       .on('mousemove', (event, d: any) => {
         if (!tooltipEl) return;
-        const { clientX, clientY } = event as MouseEvent;
+        const { pageX, pageY } = event as MouseEvent;
         tooltipEl.style.opacity = '1';
-        tooltipEl.style.transform = `translate(${clientX + 12}px, ${clientY - 12}px)`;
+        tooltipEl.style.left = pageX + 12 + 'px';
+        tooltipEl.style.top = pageY - 12 + 'px';
         const pct = ((d.data.value / total) * 100).toFixed(1);
-        tooltipEl.textContent = `${d.data.label}: ${d.data.value} (${pct}%)`;
+        tooltipEl.innerHTML = `
+          <div style="font-weight:700; margin-bottom:4px;">${title || 'Responses'}</div>
+          <div><strong>Option:</strong> ${d.data.label}</div>
+          <div><strong>Responses:</strong> ${d.data.value} <span style="opacity:0.8">(${pct}%)</span></div>
+        `;
       })
-      .on('mouseleave', () => tooltipEl && (tooltipEl.style.opacity = '0'));
+      .on('mouseleave', function () {
+        if (tooltipEl) tooltipEl.style.opacity = '0';
+        select(this).transition().duration(120).attr('stroke-width', '2');
+      });
 
     // Labels (hide under 7%, truncate long labels)
     rootG
@@ -64,6 +77,7 @@
       .attr('fill', 'hsl(var(--text-primary))')
       .attr('pointer-events', 'none')
       .text((d: any) => {
+        if (isMobile) return '';
         if ((d.data.value / total) * 100 < 7) return '';
         const label = d.data.label;
         // Truncate labels based on slice size
@@ -91,7 +105,7 @@
     <g bind:this={rootEl}>
       {@html (render(rootEl, innerWidth, innerHeight, data), '')}
     </g>
-    <div slot="tooltip" bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
+    <div slot="tooltip" bind:this={tooltipEl} style="position:fixed;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:8px;padding:8px 10px;font-size:12px;color:hsl(var(--text-primary));white-space:nowrap;box-shadow:0 6px 18px hsl(var(--brand) / 0.15)" />
   </ChartFrame>
 
   {#if selectedSlice}

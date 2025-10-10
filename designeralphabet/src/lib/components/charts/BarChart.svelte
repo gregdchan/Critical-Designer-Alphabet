@@ -122,10 +122,17 @@
       })
       .on('mousemove', (event, d: any) => {
         if (!tooltipEl) return;
-        const { clientX, clientY } = event as MouseEvent;
+        const { pageX, pageY } = event as MouseEvent;
         tooltipEl.style.opacity = '1';
-        tooltipEl.style.transform = `translate(${clientX + 12}px, ${clientY - 12}px)`;
-        tooltipEl.textContent = `${d.label}: ${d.value}`;
+        tooltipEl.style.left = pageX + 12 + 'px';
+        tooltipEl.style.top = pageY - 12 + 'px';
+        const total = points.reduce((s, p) => s + (Number.isFinite(p.value) ? p.value : 0), 0) || 1;
+        const pct = ((d.value / total) * 100).toFixed(1);
+        tooltipEl.innerHTML = `
+          <div style=\"font-weight:700;margin-bottom:4px;\">${title || 'Responses'}<\/div>
+          <div><strong>Option:<\/strong> ${d.label}<\/div>
+          <div><strong>Responses:<\/strong> ${d.value} <span style=\"opacity:0.8\">(${pct}%)<\/span><\/div>
+        `;
       })
       .on('mouseleave', () => tooltipEl && (tooltipEl.style.opacity = '0'));
   }
@@ -146,7 +153,7 @@
     <g bind:this={rootEl}>
       {@html (render(rootEl, innerWidth, innerHeight, data), '')}
     </g>
-    <div slot="tooltip" bind:this={tooltipEl} style="position:absolute;opacity:0;pointer-events:none" />
+    <div slot="tooltip" bind:this={tooltipEl} style="position:fixed;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:8px;padding:8px 10px;font-size:12px;color:hsl(var(--text-primary));white-space:nowrap;box-shadow:0 6px 18px hsl(var(--brand) / 0.15)" />
   </ChartFrame>
 
   {#if selectedBar}
