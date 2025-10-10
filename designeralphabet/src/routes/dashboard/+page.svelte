@@ -303,10 +303,16 @@
 										<div class="flex items-center gap-2">
 											<button
 												class="inline-flex items-center gap-2 rounded-lg border border-line surface px-3 py-2 text-sm font-medium text-primary hover:bg-surface-muted transition-colors shadow-sm"
-												on:click={() => (window.location.href = `/session/${selectedSession.code}`)}
+												on:click={() => {
+													if (selectedSession.status === 'done') {
+														window.location.href = `/presentation?code=${selectedSession.code}`;
+													} else {
+														window.location.href = `/session/${selectedSession.code}`;
+													}
+												}}
 											>
 												<Eye class="h-4 w-4" />
-												View Live
+												{selectedSession.status === 'done' ? 'View Results' : 'View Live'}
 											</button>
 											<button
 												class="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
