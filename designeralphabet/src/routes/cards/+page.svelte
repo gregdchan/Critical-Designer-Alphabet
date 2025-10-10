@@ -198,14 +198,15 @@ function variantClass(card: Card | null, role: string): string {
 				<p
 					class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-surface-elevated/5 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-white/85"
 				>
-					<Sparkles class="h-4 w-4 text-neonCyan" /> Retro Card Library
+					<Sparkles class="h-4 w-4 text-neonCyan" /> Pluriversal Card Library
 				</p>
 				<h1 class="font-retro text-2xl uppercase tracking-[0.45em] text-white sm:text-3xl">
-					Build inclusive decks with neon precision
+					Build your inclusive design deck
 				</h1>
 				<p class="max-w-3xl text-sm text-white/85">
-					Filter by lens, remix prompts, and stage up to five cards. Every selection syncs to live
-					sessions so your team can explore justice-centered design moves together.
+					So you're ready to design inclusively? Start by selecting 3–5 cards to stage a session. Each card
+					should represent a unique perspective or idea centered around your own belief systems, focus, or values.
+					 Once you've made your selections, you can launch the session and begin exploring these concepts with your team.
 				</p>
 			</div>
 			<div class="flex flex-wrap items-center gap-3">
