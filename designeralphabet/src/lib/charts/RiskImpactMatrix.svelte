@@ -55,28 +55,19 @@ import { getRiskColor, getThemeColors } from '$lib/utils/colors';
 
 		// Transform responses to risk data
 		riskData = riskResponses.map((response, index) => {
-			// Calculate impact and likelihood based on response characteristics
-			// This is a simplified calculation - in reality, these might be set by facilitators
-			const textLength = response.text.length;
-			const voteCount = Number(response.votes) || 0;
+			// Use structured metadata if available, otherwise use defaults
+			const metadata = response.metadata;
+			const hasRiskMetadata = metadata && metadata.type === 'riskAssessment';
 
-			// Impact: based on votes and text complexity (1-5 scale)
-			const impact = Math.min(
-				5,
-				Math.max(1, Math.ceil(voteCount * 0.5 + textLength / 100 + Math.random()))
-			);
-
-			// Likelihood: based on response patterns (1-5 scale)
-			const likelihood = Math.min(
-				5,
-				Math.max(1, Math.ceil(voteCount * 0.3 + (index % 3) + 1 + Math.random()))
-			);
+			// Get impact and likelihood from metadata or use defaults
+			const impact = hasRiskMetadata ? metadata.impact : 3;
+			const likelihood = hasRiskMetadata ? metadata.likelihood : 3;
 
 			return {
 				id: response.id,
 				risk: response.text,
-				impact: impact,
-				likelihood: likelihood,
+				impact: Math.max(1, Math.min(5, impact)),
+				likelihood: Math.max(1, Math.min(5, likelihood)),
 				votes: voteCount,
 				text: response.text
 			};

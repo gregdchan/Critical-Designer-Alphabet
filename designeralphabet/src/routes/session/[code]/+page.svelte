@@ -77,7 +77,7 @@
 	let responseText = '';
 	let responseMetadata: any = null;
 	// let linkedCardsText = ''; // Temporarily hidden - not usable with current exercise
-	let currentQuestion: Record<string, unknown> | null = null;
+	let currentQuestion: any = null;
 	let currentQuestionConfig: Record<string, unknown> = {};
 	let modalResponseType = 'written';
 	let modalOptions: string[] = [];
@@ -2445,7 +2445,6 @@
 					</button>
 				</div>
 			{/if}
-			</div>
 		</div>
 	</div>
 {/if}

@@ -22,7 +22,7 @@
 	let selectedLevel = 3;
 	let additionalNotes = '';
 
-	$: selectedStage = stages.find(s => s.level === selectedLevel);
+	$: selectedStage = stages.find((s: any) => s.level === selectedLevel);
 
 	function handleSubmit() {
 		const metadata = createMaturityDialMetadata(selectedLevel, selectedStage?.name);

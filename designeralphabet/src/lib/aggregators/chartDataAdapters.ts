@@ -29,33 +29,17 @@ export function adaptRiskAssessmentData(responses: Response[], question: Questio
 	return responses
 		.filter(r => r.question_id === question.id)
 		.map(response => {
-			// Response text should be structured as: "RiskText|Impact:3|Likelihood:4"
-			// OR the response might have separate fields
-			let riskText = response.text;
-			let impact = 3; // default
-			let likelihood = 3; // default
+			// Use metadata if available
+			const metadata = response.metadata;
+			const hasRiskMetadata = metadata && metadata.type === 'riskAssessment';
 
-			// Try to parse structured response
-			if (response.text?.includes('|Impact:') && response.text?.includes('|Likelihood:')) {
-				const parts = response.text.split('|');
-				riskText = parts[0];
-
-				const impactMatch = parts.find(p => p.startsWith('Impact:'));
-				const likelihoodMatch = parts.find(p => p.startsWith('Likelihood:'));
-
-				if (impactMatch) impact = parseInt(impactMatch.split(':')[1]) || 3;
-				if (likelihoodMatch) likelihood = parseInt(likelihoodMatch.split(':')[1]) || 3;
-			}
-			// Check if response has direct fields
-			else if (response.impact !== undefined && response.likelihood !== undefined) {
-				impact = Number(response.impact) || 3;
-				likelihood = Number(response.likelihood) || 3;
-			}
+			const impact = hasRiskMetadata ? metadata.impact : 3;
+			const likelihood = hasRiskMetadata ? metadata.likelihood : 3;
 
 			return {
 				id: response.id,
-				risk: riskText,
-				text: riskText,
+				risk: response.text,
+				text: response.text,
 				impact: Math.max(1, Math.min(5, impact)),
 				likelihood: Math.max(1, Math.min(5, likelihood)),
 				votes: response.votes || 0,
@@ -89,16 +73,23 @@ export function adaptMaturityData(responses: Response[], question: Question) {
 		return { maturityLevel: 3, progress: 0.5, stages };
 	}
 
-	// Parse maturity levels from responses
+	// Parse maturity levels from responses (use metadata if available)
 	const levels = questionResponses
 		.map(r => {
-			// Response text might be a number (1-5) or contain level info
+			const metadata = r.metadata;
+			const hasMaturityMetadata = metadata && metadata.type === 'maturityDial';
+
+			if (hasMaturityMetadata) {
+				return metadata.level;
+			}
+
+			// Fallback: try to parse from text
 			const levelMatch = r.text?.match(/\d+/);
 			return levelMatch ? parseInt(levelMatch[0]) : 3;
 		})
 		.filter(l => l >= 1 && l <= 5);
 
-	const avgLevel = levels.reduce((a, b) => a + b, 0) / levels.length;
+	const avgLevel = levels.length > 0 ? levels.reduce((a, b) => a + b, 0) / levels.length : 3;
 	const maturityLevel = Math.round(avgLevel);
 	const progress = avgLevel - maturityLevel + 0.5; // Progress within level
 
@@ -133,15 +124,23 @@ export function adaptInclusivityData(responses: Response[], question: Question) 
 		};
 	}
 
-	// Parse scores from responses (0-100)
+	// Parse scores from responses (0-100, use metadata if available)
 	const scores = questionResponses
 		.map(r => {
+			const metadata = r.metadata;
+			const hasInclusivityMetadata = metadata && metadata.type === 'inclusivityMeter';
+
+			if (hasInclusivityMetadata) {
+				return metadata.score;
+			}
+
+			// Fallback: try to parse from text
 			const scoreMatch = r.text?.match(/\d+/);
 			return scoreMatch ? parseInt(scoreMatch[0]) : 50;
 		})
 		.filter(s => s >= 0 && s <= 100);
 
-	const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+	const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 50;
 
 	return {
 		score: Math.round(avgScore),
@@ -167,25 +166,13 @@ export function adaptLandscapeData(responses: Response[], question: Question) {
 	return responses
 		.filter(r => r.question_id === question.id)
 		.map(response => {
-			// Response might be structured as "Label|X:5|Y:7" or have separate fields
-			let label = response.text;
-			let x = 5; // default center
-			let y = 5; // default center
+			// Use metadata if available
+			const metadata = response.metadata;
+			const hasLandscapeMetadata = metadata && metadata.type === 'landscape';
 
-			if (response.text?.includes('|X:') && response.text?.includes('|Y:')) {
-				const parts = response.text.split('|');
-				label = parts[0];
-
-				const xMatch = parts.find(p => p.startsWith('X:'));
-				const yMatch = parts.find(p => p.startsWith('Y:'));
-
-				if (xMatch) x = parseFloat(xMatch.split(':')[1]) || 5;
-				if (yMatch) y = parseFloat(yMatch.split(':')[1]) || 5;
-			}
-			else if (response.x !== undefined && response.y !== undefined) {
-				x = Number(response.x) || 5;
-				y = Number(response.y) || 5;
-			}
+			const label = response.text;
+			const x = hasLandscapeMetadata ? metadata.x : 5;
+			const y = hasLandscapeMetadata ? metadata.y : 5;
 
 			return {
 				id: response.id,
