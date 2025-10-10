@@ -102,23 +102,30 @@
   }
 
   // Lens donut data (PieChart)
-  $: lensDonut: ChartData = {
+  let lensDonut: ChartData = {
     title: 'Lens Profile',
-    series: [
-      {
-        id: 'lenses',
-        points: Object.entries(
-          participantResponses.reduce((acc: Record<string, number>, r) => {
-            const lens = (r.questions?.section || 'General') as string;
-            acc[lens] = (acc[lens] || 0) + 1;
-            return acc;
-          }, {})
-        )
-          .map(([label, value]) => ({ id: label, label, value }))
-          .sort((a, b) => b.value - a.value)
-      }
-    ]
+    series: [{ id: 'lenses', points: [] }]
   };
+
+  $: {
+    lensDonut = {
+      title: 'Lens Profile',
+      series: [
+        {
+          id: 'lenses',
+          points: Object.entries(
+            participantResponses.reduce((acc: Record<string, number>, r) => {
+              const lens = (r.questions?.section || 'General') as string;
+              acc[lens] = (acc[lens] || 0) + 1;
+              return acc;
+            }, {})
+          )
+            .map(([label, value]) => ({ id: label, label, value }))
+            .sort((a, b) => b.value - a.value)
+        }
+      ]
+    };
+  }
 
   // Journey points
   const qPhaseMap = () => {
@@ -189,8 +196,9 @@
 
   {#if !loading && participants.length > 0}
     <div class="flex flex-wrap items-center gap-3">
-      <label class="text-sm text-ink-2">Participant</label>
+      <label for="participant-select" class="text-sm text-ink-2">Participant</label>
       <select
+        id="participant-select"
         class="rounded-md border border-line bg-surface-elevated px-3 py-2 text-sm"
         bind:value={selectedParticipantId}
       >
