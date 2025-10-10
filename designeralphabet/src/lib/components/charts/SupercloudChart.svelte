@@ -314,8 +314,7 @@
 		// Create FIXED UI layer (legends, stats) - this stays put
 		const uiGroup = svgSel
 			.append('g')
-			.attr('class', 'ui-layer')
-			.style('pointer-events', 'none'); // Don't block interactions with bubbles
+			.attr('class', 'ui-layer');
 
 		// Initialize/update zoom behavior for panning-only
 		const translateExtentPadding = 0.5; // allow slight overscroll
@@ -644,6 +643,7 @@
 			.attr('fill', theme.inkMuted)
 			.attr('font-size', '11px')
 			.attr('font-weight', '600')
+			.style('pointer-events', 'none')
 			.text(`${positioned.length} aggregated insights from ${questions.length} questions`);
 	}
 
