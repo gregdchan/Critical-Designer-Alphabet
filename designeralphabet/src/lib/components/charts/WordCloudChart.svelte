@@ -132,7 +132,8 @@
 					radius = minRadius + Math.min(12, Math.sqrt(textLen) * 1.5);
 				}
 
-				const color = resolveLensColor(lensLabel);
+				// Use participant color if available, otherwise fall back to lens color
+				const color = response.participantColor || resolveLensColor(lensLabel);
 
 				return {
 					id: response.id,
@@ -440,44 +441,48 @@
 			.attr('font-weight', '700')
 			.text('Response Word Cloud');
 
-		// Add legend to fixed UI layer
+		// Add legend to fixed UI layer - only show if there are actual lenses (not just "General")
 		const uniqueLenses = Array.from(new Set(positionedBubbles.map((b: any) => b.lens)));
-		const legend = uiGroup
-			.append('g')
-			.attr('transform', `translate(${width - 160}, 50)`);
+		const hasActualLenses = uniqueLenses.length > 1 || (uniqueLenses.length === 1 && uniqueLenses[0] !== 'General');
 
-		legend
-			.append('text')
-			.attr('x', 0)
-			.attr('y', 0)
-			.attr('fill', theme.ink)
-			.attr('font-size', '12px')
-			.attr('font-weight', '700')
-			.text('Lenses');
+		if (hasActualLenses) {
+			const legend = uiGroup
+				.append('g')
+				.attr('transform', `translate(${width - 160}, 50)`);
 
-		legend
-			.selectAll('.legend-item')
-			.data(uniqueLenses)
-			.join('g')
-			.attr('class', 'legend-item')
-			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
-			.each(function (lens: any) {
-				const item = d3.select(this);
-				const lensColor = lensColorByName.get(lens) ?? theme.ink2;
-				item
-					.append('circle')
-					.attr('r', 6)
-					.attr('fill', lensColor)
-					.attr('opacity', 0.8);
+			legend
+				.append('text')
+				.attr('x', 0)
+				.attr('y', 0)
+				.attr('fill', theme.ink)
+				.attr('font-size', '12px')
+				.attr('font-weight', '700')
+				.text('Lenses');
 
-				item
-					.append('text')
-					.attr('x', 14)
-					.attr('y', 4)
-					.attr('fill', theme.ink2)
-					.attr('font-size', '10px')
-					.text(lens);
-			});
+			legend
+				.selectAll('.legend-item')
+				.data(uniqueLenses)
+				.join('g')
+				.attr('class', 'legend-item')
+				.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+				.each(function (lens: any) {
+					const item = d3.select(this);
+					const lensColor = lensColorByName.get(lens) ?? theme.ink2;
+					item
+						.append('circle')
+						.attr('r', 6)
+						.attr('fill', lensColor)
+						.attr('opacity', 0.8);
+
+					item
+						.append('text')
+						.attr('x', 14)
+						.attr('y', 4)
+						.attr('fill', theme.ink2)
+						.attr('font-size', '10px')
+						.text(lens);
+				});
+		}
 
 		// Add stats to fixed UI layer
 		const totalVotes = positionedBubbles.reduce((sum: number, b: any) => sum + b.votes, 0);

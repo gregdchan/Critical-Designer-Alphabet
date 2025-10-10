@@ -65,7 +65,7 @@
         select(this).transition().duration(120).attr('stroke-width', '2');
       });
 
-    // Labels (hide under 7%, truncate long labels)
+    // Labels with percentage (hide under 7%)
     rootG
       .selectAll('text')
       .data(arcs)
@@ -76,14 +76,12 @@
       .attr('text-anchor', 'middle')
       .attr('fill', 'hsl(var(--text-primary))')
       .attr('pointer-events', 'none')
+      .attr('font-weight', '600')
       .text((d: any) => {
         if (isMobile) return '';
-        if ((d.data.value / total) * 100 < 7) return '';
-        const label = d.data.label;
-        // Truncate labels based on slice size
         const pct = (d.data.value / total) * 100;
-        const maxLen = pct >= 15 ? 12 : pct >= 10 ? 8 : 6;
-        return label.length > maxLen ? label.slice(0, maxLen) + '...' : label;
+        if (pct < 7) return '';
+        return `${pct.toFixed(1)}%`;
       });
   }
 
