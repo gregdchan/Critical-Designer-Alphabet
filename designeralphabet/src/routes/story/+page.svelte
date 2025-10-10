@@ -5,6 +5,7 @@
   import type { ChartData } from '$lib/types/charts';
   import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
   import PhaseStackedBar from '$lib/components/charts/PhaseStackedBar.svelte';
+  import PhaseTopIdeasBubbles from '$lib/components/charts/PhaseTopIdeasBubbles.svelte';
   import RatingsBeeswarm from '$lib/components/charts/RatingsBeeswarm.svelte';
   import { page } from '$app/stores';
 
@@ -190,6 +191,30 @@
         stacks: Array.from(map.get(phase as string)?.entries() || []).map(([lens, value]) => ({ lens, value }))
       }));
   })();
+
+  // Top ideas by phase (session‑wide, not just this participant)
+  $: phaseIdeas = (() => {
+    const phaseMap = qPhaseMap();
+    const grouped = new Map<string, any[]>();
+    for (const r of responses || []) {
+      const phase = phaseMap.get(r.question_id) || 'Unassigned';
+      const arr = grouped.get(phase) || [];
+      arr.push({
+        id: r.id,
+        label: r.text || '(no text)',
+        votes: Number(r.votes || 0),
+        participantId: r.participant_id || null,
+        participantName: participants.find((p) => p.id === r.participant_id)?.name || null,
+        lens: (r.questions?.section || null) as any
+      });
+      grouped.set(phase, arr);
+    }
+    const topN = 6;
+    return Array.from(grouped.entries()).map(([phase, items]) => ({
+      phase,
+      items: items.sort((a: any, b: any) => b.votes - a.votes).slice(0, topN)
+    }));
+  })();
 </script>
 
 <section class="mx-auto max-w-[1200px] px-4 py-8 space-y-6">
@@ -262,6 +287,16 @@
         <h2 class="mb-3 text-sm font-semibold text-ink">Phase Engagement</h2>
         <div class="h-[320px]">
           <PhaseStackedBar title="Phase Engagement" data={phaseStacks} />
+        </div>
+      </div>
+    {/if}
+
+    <!-- Top ideas by phase (most popular) -->
+    {#if phaseIdeas.length > 0}
+      <div class="rounded-2xl border border-line bg-surface-elevated p-4 mt-6">
+        <h2 class="mb-3 text-sm font-semibold text-ink">Most Popular Ideas by Phase</h2>
+        <div class="h-[420px]">
+          <PhaseTopIdeasBubbles title="Top Ideas" data={phaseIdeas} highlightParticipantId={selectedParticipantId} />
         </div>
       </div>
     {/if}
