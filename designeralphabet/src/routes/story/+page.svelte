@@ -51,8 +51,11 @@
       participants = data.participants || [];
       responses = data.responses || [];
       questions = data.questions || [];
-      // Preselect first participant if available
-      selectedParticipantId = participants[0]?.id ?? null;
+      // Only default-select if not already provided or invalid
+      const hasExisting = selectedParticipantId && participants.some((p) => p.id === selectedParticipantId);
+      if (!hasExisting) {
+        selectedParticipantId = participants[0]?.id ?? null;
+      }
     } catch (e: any) {
       error = e?.message || 'Failed to load session';
     } finally {
