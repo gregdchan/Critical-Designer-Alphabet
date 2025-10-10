@@ -43,14 +43,30 @@
     }
     loading = true;
     try {
+      // Primary: rich dashboard API (has joined questions in responses)
       const res = await fetch(`/api/dashboard/${encodeURIComponent(sessionCode.trim())}`);
-      const data: ApiResponse = await res.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to load session');
+      let data: ApiResponse | null = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
       }
-      participants = data.participants || [];
-      responses = data.responses || [];
-      questions = data.questions || [];
+
+      if (data?.success) {
+        participants = data.participants || [];
+        responses = data.responses || [];
+        questions = data.questions || [];
+      } else {
+        // Fallback: generic session API
+        const alt = await fetch(`/api/session/${encodeURIComponent(sessionCode.trim())}`);
+        const altData: any = await alt.json();
+        if (!altData?.success) {
+          throw new Error(altData?.error || data?.error || 'Failed to load session');
+        }
+        participants = altData.participants || [];
+        responses = altData.responses || [];
+        questions = altData.questions || [];
+      }
       // Only default-select if not already provided or invalid
       const hasExisting = selectedParticipantId && participants.some((p) => p.id === selectedParticipantId);
       if (!hasExisting) {
