@@ -24,6 +24,11 @@
 	let svg: SVGSVGElement;
 	let mounted = false;
 
+	// Zoom/pan state
+	let zoomBehavior: d3.ZoomBehavior<SVGSVGElement, unknown> | null = null;
+	let rootGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
+	let currentTransform = d3.zoomIdentity;
+
 	const ro = typeof ResizeObserver !== 'undefined'
 		? new ResizeObserver((entries) => {
 				const r = entries[0]?.contentRect;
@@ -209,11 +214,48 @@
 		// Clear previous
 		d3.select(svg).selectAll('*').remove();
 
+
+		// Root group for all chart elements (so we can pan it)
 		const g = d3
 			.select(svg)
 			.attr('width', width)
 			.attr('height', height)
 			.append('g');
+
+		rootGroup = g;
+		// Preserve existing transform between renders
+		rootGroup.attr('transform', currentTransform.toString());
+
+		// Initialize/update zoom behavior for panning-only
+		const translateExtentPadding = 0.5; // allow slight overscroll
+		const txMin = -width * translateExtentPadding;
+		const tyMin = -height * translateExtentPadding;
+		const txMax = width * (1 + translateExtentPadding);
+		const tyMax = height * (1 + translateExtentPadding);
+
+		zoomBehavior = d3
+			.zoom<SVGSVGElement, unknown>()
+			.scaleExtent([1, 1]) // pan only; no zoom scaling
+			.translateExtent([
+				[txMin, tyMin],
+				[txMax, tyMax]
+			])
+			.on('zoom', (event: any) => {
+				currentTransform = event.transform;
+				if (rootGroup) rootGroup.attr('transform', currentTransform.toString());
+			});
+
+		// Bind zoom to the SVG (clear prior handlers first)
+		const svgSel = d3.select(svg)
+			.on('.zoom', null)
+			.call(zoomBehavior as any)
+			.on('dblclick.zoom', null) // disable double-click zoom behavior
+			.style('cursor', 'grab');
+
+		// Visual feedback for dragging
+		svgSel
+			.on('mousedown.dragcursor touchstart.dragcursor', () => svgSel.style('cursor', 'grabbing'))
+			.on('mouseup.dragcursor touchend.dragcursor mouseleave.dragcursor', () => svgSel.style('cursor', 'grab'));
 
 		// Type legend
 		const typeColors = {
@@ -399,12 +441,19 @@
 		width: 100%;
 		max-width: 100%;
 		overflow: hidden;
+		/* Prefer flexible height; fall back to aspect on larger screens */
+		height: 100%;
 		aspect-ratio: 16/9;
+		/* Enable touch panning without scrolling the page */
+		touch-action: none;
 	}
 
 	@media (max-width: 768px) {
 		.supercloud-container {
-			aspect-ratio: 3/4;
+			/* On small screens, fill vertical space */
+			height: 80dvh;
+			min-height: 400px;
+			aspect-ratio: auto;
 		}
 	}
 

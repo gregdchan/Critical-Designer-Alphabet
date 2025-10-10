@@ -818,7 +818,7 @@
 										Multi-chart aggregation: Responses sized by votes, choices by frequency, scales by count.
 									</p>
 								</header>
-								<div class="w-full h-[700px] overflow-hidden">
+								<div class="w-full md:h-[700px] h-[80dvh] overflow-hidden">
 									<SupercloudChart responses={responsesForViz} questions={questionsList} />
 								</div>
 							</div>
