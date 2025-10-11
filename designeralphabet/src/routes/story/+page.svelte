@@ -31,6 +31,7 @@
 	let responses: ApiResponse['responses'] = [];
 	let selectedParticipantId: string | null = null;
 	let questions: any[] = [];
+	let phases: any[] = [];
 
 	$: selectedParticipant = participants.find((p) => p.id === selectedParticipantId) || null;
 
@@ -55,6 +56,7 @@
 				participants = data.participants || [];
 				responses = data.responses || [];
 				questions = data.questions || [];
+				phases = data.phases || [];
 			} else {
 				// Fallback: generic session API
 				const alt = await fetch(`/api/session/${encodeURIComponent(sessionCode.trim())}`);
@@ -65,6 +67,7 @@
 				participants = altData.participants || [];
 				responses = altData.responses || [];
 				questions = altData.questions || [];
+				phases = altData.phases || [];
 			}
 			// Only default-select if not already provided or invalid
 			const hasExisting =
@@ -132,8 +135,20 @@
 	// Journey points
 	const qPhaseMap = () => {
 		const map = new Map<string, string>();
+		// Create a lookup from phase_key to phase title
+		const phaseKeyToTitle = new Map<string, string>();
+		for (const phase of phases || []) {
+			if (phase?.phase_key && phase?.title) {
+				phaseKeyToTitle.set(phase.phase_key, phase.title);
+			}
+		}
+		
+		// Map question IDs to phase titles (not keys)
 		for (const q of questions || []) {
-			if (q?.id && q?.phase_key) map.set(q.id, q.phase_key);
+			if (q?.id && q?.phase_key) {
+				const phaseTitle = phaseKeyToTitle.get(q.phase_key) || q.phase_key;
+				map.set(q.id, phaseTitle);
+			}
 		}
 		return map;
 	};

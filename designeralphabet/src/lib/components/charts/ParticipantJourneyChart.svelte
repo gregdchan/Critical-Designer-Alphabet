@@ -91,13 +91,6 @@
 	})();
 
 	function render(root: SVGGElement, innerWidth: number, innerHeight: number, _points: JourneyPoint[]) {
-		console.log('ParticipantJourneyChart render called with:', { 
-			pointsCount: _points.length, 
-			points: _points,
-			tooltipEl,
-			mounted 
-		});
-		
 		const g = select(root);
 		g.selectAll("*").remove();
 
@@ -300,7 +293,6 @@
 				return 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
 			})
 			.on('mouseover', function(event, d) {
-				console.log('Mouseover event triggered:', { event, d, tooltipEl });
 	
 				const circle = select(this);
 				const originalRadius = sizeScale(d.votes || 0);
@@ -326,7 +318,6 @@
 
 				// Enhanced tooltip
 				if (tooltipEl) {
-					console.log('Showing tooltip for:', d);
 					tooltipEl.style.opacity = '1';
 					tooltipEl.style.left = event.clientX + 8 + 'px';
 					tooltipEl.style.top = event.clientY + 8 + 'px';
@@ -338,8 +329,6 @@
 						<div><strong>Responses:</strong> ${d.votes || 0}</div>
 						${d.text ? `<div style="margin-top:4px;max-width:200px;font-size:11px;font-style:italic;">"${d.text}"</div>` : ''}
 					`;
-				} else {
-					console.log('tooltipEl is null or undefined');
 				}
 			})
 		.on('mousemove', function(event) {
