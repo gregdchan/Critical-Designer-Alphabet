@@ -316,9 +316,8 @@
 			// If this is a landscape/2d question, ensure metadata.x/y/label are present
 			let metadata = entry.metadata ? { ...entry.metadata } : {};
 			const isLandscape =
-				question?.type === 'landscape' ||
-				question?.type === '2d' ||
-				question?.chart === 'landscape';
+				question?.response_type === 'landscape' ||
+				question?.response_type === '2d';
 			if (isLandscape) {
 				// Try to parse from entry.text if not present
 				if (typeof metadata.x !== 'number' || typeof metadata.y !== 'number') {
@@ -2164,7 +2163,7 @@
 																</div>
 																<div class="text-center p-2 rounded surface-muted/60">
 																	<div class="font-medium text-primary truncate px-1">
-																		{participant.score ?? participant.points ?? 0}
+																		{participant.points ?? 0}
 																	</div>
 																	<div class="text-xs text-secondary">points</div>
 																</div>

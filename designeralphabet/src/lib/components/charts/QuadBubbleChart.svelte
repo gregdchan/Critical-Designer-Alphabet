@@ -159,7 +159,9 @@
 		const lensColorMap = resolver.colorMap;
 		const hasData = nodes.length > 0;
 
-		const margin = { top: 56, right: 64, bottom: 64, left: 72 };
+		// Responsive layout: Adjust legend placement on mobile
+		const isMobile = width < 768;
+		const margin = { top: 56, right: 64, bottom: isMobile ? 140 : 64, left: 72 };
 		const chartWidth = width - margin.left - margin.right;
 		const chartHeight = height - margin.top - margin.bottom;
 
@@ -455,10 +457,13 @@
 				tooltip.style('opacity', 0);
 			});
 
+		// Position legend below chart on mobile, bottom-right on desktop
+		const legendX = isMobile ? 0 : chartWidth - 200;
+		const legendY = isMobile ? chartHeight + 30 : chartHeight - 120;
 		const legend = container
 			.append('g')
 			.attr('class', 'legend')
-			.attr('transform', `translate(${chartWidth - 200}, ${chartHeight - 120})`);
+			.attr('transform', `translate(${legendX}, ${legendY})`);
 
 		legend
 			.append('text')

@@ -148,7 +148,14 @@
 
 		const visibleSeries = series.filter((s) => s.visible);
 
-		const margin = { top: 40, right: 200, bottom: 60, left: 60 };
+		// Responsive layout: On mobile, legend goes below chart; on desktop, to the right
+		const isMobile = width < 768;
+		const margin = {
+			top: 40,
+			right: isMobile ? 20 : 200,
+			bottom: isMobile ? Math.min(series.length * 80 + 60, 300) : 60,
+			left: 60
+		};
 		const innerWidth = width - margin.left - margin.right;
 		const innerHeight = height - margin.top - margin.bottom;
 
@@ -311,7 +318,9 @@
 			.text('Comparative Scale Trends');
 
 		// Interactive Legend
-		const legend = g.append('g').attr('transform', `translate(${innerWidth + 20}, 0)`);
+		const legendX = isMobile ? 0 : innerWidth + 20;
+		const legendY = isMobile ? innerHeight + 40 : 0;
+		const legend = g.append('g').attr('transform', `translate(${legendX}, ${legendY})`);
 
 		series.forEach((s, i) => {
 			const legendItem = legend
@@ -385,9 +394,11 @@
 		});
 
 		// Instructions
+		const instructionsX = isMobile ? 0 : innerWidth + 20;
+		const instructionsY = isMobile ? innerHeight + 40 + series.length * 80 + 20 : series.length * 80 + 20;
 		g.append('text')
-			.attr('x', innerWidth + 20)
-			.attr('y', series.length * 80 + 20)
+			.attr('x', instructionsX)
+			.attr('y', instructionsY)
 			.attr('fill', theme.inkMuted)
 			.attr('font-size', '10px')
 			.attr('font-style', 'italic')

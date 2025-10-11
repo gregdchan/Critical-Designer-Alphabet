@@ -134,6 +134,8 @@
 			}
 		});
 
+		// Responsive layout: Center legend on mobile
+		const isMobile = width < 768;
 		const margin = { top: 80, right: 56, bottom: 80, left: 160 };
 		const chartWidth = width - margin.left - margin.right;
 		const chartHeight = height - margin.top - margin.bottom;
@@ -405,9 +407,11 @@
 			});
 		});
 
+		// Center legend on mobile, position to right on desktop
+		const legendX = isMobile ? (chartWidth - 210) / 2 : chartWidth - 210;
 		const legend = container
 			.append('g')
-			.attr('transform', `translate(${chartWidth - 210}, ${chartHeight + 44})`);
+			.attr('transform', `translate(${legendX}, ${chartHeight + 44})`);
 
 		const legendItems: Array<{ label: string; caption: string; color: string }> = [
 			{ label: 'High', caption: 'Ready to activate', color: theme.accentWarm },

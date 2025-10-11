@@ -293,7 +293,8 @@
 		{#if phaseIdeas.length > 0}
 			<div class="rounded-2xl border border-line bg-surface-elevated p-4 mt-6">
 				<h2 class="mb-3 text-sm font-semibold text-ink">Most Popular Ideas by Phase</h2>
-				<div class="h-[420px]">
+				<!-- Increase height on mobile to accommodate taller phase cells -->
+				<div class="phase-bubbles-container">
 					<PhaseTopIdeasBubbles
 						title="Top Ideas"
 						data={phaseIdeas}
@@ -323,5 +324,14 @@
 	}
 	.border-line {
 		border-color: hsl(var(--border-subtle));
+	}
+	.phase-bubbles-container {
+		height: 420px;
+	}
+	@media (max-width: 640px) {
+		.phase-bubbles-container {
+			height: auto;
+			min-height: 800px;
+		}
 	}
 </style>

@@ -95,6 +95,8 @@
 			])
 		);
 
+		// Responsive layout: Center legend on mobile
+		const isMobile = width < 768;
 		const margin = { top: 72, right: 48, bottom: 96, left: 132 };
 		const chartWidth = width - margin.left - margin.right;
 		const chartHeight = height - margin.top - margin.bottom;
@@ -342,9 +344,11 @@
 			.attr('font-size', 12)
 			.text('Votes steer maturity; hover for representative voices.');
 
+		// Center legend on mobile, position to right on desktop
+		const legendX = isMobile ? (chartWidth - 160) / 2 : chartWidth - 220;
 		const legend = container
 			.append('g')
-			.attr('transform', `translate(${chartWidth - 220}, ${chartHeight + 56})`);
+			.attr('transform', `translate(${legendX}, ${chartHeight + 56})`);
 
 		const legendGradient = defs
 			.append('linearGradient')

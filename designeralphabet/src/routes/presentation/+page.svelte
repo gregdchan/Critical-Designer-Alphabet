@@ -1081,7 +1081,15 @@
 										</p>
 									</header>
 									<div class="w-full h-[600px]">
-										<SuperlineChart responses={responsesForViz} questions={questionsList} />
+										<SuperlineChart
+											responses={responsesForViz}
+											questions={questionsList.map(q => ({
+												...q,
+												response_type: q.response_type === null ? undefined : q.response_type,
+												config: q.config === null ? undefined : q.config,
+												enable_voting: q.enable_voting === null ? undefined : q.enable_voting
+											}))}
+										/>
 									</div>
 								</div>
 							{:else}

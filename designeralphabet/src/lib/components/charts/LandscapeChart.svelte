@@ -231,7 +231,15 @@
 			point.color = resolveLensColor(point.lens);
 		});
 
-		const margin = { top: 60, right: 120, bottom: 80, left: 80 };
+		// Responsive layout: On mobile, legend goes below chart; on desktop, to the right
+		const isMobile = width < 768;
+		const uniqueLenses = Array.from(new Set(parsedPoints.map((p) => p.lens)));
+		const margin = {
+			top: 60,
+			right: isMobile ? 20 : 120,
+			bottom: isMobile ? Math.min(uniqueLenses.length * 22 + 100, 250) : 80,
+			left: 80
+		};
 		const chartWidth = width - margin.left - margin.right;
 		const chartHeight = height - margin.top - margin.bottom;
 
@@ -441,8 +449,9 @@
 			});
 
 		// Legend
-		const uniqueLenses = Array.from(new Set(parsedPoints.map((p) => p.lens)));
-		const legend = g.append('g').attr('transform', `translate(${chartWidth + 20}, 0)`);
+		const legendX = isMobile ? 0 : chartWidth + 20;
+		const legendY = isMobile ? chartHeight + 40 : 0;
+		const legend = g.append('g').attr('transform', `translate(${legendX}, ${legendY})`);
 
 		legend
 			.selectAll('.legend-item')
@@ -478,9 +487,11 @@
 			.text('Response Landscape');
 
 		// Statistics summary
+		const statsX = isMobile ? 0 : chartWidth + 20;
+		const statsY = isMobile ? chartHeight + 40 + uniqueLenses.length * 22 + 30 : uniqueLenses.length * 22 + 30;
 		const stats = g
 			.append('g')
-			.attr('transform', `translate(${chartWidth + 20}, ${uniqueLenses.length * 22 + 30})`);
+			.attr('transform', `translate(${statsX}, ${statsY})`);
 
 		stats
 			.append('text')

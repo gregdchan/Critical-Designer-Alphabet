@@ -30,11 +30,14 @@
 		if (!data.length) return;
 
 		const phases = data.map((d) => d.phase);
-		const cols = innerWidth < 640 ? 1 : innerWidth < 900 ? 2 : 3;
+		const isMobile = innerWidth < 640;
+		const cols = isMobile ? 1 : innerWidth < 900 ? 2 : 3;
 		const cellGap = 16;
 		const cellWidth = Math.floor((innerWidth - cellGap * (cols - 1)) / cols);
 		const rows = Math.ceil(phases.length / cols);
-		const cellHeight = Math.floor((innerHeight - cellGap * (rows - 1)) / Math.max(1, rows));
+		// On mobile, make each phase taller for better readability
+		const baseCellHeight = Math.floor((innerHeight - cellGap * (rows - 1)) / Math.max(1, rows));
+		const cellHeight = isMobile ? Math.max(baseCellHeight, 350) : baseCellHeight;
 
 		data.forEach((phaseData, idx) => {
 			const col = idx % cols;
@@ -61,12 +64,31 @@
 				.style('font-weight', '600')
 				.text(phaseData.phase);
 
+			// Calculate statistics
+			const responseCount = phaseData.items.length;
+			const totalVotes = phaseData.items.reduce((sum, item) => sum + (item.votes || 0), 0);
+			const topVotes = phaseData.items.length > 0 ? Math.max(...phaseData.items.map((i) => i.votes || 0)) : 0;
+
+			// Statistics text - compact format for readability
+			const statsText = isMobile
+				? `${responseCount} responses • ${totalVotes} votes • top: ${topVotes}`
+				: `${responseCount} response${responseCount !== 1 ? 's' : ''}, ${totalVotes} vote${totalVotes !== 1 ? 's' : ''} total, top earned ${topVotes}`;
+
+			cell
+				.append('text')
+				.attr('x', 10)
+				.attr('y', 32)
+				.attr('fill', 'hsl(var(--text-muted))')
+				.style('font-size', '10px')
+				.style('font-weight', '400')
+				.text(statsText);
+
 			// bubble pack area
 			const radiusPad = 6;
 			const contentWidth = cellWidth - 20;
-			const contentHeight = cellHeight - 26;
+			const contentHeight = cellHeight - 42; // Adjusted for stats line
 			const cx = x0 + cellWidth / 2;
-			const cy = y0 + cellHeight / 2 + 6;
+			const cy = y0 + cellHeight / 2 + 8; // Adjusted for stats
 
 			// build hierarchy for pack
 			const root = hierarchy<any>({ children: phaseData.items })
@@ -76,7 +98,7 @@
 			const p = pack<any>().size([contentWidth, contentHeight]).padding(radiusPad);
 			p(root);
 
-			const local = g.append('g').attr('transform', `translate(${x0 + 10},${y0 + 22})`);
+			const local = g.append('g').attr('transform', `translate(${x0 + 10},${y0 + 38})`); // Adjusted for stats
 			const nodes = local
 				.selectAll('g.node')
 				.data(root.leaves())

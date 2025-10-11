@@ -189,11 +189,12 @@
 		const wordBubbles = calculateWordBubbles(responses, theme);
 		if (wordBubbles.length === 0) return;
 
-		// Reserve space for legend (right side) and title/stats (top/bottom)
-		const legendWidth = 170;
+		// Responsive layout: On mobile, legend goes below chart; on desktop, to the right
+		const isMobile = width < 768;
+		const legendWidth = isMobile ? 0 : 170;
 		const topMargin = 40;
-		const bottomMargin = 30;
-		const chartWidth = Math.max(400, width - legendWidth);
+		const bottomMargin = isMobile ? 120 : 30; // Extra space for legend on mobile
+		const chartWidth = Math.max(300, width - legendWidth);
 		const chartHeight = Math.max(300, height - topMargin - bottomMargin);
 
 		const positionedBubbles = packBubbles(wordBubbles, chartWidth, chartHeight);
@@ -443,7 +444,10 @@
 			uniqueLenses.length > 1 || (uniqueLenses.length === 1 && uniqueLenses[0] !== 'General');
 
 		if (hasActualLenses) {
-			const legend = uiGroup.append('g').attr('transform', `translate(${width - 160}, 50)`);
+			// Responsive legend positioning
+			const legendX = isMobile ? 20 : width - 160;
+			const legendY = isMobile ? height - bottomMargin + 20 : 50;
+			const legend = uiGroup.append('g').attr('transform', `translate(${legendX}, ${legendY})`);
 
 			legend
 				.append('text')
@@ -459,7 +463,9 @@
 				.data(uniqueLenses)
 				.join('g')
 				.attr('class', 'legend-item')
-				.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+				.attr('transform', (d: any, i: number) =>
+					isMobile ? `translate(${i * 80}, 0)` : `translate(0, ${i * 20 + 15})`
+				)
 				.each(function (lens: any) {
 					const item = d3.select(this);
 					const lensColor = lensColorByName.get(lens) ?? theme.ink2;
