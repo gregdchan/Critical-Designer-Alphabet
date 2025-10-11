@@ -625,6 +625,19 @@
 			.on('mouseenter', function (event: any, d: any) {
 				d3.select(this).transition().duration(200).attr('opacity', 1).attr('stroke-width', 4);
 
+				// Pop and giggle animation on the whole bubble group
+				const group = d3.select(this.parentNode as SVGGElement);
+				const maxNudge = Math.min(10, d.radius * 0.12);
+				const offsetX = (Math.random() - 0.5) * 2 * maxNudge;
+				const offsetY = (Math.random() - 0.5) * 2 * maxNudge;
+				const rotate = (Math.random() - 0.5) * 8; // Random rotation between -4 and 4 degrees
+				group
+					.interrupt()
+					.transition()
+					.duration(250)
+					.ease(d3.easeCubicOut)
+					.attr('transform', `translate(${d.x + offsetX},${d.y + offsetY}) scale(1.12) rotate(${rotate})`);
+
 				const tooltip = d3.select('body').selectAll<HTMLDivElement, null>('.supercloud-tooltip').data([null]);
 				const tooltipEnter = tooltip
 					.enter()
@@ -682,6 +695,15 @@
 					.duration(200)
 					.attr('opacity', isTopTier ? 0.9 : 0.65)
 					.attr('stroke-width', isTopTier ? 3 : 2);
+
+				// Return the bubble group to its original position/scale smoothly
+				const group = d3.select(this.parentNode as SVGGElement);
+				group
+					.interrupt()
+					.transition()
+					.duration(300)
+					.ease(d3.easeCubicOut)
+					.attr('transform', `translate(${d.x},${d.y}) scale(1) rotate(0)`);
 
 				d3.select('body').selectAll('.supercloud-tooltip').remove();
 			});
