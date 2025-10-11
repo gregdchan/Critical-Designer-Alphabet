@@ -332,17 +332,17 @@
 					.enter()
 					.append('div')
 					.attr('class', 'word-cloud-tooltip')
-					.style('position', 'absolute')
-					.style('background', 'hsl(var(--surface) / 0.95)')
-					.style('color', 'hsl(var(--text-on-teal))')
-					.style('padding', '12px')
+					.style('position', 'fixed')
+					.style('background', 'hsl(var(--surface-elevated))')
+					.style('color', 'hsl(var(--text-primary))')
+					.style('padding', '8px 10px')
 					.style('border-radius', '8px')
-					.style('border', '1px solid hsl(var(--border-subtle))')
+					.style('border', '1px solid hsl(var(--brand))')
 					.style('pointer-events', 'none')
 					.style('font-size', '12px')
-					.style('box-shadow', '0 4px 12px hsl(var(--brand-soft) / 0.35)')
+					.style('box-shadow', '0 6px 18px hsl(var(--brand) / 0.15)')
 					.style('backdrop-filter', 'blur(8px)')
-					.style('z-index', '1000');
+					.style('z-index', '99999');
 
 				const tooltipMerge = tooltipEnter.merge(tooltip);
 

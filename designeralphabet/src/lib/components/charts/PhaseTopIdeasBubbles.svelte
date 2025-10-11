@@ -24,7 +24,7 @@
 
 	const theme = getThemeColors();
 
-	function render(root: SVGGElement, innerWidth: number, innerHeight: number) {
+	function render(root: SVGGElement, innerWidth: number, innerHeight: number, _data: PhaseIdeas[], _highlightParticipantId: string | null) {
 		const g = select(root);
 		g.selectAll('*').remove();
 		if (!data.length) return;
@@ -167,11 +167,11 @@
 
 <ChartFrame {title} ariaLabel="Top ideas by phase" let:innerWidth let:innerHeight>
 	<g bind:this={rootEl}>
-		{@html (render(rootEl, innerWidth, innerHeight), '')}
+		{@html (rootEl && render(rootEl, innerWidth, innerHeight, data, highlightParticipantId), '')}
 	</g>
 	<div
 		slot="tooltip"
 		bind:this={tooltipEl}
-		style="position:fixed;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:8px;padding:8px 10px;font-size:12px;color:hsl(var(--text-primary));box-shadow:0 6px 18px hsl(var(--brand) / 0.15);max-width:300px"
+		style="position:fixed;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:8px;padding:8px 10px;font-size:12px;color:hsl(var(--text-primary));box-shadow:0 6px 18px hsl(var(--brand) / 0.15);max-width:300px;z-index:99999;"
 	/>
 </ChartFrame>

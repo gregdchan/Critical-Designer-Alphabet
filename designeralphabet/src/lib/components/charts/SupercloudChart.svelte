@@ -394,10 +394,9 @@
 
 		// ===== FIXED UI LAYER (legends, stats) =====
 		// Legends - Response Types and Lenses
-		// On mobile: position legends below chart in horizontal layout
-		// On desktop: position legends to the right in vertical layout
-		const legendX = isMobile ? 20 : width - 170;
-		const legendY = isMobile ? height - bottomMargin + 20 : 50;
+	// Always position legends to the left (below chart on mobile, left on desktop)
+	const legendX = 20;
+	const legendY = isMobile ? height - bottomMargin + 20 : 50;
 
 		// Response Type Legend
 		const responseTypeLegend = uiGroup
@@ -458,8 +457,8 @@
 			});
 
 		// Lens Legend
-		const lensLegendX = isMobile ? legendX : legendX;
-		const lensLegendY = isMobile ? legendY + 70 : legendY + responseTypes.length * 20 + 40;
+	const lensLegendX = legendX;
+	const lensLegendY = isMobile ? legendY + 70 : legendY + responseTypes.length * 20 + 40;
 		const uniqueLenses = Array.from(new Set(positioned.map((b: any) => b.lens)));
 		const lensLegend = uiGroup
 			.append('g')
@@ -517,8 +516,8 @@
 			});
 
 		// Phase Legend
-		const phaseLegendX = isMobile ? legendX : legendX;
-		const phaseLegendY = isMobile ? legendY + 140 : lensLegendY + uniqueLenses.length * 20 + 40;
+	const phaseLegendX = legendX;
+	const phaseLegendY = isMobile ? legendY + 140 : lensLegendY + uniqueLenses.length * 20 + 40;
 		const uniquePhases = Array.from(new Set(positioned.map((b: any) => b.phase)));
 		const phaseLegend = uiGroup
 			.append('g')
@@ -631,17 +630,17 @@
 					.enter()
 					.append('div')
 					.attr('class', 'supercloud-tooltip')
-					.style('position', 'absolute')
-					.style('background', 'hsl(var(--surface) / 0.95)')
-					.style('color', 'hsl(var(--text-on-teal))')
-					.style('padding', '12px')
+					.style('position', 'fixed')
+					.style('background', 'hsl(var(--surface-elevated))')
+					.style('color', 'hsl(var(--text-primary))')
+					.style('padding', '8px 10px')
 					.style('border-radius', '8px')
-					.style('border', '1px solid hsl(var(--border-subtle))')
+					.style('border', '1px solid hsl(var(--brand))')
 					.style('pointer-events', 'none')
 					.style('font-size', '12px')
-					.style('box-shadow', '0 4px 12px hsl(var(--brand-soft) / 0.35)')
+					.style('box-shadow', '0 6px 18px hsl(var(--brand) / 0.15)')
 					.style('backdrop-filter', 'blur(8px)')
-					.style('z-index', '1000')
+					.style('z-index', '99999')
 					.style('max-width', '300px');
 
 				const tooltipMerge = tooltipEnter.merge(tooltip as d3.Selection<HTMLDivElement, null, HTMLElement, unknown>);

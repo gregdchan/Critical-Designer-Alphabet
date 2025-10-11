@@ -1,16 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 import { building } from '$app/environment';
+import { env } from '$env/dynamic/private';
 
-const url = import.meta.env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE;
+const url = env.VITE_SUPABASE_URL;
+const serviceRoleKey = env.SUPABASE_SERVICE_ROLE;
 
 // Only validate environment variables when not in build mode
 if (!building) {
 	if (!url) {
+		console.error('Available env vars:', Object.keys(env));
 		throw new Error('Missing Supabase URL. Set VITE_SUPABASE_URL in your environment.');
 	}
 
 	if (!serviceRoleKey) {
+		console.error('Available env vars:', Object.keys(env));
 		throw new Error(
 			'Missing Supabase service role key. Set SUPABASE_SERVICE_ROLE for server-side access.'
 		);

@@ -1813,8 +1813,6 @@
 												<div class="w-full md:h-[520px] h-[70dvh] overflow-hidden">
 													<WordCloudChart
 														responses={responsesForViz}
-														width={isMobile ? 350 : 900}
-														height={isMobile ? 400 : 520}
 													/>
 												</div>
 											{:else if activeTab === 'response-landscape'}

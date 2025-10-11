@@ -52,11 +52,12 @@
 <style>
 	.chart-frame {
 		position: relative;
-		overflow: hidden;
+		overflow: visible;
 	}
 	svg {
 		display: block;
 		max-width: 100%;
 		max-height: 100%;
+		overflow: visible;
 	}
 </style>
