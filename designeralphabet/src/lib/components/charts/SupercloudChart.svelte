@@ -502,7 +502,67 @@
 					.attr('font-size', '10px')
 					.attr('font-weight', activeLensFilter === lens ? '700' : '400')
 					.text(lens);
-			}); // ===== INTERACTIVE LAYER (bubbles) =====
+			});
+
+		// Phase Legend
+		const phaseLegendY = lensLegendY + uniqueLenses.length * 20 + 40;
+		const uniquePhases = Array.from(new Set(positioned.map((b: any) => b.phase)));
+		const phaseLegend = uiGroup
+			.append('g')
+			.attr('transform', `translate(${legendX}, ${phaseLegendY})`);
+
+		phaseLegend
+			.append('text')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('fill', theme.ink)
+			.attr('font-size', '12px')
+			.attr('font-weight', '700')
+			.text('Session Phases');
+
+		phaseLegend
+			.selectAll('.phase-legend-item')
+			.data(uniquePhases)
+			.join('g')
+			.attr('class', 'phase-legend-item')
+			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.style('cursor', 'pointer')
+			.on('click', function (_event: any, phase: any) {
+				// Toggle filter: click again to deactivate
+				if (activePhaseFilter === phase) {
+					activePhaseFilter = null;
+				} else {
+					activePhaseFilter = phase;
+				}
+				renderSupercloud();
+			})
+			.each(function (phase: any) {
+				const item = d3.select(this);
+				const isActive = activePhaseFilter === null || activePhaseFilter === phase;
+
+				// Show square icon for phases
+				item
+					.append('rect')
+					.attr('x', -6)
+					.attr('y', -6)
+					.attr('width', 12)
+					.attr('height', 12)
+					.attr('fill', theme.brand)
+					.attr('opacity', isActive ? 0.6 : 0.2)
+					.attr('stroke', activePhaseFilter === phase ? theme.ink : 'none')
+					.attr('stroke-width', 2);
+
+				item
+					.append('text')
+					.attr('x', 14)
+					.attr('y', 4)
+					.attr('fill', isActive ? theme.ink2 : theme.inkMuted)
+					.attr('font-size', '10px')
+					.attr('font-weight', activePhaseFilter === phase ? '700' : '400')
+					.text(phase === 'No Phase' ? '(No Phase)' : phase);
+			});
+
+		// ===== INTERACTIVE LAYER (bubbles) =====
 		// Bubbles in interactive layer
 		const bubbleGroups = interactiveGroup
 			.selectAll('.bubble')
@@ -514,11 +574,13 @@
 			.attr('opacity', (d: any) => {
 				if (activeTypeFilter && d.type !== activeTypeFilter) return 0.05;
 				if (activeLensFilter && d.lens !== activeLensFilter) return 0.05;
+				if (activePhaseFilter && d.phase !== activePhaseFilter) return 0.05;
 				return 1;
 			})
 			.style('pointer-events', (d: any) => {
 				if (activeTypeFilter && d.type !== activeTypeFilter) return 'none';
 				if (activeLensFilter && d.lens !== activeLensFilter) return 'none';
+				if (activePhaseFilter && d.phase !== activePhaseFilter) return 'none';
 				return 'all';
 			});
 
