@@ -95,10 +95,10 @@
 			.on('mouseover', function (event, d: any) {
 				select(this).transition().duration(200).attr('r', 7);
 				if (!tooltipEl) return;
-				const { pageX, pageY } = event as MouseEvent;
+				const { clientX, clientY } = event as MouseEvent;
 				tooltipEl.style.opacity = '1';
-				tooltipEl.style.left = pageX + 8 + 'px';
-				tooltipEl.style.top = pageY + 8 + 'px';
+				tooltipEl.style.left = clientX + 8 + 'px';
+				tooltipEl.style.top = clientY + 8 + 'px';
 				const total = points.reduce((s, p) => s + p.count, 0) || 1;
 				const pct = ((d.count / total) * 100).toFixed(1);
 				tooltipEl.innerHTML = `
@@ -112,9 +112,9 @@
 			})
 			.on('mousemove', function (event) {
 				if (!tooltipEl) return;
-				const { pageX, pageY } = event as MouseEvent;
-				tooltipEl.style.left = pageX + 8 + 'px';
-				tooltipEl.style.top = pageY + 8 + 'px';
+				const { clientX, clientY } = event as MouseEvent;
+				tooltipEl.style.left = clientX + 8 + 'px';
+				tooltipEl.style.top = clientY + 8 + 'px';
 			})
 			.on('mouseout', function () {
 				select(this).transition().duration(200).attr('r', 4);

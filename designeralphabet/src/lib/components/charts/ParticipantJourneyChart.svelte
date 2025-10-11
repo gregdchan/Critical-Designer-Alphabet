@@ -32,9 +32,14 @@
 		tooltipEl.style.opacity = '0';
 		tooltipEl.style.transition = 'opacity 0.2s ease';
 		tooltipEl.style.display = 'block';
+		tooltipEl.style.background = 'hsl(var(--surface-elevated))';
+		tooltipEl.style.borderRadius = '8px';
+		tooltipEl.style.padding = '8px 10px';
+		tooltipEl.style.fontSize = '12px';
+		tooltipEl.style.color = 'hsl(var(--text-primary))';
+		tooltipEl.style.boxShadow = '0 6px 18px hsl(var(--brand) / 0.15)';
+		tooltipEl.style.maxWidth = '300px';
 		document.body.appendChild(tooltipEl);
-
-		console.log('Tooltip element created:', tooltipEl);
 
 		return () => {
 			if (tooltipEl && document.body.contains(tooltipEl)) {
@@ -315,38 +320,16 @@
 					console.log('Setting tooltip content for:', d.lens);
 
 					tooltipEl.style.opacity = '1';
-					tooltipEl.style.left = event.pageX + 12 + 'px';
-					tooltipEl.style.top = event.pageY + 12 + 'px';
-					tooltipEl.style.transition = 'opacity 0.2s ease';
-					tooltipEl.style.background = '#ffffff';
-					tooltipEl.style.border = `2px solid ${lensColors.get(d.lens) || theme.brand}`;
-					tooltipEl.style.borderRadius = '12px';
-					tooltipEl.style.padding = '16px';
-					tooltipEl.style.boxShadow = '0 12px 24px rgba(0,0,0,0.2)';
-					tooltipEl.style.backdropFilter = 'blur(12px)';
-					tooltipEl.style.fontSize = '13px';
-					tooltipEl.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-					tooltipEl.style.lineHeight = '1.6';
-					tooltipEl.style.maxWidth = '350px';
-					tooltipEl.style.color = '#000000';
+					tooltipEl.style.left = event.clientX + 8 + 'px';
+					tooltipEl.style.top = event.clientY + 8 + 'px';
+					tooltipEl.style.border = `1px solid ${lensColors.get(d.lens) || theme.brand}`;
 					tooltipEl.innerHTML = `
-						<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-							<div style="width:8px;height:8px;border-radius:50%;background:${lensColors.get(d.lens) || theme.brand};"></div>
-							<div style="font-weight:700;color:${lensColors.get(d.lens) || theme.brand};font-size:14px;">${d.lens}</div>
-						</div>
-						${d.phase ? `<div style="font-size:11px;opacity:0.7;margin-bottom:8px;"><strong>Phase:</strong> ${d.phase}</div>` : ''}
-						<div style="font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-							<span style="opacity:0.7;">Question #${d.questionPosition || ''}</span>
-							<span style="opacity:0.4;">•</span>
-							<span style="color:${level === 'viral' ? '#FF6B35' : level === 'high' ? '#00D9FF' : 'inherit'};font-weight:600;">${d.votes || 0} response${(d.votes || 0) === 1 ? '' : 's'}</span>
-						</div>
-						<div style="font-size:11px;opacity:0.6;margin-bottom:8px;">${d.t ? d.t.toLocaleString() : ''}</div>
-						${d.text ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:12px;line-height:1.5;font-style:italic;">"${d.text}"</div>` : ''}
+						<div style="font-weight:700;margin-bottom:4px;">${d.lens}</div>
+						${d.phase ? `<div><strong>Phase:</strong> ${d.phase}</div>` : ''}
+						<div><strong>Question:</strong> #${d.questionPosition || ''}</div>
+						<div><strong>Responses:</strong> ${d.votes || 0}</div>
+						${d.text ? `<div style="margin-top:4px;max-width:200px;font-size:11px;font-style:italic;">"${d.text}"</div>` : ''}
 					`;
-
-					console.log('Tooltip displayed at:', event.pageX, event.pageY, 'Opacity:', tooltipEl.style.opacity);
-				} else {
-					console.warn('Tooltip element not found!');
 				}
 			})
 			.on('mouseout', function(_event, d) {

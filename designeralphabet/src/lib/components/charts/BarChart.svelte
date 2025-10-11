@@ -131,10 +131,10 @@
 			})
 			.on('mousemove', (event, d: any) => {
 				if (!tooltipEl) return;
-				const { pageX, pageY } = event as MouseEvent;
+				const { clientX, clientY } = event as MouseEvent;
 				tooltipEl.style.opacity = '1';
-				tooltipEl.style.left = pageX + 8 + 'px';
-				tooltipEl.style.top = pageY + 8 + 'px';
+				tooltipEl.style.left = clientX + 8 + 'px';
+				tooltipEl.style.top = clientY + 8 + 'px';
 				const total = points.reduce((s, p) => s + (Number.isFinite(p.value) ? p.value : 0), 0) || 1;
 				const pct = ((d.value / total) * 100).toFixed(1);
 				tooltipEl.innerHTML = `

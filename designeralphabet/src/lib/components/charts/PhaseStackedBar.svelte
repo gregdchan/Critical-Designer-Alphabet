@@ -82,11 +82,11 @@
 						.attr('rx', 3)
 						.on('mousemove', (event) => {
 							if (!tooltipEl) return;
-							const { pageX, pageY } = event as MouseEvent;
+							const { clientX, clientY } = event as MouseEvent;
 							const pct = ((s.value / total) * 100).toFixed(1);
 							tooltipEl.style.opacity = '1';
-							tooltipEl.style.left = pageX + 8 + 'px';
-							tooltipEl.style.top = pageY + 8 + 'px';
+							tooltipEl.style.left = clientX + 8 + 'px';
+							tooltipEl.style.top = clientY + 8 + 'px';
 							tooltipEl.innerHTML = `
                 <div style="font-weight:700;margin-bottom:4px;">${title}</div>
                 <div><strong>Phase:</strong> ${d.phase}</div>

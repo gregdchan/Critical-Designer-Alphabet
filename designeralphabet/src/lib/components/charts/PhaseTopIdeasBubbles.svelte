@@ -129,8 +129,8 @@
 				.on('mousemove', (event: MouseEvent, d: any) => {
 					if (!tooltipEl) return;
 					tooltipEl.style.opacity = '1';
-					tooltipEl.style.left = event.pageX + 8 + 'px';
-					tooltipEl.style.top = event.pageY + 8 + 'px';
+					tooltipEl.style.left = event.clientX + 8 + 'px';
+					tooltipEl.style.top = event.clientY + 8 + 'px';
 					const pct = (() => {
 						const total = phaseData.items.reduce((s, it) => s + (Number(it.votes) || 0), 0) || 1;
 						return ((d.data.votes / total) * 100).toFixed(1);
