@@ -271,15 +271,15 @@
 							<div style="color: ${theme.inkMuted}; font-size: 11px;">${d3.timeFormat('%b %d, %H:%M')(d.timestamp)}</div>
 						`
 						)
-						.style('left', event.pageX + 15 + 'px')
-						.style('top', event.pageY + 8 + 'px')
+						.style('left', event.clientX + 8 + 'px')
+						.style('top', event.clientY + 8 + 'px')
 						.style('opacity', 1);
 				})
 				.on('mousemove', function (event: any) {
 					d3.select('body')
 						.selectAll('.superline-tooltip')
-						.style('left', event.pageX + 15 + 'px')
-						.style('top', event.pageY + 8 + 'px');
+						.style('left', event.clientX + 8 + 'px')
+						.style('top', event.clientY + 8 + 'px');
 				})
 				.on('mouseleave', function () {
 					d3.select(this).transition().duration(200).attr('r', 4);

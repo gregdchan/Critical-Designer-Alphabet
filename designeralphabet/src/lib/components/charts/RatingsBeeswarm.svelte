@@ -74,10 +74,10 @@
 			.style('cursor', 'pointer')
 			.on('mousemove', (event, d: any) => {
 				if (!tooltipEl) return;
-				const { pageX, pageY } = event as MouseEvent;
+				const { clientX, clientY } = event as MouseEvent;
 				tooltipEl.style.opacity = '1';
-				tooltipEl.style.left = pageX + 8 + 'px';
-				tooltipEl.style.top = pageY + 8 + 'px';
+				tooltipEl.style.left = clientX + 8 + 'px';
+				tooltipEl.style.top = clientY + 8 + 'px';
 				const when = d.t
 					? new Date(d.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 					: '';

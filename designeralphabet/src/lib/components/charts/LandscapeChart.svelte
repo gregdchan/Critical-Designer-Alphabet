@@ -441,8 +441,8 @@
 					<div class="text-xs" style="color:${theme.inkMuted};">Votes: ${d.votes}</div>
 				`;
 				tooltipEl.style.display = 'block';
-				tooltipEl.style.left = `${event.pageX + 8}px`;
-				tooltipEl.style.top = `${event.pageY + 8}px`;
+				tooltipEl.style.left = `${event.clientX + 8}px`;
+				tooltipEl.style.top = `${event.clientY + 8}px`;
 			})
 			.on('mouseleave', function () {
 				d3.select(this).select('circle').attr('opacity', 0.7).attr('stroke-width', 2);

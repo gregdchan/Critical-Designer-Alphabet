@@ -134,7 +134,7 @@
 	<div class="flex flex-col gap-10 lg:flex-row">
 		<div class="flex-1 space-y-6">
 			<h2 class="font-retro text-xl uppercase tracking-[0.4em] text-brand">
-				Justice‑Centered Engagement Loop
+				Engagement Loop
 			</h2>
 			<p class="max-w-xl text-sm text-ink-2">
 				Use simple prompts and live facilitation to gather everyone's input, decide what matters,
