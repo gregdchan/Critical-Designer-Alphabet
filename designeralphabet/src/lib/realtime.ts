@@ -109,10 +109,13 @@ async function fetchBundle(code: string) {
 			responses: data.responses?.length || 0,
 			phases: data.phases?.length || 0
 		});
-		console.log('[Realtime] Questions dashboards:', data.questions?.map((q: any) => ({
-			text: q.text?.substring(0, 40),
-			recommended_dashboards: q.recommended_dashboards
-		})));
+		console.log(
+			'[Realtime] Questions dashboards:',
+			data.questions?.map((q: any) => ({
+				text: q.text?.substring(0, 40),
+				recommended_dashboards: q.recommended_dashboards
+			}))
+		);
 		sessionDetails.set(data.session);
 		participants.set(data.participants ?? []);
 		questions.set(data.questions ?? []);
@@ -186,9 +189,7 @@ function handleWebSocketMessage(message: any, code: string) {
 		case 'VOTE_UPDATED': {
 			// Update specific response vote count
 			responses.update((current) =>
-				current.map((r) =>
-					r.id === message.responseId ? { ...r, votes: message.votes } : r
-				)
+				current.map((r) => (r.id === message.responseId ? { ...r, votes: message.votes } : r))
 			);
 			break;
 		}
@@ -268,7 +269,7 @@ function handleWebSocketMessage(message: any, code: string) {
 
 function setupDataSubscriptions(code: string) {
 	if (!browser) return;
-	
+
 	// Set up Supabase Realtime subscriptions for all data tables
 	supabaseChannel = supabase
 		.channel(`session:${code}`)
@@ -327,7 +328,7 @@ function setupDataSubscriptions(code: string) {
 
 function setupSessionStatusSubscription(code: string) {
 	if (!browser) return;
-	
+
 	// Separate subscription to watch for session status changes
 	sessionStatusChannel = supabase
 		.channel(`session-status:${code}`)
@@ -338,7 +339,7 @@ function setupSessionStatusSubscription(code: string) {
 				console.log('[Realtime] Session status updated', payload);
 				const newSession = payload.new as Session;
 				await fetchBundle(code);
-				
+
 				// Dynamically adjust realtime behavior based on new status
 				if (newSession.status === 'live' && !isRealtimeEnabled) {
 					console.log('[Realtime] Session went live - enabling realtime subscriptions');
@@ -400,7 +401,9 @@ export async function startRealtimeSession(code: string) {
 		// More frequent polling for live sessions
 		pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 6); // 30 seconds
 	} else {
-		console.log(`[Realtime] Session is ${currentSession?.status || 'unknown'} - using polling only`);
+		console.log(
+			`[Realtime] Session is ${currentSession?.status || 'unknown'} - using polling only`
+		);
 		isRealtimeEnabled = false;
 		// Less frequent polling for non-live sessions
 		pollHandle = setInterval(() => fetchBundle(code), POLL_INTERVAL * 30); // 2.5 minutes
@@ -444,7 +447,13 @@ export function stopRealtimeSession() {
 
 export async function addResponse(
 	code: string,
-	payload: { questionId: string; participantId: string | null; text: string; cards?: string[]; metadata?: any }
+	payload: {
+		questionId: string;
+		participantId: string | null;
+		text: string;
+		cards?: string[];
+		metadata?: any;
+	}
 ) {
 	try {
 		const res = await fetch('/api/responses/add', {

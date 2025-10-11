@@ -13,8 +13,8 @@
 		votes?: number;
 	};
 
-export let responses: LandscapeResponse[] = [];
-export let highlightParticipantId: string | null = null;
+	export let responses: LandscapeResponse[] = [];
+	export let highlightParticipantId: string | null = null;
 	export let width = 900;
 	export let height = 600;
 	export let xLabel = 'X Axis';
@@ -38,22 +38,24 @@ export let highlightParticipantId: string | null = null;
 		'Agency'
 	] as const;
 
-    type PlotPoint = {
-        id: string;
-        x: number;
-        y: number;
-        label: string;
-        text: string;
-        participant: string;
-        participantId?: string;
-        lens: string;
-        color: string;
-        votes: number;
-    };
+	type PlotPoint = {
+		id: string;
+		x: number;
+		y: number;
+		label: string;
+		text: string;
+		participant: string;
+		participantId?: string;
+		lens: string;
+		color: string;
+		votes: number;
+	};
 
 	function normaliseLens(raw?: string) {
 		if (!raw) return 'General';
-		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+		const match = (lensOrder as readonly string[]).find(
+			(key) => key.toLowerCase() === raw.toLowerCase()
+		);
 		return match ?? raw;
 	}
 
@@ -84,21 +86,23 @@ export let highlightParticipantId: string | null = null;
 
 		const lensLabel = normaliseLens(response.lens);
 
-        return {
-            id: response.id,
-            x,
-            y,
-            label: label || response.text?.slice(0, 30) || 'Response',
-            text: response.text,
-            participant: response.participantName || 'Anonymous',
-            participantId: response.participantId,
-            lens: lensLabel,
-            color: '',
-            votes: response.votes || 0
-        };
+		return {
+			id: response.id,
+			x,
+			y,
+			label: label || response.text?.slice(0, 30) || 'Response',
+			text: response.text,
+			participant: response.participantName || 'Anonymous',
+			participantId: response.participantId,
+			lens: lensLabel,
+			color: '',
+			votes: response.votes || 0
+		};
 	}
 
-	function calculateTrendLine(points: PlotPoint[]): { slope: number; intercept: number; r2: number } | null {
+	function calculateTrendLine(
+		points: PlotPoint[]
+	): { slope: number; intercept: number; r2: number } | null {
 		if (points.length < 2) return null;
 
 		const n = points.length;
@@ -174,8 +178,10 @@ export let highlightParticipantId: string | null = null;
 		const contours = d3
 			.contours()
 			.size([gridSize + 1, gridSize + 1])
-			.thresholds(6) // Number of contour levels
-			(values);
+			.thresholds(6)(
+			// Number of contour levels
+			values
+		);
 
 		// Create scale to map grid indices to actual coordinates
 		const xGridScale = d3.scaleLinear().domain([0, gridSize]).range([minX, maxX]);
@@ -187,9 +193,7 @@ export let highlightParticipantId: string | null = null;
 	function renderChart() {
 		if (!mounted || !svg || !tooltipEl) return;
 
-		const parsedPoints = responses
-			.map(parseResponseData)
-			.filter((p): p is PlotPoint => p !== null);
+		const parsedPoints = responses.map(parseResponseData).filter((p): p is PlotPoint => p !== null);
 
 		if (parsedPoints.length === 0) return;
 
@@ -273,7 +277,13 @@ export let highlightParticipantId: string | null = null;
 			.attr('stroke-width', 1);
 
 		// Draw density contours
-		const densityContours = calculateDensityContours(parsedPoints, chartWidth, chartHeight, xScale, yScale);
+		const densityContours = calculateDensityContours(
+			parsedPoints,
+			chartWidth,
+			chartHeight,
+			xScale,
+			yScale
+		);
 		if (densityContours) {
 			const { contours, xGridScale, yGridScale } = densityContours;
 
@@ -356,11 +366,7 @@ export let highlightParticipantId: string | null = null;
 			.attr('fill', theme.ink2)
 			.attr('font-size', '11px');
 
-		g.append('g')
-			.call(yAxis)
-			.selectAll('text')
-			.attr('fill', theme.ink2)
-			.attr('font-size', '11px');
+		g.append('g').call(yAxis).selectAll('text').attr('fill', theme.ink2).attr('font-size', '11px');
 
 		// Axis labels
 		g.append('text')
@@ -392,13 +398,15 @@ export let highlightParticipantId: string | null = null;
 
 		// Point circles (size based on votes)
 		pointGroup
-        .append('circle')
-        .attr('r', (d) => Math.max(5, Math.min(15, 5 + d.votes)))
-        .attr('fill', (d) => d.color)
-        .attr('opacity', (d:any) => highlightParticipantId ? (d.participantId === highlightParticipantId ? 1 : 0.15) : 0.7)
-        .attr('stroke', 'hsl(var(--surface-elevated))')
-        .attr('stroke-width', 2)
-        .style('cursor', 'pointer');
+			.append('circle')
+			.attr('r', (d) => Math.max(5, Math.min(15, 5 + d.votes)))
+			.attr('fill', (d) => d.color)
+			.attr('opacity', (d: any) =>
+				highlightParticipantId ? (d.participantId === highlightParticipantId ? 1 : 0.15) : 0.7
+			)
+			.attr('stroke', 'hsl(var(--surface-elevated))')
+			.attr('stroke-width', 2)
+			.style('cursor', 'pointer');
 
 		// Point labels
 		pointGroup
@@ -424,8 +432,8 @@ export let highlightParticipantId: string | null = null;
 					<div class="text-xs" style="color:${theme.inkMuted};">Votes: ${d.votes}</div>
 				`;
 				tooltipEl.style.display = 'block';
-				tooltipEl.style.left = `${event.pageX + 10}px`;
-				tooltipEl.style.top = `${event.pageY - 10}px`;
+				tooltipEl.style.left = `${event.pageX + 8}px`;
+				tooltipEl.style.top = `${event.pageY + 8}px`;
 			})
 			.on('mouseleave', function () {
 				d3.select(this).select('circle').attr('opacity', 0.7).attr('stroke-width', 2);
@@ -434,9 +442,7 @@ export let highlightParticipantId: string | null = null;
 
 		// Legend
 		const uniqueLenses = Array.from(new Set(parsedPoints.map((p) => p.lens)));
-		const legend = g
-			.append('g')
-			.attr('transform', `translate(${chartWidth + 20}, 0)`);
+		const legend = g.append('g').attr('transform', `translate(${chartWidth + 20}, 0)`);
 
 		legend
 			.selectAll('.legend-item')
@@ -484,7 +490,8 @@ export let highlightParticipantId: string | null = null;
 			.text(`n = ${parsedPoints.length}`);
 
 		if (trendLine) {
-			const correlation = trendLine.slope > 0 ? 'Positive' : trendLine.slope < 0 ? 'Negative' : 'No';
+			const correlation =
+				trendLine.slope > 0 ? 'Positive' : trendLine.slope < 0 ? 'Negative' : 'No';
 			stats
 				.append('text')
 				.attr('y', 15)
@@ -528,11 +535,7 @@ export let highlightParticipantId: string | null = null;
 		display: block;
 		max-width: 100%;
 		height: auto;
-		background: linear-gradient(
-			135deg,
-			hsl(var(--surface-muted)) 0%,
-			hsl(var(--surface)) 100%
-		);
+		background: linear-gradient(135deg, hsl(var(--surface-muted)) 0%, hsl(var(--surface)) 100%);
 		border-radius: 12px;
 	}
 </style>

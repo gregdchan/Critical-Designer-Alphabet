@@ -3,8 +3,8 @@
 	import { arc } from 'd3-shape';
 	import { interpolate } from 'd3-interpolate';
 	import BaseChart from './BaseChart.svelte';
-import { useParticipants, useResponses } from '$lib/hooks/useSupabaseRealtime';
-import { getThemeColors } from '$lib/utils/colors';
+	import { useParticipants, useResponses } from '$lib/hooks/useSupabaseRealtime';
+	import { getThemeColors } from '$lib/utils/colors';
 	import type { ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
@@ -100,10 +100,10 @@ import { getThemeColors } from '$lib/utils/colors';
 		chart.selectAll('*').remove();
 
 		// Background arc
-	chart
-		.append('path')
-		.attr('class', 'gauge-background')
-		.attr('transform', `translate(${centerX}, ${centerY})`)
+		chart
+			.append('path')
+			.attr('class', 'gauge-background')
+			.attr('transform', `translate(${centerX}, ${centerY})`)
 			.attr(
 				'd',
 				arcGenerator({
@@ -113,19 +113,19 @@ import { getThemeColors } from '$lib/utils/colors';
 					outerRadius: radius * 0.9
 				})
 			)
-		.attr('fill', 'hsl(var(--surface) / 0.12)')
-		.attr('stroke', 'hsl(var(--border-subtle) / 0.35)')
+			.attr('fill', 'hsl(var(--surface) / 0.12)')
+			.attr('stroke', 'hsl(var(--border-subtle) / 0.35)')
 			.attr('stroke-width', 1);
 
 		// Progress arc
 		const progressAngle = startAngle + (endAngle - startAngle) * (inclusivityPercentage / 100);
 
-	const progressArc = chart
-		.append('path')
-		.attr('class', 'gauge-progress')
-		.attr('transform', `translate(${centerX}, ${centerY})`)
-		.attr('fill', inclusivityColor)
-		.attr('stroke', inclusivityColor)
+		const progressArc = chart
+			.append('path')
+			.attr('class', 'gauge-progress')
+			.attr('transform', `translate(${centerX}, ${centerY})`)
+			.attr('fill', inclusivityColor)
+			.attr('stroke', inclusivityColor)
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#neon-glow)')
 			.attr('opacity', 0);
@@ -192,13 +192,13 @@ import { getThemeColors } from '$lib/utils/colors';
 			.attr('class', 'gauge-needle')
 			.attr('transform', `translate(${centerX}, ${centerY})`);
 
-	needle
-		.append('line')
-		.attr('x1', 0)
-		.attr('y1', 0)
-		.attr('x2', Math.cos(startAngle) * radius * 0.5)
-		.attr('y2', Math.sin(startAngle) * radius * 0.5)
-		.attr('stroke', themeColors.accentCritical)
+		needle
+			.append('line')
+			.attr('x1', 0)
+			.attr('y1', 0)
+			.attr('x2', Math.cos(startAngle) * radius * 0.5)
+			.attr('y2', Math.sin(startAngle) * radius * 0.5)
+			.attr('stroke', themeColors.accentCritical)
 			.attr('stroke-width', 3)
 			.attr('stroke-linecap', 'round')
 			.attr('filter', 'url(#neon-glow)')
@@ -256,12 +256,12 @@ import { getThemeColors } from '$lib/utils/colors';
 			.attr('opacity', 1);
 
 		// Fairness multiplier
-	centerGroup
-		.append('text')
-		.attr('class', 'multiplier-text')
-		.attr('text-anchor', 'middle')
-		.attr('dy', '1.5em')
-		.attr('fill', inclusivityColor)
+		centerGroup
+			.append('text')
+			.attr('class', 'multiplier-text')
+			.attr('text-anchor', 'middle')
+			.attr('dy', '1.5em')
+			.attr('fill', inclusivityColor)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '14px')
 			.attr('font-weight', 'bold')
@@ -290,13 +290,13 @@ import { getThemeColors } from '$lib/utils/colors';
 			.attr('opacity', 1);
 	}
 
-function getInclusivityColor(percentage: number): string {
-	const theme = getThemeColors();
-	if (percentage >= 80) return theme.risk.low;
-	if (percentage >= 60) return theme.accentWarm;
-	if (percentage >= 40) return theme.accentCritical;
-	return theme.brand;
-}
+	function getInclusivityColor(percentage: number): string {
+		const theme = getThemeColors();
+		if (percentage >= 80) return theme.risk.low;
+		if (percentage >= 60) return theme.accentWarm;
+		if (percentage >= 40) return theme.accentCritical;
+		return theme.brand;
+	}
 
 	function getInclusivityStatus(percentage: number): string {
 		if (percentage >= 80) return 'Excellent';
@@ -305,11 +305,11 @@ function getInclusivityColor(percentage: number): string {
 		return 'Improving';
 	}
 
-function handleResize(newDimensions: ChartDimensions) {
-	dimensions = newDimensions;
-	fallbackDimensions = newDimensions;
-	updateVisualization();
-}
+	function handleResize(newDimensions: ChartDimensions) {
+		dimensions = newDimensions;
+		fallbackDimensions = newDimensions;
+		updateVisualization();
+	}
 
 	// Watch for changes
 	$: if (svgElement && dimensions) {
@@ -328,7 +328,8 @@ function handleResize(newDimensions: ChartDimensions) {
 	on:mounted={() => updateVisualization()}
 >
 	<svelte:fragment slot="default" let:svgElement={svg} let:dimensions={dims}>
-		{@const _ = svg && dims ? ((svgElement = svg), (dimensions = dims), (fallbackDimensions = dims)) : null}
+		{@const _ =
+			svg && dims ? ((svgElement = svg), (dimensions = dims), (fallbackDimensions = dims)) : null}
 		{#if loading}
 			<text
 				x={(dimensions ?? fallbackDimensions).innerWidth / 2}
@@ -359,7 +360,7 @@ function handleResize(newDimensions: ChartDimensions) {
 	}
 
 	:global(.inclusivity-meter-chart .gauge-needle) {
-	filter: drop-shadow(0 0 5px hsl(var(--accent-critical)));
+		filter: drop-shadow(0 0 5px hsl(var(--accent-critical)));
 	}
 
 	:global(.inclusivity-meter-chart .percentage-text) {

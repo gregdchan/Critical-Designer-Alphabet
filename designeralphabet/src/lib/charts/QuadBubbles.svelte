@@ -2,10 +2,10 @@
 	import { select } from 'd3-selection';
 	import { forceSimulation, forceManyBody, forceCenter, forceX, forceY } from 'd3-force';
 	import { scaleSqrt } from 'd3-scale';
-import BaseChart from './BaseChart.svelte';
-import { useResponses } from '$lib/hooks/useSupabaseRealtime';
-import { getThemeColors } from '$lib/utils/colors';
-import type { BubbleDatum, ChartDimensions } from '$lib/types/charts';
+	import BaseChart from './BaseChart.svelte';
+	import { useResponses } from '$lib/hooks/useSupabaseRealtime';
+	import { getThemeColors } from '$lib/utils/colors';
+	import type { BubbleDatum, ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let theme: 'dark' | 'light' = 'dark';
@@ -39,35 +39,35 @@ import type { BubbleDatum, ChartDimensions } from '$lib/types/charts';
 	let bubbles: any;
 
 	// Lens centers for force positioning
-const lensPositions = {
-	Risk: { x: 0.2, y: 0.3 },
-	Work: { x: 0.8, y: 0.3 },
-	Sustainability: { x: 0.2, y: 0.7 },
-	Ethics: { x: 0.8, y: 0.7 },
-	Justice: { x: 0.5, y: 0.2 },
-	Culture: { x: 0.5, y: 0.8 },
-	Innovation: { x: 0.1, y: 0.5 },
-	Governance: { x: 0.9, y: 0.5 }
-};
+	const lensPositions = {
+		Risk: { x: 0.2, y: 0.3 },
+		Work: { x: 0.8, y: 0.3 },
+		Sustainability: { x: 0.2, y: 0.7 },
+		Ethics: { x: 0.8, y: 0.7 },
+		Justice: { x: 0.5, y: 0.2 },
+		Culture: { x: 0.5, y: 0.8 },
+		Innovation: { x: 0.1, y: 0.5 },
+		Governance: { x: 0.9, y: 0.5 }
+	};
 
-const lensColorCache = new Map<string, string>();
+	const lensColorCache = new Map<string, string>();
 
-function resolveLensColor(lens: string) {
-	const key = normaliseLens(lens);
-	if (lensColorCache.has(key)) return lensColorCache.get(key)!;
-	const themeColors = getThemeColors();
-	const palette = [
-		...themeColors.chart,
-		themeColors.brand,
-		themeColors.brandSoft,
-		themeColors.accentWarm,
-		themeColors.accentCritical,
-		themeColors.ink
-	];
-	const color = palette[lensColorCache.size % palette.length] ?? themeColors.brand;
-	lensColorCache.set(key, color);
-	return color;
-}
+	function resolveLensColor(lens: string) {
+		const key = normaliseLens(lens);
+		if (lensColorCache.has(key)) return lensColorCache.get(key)!;
+		const themeColors = getThemeColors();
+		const palette = [
+			...themeColors.chart,
+			themeColors.brand,
+			themeColors.brandSoft,
+			themeColors.accentWarm,
+			themeColors.accentCritical,
+			themeColors.ink
+		];
+		const color = palette[lensColorCache.size % palette.length] ?? themeColors.brand;
+		lensColorCache.set(key, color);
+		return color;
+	}
 
 	// Set up realtime data subscription
 	useResponses(roomCode, (state) => {
@@ -84,14 +84,14 @@ function resolveLensColor(lens: string) {
 		}
 
 		// Group responses by lens and aggregate
-	const lensGroups = responses.reduce((acc, response) => {
-		const lens = normaliseLens(response.questions?.lens);
-		if (!acc[lens]) {
-			acc[lens] = [];
-		}
-		acc[lens].push(response);
-		return acc;
-	}, {});
+		const lensGroups = responses.reduce((acc, response) => {
+			const lens = normaliseLens(response.questions?.lens);
+			if (!acc[lens]) {
+				acc[lens] = [];
+			}
+			acc[lens].push(response);
+			return acc;
+		}, {});
 
 		// Create bubble data
 		bubbleData = Object.entries(lensGroups).map(([lens, items]: [string, any[]]) => {
@@ -105,16 +105,16 @@ function resolveLensColor(lens: string) {
 				.map((item) => item.text)
 				.join('; ');
 
-		return {
-			id: lens,
-			lens,
-			text: representativeText,
-			votes: totalVotes,
-			cardsCount: totalCards,
-			count: items.length,
-			color: resolveLensColor(lens)
-		};
-	});
+			return {
+				id: lens,
+				lens,
+				text: representativeText,
+				votes: totalVotes,
+				cardsCount: totalCards,
+				count: items.length,
+				color: resolveLensColor(lens)
+			};
+		});
 
 		if (svgElement && dimensions) {
 			updateVisualization();

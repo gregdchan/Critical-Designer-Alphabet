@@ -28,9 +28,7 @@
 	<!-- The Designer's Critical Alphabet -->
 	<section class="bg-slate-800 rounded-lg border border-slate-600 p-8">
 		<div class="flex items-start gap-4 mb-6">
-			<div
-				class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand/20 text-brand"
-			>
+			<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand/20 text-brand">
 				<Scale class="h-6 w-6" />
 			</div>
 			<div>
@@ -110,9 +108,7 @@
 	<!-- Licensing -->
 	<section class="bg-slate-800 rounded-lg border border-slate-600 p-8">
 		<div class="flex items-start gap-4 mb-6">
-			<div
-				class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand/20 text-brand"
-			>
+			<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-brand/20 text-brand">
 				<Scale class="h-6 w-6" />
 			</div>
 			<div>
@@ -140,10 +136,6 @@
 				<p>
 					• The digital platform may not be copied, distributed, or commercialized without express
 					permission.
-				</p>
-				<p>
-					• Workshops that include the physical Critical Alphabet should acknowledge Dr. Noel as the
-					creator of the deck.
 				</p>
 			</div>
 		</div>
@@ -285,7 +277,7 @@
 	>
 		<h2 class="text-2xl font-semibold text-slate-100 mb-6 flex items-center gap-2">
 			<Heart class="h-6 w-6 text-pink-400" />
-			🙏 Acknowledgements
+			Acknowledgements
 		</h2>
 
 		<div class="space-y-3 text-ink-muted">
@@ -300,14 +292,6 @@
 			</p>
 			<p>
 				<strong>Open-source communities</strong> behind SvelteKit, TailwindCSS, D3.js, and MariaDB
-			</p>
-		</div>
-
-		<div class="mt-8 pt-6 border-t border-slate-600">
-			<p class="text-center text-ink-muted italic">
-				✨ The physical cards were created by Dr. Noel. This digital workshop platform—its design,
-				code, and game mechanics—was created by Gregory D. Chan, inspired by pluriversal and
-				inclusive design theory.
 			</p>
 		</div>
 	</section>

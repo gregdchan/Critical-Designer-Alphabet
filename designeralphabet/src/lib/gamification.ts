@@ -96,7 +96,8 @@ export const BADGES: Badge[] = [
 		color: '#3b82f6',
 		requirement: (participant, responses) =>
 			// Note: votes is a number, not an array - this badge may need different logic
-			responses.filter((r) => r.participant_id !== participant.id && (r.votes || 0) > 0).length >= 10,
+			responses.filter((r) => r.participant_id !== participant.id && (r.votes || 0) > 0).length >=
+			10,
 		points: 20
 	},
 	{
@@ -133,11 +134,11 @@ export const BADGES: Badge[] = [
 		color: '#06b6d4',
 		requirement: (participant, responses, timeline) => {
 			// Simplified: check if participant is among first 3 contributors
-			const sortedResponses = [...responses].sort((a, b) =>
-				new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+			const sortedResponses = [...responses].sort(
+				(a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
 			);
 			const firstThree = sortedResponses.slice(0, 3);
-			return firstThree.some(r => r.participant_id === participant.id);
+			return firstThree.some((r) => r.participant_id === participant.id);
 		},
 		points: 15
 	},
@@ -163,8 +164,8 @@ export const BADGES: Badge[] = [
 		requirement: (participant, responses) => {
 			// Simplified to participants who both contribute and engage with others
 			const userResponses = responses.filter((r) => r.participant_id === participant.id);
-			const othersWithVotes = responses.filter((r) =>
-				r.participant_id !== participant.id && (r.votes || 0) > 0
+			const othersWithVotes = responses.filter(
+				(r) => r.participant_id !== participant.id && (r.votes || 0) > 0
 			).length;
 			return userResponses.length >= 3 && othersWithVotes >= 5;
 		},

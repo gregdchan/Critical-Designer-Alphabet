@@ -96,7 +96,7 @@
 		{
 			label: 'Display / Hero',
 			className: 'text-3xl font-semibold text-slate-100 sm:text-4xl',
-			preview: 'Critical Designer Planner',
+			preview: 'Critical Design Planner',
 			usage: 'Hero titles, page headlines'
 		},
 		{
@@ -168,7 +168,7 @@
 					<IconSparkle class="h-4 w-4" /> Design System Overview
 				</span>
 				<h1 class="text-3xl font-semibold text-slate-100 sm:text-4xl">
-					Critical Designer Planner UI Kit
+					Critical Design Planner UI Kit
 				</h1>
 				<p class="max-w-2xl text-base leading-relaxed text-ink-muted">
 					This page mirrors the production experience—Inter-first typography, slate gradients,

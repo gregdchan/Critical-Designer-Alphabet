@@ -82,7 +82,9 @@
 		</div>
 
 		<div class="text-center mt-3">
-			<span class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm">
+			<span
+				class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm"
+			>
 				{impactDescriptions[impact - 1]} ({impact}/5)
 			</span>
 		</div>
@@ -114,7 +116,9 @@
 		</div>
 
 		<div class="text-center mt-3">
-			<span class="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-800 rounded-full font-semibold text-sm">
+			<span
+				class="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-800 rounded-full font-semibold text-sm"
+			>
 				{likelihoodDescriptions[likelihood - 1]} ({likelihood}/5)
 			</span>
 		</div>

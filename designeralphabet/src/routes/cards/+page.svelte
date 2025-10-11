@@ -30,33 +30,33 @@
 		method: 'orange'
 	};
 
-function getCardClass(card: Card): string {
-	const variant = card.category ? CATEGORY_VARIANTS[card.category as CategoryType] : 'cyan';
-	return `card-${variant}`;
-}
+	function getCardClass(card: Card): string {
+		const variant = card.category ? CATEGORY_VARIANTS[card.category as CategoryType] : 'cyan';
+		return `card-${variant}`;
+	}
 
-function getCardColorVariation(card: Card): string {
-	// Generate a slight color variation based on the card's letter
-	const letter = card.letter?.charCodeAt(0) || 65;
-	const variation = ((letter - 65) * 7) % 20; // 0-19 range for subtle variations
-	return `filter: brightness(${1 + variation * 0.02 - 0.2}) saturate(${1 + (variation % 10) * 0.03 - 0.15});`;
-}
+	function getCardColorVariation(card: Card): string {
+		// Generate a slight color variation based on the card's letter
+		const letter = card.letter?.charCodeAt(0) || 65;
+		const variation = ((letter - 65) * 7) % 20; // 0-19 range for subtle variations
+		return `filter: brightness(${1 + variation * 0.02 - 0.2}) saturate(${1 + (variation % 10) * 0.03 - 0.15});`;
+	}
 
-function variantClass(card: Card | null, role: string): string {
-	if (!card) return '';
-	const category = card.category as CategoryType;
+	function variantClass(card: Card | null, role: string): string {
+		if (!card) return '';
+		const category = card.category as CategoryType;
 
-	// Color mapping for drawer chip badges
-	const categoryColors: Record<CategoryType, string> = {
-		practice: 'border-cyan-500 bg-cyan-100 text-cyan-900',
-		lens: 'border-pink-500 bg-pink-100 text-pink-900',
-		mindset: 'border-lime-600 bg-lime-100 text-lime-900',
-		theory: 'border-purple-500 bg-purple-100 text-purple-900',
-		method: 'border-orange-500 bg-orange-100 text-orange-900'
-	};
+		// Color mapping for drawer chip badges
+		const categoryColors: Record<CategoryType, string> = {
+			practice: 'border-cyan-500 bg-cyan-100 text-cyan-900',
+			lens: 'border-pink-500 bg-pink-100 text-pink-900',
+			mindset: 'border-lime-600 bg-lime-100 text-lime-900',
+			theory: 'border-purple-500 bg-purple-100 text-purple-900',
+			method: 'border-orange-500 bg-orange-100 text-orange-900'
+		};
 
-	return categoryColors[category] || 'border-slate-500 bg-slate-100 text-slate-900';
-}
+		return categoryColors[category] || 'border-slate-500 bg-slate-100 text-slate-900';
+	}
 
 	let cards: Card[] = [];
 	let loading = true;
@@ -204,9 +204,10 @@ function variantClass(card: Card | null, role: string): string {
 					Build your inclusive design deck
 				</h1>
 				<p class="max-w-3xl text-sm text-white/85">
-					So you're ready to design inclusively? Start by selecting 3–5 cards to stage a session. Each card
-					should represent a unique perspective or idea centered around your own belief systems, focus, or values.
-					 Once you've made your selections, you can launch the session and begin exploring these concepts with your team.
+					So you're ready to design inclusively? Start by selecting 3–5 cards to stage a session.
+					Each card should represent a unique perspective or idea centered around your own belief
+					systems, focus, or values. Once you've made your selections, you can launch the session
+					and begin exploring these concepts with your team.
 				</p>
 			</div>
 			<div class="flex flex-wrap items-center gap-3">
@@ -362,7 +363,9 @@ function variantClass(card: Card | null, role: string): string {
 									<div class="flex items-center gap-2 flex-wrap">
 										<p class="card-id card-text-secondary">{card.cardID}</p>
 										{#if card.category}
-											<span class="card-badge rounded-full px-2.5 py-0.5 text-[0.55rem] uppercase tracking-[0.25em]">
+											<span
+												class="card-badge rounded-full px-2.5 py-0.5 text-[0.55rem] uppercase tracking-[0.25em]"
+											>
 												{card.category}
 											</span>
 										{/if}
@@ -371,12 +374,22 @@ function variantClass(card: Card | null, role: string): string {
 							</div>
 						</div>
 						{#if card.description}
-							<p class="text-[0.75rem] font-medium leading-relaxed card-text-primary break-words line-clamp-4">{card.description}</p>
+							<p
+								class="text-[0.75rem] font-medium leading-relaxed card-text-primary break-words line-clamp-4"
+							>
+								{card.description}
+							</p>
 						{/if}
 						{#if card.prompt}
 							<div class="rounded-xl border-2 border-white/30 bg-white/10 backdrop-blur px-3 py-2">
-								<p class="text-[0.6rem] font-bold uppercase tracking-[0.2em] card-text-secondary mb-1">Prompt</p>
-								<p class="text-[0.7rem] leading-snug card-text-primary line-clamp-3">{card.prompt}</p>
+								<p
+									class="text-[0.6rem] font-bold uppercase tracking-[0.2em] card-text-secondary mb-1"
+								>
+									Prompt
+								</p>
+								<p class="text-[0.7rem] leading-snug card-text-primary line-clamp-3">
+									{card.prompt}
+								</p>
 							</div>
 						{/if}
 						<div class="flex flex-wrap gap-1.5">
@@ -458,20 +471,29 @@ function variantClass(card: Card | null, role: string): string {
 
 <SimpleDrawer open={$drawerOpen} on:backdrop={closeDetails}>
 	{#if activeCard}
-		<article class="flex h-full flex-col gap-6 overflow-y-auto overflow-x-hidden bg-white p-4 sm:p-6 text-slate-900 w-full max-w-full box-border">
+		<article
+			class="flex h-full flex-col gap-6 overflow-y-auto overflow-x-hidden bg-white p-4 sm:p-6 text-slate-900 w-full max-w-full box-border"
+		>
 			<header class="flex items-start justify-between gap-3 w-full max-w-full">
 				<div class="space-y-3 min-w-0 flex-1">
-					<div
-						class="flex flex-wrap items-center gap-2 text-[0.65rem] uppercase tracking-[0.25em]"
-					>
+					<div class="flex flex-wrap items-center gap-2 text-[0.65rem] uppercase tracking-[0.25em]">
 						{#if activeCard.category}
-							<span class={`rounded-full border-2 px-3 py-1.5 font-bold ${variantClass(activeCard, 'chip')}`}>
+							<span
+								class={`rounded-full border-2 px-3 py-1.5 font-bold ${variantClass(activeCard, 'chip')}`}
+							>
 								{activeCard.category}
 							</span>
 						{/if}
-						<span class="rounded-full border-2 border-slate-300 bg-slate-100 px-3 py-1.5 font-semibold text-slate-700">{activeCard.cardID}</span>
+						<span
+							class="rounded-full border-2 border-slate-300 bg-slate-100 px-3 py-1.5 font-semibold text-slate-700"
+							>{activeCard.cardID}</span
+						>
 					</div>
-					<h2 class="font-retro text-xl sm:text-2xl uppercase tracking-[0.3em] sm:tracking-[0.4em] text-slate-900 break-words">{activeCard.title}</h2>
+					<h2
+						class="font-retro text-xl sm:text-2xl uppercase tracking-[0.3em] sm:tracking-[0.4em] text-slate-900 break-words"
+					>
+						{activeCard.title}
+					</h2>
 					<p class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-600">
 						Letter {activeCard.letter}
 					</p>
@@ -504,7 +526,9 @@ function variantClass(card: Card | null, role: string): string {
 			{#if activeCard.exampleUse?.length}
 				<section class="space-y-3 text-base w-full max-w-full">
 					<h3 class="text-xs font-bold uppercase tracking-[0.25em] text-slate-900">Example Uses</h3>
-					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border">
+					<ul
+						class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border"
+					>
 						{#each activeCard.exampleUse as example}
 							<li class="leading-relaxed text-slate-800 break-words">• {example}</li>
 						{/each}
@@ -514,7 +538,9 @@ function variantClass(card: Card | null, role: string): string {
 			{#if activeCard.readingList?.length}
 				<section class="space-y-3 text-base w-full max-w-full">
 					<h3 class="text-xs font-bold uppercase tracking-[0.25em] text-slate-900">Reading List</h3>
-					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border">
+					<ul
+						class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border"
+					>
 						{#each activeCard.readingList as item}
 							<li class="text-slate-800 break-words">
 								{#if item.url}
@@ -537,7 +563,9 @@ function variantClass(card: Card | null, role: string): string {
 			{#if activeCard.sources?.length}
 				<section class="space-y-3 text-base w-full max-w-full">
 					<h3 class="text-xs font-bold uppercase tracking-[0.25em] text-slate-900">Sources</h3>
-					<ul class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border">
+					<ul
+						class="space-y-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 sm:p-5 w-full max-w-full box-border"
+					>
 						{#each activeCard.sources as source}
 							<li class="w-full max-w-full overflow-hidden">
 								<a
@@ -551,7 +579,9 @@ function variantClass(card: Card | null, role: string): string {
 					</ul>
 				</section>
 			{/if}
-			<footer class="mt-auto space-y-3 border-t-2 border-slate-200 pt-4 text-sm w-full max-w-full box-border">
+			<footer
+				class="mt-auto space-y-3 border-t-2 border-slate-200 pt-4 text-sm w-full max-w-full box-border"
+			>
 				<button
 					class="w-full rounded-full border-2 border-purple-500 bg-purple-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-white shadow-lg transition hover:bg-purple-700"
 					type="button"

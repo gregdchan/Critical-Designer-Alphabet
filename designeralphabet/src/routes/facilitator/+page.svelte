@@ -164,11 +164,12 @@
 				// Block content array - extract text from blocks
 				sessionChallenge = challenge
 					.filter((block: any) => block._type === 'block')
-					.map((block: any) =>
-						block.children
-							?.filter((child: any) => child._type === 'span')
-							?.map((child: any) => child.text)
-							?.join('') ?? ''
+					.map(
+						(block: any) =>
+							block.children
+								?.filter((child: any) => child._type === 'span')
+								?.map((child: any) => child.text)
+								?.join('') ?? ''
 					)
 					.join('\n');
 			} else if (challenge && typeof challenge === 'object') {
@@ -307,8 +308,8 @@
 			}
 
 			// Collect all breakout rounds from all phases with phase context
-			const roundsWithPhase = (selectedTemplate.phases ?? []).flatMap(
-				(phase: any) => (phase.breakoutRounds ?? []).map((round: any) => ({
+			const roundsWithPhase = (selectedTemplate.phases ?? []).flatMap((phase: any) =>
+				(phase.breakoutRounds ?? []).map((round: any) => ({
 					...round,
 					phaseKey: phase.key
 				}))
@@ -441,11 +442,12 @@
 			// Block content array - extract text from blocks
 			return challenge
 				.filter((block: any) => block._type === 'block')
-				.map((block: any) =>
-					block.children
-						?.filter((child: any) => child._type === 'span')
-						?.map((child: any) => child.text)
-						?.join('') ?? ''
+				.map(
+					(block: any) =>
+						block.children
+							?.filter((child: any) => child._type === 'span')
+							?.map((child: any) => child.text)
+							?.join('') ?? ''
 				)
 				.join('\n');
 		}
@@ -454,7 +456,9 @@
 	}
 </script>
 
-<div class="facilitator-shell min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white p-6">
+<div
+	class="facilitator-shell min-h-screen bg-gradient-to-br from-surface-muted via-surface to-white p-6"
+>
 	{#if currentView === 'launching'}
 		<div class="flex items-center justify-center min-h-screen">
 			<div class="text-center">
@@ -635,12 +639,17 @@
 										{template.description || 'No description available'}
 									</p>
 									{#if template.challenge}
-										<div class="mb-3 rounded-lg border border-retro-purple/30 bg-retro-purple/10 p-3">
+										<div
+											class="mb-3 rounded-lg border border-retro-purple/30 bg-retro-purple/10 p-3"
+										>
 											<p class="text-xs uppercase tracking-[0.3em] text-retro-purple">
 												Challenge Focus
 											</p>
 											<div class="mt-2 text-sm text-primary">
-												<PortableText value={template.challenge} styleClass="prose-sm prose-primary" />
+												<PortableText
+													value={template.challenge}
+													styleClass="prose-sm prose-primary"
+												/>
 											</div>
 										</div>
 									{/if}
@@ -695,9 +704,7 @@
 												</span>
 											{/if}
 											{#if template.visuals?.charts && template.visuals.charts.length > 0}
-												<span class="px-2 py-1 bg-brand/20 text-brand rounded">
-													📊 Data Viz
-												</span>
+												<span class="px-2 py-1 bg-brand/20 text-brand rounded"> 📊 Data Viz </span>
 											{/if}
 										</div>
 									</div>
@@ -793,9 +800,7 @@
 										<span class="text-secondary">Roles:</span>
 										<div class="flex flex-wrap gap-1 mt-1">
 											{#each selectedTemplate.facilitation?.roles ?? [] as role}
-												<span class="px-2 py-1 bg-brand/20 text-brand rounded text-xs"
-													>{role}</span
-												>
+												<span class="px-2 py-1 bg-brand/20 text-brand rounded text-xs">{role}</span>
 											{/each}
 										</div>
 									</div>
@@ -911,7 +916,9 @@
 												>
 												<div class="space-y-1 max-h-32 overflow-y-auto">
 													{#each round.questions.slice(0, 3) as question}
-														<div class="text-sm text-secondary bg-surface-accent/30 rounded px-3 py-2">
+														<div
+															class="text-sm text-secondary bg-surface-accent/30 rounded px-3 py-2"
+														>
 															{question}
 														</div>
 													{/each}
@@ -965,9 +972,7 @@
 				<div class="space-y-8">
 					<!-- Session Overview -->
 					<div class="grid lg:grid-cols-3 gap-6">
-						<div
-							class="lg:col-span-2 panel p-6"
-						>
+						<div class="lg:col-span-2 panel p-6">
 							<h3 class="text-xl font-semibold text-primary mb-4">Session Overview</h3>
 							<div class="grid md:grid-cols-2 gap-4 mb-6">
 								<div class="space-y-2">
@@ -997,9 +1002,7 @@
 							{/if}
 						</div>
 
-						<div
-							class="panel p-6 border border-retro-purple/20"
-						>
+						<div class="panel p-6 border border-retro-purple/20">
 							<h3 class="text-xl font-semibold text-primary mb-4">Session Stats</h3>
 							<div class="space-y-4">
 								<div class="flex justify-between items-center">
@@ -1096,7 +1099,9 @@
 												<p class="text-sm text-secondary">Active Dashboards:</p>
 												<div class="space-y-1">
 													{#each phase.dashboards as dashboard}
-														<div class="text-xs px-2 py-1 bg-retro-purple/20 text-purple-200 rounded">
+														<div
+															class="text-xs px-2 py-1 bg-retro-purple/20 text-purple-200 rounded"
+														>
 															{dashboard}
 														</div>
 													{/each}

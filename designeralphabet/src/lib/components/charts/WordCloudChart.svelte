@@ -27,15 +27,16 @@
 	let rootGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
 	let currentTransform = d3.zoomIdentity;
 
-	const ro = typeof ResizeObserver !== 'undefined'
-		? new ResizeObserver((entries) => {
-				const r = entries[0]?.contentRect;
-				if (r) {
-					width = Math.max(300, r.width);
-					height = Math.max(300, r.height);
-				}
-			})
-		: null;
+	const ro =
+		typeof ResizeObserver !== 'undefined'
+			? new ResizeObserver((entries) => {
+					const r = entries[0]?.contentRect;
+					if (r) {
+						width = Math.max(300, r.width);
+						height = Math.max(300, r.height);
+					}
+				})
+			: null;
 
 	const lensOrder = [
 		'Risk',
@@ -62,7 +63,9 @@
 
 	function normaliseLens(raw?: string) {
 		if (!raw) return 'General';
-		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+		const match = (lensOrder as readonly string[]).find(
+			(key) => key.toLowerCase() === raw.toLowerCase()
+		);
 		return match ?? raw;
 	}
 
@@ -74,8 +77,8 @@
 
 		// Calculate total votes and max votes for better scaling
 		const totalVotes = data.reduce((sum, r) => sum + (r.votes || 0), 0);
-		const maxVotes = Math.max(...data.map(r => r.votes || 0), 1);
-		const minVotes = Math.min(...data.map(r => r.votes || 0).filter(v => v > 0), 0);
+		const maxVotes = Math.max(...data.map((r) => r.votes || 0), 1);
+		const minVotes = Math.min(...data.map((r) => r.votes || 0).filter((v) => v > 0), 0);
 
 		// Bubble sizing - more dramatic range to emphasize top items
 		const minRadius = 18;
@@ -156,14 +159,13 @@
 		if (bubbles.length === 0) return [];
 
 		// Use D3 pack layout for optimal bubble positioning
-		const packLayout = d3.pack<WordBubble>()
-			.size([width, height])
-			.padding(5);
+		const packLayout = d3.pack<WordBubble>().size([width, height]).padding(5);
 
 		// Create hierarchy
-		const root = d3.hierarchy<any>({
-			children: bubbles
-		})
+		const root = d3
+			.hierarchy<any>({
+				children: bubbles
+			})
 			.sum((d: any) => d.radius * d.radius); // Area-based packing
 
 		// Apply pack layout
@@ -205,10 +207,7 @@
 		// Clear previous content
 		d3.select(svg).selectAll('*').remove();
 
-		const svgSel = d3
-			.select(svg)
-			.attr('width', width)
-			.attr('height', height);
+		const svgSel = d3.select(svg).attr('width', width).attr('height', height);
 
 		// Create INTERACTIVE layer (bubbles) - this will be zoomed/panned
 		const interactiveGroup = svgSel
@@ -221,10 +220,7 @@
 		rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
 
 		// Create FIXED UI layer (title, legend, stats) - this stays put
-		const uiGroup = svgSel
-			.append('g')
-			.attr('class', 'ui-layer')
-			.style('pointer-events', 'none'); // Don't block interactions with bubbles
+		const uiGroup = svgSel.append('g').attr('class', 'ui-layer').style('pointer-events', 'none'); // Don't block interactions with bubbles
 
 		// enable pinch zoom and panning ONLY on interactive layer
 		const pad = 0.5;
@@ -259,7 +255,9 @@
 		// Drag cursor feedback
 		svgSel
 			.on('mousedown.dragcursor touchstart.dragcursor', () => svgSel.style('cursor', 'grabbing'))
-			.on('mouseup.dragcursor touchend.dragcursor mouseleave.dragcursor', () => svgSel.style('cursor', 'grab'));
+			.on('mouseup.dragcursor touchend.dragcursor mouseleave.dragcursor', () =>
+				svgSel.style('cursor', 'grab')
+			);
 
 		// Create bubble groups in INTERACTIVE layer
 		const bubbleGroups = interactiveGroup
@@ -286,11 +284,7 @@
 			.attr('stroke-width', 2)
 			.style('cursor', 'pointer')
 			.on('mouseenter', function (event: any, d: any) {
-				d3.select(this)
-					.transition()
-					.duration(200)
-					.attr('opacity', 1)
-					.attr('stroke-width', 3);
+				d3.select(this).transition().duration(200).attr('opacity', 1).attr('stroke-width', 3);
 
 				// Show tooltip
 				const tooltip = d3.select('body').selectAll('.word-cloud-tooltip').data([null]);
@@ -325,14 +319,14 @@
 					`
 					)
 					.style('left', event.pageX + 15 + 'px')
-					.style('top', event.pageY - 10 + 'px')
+					.style('top', event.pageY + 8 + 'px')
 					.style('opacity', 1);
 			})
 			.on('mousemove', function (event: any) {
 				d3.select('body')
 					.selectAll('.word-cloud-tooltip')
 					.style('left', event.pageX + 15 + 'px')
-					.style('top', event.pageY - 10 + 'px');
+					.style('top', event.pageY + 8 + 'px');
 			})
 			.on('mouseleave', function (event: any, d: any) {
 				const isTopTier = d.votes >= topTierThreshold;
@@ -397,9 +391,10 @@
 				}
 
 				// Add tspan for each line
-				const startY = -(displayLines.length - 1) * lineHeight / 2;
+				const startY = (-(displayLines.length - 1) * lineHeight) / 2;
 				displayLines.forEach((line, i) => {
-					text.append('tspan')
+					text
+						.append('tspan')
 						.attr('x', 0)
 						.attr('dy', i === 0 ? `${startY}px` : `${lineHeight}px`)
 						.text(line);
@@ -432,7 +427,8 @@
 
 		// ===== FIXED UI LAYER (title, legend, stats) =====
 		// Add title to fixed UI layer
-		uiGroup.append('text')
+		uiGroup
+			.append('text')
 			.attr('x', width / 2)
 			.attr('y', 25)
 			.attr('text-anchor', 'middle')
@@ -443,12 +439,11 @@
 
 		// Add legend to fixed UI layer - only show if there are actual lenses (not just "General")
 		const uniqueLenses = Array.from(new Set(positionedBubbles.map((b: any) => b.lens)));
-		const hasActualLenses = uniqueLenses.length > 1 || (uniqueLenses.length === 1 && uniqueLenses[0] !== 'General');
+		const hasActualLenses =
+			uniqueLenses.length > 1 || (uniqueLenses.length === 1 && uniqueLenses[0] !== 'General');
 
 		if (hasActualLenses) {
-			const legend = uiGroup
-				.append('g')
-				.attr('transform', `translate(${width - 160}, 50)`);
+			const legend = uiGroup.append('g').attr('transform', `translate(${width - 160}, 50)`);
 
 			legend
 				.append('text')
@@ -468,11 +463,7 @@
 				.each(function (lens: any) {
 					const item = d3.select(this);
 					const lensColor = lensColorByName.get(lens) ?? theme.ink2;
-					item
-						.append('circle')
-						.attr('r', 6)
-						.attr('fill', lensColor)
-						.attr('opacity', 0.8);
+					item.append('circle').attr('r', 6).attr('fill', lensColor).attr('opacity', 0.8);
 
 					item
 						.append('text')
@@ -486,7 +477,8 @@
 
 		// Add stats to fixed UI layer
 		const totalVotes = positionedBubbles.reduce((sum: number, b: any) => sum + b.votes, 0);
-		uiGroup.append('text')
+		uiGroup
+			.append('text')
 			.attr('x', 10)
 			.attr('y', height - 10)
 			.attr('fill', theme.inkMuted)
@@ -514,7 +506,13 @@
 </script>
 
 <div bind:this={container} class="relative word-cloud-container">
-	<svg bind:this={svg} viewBox="0 0 {width} {height}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"></svg>
+	<svg
+		bind:this={svg}
+		viewBox="0 0 {width} {height}"
+		width="100%"
+		height="100%"
+		preserveAspectRatio="xMidYMid meet"
+	></svg>
 </div>
 
 <style>
@@ -543,11 +541,7 @@
 		width: 100%;
 		height: 100%;
 		min-height: 400px;
-		background: linear-gradient(
-			135deg,
-			hsl(var(--surface-muted)) 0%,
-			hsl(var(--surface)) 100%
-		);
+		background: linear-gradient(135deg, hsl(var(--surface-muted)) 0%, hsl(var(--surface)) 100%);
 		border-radius: 12px;
 	}
 </style>

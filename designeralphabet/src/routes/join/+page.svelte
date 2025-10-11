@@ -321,9 +321,7 @@
 			Back to Home
 		</button>
 
-		<div
-			class="panel backdrop-blur-sm rounded-2xl p-8 border border-brand/20 shadow-2xl"
-		>
+		<div class="panel backdrop-blur-sm rounded-2xl p-8 border border-brand/20 shadow-2xl">
 			<header class="text-center mb-8">
 				<div
 					class="w-16 h-16 bg-gradient-to-r from-brand to-retro-purple rounded-full flex items-center justify-center mx-auto mb-4"
@@ -366,7 +364,8 @@
 							class="w-full px-4 py-3 surface-input border border-line rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"
 						/>
 						<p class="mt-2 text-xs text-secondary">
-							📧 Optional: Add your email to reconnect if you drop off and track stats across sessions.
+							📧 Optional: Add your email to reconnect if you drop off and track stats across
+							sessions.
 						</p>
 					</div>
 				{/if}

@@ -1,11 +1,13 @@
 # High Contrast Accent Elements Guide
 
 ## Overview
+
 This document describes the high-contrast design system implemented for all accent elements (buttons, badges, timers, alerts, etc.) to ensure maximum visibility and accessibility.
 
 ## Color Palette
 
 ### Primary Colors
+
 - **Teal Dark**: `#025259` - Deep teal for borders and hover states
 - **Teal**: `#007172` - Primary brand color for buttons
 - **Teal Light**: `#00a0a3` - Success/positive actions
@@ -15,6 +17,7 @@ This document describes the high-contrast design system implemented for all acce
 ## Button Styles
 
 ### Primary Action Buttons (Blue → Teal)
+
 - **Background**: `#007172` (Teal)
 - **Text**: `#ffffff` (White)
 - **Border**: 2px solid `#025259` (Teal Dark)
@@ -25,6 +28,7 @@ This document describes the high-contrast design system implemented for all acce
 **Usage**: Main CTAs, primary navigation, "Complete Phase" buttons
 
 ### Critical/Danger Buttons (Red → Deep Orange)
+
 - **Background**: `#D94F04` (Orange Dark)
 - **Text**: `#ffffff` (White)
 - **Border**: 2px solid `#bf4304`
@@ -35,6 +39,7 @@ This document describes the high-contrast design system implemented for all acce
 **Usage**: Delete actions, danger warnings, critical alerts
 
 ### Warning Buttons (Yellow → Vibrant Orange)
+
 - **Background**: `#F29325` (Orange)
 - **Text**: `#0f172a` (Near Black)
 - **Border**: 2px solid `#D94F04`
@@ -44,6 +49,7 @@ This document describes the high-contrast design system implemented for all acce
 **Usage**: "Reset Timer", warning actions, important notices
 
 ### Success Buttons (Green → Light Teal)
+
 - **Background**: `#00a0a3` (Teal Light)
 - **Text**: `#ffffff` (White)
 - **Border**: 2px solid `#007172`
@@ -55,6 +61,7 @@ This document describes the high-contrast design system implemented for all acce
 ## Status Badges
 
 ### Success Badge
+
 - **Background**: `#00a0a3` (Teal Light) - **solid, not transparent**
 - **Text**: `#ffffff` (White)
 - **Border**: 2px solid `#007172`
@@ -62,6 +69,7 @@ This document describes the high-contrast design system implemented for all acce
 - **Padding**: 0.5rem 1rem
 
 ### Warning Badge
+
 - **Background**: `#F29325` (Orange) - **solid, not transparent**
 - **Text**: `#0f172a` (Near Black)
 - **Border**: 2px solid `#D94F04`
@@ -69,6 +77,7 @@ This document describes the high-contrast design system implemented for all acce
 - **Padding**: 0.5rem 1rem
 
 ### Info Badge
+
 - **Background**: `#007172` (Teal) - **solid, not transparent**
 - **Text**: `#ffffff` (White)
 - **Border**: 2px solid `#025259`
@@ -78,21 +87,25 @@ This document describes the high-contrast design system implemented for all acce
 ## Icon Backgrounds
 
 ### Primary Icons (Blue → Teal)
+
 - **Background**: `#007172`
 - **Text/Icon**: `#ffffff`
 - **Border**: 2px solid `#025259`
 
 ### Success Icons (Green → Light Teal)
+
 - **Background**: `#00a0a3`
 - **Text/Icon**: `#ffffff`
 - **Border**: 2px solid `#007172`
 
 ### Dark Icons (Purple → Dark Teal)
+
 - **Background**: `#025259`
 - **Text/Icon**: `#ffffff`
 - **Border**: 2px solid `#013840`
 
 ## Headings
+
 - **Color**: `#025259` (Teal Dark)
 - **Font Weight**: 800
 - **No text shadow** for maximum clarity
@@ -102,6 +115,7 @@ This document describes the high-contrast design system implemented for all acce
 All high-contrast overrides are defined in `/src/app.css` using `:global()` selectors to override Tailwind classes throughout the app.
 
 ### Affected Classes
+
 - `bg-blue-600`, `bg-blue-700` → Teal primary buttons
 - `bg-red-600`, `bg-red-700` → Orange dark critical buttons
 - `bg-yellow-400/500/600` → Orange warning buttons

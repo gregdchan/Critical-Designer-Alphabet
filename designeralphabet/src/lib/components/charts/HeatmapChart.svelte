@@ -76,22 +76,24 @@
 	}
 
 	function normaliseLens(raw: string) {
-		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+		const match = (lensOrder as readonly string[]).find(
+			(key) => key.toLowerCase() === raw.toLowerCase()
+		);
 		return match ?? raw;
 	}
 
 	function renderChart() {
 		if (!mounted || !svg || !tooltipEl) return;
 
-	const data = prepareData(responses);
-	const chartLenses = Array.from(new Set(data.map((d) => d.lens)));
-	const theme = getThemeColors();
-	const lensPalette = Object.fromEntries(
-		(lensOrder as readonly string[]).map((lens, idx) => [
-			lens,
-			theme.chart[idx % theme.chart.length] ?? theme.brand
-		])
-	);
+		const data = prepareData(responses);
+		const chartLenses = Array.from(new Set(data.map((d) => d.lens)));
+		const theme = getThemeColors();
+		const lensPalette = Object.fromEntries(
+			(lensOrder as readonly string[]).map((lens, idx) => [
+				lens,
+				theme.chart[idx % theme.chart.length] ?? theme.brand
+			])
+		);
 
 		const margin = { top: 72, right: 48, bottom: 96, left: 132 };
 		const chartWidth = width - margin.left - margin.right;
@@ -104,15 +106,15 @@
 			.padding(0.12);
 		const yScale = d3.scaleBand<string>().domain(chartLenses).range([0, chartHeight]).padding(0.18);
 
-	const maxCount = d3.max(data, (d) => d.count) ?? 1;
-	const fillStops = theme.chart.length
-		? theme.chart
-		: [theme.surfaceMuted, theme.accentWarm, theme.accentCritical];
-	const maxRange = Math.max(4, maxCount);
-	const domainStops = fillStops.map((_, idx) =>
-		idx === fillStops.length - 1 ? maxRange : (idx / Math.max(1, fillStops.length - 1)) * maxRange
-	);
-	const fillScale = d3.scaleLinear<string>().domain(domainStops).range(fillStops);
+		const maxCount = d3.max(data, (d) => d.count) ?? 1;
+		const fillStops = theme.chart.length
+			? theme.chart
+			: [theme.surfaceMuted, theme.accentWarm, theme.accentCritical];
+		const maxRange = Math.max(4, maxCount);
+		const domainStops = fillStops.map((_, idx) =>
+			idx === fillStops.length - 1 ? maxRange : (idx / Math.max(1, fillStops.length - 1)) * maxRange
+		);
+		const fillScale = d3.scaleLinear<string>().domain(domainStops).range(fillStops);
 
 		const root = d3.select(svg);
 		root.selectAll('*').remove();

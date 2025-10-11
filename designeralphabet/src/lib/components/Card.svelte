@@ -33,9 +33,7 @@
 			{card.letter ?? '?'}
 		</span>
 		<div class="flex flex-1 flex-col">
-			<span class="text-xs font-semibold uppercase tracking-wide text-ink-2"
-				>{categoryLabel}</span
-			>
+			<span class="text-xs font-semibold uppercase tracking-wide text-ink-2">{categoryLabel}</span>
 			<h3 class="text-lg font-semibold text-ink">{titleLabel}</h3>
 		</div>
 		<span class="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-ink-2">

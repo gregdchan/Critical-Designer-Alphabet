@@ -35,15 +35,16 @@
 	let activeTypeFilter: string | null = null; // 'written', 'choice', 'scale', or null (all)
 	let activeLensFilter: string | null = null; // lens name or null (all)
 
-	const ro = typeof ResizeObserver !== 'undefined'
-		? new ResizeObserver((entries) => {
-				const r = entries[0]?.contentRect;
-				if (r) {
-					width = Math.max(300, r.width);
-					height = Math.max(300, r.height);
-				}
-			})
-		: null;
+	const ro =
+		typeof ResizeObserver !== 'undefined'
+			? new ResizeObserver((entries) => {
+					const r = entries[0]?.contentRect;
+					if (r) {
+						width = Math.max(300, r.width);
+						height = Math.max(300, r.height);
+					}
+				})
+			: null;
 
 	const lensOrder = [
 		'Risk',
@@ -57,7 +58,9 @@
 
 	function normaliseLens(raw?: string) {
 		if (!raw) return 'General';
-		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+		const match = (lensOrder as readonly string[]).find(
+			(key) => key.toLowerCase() === raw.toLowerCase()
+		);
 		return match ?? raw;
 	}
 
@@ -82,14 +85,14 @@
 		theme: ReturnType<typeof getThemeColors>
 	): AggregatedBubble[] {
 		const bubbles: AggregatedBubble[] = [];
-		const questionMap = new Map(questions.map(q => [q.id, q]));
+		const questionMap = new Map(questions.map((q) => [q.id, q]));
 
 		// Define diverse colors for different response types
 		const responseTypeColors = {
-			written: '#8B5CF6',  // Purple - for open text responses
-			choice: '#3B82F6',   // Blue - for multiple choice
-			scale: '#10B981',    // Green - for scale/rating
-			default: '#6366F1'   // Indigo - fallback
+			written: '#8B5CF6', // Purple - for open text responses
+			choice: '#3B82F6', // Blue - for multiple choice
+			scale: '#10B981', // Green - for scale/rating
+			default: '#6366F1' // Indigo - fallback
 		};
 
 		// Lens color mapping
@@ -124,12 +127,12 @@
 		};
 
 		// 1. Written responses (sized by votes)
-		const writtenResponses = responses.filter(r => {
+		const writtenResponses = responses.filter((r) => {
 			const q = questionMap.get(r.question_id || '');
 			return q?.response_type === 'written' && r.text?.trim();
 		});
 
-		writtenResponses.forEach(r => {
+		writtenResponses.forEach((r) => {
 			const q = questionMap.get(r.question_id || '');
 			const lensLabel = normaliseLens(r.lens);
 			bubbles.push({
@@ -149,14 +152,17 @@
 		});
 
 		// 2. Choice responses (count frequency)
-		const choiceResponses = responses.filter(r => {
+		const choiceResponses = responses.filter((r) => {
 			const q = questionMap.get(r.question_id || '');
 			return ['singleChoice', 'multiSelect'].includes(q?.response_type || '') && r.text?.trim();
 		});
 
 		// Count occurrences
-		const choiceCounts = new Map<string, { count: number; questionId: string; questionText: string; lens: string }>();
-		choiceResponses.forEach(r => {
+		const choiceCounts = new Map<
+			string,
+			{ count: number; questionId: string; questionText: string; lens: string }
+		>();
+		choiceResponses.forEach((r) => {
 			const key = `${r.question_id}:${r.text}`;
 			const existing = choiceCounts.get(key);
 			const q = questionMap.get(r.question_id || '');
@@ -192,13 +198,16 @@
 		});
 
 		// 3. Scale responses (group by question, show avg)
-		const scaleResponses = responses.filter(r => {
+		const scaleResponses = responses.filter((r) => {
 			const q = questionMap.get(r.question_id || '');
 			return q?.response_type === 'scale';
 		});
 
-		const scaleByQuestion = new Map<string, { values: number[]; questionText: string; lens: string }>();
-		scaleResponses.forEach(r => {
+		const scaleByQuestion = new Map<
+			string,
+			{ values: number[]; questionText: string; lens: string }
+		>();
+		scaleResponses.forEach((r) => {
 			const q = questionMap.get(r.question_id || '');
 			if (!q) return;
 			const value = parseFloat(r.text);
@@ -244,26 +253,30 @@
 	function calculateSizes(bubbles: AggregatedBubble[]): AggregatedBubble[] {
 		if (bubbles.length === 0) return [];
 
-		const maxValue = Math.max(...bubbles.map(b => b.value), 1);
+		const maxValue = Math.max(...bubbles.map((b) => b.value), 1);
 		const minRadius = 20;
 		const maxRadius = 80;
 
-		return bubbles.map(b => ({
+		return bubbles.map((b) => ({
 			...b,
-			radius: minRadius + (Math.pow(b.value / maxValue, 0.6) * (maxRadius - minRadius))
+			radius: minRadius + Math.pow(b.value / maxValue, 0.6) * (maxRadius - minRadius)
 		}));
 	}
 
-	function packBubbles(bubbles: AggregatedBubble[], width: number, height: number): AggregatedBubble[] {
+	function packBubbles(
+		bubbles: AggregatedBubble[],
+		width: number,
+		height: number
+	): AggregatedBubble[] {
 		if (bubbles.length === 0) return [];
 
-		const packLayout = d3.pack<AggregatedBubble>()
-			.size([width, height])
-			.padding(5);
+		const packLayout = d3.pack<AggregatedBubble>().size([width, height]).padding(5);
 
-		const root = d3.hierarchy<any>({
-			children: bubbles
-		}).sum((d: any) => d.radius * d.radius);
+		const root = d3
+			.hierarchy<any>({
+				children: bubbles
+			})
+			.sum((d: any) => d.radius * d.radius);
 
 		packLayout(root);
 
@@ -296,10 +309,7 @@
 		// Clear previous
 		d3.select(svg).selectAll('*').remove();
 
-		const svgSel = d3
-			.select(svg)
-			.attr('width', width)
-			.attr('height', height);
+		const svgSel = d3.select(svg).attr('width', width).attr('height', height);
 
 		// Create INTERACTIVE layer (bubbles) - this will be zoomed/panned
 		const interactiveGroup = svgSel
@@ -312,9 +322,7 @@
 		rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
 
 		// Create FIXED UI layer (legends, stats) - this stays put
-		const uiGroup = svgSel
-			.append('g')
-			.attr('class', 'ui-layer');
+		const uiGroup = svgSel.append('g').attr('class', 'ui-layer');
 
 		// Initialize/update zoom behavior for panning-only
 		const translateExtentPadding = 0.5; // allow slight overscroll
@@ -353,7 +361,9 @@
 		// Visual feedback for dragging
 		svgSel
 			.on('mousedown.dragcursor touchstart.dragcursor', () => svgSel.style('cursor', 'grabbing'))
-			.on('mouseup.dragcursor touchend.dragcursor mouseleave.dragcursor', () => svgSel.style('cursor', 'grab'));
+			.on('mouseup.dragcursor touchend.dragcursor mouseleave.dragcursor', () =>
+				svgSel.style('cursor', 'grab')
+			);
 
 		// Create lensColorByName map for legend
 		const lensColorByName = new Map<string, string>();
@@ -388,41 +398,41 @@
 			{ type: 'scale', label: '📊 Scales', color: '#10B981' }
 		];
 
-	responseTypeLegend
-		.selectAll('.type-legend-item')
-		.data(responseTypes)
-		.join('g')
-		.attr('class', 'type-legend-item')
-		.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
-		.style('cursor', 'pointer')
-		.on('click', function(_event: any, item: any) {
-			// Toggle filter: click again to deactivate
-			if (activeTypeFilter === item.type) {
-				activeTypeFilter = null;
-			} else {
-				activeTypeFilter = item.type;
-			}
-			renderSupercloud();
-		})
-		.each(function (item: any) {
-			const g = d3.select(this);
-			const isActive = activeTypeFilter === null || activeTypeFilter === item.type;
-			
-			g.append('circle')
-				.attr('r', 6)
-				.attr('fill', item.color)
-				.attr('opacity', isActive ? 0.8 : 0.3)
-				.attr('stroke', activeTypeFilter === item.type ? theme.brand : 'none')
-				.attr('stroke-width', 2);
+		responseTypeLegend
+			.selectAll('.type-legend-item')
+			.data(responseTypes)
+			.join('g')
+			.attr('class', 'type-legend-item')
+			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.style('cursor', 'pointer')
+			.on('click', function (_event: any, item: any) {
+				// Toggle filter: click again to deactivate
+				if (activeTypeFilter === item.type) {
+					activeTypeFilter = null;
+				} else {
+					activeTypeFilter = item.type;
+				}
+				renderSupercloud();
+			})
+			.each(function (item: any) {
+				const g = d3.select(this);
+				const isActive = activeTypeFilter === null || activeTypeFilter === item.type;
 
-			g.append('text')
-				.attr('x', 12)
-				.attr('y', 4)
-				.attr('fill', isActive ? theme.ink2 : theme.inkMuted)
-				.attr('font-size', '10px')
-				.attr('font-weight', activeTypeFilter === item.type ? '700' : '400')
-				.text(item.label);
-		});		// Lens Legend
+				g.append('circle')
+					.attr('r', 6)
+					.attr('fill', item.color)
+					.attr('opacity', isActive ? 0.8 : 0.3)
+					.attr('stroke', activeTypeFilter === item.type ? theme.brand : 'none')
+					.attr('stroke-width', 2);
+
+				g.append('text')
+					.attr('x', 12)
+					.attr('y', 4)
+					.attr('fill', isActive ? theme.ink2 : theme.inkMuted)
+					.attr('font-size', '10px')
+					.attr('font-weight', activeTypeFilter === item.type ? '700' : '400')
+					.text(item.label);
+			}); // Lens Legend
 		const lensLegendY = legendY + responseTypes.length * 20 + 40;
 		const uniqueLenses = Array.from(new Set(positioned.map((b: any) => b.lens)));
 		const lensLegend = uiGroup
@@ -438,45 +448,45 @@
 			.attr('font-weight', '700')
 			.text('Lenses (Ring)');
 
-	lensLegend
-		.selectAll('.lens-legend-item')
-		.data(uniqueLenses)
-		.join('g')
-		.attr('class', 'lens-legend-item')
-		.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
-		.style('cursor', 'pointer')
-		.on('click', function(_event: any, lens: any) {
-			// Toggle filter: click again to deactivate
-			if (activeLensFilter === lens) {
-				activeLensFilter = null;
-			} else {
-				activeLensFilter = lens;
-			}
-			renderSupercloud();
-		})
-		.each(function (lens: any) {
-			const item = d3.select(this);
-			const lensColor = lensColorByName.get(lens) ?? theme.ink2;
-			const isActive = activeLensFilter === null || activeLensFilter === lens;
-			
-			// Show ring style to match bubbles
-			item
-				.append('circle')
-				.attr('r', 6)
-				.attr('fill', 'none')
-				.attr('stroke', lensColor)
-				.attr('stroke-width', activeLensFilter === lens ? 4 : 3)
-				.attr('opacity', isActive ? 0.8 : 0.3);
+		lensLegend
+			.selectAll('.lens-legend-item')
+			.data(uniqueLenses)
+			.join('g')
+			.attr('class', 'lens-legend-item')
+			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.style('cursor', 'pointer')
+			.on('click', function (_event: any, lens: any) {
+				// Toggle filter: click again to deactivate
+				if (activeLensFilter === lens) {
+					activeLensFilter = null;
+				} else {
+					activeLensFilter = lens;
+				}
+				renderSupercloud();
+			})
+			.each(function (lens: any) {
+				const item = d3.select(this);
+				const lensColor = lensColorByName.get(lens) ?? theme.ink2;
+				const isActive = activeLensFilter === null || activeLensFilter === lens;
 
-			item
-				.append('text')
-				.attr('x', 14)
-				.attr('y', 4)
-				.attr('fill', isActive ? theme.ink2 : theme.inkMuted)
-				.attr('font-size', '10px')
-				.attr('font-weight', activeLensFilter === lens ? '700' : '400')
-				.text(lens);
-		});		// ===== INTERACTIVE LAYER (bubbles) =====
+				// Show ring style to match bubbles
+				item
+					.append('circle')
+					.attr('r', 6)
+					.attr('fill', 'none')
+					.attr('stroke', lensColor)
+					.attr('stroke-width', activeLensFilter === lens ? 4 : 3)
+					.attr('opacity', isActive ? 0.8 : 0.3);
+
+				item
+					.append('text')
+					.attr('x', 14)
+					.attr('y', 4)
+					.attr('fill', isActive ? theme.ink2 : theme.inkMuted)
+					.attr('font-size', '10px')
+					.attr('font-weight', activeLensFilter === lens ? '700' : '400')
+					.text(lens);
+			}); // ===== INTERACTIVE LAYER (bubbles) =====
 		// Bubbles in interactive layer
 		const bubbleGroups = interactiveGroup
 			.selectAll('.bubble')
@@ -497,7 +507,8 @@
 			});
 
 		// Calculate top tier for visual emphasis
-		const topTierThreshold = positioned.sort((a, b) => b.value - a.value)[Math.floor(positioned.length * 0.2)]?.value || 0;
+		const topTierThreshold =
+			positioned.sort((a, b) => b.value - a.value)[Math.floor(positioned.length * 0.2)]?.value || 0;
 
 		// Add outer lens ring first (so it's behind the main circle)
 		bubbleGroups
@@ -513,9 +524,11 @@
 			.append('circle')
 			.attr('r', (d: any) => d.radius)
 			.attr('fill', (d: any) => d.color)
-			.attr('opacity', (d: any) => d.value >= topTierThreshold ? 0.9 : 0.7)
-			.attr('stroke', (d: any) => d.value >= topTierThreshold ? 'hsl(var(--brand))' : 'hsl(var(--surface-elevated))')
-			.attr('stroke-width', (d: any) => d.value >= topTierThreshold ? 3 : 2)
+			.attr('opacity', (d: any) => (d.value >= topTierThreshold ? 0.9 : 0.7))
+			.attr('stroke', (d: any) =>
+				d.value >= topTierThreshold ? 'hsl(var(--brand))' : 'hsl(var(--surface-elevated))'
+			)
+			.attr('stroke-width', (d: any) => (d.value >= topTierThreshold ? 3 : 2))
 			.style('cursor', 'pointer')
 			.on('mouseenter', function (event: any, d: any) {
 				d3.select(this).transition().duration(200).attr('opacity', 1).attr('stroke-width', 4);
@@ -561,14 +574,14 @@
 					`
 					)
 					.style('left', event.pageX + 15 + 'px')
-					.style('top', event.pageY - 10 + 'px')
+					.style('top', event.pageY + 8 + 'px')
 					.style('opacity', 1);
 			})
 			.on('mousemove', function (event: any) {
 				d3.select('body')
 					.selectAll('.supercloud-tooltip')
 					.style('left', event.pageX + 15 + 'px')
-					.style('top', event.pageY - 10 + 'px');
+					.style('top', event.pageY + 8 + 'px');
 			})
 			.on('mouseleave', function (event: any, d: any) {
 				const isTopTier = d.value >= topTierThreshold;
@@ -627,9 +640,10 @@
 					displayLines.push(words[0].slice(0, 12) + (words[0].length > 12 ? '...' : ''));
 				}
 
-				const startY = -(displayLines.length - 1) * lineHeight / 2;
+				const startY = (-(displayLines.length - 1) * lineHeight) / 2;
 				displayLines.forEach((line, i) => {
-					text.append('tspan')
+					text
+						.append('tspan')
 						.attr('x', 0)
 						.attr('dy', i === 0 ? `${startY}px` : `${lineHeight}px`)
 						.text(line);
@@ -637,7 +651,8 @@
 			});
 
 		// Stats in fixed UI layer
-		uiGroup.append('text')
+		uiGroup
+			.append('text')
 			.attr('x', 10)
 			.attr('y', height - 10)
 			.attr('fill', theme.inkMuted)
@@ -665,7 +680,13 @@
 </script>
 
 <div bind:this={container} class="relative supercloud-container">
-	<svg bind:this={svg} viewBox="0 0 {width} {height}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"></svg>
+	<svg
+		bind:this={svg}
+		viewBox="0 0 {width} {height}"
+		width="100%"
+		height="100%"
+		preserveAspectRatio="xMidYMid meet"
+	></svg>
 </div>
 
 <style>
@@ -694,11 +715,7 @@
 		width: 100%;
 		height: 100%;
 		min-height: 400px;
-		background: linear-gradient(
-			135deg,
-			hsl(var(--surface-muted)) 0%,
-			hsl(var(--surface)) 100%
-		);
+		background: linear-gradient(135deg, hsl(var(--surface-muted)) 0%, hsl(var(--surface)) 100%);
 		border-radius: 12px;
 	}
 </style>

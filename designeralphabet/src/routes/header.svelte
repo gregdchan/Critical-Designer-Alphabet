@@ -58,7 +58,9 @@
 			aria-label="Designer's Critical Alphabet home"
 			on:click={closeMenu}
 		>
-			<span class="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-100 bg-blue-50">
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-100 bg-blue-50"
+			>
 				<img src={logo} alt="Designer's Critical Alphabet" class="h-7 w-7" />
 			</span>
 			<div class="flex flex-col text-left">

@@ -1,6 +1,7 @@
 # Realtime Setup & Troubleshooting Guide
 
 ## Current Status
+
 ✅ Realtime code is implemented in the app
 ✅ Supabase client is configured
 ❓ Need to verify Realtime is enabled in Supabase database
@@ -51,6 +52,7 @@ If you need to recreate all tables with Realtime enabled:
 ### Step 1: Check Console Logs
 
 Open browser console and look for:
+
 - `[Realtime] Subscription status: SUBSCRIBED` ✅ Good
 - `[Realtime] Subscription status: CLOSED` ❌ Problem
 
@@ -63,6 +65,7 @@ Open browser console and look for:
 2. **Submit a response in Tab 2**
 
 3. **Watch console in Tab 1** - should see:
+
    ```
    [Realtime] Responses updated! {payload details}
    [Realtime] Fetching bundle for session: Q6PV1X
@@ -75,6 +78,7 @@ Open browser console and look for:
 ### Step 3: Verify Data Flow
 
 You should see this sequence:
+
 1. User submits response → `/api/responses/add`
 2. Database updated → Supabase
 3. Realtime event fired → `postgres_changes` callback
@@ -86,11 +90,13 @@ You should see this sequence:
 ### Issue: No realtime updates, only polling
 
 **Symptoms:**
+
 - Updates appear every 30 seconds
 - Console shows no `[Realtime] Responses updated!` logs
 - Only see `[Realtime] Fetching bundle` every 30 seconds
 
 **Solution:**
+
 - Realtime not enabled in database
 - Run the SQL from Option 2 above
 - Or enable via Dashboard (Option 1)
@@ -98,15 +104,18 @@ You should see this sequence:
 ### Issue: Subscription status CLOSED or ERROR
 
 **Symptoms:**
+
 - Console shows `[Realtime] Subscription status: CLOSED`
 - Or `[Realtime] Subscription status: CHANNEL_ERROR`
 
 **Possible causes:**
+
 1. **Realtime not enabled on tables** → Enable via Dashboard
 2. **Row Level Security blocking** → Check RLS policies allow SELECT
 3. **Supabase plan limit** → Free tier has Realtime limits
 
 **Solution:**
+
 ```sql
 -- Verify RLS policies allow reading
 SELECT tablename, policyname, cmd, qual
@@ -122,10 +131,12 @@ WHERE tablename IN ('sessions', 'participants', 'responses', 'questions', 'timel
 ### Issue: Updates work but data doesn't refresh
 
 **Symptoms:**
+
 - Console shows `[Realtime] Responses updated!`
 - But UI doesn't update
 
 **Solution:**
+
 - Check browser console for errors in `fetchBundle()`
 - Verify `/api/session/${code}` endpoint works
 - Check network tab for failed requests
@@ -134,22 +145,24 @@ WHERE tablename IN ('sessions', 'participants', 'responses', 'questions', 'timel
 
 ### Realtime Events Being Listened To:
 
-| Table | Event | Action |
-|-------|-------|--------|
-| sessions | * (all) | Refetch full bundle |
-| participants | * | Refetch full bundle |
-| responses | * | Refetch full bundle |
-| questions | * | Refetch full bundle |
-| timeline | * | Refetch full bundle |
-| chat | * | Refetch full bundle |
-| session_phases | * | Refetch full bundle |
+| Table          | Event    | Action              |
+| -------------- | -------- | ------------------- |
+| sessions       | \* (all) | Refetch full bundle |
+| participants   | \*       | Refetch full bundle |
+| responses      | \*       | Refetch full bundle |
+| questions      | \*       | Refetch full bundle |
+| timeline       | \*       | Refetch full bundle |
+| chat           | \*       | Refetch full bundle |
+| session_phases | \*       | Refetch full bundle |
 
 ### Fallback Polling:
+
 - Interval: 30 seconds
 - Purpose: Backup if Realtime fails
 - Code: `setInterval(() => fetchBundle(code), POLL_INTERVAL * 6)`
 
 ### Active Views with Realtime:
+
 ✅ Participant Session View (`/session/[code]`)
 ✅ Presentation View (`/presentation?code=`)
 
@@ -161,6 +174,7 @@ WHERE tablename IN ('sessions', 'participants', 'responses', 'questions', 'timel
 4. ✅ **Confirm UI updates instantly** when data changes
 
 Once Realtime is enabled in Supabase, all views will update instantly whenever:
+
 - Someone joins the session
 - A response is submitted
 - A phase is started/completed

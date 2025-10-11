@@ -3,6 +3,7 @@
 ## Overview
 
 The system now supports **cross-session participant tracking** using email and device IDs. This allows participants to:
+
 - ✅ Reconnect to sessions without losing their stats
 - ✅ Track contributions across multiple sessions
 - ✅ Maintain their scores even if they drop off
@@ -33,21 +34,22 @@ WHERE email IS NOT NULL;
 ### **2. TypeScript Interfaces Updated**
 
 **Files:**
+
 - `/src/lib/server/workshop.ts:44-55`
 - `/src/lib/gamification.ts:1-12`
 
 ```typescript
 export interface Participant {
-  id: string;
-  room_code: string;
-  name: string;
-  role: 'facilitator' | 'participant';
-  color: string;
-  points: number;
-  badges: string[];
-  email?: string | null;        // NEW: For cross-session tracking
-  device_id?: string | null;    // NEW: Browser fingerprint fallback
-  created_at: string;
+	id: string;
+	room_code: string;
+	name: string;
+	role: 'facilitator' | 'participant';
+	color: string;
+	points: number;
+	badges: string[];
+	email?: string | null; // NEW: For cross-session tracking
+	device_id?: string | null; // NEW: Browser fingerprint fallback
+	created_at: string;
 }
 ```
 
@@ -56,6 +58,7 @@ export interface Participant {
 Created: `/src/lib/utils/device.ts`
 
 Generates a stable browser-specific ID stored in localStorage:
+
 ```typescript
 import { getOrCreateDeviceId } from '$lib/utils/device';
 
@@ -69,53 +72,58 @@ const deviceId = getOrCreateDeviceId();
 
 ```typescript
 export async function addParticipant({
-  code, name, role, color,
-  email,      // NEW
-  deviceId    // NEW
+	code,
+	name,
+	role,
+	color,
+	email, // NEW
+	deviceId // NEW
 }) {
-  // 1. Check if participant exists by email
-  if (email) {
-    const existing = await supabaseAdmin
-      .from('participants')
-      .select('*')
-      .eq('room_code', code)
-      .eq('email', email)
-      .maybeSingle();
+	// 1. Check if participant exists by email
+	if (email) {
+		const existing = await supabaseAdmin
+			.from('participants')
+			.select('*')
+			.eq('room_code', code)
+			.eq('email', email)
+			.maybeSingle();
 
-    if (existing.data) {
-      console.log('[addParticipant] Reconnecting via email');
-      return asParticipant(existing.data);
-    }
-  }
+		if (existing.data) {
+			console.log('[addParticipant] Reconnecting via email');
+			return asParticipant(existing.data);
+		}
+	}
 
-  // 2. Check by device_id as fallback
-  if (deviceId) {
-    const existing = await supabaseAdmin
-      .from('participants')
-      .select('*')
-      .eq('room_code', code)
-      .eq('device_id', deviceId)
-      .maybeSingle();
+	// 2. Check by device_id as fallback
+	if (deviceId) {
+		const existing = await supabaseAdmin
+			.from('participants')
+			.select('*')
+			.eq('room_code', code)
+			.eq('device_id', deviceId)
+			.maybeSingle();
 
-    if (existing.data) {
-      console.log('[addParticipant] Reconnecting via device ID');
-      return asParticipant(existing.data);
-    }
-  }
+		if (existing.data) {
+			console.log('[addParticipant] Reconnecting via device ID');
+			return asParticipant(existing.data);
+		}
+	}
 
-  // 3. Create new participant
-  const response = await supabaseAdmin
-    .from('participants')
-    .insert({
-      room_code: code,
-      name, role, color,
-      email: email || null,
-      device_id: deviceId || null
-    })
-    .select()
-    .single();
+	// 3. Create new participant
+	const response = await supabaseAdmin
+		.from('participants')
+		.insert({
+			room_code: code,
+			name,
+			role,
+			color,
+			email: email || null,
+			device_id: deviceId || null
+		})
+		.select()
+		.single();
 
-  return asParticipant(ensure(response, 'addParticipant'));
+	return asParticipant(ensure(response, 'addParticipant'));
 }
 ```
 
@@ -125,15 +133,18 @@ export async function addParticipant({
 
 ```typescript
 export const POST: RequestHandler = async ({ request }) => {
-  const { code, name, role, color, email, deviceId } = await request.json();
+	const { code, name, role, color, email, deviceId } = await request.json();
 
-  const participant = await addParticipant({
-    code, name, role, color,
-    email: email || undefined,
-    deviceId: deviceId || undefined
-  });
+	const participant = await addParticipant({
+		code,
+		name,
+		role,
+		color,
+		email: email || undefined,
+		deviceId: deviceId || undefined
+	});
 
-  return json({ success: true, participant });
+	return json({ success: true, participant });
 };
 ```
 
@@ -145,26 +156,26 @@ export const POST: RequestHandler = async ({ request }) => {
 const deviceId = getOrCreateDeviceId();
 
 const response = await fetch('/api/participants/join', {
-  method: 'POST',
-  body: JSON.stringify({
-    code: uppercaseCode,
-    name: participantName,
-    role: 'participant',
-    color: selectedColor,
-    email: participantEmail.trim() || undefined,  // NEW
-    deviceId: deviceId || undefined                // NEW
-  })
+	method: 'POST',
+	body: JSON.stringify({
+		code: uppercaseCode,
+		name: participantName,
+		role: 'participant',
+		color: selectedColor,
+		email: participantEmail.trim() || undefined, // NEW
+		deviceId: deviceId || undefined // NEW
+	})
 });
 
 const profile = {
-  id: data.participant.id,
-  participantId: data.participant.id,
-  sessionCode: uppercaseCode,
-  name: participantName,
-  email: participantEmail.trim() || undefined,    // NEW
-  role: 'participant',
-  color: selectedColor,
-  deviceId: deviceId || undefined                  // NEW
+	id: data.participant.id,
+	participantId: data.participant.id,
+	sessionCode: uppercaseCode,
+	name: participantName,
+	email: participantEmail.trim() || undefined, // NEW
+	role: 'participant',
+	color: selectedColor,
+	deviceId: deviceId || undefined // NEW
 };
 
 currentUser.set(profile);
@@ -176,6 +187,7 @@ storeParticipantProfile(uppercaseCode, profile);
 ## How It Works
 
 ### **Scenario 1: First-time Join**
+
 1. User visits `/join?code=ABC123`
 2. Enters name: "Alice"
 3. (Optional) Enters email: "alice@example.com"
@@ -185,6 +197,7 @@ storeParticipantProfile(uppercaseCode, profile);
 7. User can now participate
 
 ### **Scenario 2: Reconnection via Email**
+
 1. User drops off and visits `/join?code=ABC123` again
 2. Enters name: "Alice" (could be different)
 3. Enters email: "alice@example.com" (SAME as before)
@@ -193,6 +206,7 @@ storeParticipantProfile(uppercaseCode, profile);
 6. User continues with same ID, points, badges
 
 ### **Scenario 3: Reconnection via Device ID**
+
 1. User drops off (didn't provide email)
 2. Visits `/join?code=ABC123` from SAME browser
 3. System reads device ID from localStorage: `device_1696800000000_xyz`
@@ -201,6 +215,7 @@ storeParticipantProfile(uppercaseCode, profile);
 6. User continues with preserved stats
 
 ### **Scenario 4: New Session, Same Email**
+
 1. User joins session "ABC123" with email "alice@example.com"
 2. Later joins session "XYZ789" with same email
 3. System creates NEW participant for XYZ789
@@ -215,21 +230,21 @@ To complete this feature, add an email input field to `/src/routes/join/+page.sv
 ```svelte
 <!-- After the "Your Name" field -->
 {#if !joinAsFacilitator}
-  <div>
-    <label for="participantEmail" class="block text-sm font-medium text-secondary mb-2">
-      Email (Optional)
-    </label>
-    <input
-      id="participantEmail"
-      type="email"
-      bind:value={participantEmail}
-      placeholder="you@example.com (optional)"
-      class="w-full px-4 py-3 surface-input border border-line rounded-lg..."
-    />
-    <p class="mt-2 text-xs text-secondary">
-      📧 Optional: Add your email to reconnect if you drop off and track stats across sessions.
-    </p>
-  </div>
+	<div>
+		<label for="participantEmail" class="block text-sm font-medium text-secondary mb-2">
+			Email (Optional)
+		</label>
+		<input
+			id="participantEmail"
+			type="email"
+			bind:value={participantEmail}
+			placeholder="you@example.com (optional)"
+			class="w-full px-4 py-3 surface-input border border-line rounded-lg..."
+		/>
+		<p class="mt-2 text-xs text-secondary">
+			📧 Optional: Add your email to reconnect if you drop off and track stats across sessions.
+		</p>
+	</div>
 {/if}
 ```
 
@@ -238,6 +253,7 @@ To complete this feature, add an email input field to `/src/routes/join/+page.sv
 ## Testing
 
 ### **Test Reconnection by Email:**
+
 1. Join session with email: `test@example.com`
 2. Submit a response (note your points)
 3. Leave session (close tab)
@@ -245,6 +261,7 @@ To complete this feature, add an email input field to `/src/routes/join/+page.sv
 5. ✅ Should show same participant ID and points
 
 ### **Test Reconnection by Device ID:**
+
 1. Join session WITHOUT email
 2. Submit a response (note your points)
 3. Leave session
@@ -252,6 +269,7 @@ To complete this feature, add an email input field to `/src/routes/join/+page.sv
 5. ✅ Should reconnect automatically
 
 ### **Test Cross-Session Tracking:**
+
 1. Join Session A with email
 2. Join Session B with same email
 3. ✅ Different participant IDs (one per session)
@@ -262,6 +280,7 @@ To complete this feature, add an email input field to `/src/routes/join/+page.sv
 ## Database Query Examples
 
 ### Find all sessions a participant joined:
+
 ```sql
 SELECT p.*, s.code, s.title
 FROM participants p
@@ -271,6 +290,7 @@ ORDER BY p.created_at DESC;
 ```
 
 ### See participant's total contributions:
+
 ```sql
 SELECT p.email, p.name, COUNT(r.id) as total_responses
 FROM participants p
@@ -284,26 +304,29 @@ GROUP BY p.email, p.name;
 ## Security & Privacy
 
 ### ✅ **Privacy Considerations:**
+
 - Email is **optional** - participants can join anonymously
 - Device ID is browser-specific, not personally identifiable
 - Email is stored but **not displayed** publicly
 - Use hashed device IDs for production
 
 ### ✅ **GDPR Compliance:**
+
 - Add privacy policy link to join page
 - Allow users to request data deletion
 - Don't share emails with third parties
 - Inform users how data is used
 
 ### 🔒 **Recommended Additions:**
+
 ```typescript
 // Hash device ID for privacy
 import { createHash } from 'crypto';
 
 function getOrCreateDeviceId(): string {
-  const rawId = `${navigator.userAgent}_${screen.width}_${screen.height}`;
-  const hash = createHash('sha256').update(rawId).digest('hex');
-  return `device_${hash.substring(0, 16)}`;
+	const rawId = `${navigator.userAgent}_${screen.width}_${screen.height}`;
+	const hash = createHash('sha256').update(rawId).digest('hex');
+	return `device_${hash.substring(0, 16)}`;
 }
 ```
 
@@ -312,16 +335,19 @@ function getOrCreateDeviceId(): string {
 ## Benefits
 
 ✅ **User Experience:**
+
 - Seamless reconnection without losing progress
 - Works even without email (device ID fallback)
 - Maintains gamification progress
 
 ✅ **Analytics:**
+
 - Track participant engagement across sessions
 - Identify power users by email
 - Analyze participation patterns
 
 ✅ **Reliability:**
+
 - Handles network drops gracefully
 - Prevents duplicate participants
 - Preserves session integrity
@@ -331,6 +357,7 @@ function getOrCreateDeviceId(): string {
 ## Next Steps
 
 1. **Run the migration:**
+
    ```bash
    cd supabase
    npx supabase db push
@@ -353,6 +380,7 @@ function getOrCreateDeviceId(): string {
 ## Summary
 
 🎉 **Participants can now:**
+
 - Provide optional email for cross-session tracking
 - Automatically reconnect via device ID
 - Maintain stats even after dropping off

@@ -27,8 +27,8 @@ export function adaptRiskAssessmentData(responses: Response[], question: Questio
 	const riskMatrix = question.config?.riskMatrix as any;
 
 	return responses
-		.filter(r => r.question_id === question.id)
-		.map(response => {
+		.filter((r) => r.question_id === question.id)
+		.map((response) => {
 			// Use metadata if available
 			const metadata = response.metadata;
 			const hasRiskMetadata = metadata && metadata.type === 'riskAssessment';
@@ -67,7 +67,7 @@ export function adaptMaturityData(responses: Response[], question: Question) {
 		{ level: 5, name: 'Aspirational', description: 'Innovation leadership' }
 	];
 
-	const questionResponses = responses.filter(r => r.question_id === question.id);
+	const questionResponses = responses.filter((r) => r.question_id === question.id);
 
 	if (questionResponses.length === 0) {
 		return { maturityLevel: 3, progress: 0.5, stages };
@@ -75,7 +75,7 @@ export function adaptMaturityData(responses: Response[], question: Question) {
 
 	// Parse maturity levels from responses (use metadata if available)
 	const levels = questionResponses
-		.map(r => {
+		.map((r) => {
 			const metadata = r.metadata;
 			const hasMaturityMetadata = metadata && metadata.type === 'maturityDial';
 
@@ -87,7 +87,7 @@ export function adaptMaturityData(responses: Response[], question: Question) {
 			const levelMatch = r.text?.match(/\d+/);
 			return levelMatch ? parseInt(levelMatch[0]) : 3;
 		})
-		.filter(l => l >= 1 && l <= 5);
+		.filter((l) => l >= 1 && l <= 5);
 
 	const avgLevel = levels.length > 0 ? levels.reduce((a, b) => a + b, 0) / levels.length : 3;
 	const maturityLevel = Math.round(avgLevel);
@@ -112,7 +112,7 @@ export function adaptInclusivityData(responses: Response[], question: Question) 
 	}
 
 	const meterConfig = question.config?.inclusivityMeter as any;
-	const questionResponses = responses.filter(r => r.question_id === question.id);
+	const questionResponses = responses.filter((r) => r.question_id === question.id);
 
 	if (questionResponses.length === 0) {
 		return {
@@ -126,7 +126,7 @@ export function adaptInclusivityData(responses: Response[], question: Question) 
 
 	// Parse scores from responses (0-100, use metadata if available)
 	const scores = questionResponses
-		.map(r => {
+		.map((r) => {
 			const metadata = r.metadata;
 			const hasInclusivityMetadata = metadata && metadata.type === 'inclusivityMeter';
 
@@ -138,7 +138,7 @@ export function adaptInclusivityData(responses: Response[], question: Question) 
 			const scoreMatch = r.text?.match(/\d+/);
 			return scoreMatch ? parseInt(scoreMatch[0]) : 50;
 		})
-		.filter(s => s >= 0 && s <= 100);
+		.filter((s) => s >= 0 && s <= 100);
 
 	const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 50;
 
@@ -164,8 +164,8 @@ export function adaptLandscapeData(responses: Response[], question: Question) {
 	const landscapeConfig = question.config?.landscape as any;
 
 	return responses
-		.filter(r => r.question_id === question.id)
-		.map(response => {
+		.filter((r) => r.question_id === question.id)
+		.map((response) => {
 			// Use metadata if available
 			const metadata = response.metadata;
 			const hasLandscapeMetadata = metadata && metadata.type === 'landscape';
@@ -191,12 +191,12 @@ export function adaptLandscapeData(responses: Response[], question: Question) {
  */
 export function adaptHeatmapData(responses: Response[], questions: Question[]) {
 	// Get questions with lens assigned
-	const lensQuestions = questions.filter(q => q.lens);
+	const lensQuestions = questions.filter((q) => q.lens);
 
 	const heatmapData: Record<string, Record<string, number>> = {};
 
-	lensQuestions.forEach(question => {
-		const questionResponses = responses.filter(r => r.question_id === question.id);
+	lensQuestions.forEach((question) => {
+		const questionResponses = responses.filter((r) => r.question_id === question.id);
 		const lens = question.lens || 'General';
 
 		if (!heatmapData[lens]) {
@@ -205,7 +205,8 @@ export function adaptHeatmapData(responses: Response[], questions: Question[]) {
 
 		// Count responses by category/type
 		const responseType = question.response_type || 'written';
-		heatmapData[lens][responseType] = (heatmapData[lens][responseType] || 0) + questionResponses.length;
+		heatmapData[lens][responseType] =
+			(heatmapData[lens][responseType] || 0) + questionResponses.length;
 	});
 
 	return heatmapData;

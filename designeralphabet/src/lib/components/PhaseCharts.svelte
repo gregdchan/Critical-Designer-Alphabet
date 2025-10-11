@@ -5,97 +5,108 @@
 	 * Each question gets its own chart based on Sanity configuration
 	 */
 	import { browser } from '$app/environment';
-    import { responses, questions, phases, participants } from '$lib/realtime';
-    import { buildChartForQuestion, type InferredQuestionType } from '$lib/aggregators/questionCharts';
-    import BarChart from '$lib/components/charts/BarChart.svelte';
-    import PieChart from '$lib/components/charts/PieChart.svelte';
-    import LineChart from '$lib/components/charts/LineChart.svelte';
-    import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
-    import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
-    import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
+	import { responses, questions, phases, participants } from '$lib/realtime';
+	import {
+		buildChartForQuestion,
+		type InferredQuestionType
+	} from '$lib/aggregators/questionCharts';
+	import BarChart from '$lib/components/charts/BarChart.svelte';
+	import PieChart from '$lib/components/charts/PieChart.svelte';
+	import LineChart from '$lib/components/charts/LineChart.svelte';
+	import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
+	import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
+	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 
-export let phaseKey: string;
-export let width = 900;
-export let height = 520;
+	export let phaseKey: string;
+	export let width = 900;
+	export let height = 520;
 
-// Map inferred types to components
-const componentMap: Record<InferredQuestionType, any> = {
-    multipleChoiceBar: BarChart,
-    multipleChoicePie: PieChart,
-    rating: LineChart,
-    boolean: PieChart,
-    voting: WordCloudChart,
-    openText: WordCloudChart
-};
+	// Map inferred types to components
+	const componentMap: Record<InferredQuestionType, any> = {
+		multipleChoiceBar: BarChart,
+		multipleChoicePie: PieChart,
+		rating: LineChart,
+		boolean: PieChart,
+		voting: WordCloudChart,
+		openText: WordCloudChart
+	};
 
-type ChartEntry = {
-    question: any;
-    type: InferredQuestionType | 'landscape' | 'roadmap' | 'timeline';
-    data: import('$lib/types/charts').ChartData | null;
-};
+	type ChartEntry = {
+		question: any;
+		type: InferredQuestionType | 'landscape' | 'roadmap' | 'timeline';
+		data: import('$lib/types/charts').ChartData | null;
+	};
 
-// Compute charts for this phase using inference, with graceful fallbacks
-$: chartEntries = ((): ChartEntry[] => {
-    if (!browser || !$responses || !$questions) return [];
-    const result: ChartEntry[] = [];
-    const phaseQs = $questions.filter(q => q.phase_key === phaseKey || q.id === phaseKey);
-    for (const question of phaseQs) {
-        const qResponses = $responses.filter(r => r.question_id === question.id);
+	// Compute charts for this phase using inference, with graceful fallbacks
+	$: chartEntries = ((): ChartEntry[] => {
+		if (!browser || !$responses || !$questions) return [];
+		const result: ChartEntry[] = [];
+		const phaseQs = $questions.filter((q) => q.phase_key === phaseKey || q.id === phaseKey);
+		for (const question of phaseQs) {
+			const qResponses = $responses.filter((r) => r.question_id === question.id);
 
-        // Honor explicit spatial/timeline kinds from Sanity when present
-        if (question?.map_type === 'landscape') {
-            result.push({ question, type: 'landscape', data: null });
-            continue;
-        }
-        const rec = (question as any)?.recommended_dashboards ?? (question as any)?.recommendedDashboards;
-        if (Array.isArray(rec) && rec.includes('roadmap')) {
-            result.push({ question, type: 'roadmap', data: null });
-            continue;
-        }
-        if (Array.isArray(rec) && rec.includes('timeline')) {
-            result.push({ question, type: 'timeline', data: null });
-            continue;
-        }
+			// Honor explicit spatial/timeline kinds from Sanity when present
+			if (question?.map_type === 'landscape') {
+				result.push({ question, type: 'landscape', data: null });
+				continue;
+			}
+			const rec =
+				(question as any)?.recommended_dashboards ?? (question as any)?.recommendedDashboards;
+			if (Array.isArray(rec) && rec.includes('roadmap')) {
+				result.push({ question, type: 'roadmap', data: null });
+				continue;
+			}
+			if (Array.isArray(rec) && rec.includes('timeline')) {
+				result.push({ question, type: 'timeline', data: null });
+				continue;
+			}
 
-        const built = buildChartForQuestion(question, qResponses);
-        result.push({ question, type: built.type, data: built.data });
-    }
-    return result;
-})();
+			const built = buildChartForQuestion(question, qResponses);
+			result.push({ question, type: built.type, data: built.data });
+		}
+		return result;
+	})();
 
-// Get phase info
-$: phase = $phases.find(p => p.phase_key === phaseKey || p.id === phaseKey);
+	// Get phase info
+	$: phase = $phases.find((p) => p.phase_key === phaseKey || p.id === phaseKey);
 
-// Helper to enrich responses with participant data and split multiple choice
-function enrichResponses(responses: any[], question: any) {
-    return responses.flatMap(r => {
-        const participant = $participants.find(p => p.id === r.participant_id);
-        const baseData = {
-            ...r,
-            participantName: participant?.name,
-            participantColor: participant?.color
-        };
+	// Helper to enrich responses with participant data and split multiple choice
+	function enrichResponses(responses: any[], question: any) {
+		return responses.flatMap((r) => {
+			const participant = $participants.find((p) => p.id === r.participant_id);
+			const baseData = {
+				...r,
+				participantName: participant?.name,
+				participantColor: participant?.color
+			};
 
-        // Split multiple choice responses into separate entries
-        const responseType = question?.response_type;
-        if (['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect'].includes(responseType || '')) {
-            const choices = (r.text || '').split(',').map(s => s.trim()).filter(s => s.length > 0);
-            if (choices.length > 1) {
-                // Multiple choices - create separate bubbles for each
-                return choices.map((choice, idx) => ({
-                    ...baseData,
-                    id: `${r.id}-${idx}`,
-                    text: choice,
-                    // Distribute votes evenly across choices (or use 0 if no votes)
-                    votes: r.votes ? Math.floor(r.votes / choices.length) : 0
-                }));
-            }
-        }
+			// Split multiple choice responses into separate entries
+			const responseType = question?.response_type;
+			if (
+				['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect'].includes(
+					responseType || ''
+				)
+			) {
+				const choices = (r.text || '')
+					.split(',')
+					.map((s: string) => s.trim())
+					.filter((s: string) => s.length > 0);
+				if (choices.length > 1) {
+					// Multiple choices - create separate bubbles for each
+					return choices.map((choice: string, idx: number) => ({
+						...baseData,
+						id: `${r.id}-${idx}`,
+						text: choice,
+						// Distribute votes evenly across choices (or use 0 if no votes)
+						votes: r.votes ? Math.floor(r.votes / choices.length) : 0
+					}));
+				}
+			}
 
-        // Single choice or non-choice question - keep as is
-        return [baseData];
-    });
-}
+			// Single choice or non-choice question - keep as is
+			return [baseData];
+		});
+	}
 </script>
 
 {#if browser}
@@ -128,53 +139,55 @@ function enrichResponses(responses: any[], question: any) {
 						</div>
 
 						<!-- Chart Visualization -->
-            {#if type === 'landscape'}
-                <LandscapeChart
-                    responses={$responses.filter(r => r.question_id === question.id)}
-                    {width}
-                    {height}
-                    question={question.text || ''}
-                />
-            {:else if type === 'roadmap' || type === 'timeline'}
-                <RoadmapChart
-                    responses={$responses.filter(r => r.question_id === question.id)}
-                    {width}
-                    {height}
-                    question={question.text || ''}
-                />
-            {:else if type === 'voting' || type === 'openText'}
-                <WordCloudChart
-                    responses={enrichResponses($responses.filter(r => r.question_id === question.id), question)}
-                    {width}
-                    {height}
-                    question={question.text || ''}
-                />
-            {:else if type === 'multipleChoiceBar' && data}
-                <BarChart data={data} title={question.text || ''} />
-            {:else if type === 'multipleChoicePie' && data}
-                <PieChart data={data} title={question.text || ''} />
-            {:else if type === 'rating' && data}
-                <LineChart data={data} title={question.text || ''} />
-            {:else if type === 'boolean' && data}
-                <PieChart data={data} title={question.text || ''} />
-            {:else}
-                <div class="no-data panel p-8 text-center">
-                    <p class="text-xs text-secondary">No responses yet</p>
-                </div>
-            {/if}
+						{#if type === 'landscape'}
+							<LandscapeChart
+								responses={$responses.filter((r) => r.question_id === question.id)}
+								{width}
+								{height}
+							/>
+						{:else if type === 'roadmap' || type === 'timeline'}
+							<RoadmapChart
+								responses={$responses.filter((r) => r.question_id === question.id)}
+								{width}
+								{height}
+							/>
+						{:else if type === 'voting' || type === 'openText'}
+							<WordCloudChart
+								responses={enrichResponses(
+									$responses.filter((r) => r.question_id === question.id),
+									question
+								)}
+								{width}
+								{height}
+								question={question.text || ''}
+							/>
+						{:else if type === 'multipleChoiceBar' && data}
+							<BarChart {data} title={question.text || ''} />
+						{:else if type === 'multipleChoicePie' && data}
+							<PieChart {data} title={question.text || ''} />
+						{:else if type === 'rating' && data}
+							<LineChart {data} title={question.text || ''} />
+						{:else if type === 'boolean' && data}
+							<PieChart {data} title={question.text || ''} />
+						{:else}
+							<div class="no-data panel p-8 text-center">
+								<p class="text-xs text-secondary">No responses yet</p>
+							</div>
+						{/if}
 
 						<!-- Chart Type Badge -->
 						<div class="mt-3 flex items-center justify-between">
-                    <span class="px-2 py-1 bg-brand/10 text-brand text-xs rounded font-medium">
-                        {type === 'multipleChoiceBar' ? 'bar' : type === 'multipleChoicePie' ? 'pie' : type}
-                    </span>
-                    <span class="text-xs text-secondary">
-                        {data?.meta?.totalResponses ?? $responses.filter(r => r.question_id === question.id).length} responses
-                    </span>
-                </div>
-            </div>
-        {/each}
-        </div>
+							<span class="px-2 py-1 bg-brand/10 text-brand text-xs rounded font-medium">
+								{type === 'multipleChoiceBar' ? 'bar' : type === 'multipleChoicePie' ? 'pie' : type}
+							</span>
+							<span class="text-xs text-secondary">
+								{data?.meta?.totalResponses ??
+									$responses.filter((r) => r.question_id === question.id).length} responses
+							</span>
+						</div>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
 {:else}

@@ -35,7 +35,7 @@ function triggerChartUpdate() {
 	const now = Date.now();
 	if (now - lastUpdate > CHART_UPDATE_THROTTLE) {
 		lastUpdate = now;
-		throttledUpdates.update(n => n + 1);
+		throttledUpdates.update((n) => n + 1);
 	}
 }
 
@@ -85,11 +85,11 @@ export function getQuestionChartData(
 	$responses: Response[],
 	$questions: Question[]
 ): ChartData | null {
-	const question = $questions.find(q => q.id === questionId);
+	const question = $questions.find((q) => q.id === questionId);
 	if (!question) return null;
 
 	// Filter responses for THIS question only
-	const questionResponses = $responses.filter(r => r.question_id === questionId);
+	const questionResponses = $responses.filter((r) => r.question_id === questionId);
 	if (questionResponses.length === 0) return null;
 
 	const chartType = getChartType(question);
@@ -121,7 +121,7 @@ export function getQuestionChartData(
 function buildOptionChart(question: Question, questionResponses: Response[]): ChartData {
 	const tallies = new Map<string, number>();
 
-	questionResponses.forEach(r => {
+	questionResponses.forEach((r) => {
 		if (r.option_id) {
 			tallies.set(r.option_id, (tallies.get(r.option_id) || 0) + 1);
 		} else if (r.scale_value !== null && r.scale_value !== undefined) {
@@ -131,13 +131,11 @@ function buildOptionChart(question: Question, questionResponses: Response[]): Ch
 		}
 	});
 
-	const points: ChartPoint[] = Array.from(tallies.entries()).map(
-		([label, value], index) => ({
-			label,
-			value,
-			color: getChartColor(index)
-		})
-	);
+	const points: ChartPoint[] = Array.from(tallies.entries()).map(([label, value], index) => ({
+		label,
+		value,
+		color: getChartColor(index)
+	}));
 
 	return {
 		title: question.text || question.section || 'Responses',
@@ -154,20 +152,20 @@ function buildOptionChart(question: Question, questionResponses: Response[]): Ch
  * Build word cloud data for text responses
  */
 function buildWordCloudChart(question: Question, questionResponses: Response[]): ChartData {
-	const textResponses = questionResponses.filter(r => r.response_text);
+	const textResponses = questionResponses.filter((r) => r.response_text);
 
 	// Count word frequency
 	const wordCounts = new Map<string, number>();
 
-	textResponses.forEach(r => {
+	textResponses.forEach((r) => {
 		if (!r.response_text) return;
 
 		const words = r.response_text
 			.toLowerCase()
 			.split(/\W+/)
-			.filter(w => w.length > 3); // Filter short words
+			.filter((w) => w.length > 3); // Filter short words
 
-		words.forEach(word => {
+		words.forEach((word) => {
 			wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
 		});
 	});
@@ -197,8 +195,11 @@ function buildWordCloudChart(question: Question, questionResponses: Response[]):
  */
 function buildLandscapeChart(question: Question, questionResponses: Response[]): ChartData {
 	const landscapeResponses = questionResponses.filter(
-		r => r.landscape_x !== null && r.landscape_x !== undefined &&
-			r.landscape_y !== null && r.landscape_y !== undefined
+		(r) =>
+			r.landscape_x !== null &&
+			r.landscape_x !== undefined &&
+			r.landscape_y !== null &&
+			r.landscape_y !== undefined
 	);
 
 	const points: ChartPoint[] = landscapeResponses.map((r, index) => ({
@@ -229,7 +230,7 @@ function buildLandscapeChart(question: Question, questionResponses: Response[]):
  * Build roadmap/timeline chart
  */
 function buildRoadmapChart(question: Question, questionResponses: Response[]): ChartData {
-	const textResponses = questionResponses.filter(r => r.response_text);
+	const textResponses = questionResponses.filter((r) => r.response_text);
 
 	const points: ChartPoint[] = textResponses.map((r, index) => ({
 		label: r.response_text || `Item ${index + 1}`,
@@ -261,20 +262,17 @@ function buildRoadmapChart(question: Question, questionResponses: Response[]): C
 /**
  * Get all questions for a specific phase
  */
-export const phaseQuestions = derived(
-	[phases, realtimeQuestions],
-	([$phases, $questions]) => {
-		const phaseMap = new Map<string, Question[]>();
+export const phaseQuestions = derived([phases, realtimeQuestions], ([$phases, $questions]) => {
+	const phaseMap = new Map<string, Question[]>();
 
-		$phases.forEach(phase => {
-			const phaseKey = phase.phase_key || phase.id;
-			const phaseQs = $questions.filter(q => q.phase_key === phaseKey);
-			phaseMap.set(phaseKey, phaseQs);
-		});
+	$phases.forEach((phase) => {
+		const phaseKey = phase.phase_key || phase.id;
+		const phaseQs = $questions.filter((q) => q.phase_key === phaseKey);
+		phaseMap.set(phaseKey, phaseQs);
+	});
 
-		return phaseMap;
-	}
-);
+	return phaseMap;
+});
 
 /**
  * Get chart data for all questions in a phase
@@ -284,10 +282,10 @@ export function getPhaseCharts(
 	$responses: Response[],
 	$questions: Question[]
 ): Map<string, { question: Question; chartData: ChartData | null; chartType: string }> {
-	const phaseQs = $questions.filter(q => q.phase_key === phaseKey);
+	const phaseQs = $questions.filter((q) => q.phase_key === phaseKey);
 	const chartMap = new Map();
 
-	phaseQs.forEach(question => {
+	phaseQs.forEach((question) => {
 		const chartData = getQuestionChartData(question.id, $responses, $questions);
 		const chartType = getChartType(question);
 
@@ -322,8 +320,8 @@ export const activePhaseCharts = derived(
 export const sessionSummary = derived(
 	[sessionDetails, responses, realtimeQuestions, phases],
 	([$session, $responses, $questions, $phases]) => {
-		const activePhase = $phases.find(p =>
-			p.phase_key === $session?.active_phase_key || p.id === $session?.active_phase_key
+		const activePhase = $phases.find(
+			(p) => p.phase_key === $session?.active_phase_key || p.id === $session?.active_phase_key
 		);
 
 		return {

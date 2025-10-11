@@ -14,7 +14,7 @@
 		stopRealtimeSession
 	} from '$lib/realtime';
 	import { CHART_REGISTRY } from '$lib/charts';
-    import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
+	import QuadBubbleChart from '$lib/components/charts/QuadBubbleChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 	import RoadmapChart from '$lib/components/charts/RoadmapChart.svelte';
 	import SupercloudChart from '$lib/components/charts/SupercloudChart.svelte';
@@ -22,7 +22,7 @@
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import PieChart from '$lib/components/charts/PieChart.svelte';
 	import LineChart from '$lib/components/charts/LineChart.svelte';
-    import { buildChartForQuestion } from '$lib/aggregators/questionCharts';
+	import { buildChartForQuestion } from '$lib/aggregators/questionCharts';
 	import RealtimeLineChart from '$lib/components/charts/RealtimeLineChart.svelte';
 	import QuadBubbles from '$lib/charts/QuadBubbles.svelte';
 	import MaturityDial from '$lib/charts/MaturityDial.svelte';
@@ -277,7 +277,12 @@
 
 	// Auto-select active phase or first phase
 	$: if (!selectedPhaseKey && (activePhase || phasesList.length > 0)) {
-		selectedPhaseKey = activePhase?.phase_key || activePhase?.id || phasesList[0]?.phase_key || phasesList[0]?.id || null;
+		selectedPhaseKey =
+			activePhase?.phase_key ||
+			activePhase?.id ||
+			phasesList[0]?.phase_key ||
+			phasesList[0]?.id ||
+			null;
 	}
 
 	const phaseStatusLabels: Record<'pending' | 'active' | 'completed', string> = {
@@ -291,7 +296,10 @@
 			// Filter responses by active phase
 			if (!activePhase) return true;
 			const question = questionsList.find((q) => q.id === entry.question_id);
-			return question?.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !question?.phase_key);
+			return (
+				question?.phase_key === activePhase.phase_key ||
+				(activePhase.status === 'active' && !question?.phase_key)
+			);
 		})
 		.flatMap((entry) => {
 			const question = questionsList.find((q) => q.id === entry.question_id);
@@ -316,10 +324,16 @@
 			let choices: string[] = [];
 			if (hasSemicolon) {
 				// Split by semicolon for lens-based responses like "Community: X; Sustainability: Y"
-				choices = text.split(';').map(s => s.trim()).filter(s => s.length > 0);
+				choices = text
+					.split(';')
+					.map((s) => s.trim())
+					.filter((s) => s.length > 0);
 			} else if (hasComma) {
 				// Split by comma for simple multi-choice
-				choices = text.split(',').map(s => s.trim()).filter(s => s.length > 0);
+				choices = text
+					.split(',')
+					.map((s) => s.trim())
+					.filter((s) => s.length > 0);
 			}
 
 			const shouldSplit = choices.length > 1;
@@ -355,8 +369,7 @@
 	$: phaseQuestions = activePhase
 		? questionsList.filter(
 				(q) =>
-					q.phase_key === activePhase.phase_key ||
-					(activePhase.status === 'active' && !q.phase_key)
+					q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
 			)
 		: [];
 
@@ -384,7 +397,8 @@
 		}
 
 		const phaseQuestions = questionsList.filter(
-			(q) => q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
+			(q) =>
+				q.phase_key === activePhase.phase_key || (activePhase.status === 'active' && !q.phase_key)
 		);
 
 		const dashboards: string[] = [];
@@ -408,12 +422,13 @@
 
 		// If no dashboards explicitly configured (besides phase), auto-detect based on question types
 		if (dashboards.length === 1 && phaseQuestions.length > 0) {
-			
 			// Add chart types based on response types
 			phaseQuestions.forEach((q) => {
 				const responseType = q.response_type || 'written';
-				
-				if (['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect'].includes(responseType)) {
+
+				if (
+					['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect'].includes(responseType)
+				) {
 					if (!dashboards.includes('barChart')) dashboards.push('barChart');
 					if (!dashboards.includes('pieChart')) dashboards.push('pieChart');
 				} else if (responseType === 'scale') {
@@ -425,7 +440,7 @@
 					// Landscape charts will be in PhaseCharts
 				}
 			});
-			
+
 			// Always add engagement boards
 			if (!dashboards.includes('leaderboard')) dashboards.push('leaderboard');
 			if (!dashboards.includes('timeline')) dashboards.push('timeline');
@@ -440,46 +455,51 @@
 	})();
 
 	// Helper function to validate if a dashboard should be shown based on available data
-	function isDashboardValid(dashboardId: string, question: any, responses: any[], questions: any[]): boolean {
-		const hasResponses = responses.some(r => r.question_id === question.id);
+	function isDashboardValid(
+		dashboardId: string,
+		question: any,
+		responses: any[],
+		questions: any[]
+	): boolean {
+		const hasResponses = responses.some((r) => r.question_id === question.id);
 		const responseType = question.response_type || 'written';
-		
+
 		// Always valid dashboards
 		if (['overview', 'timeline', 'chat', 'phase'].includes(dashboardId)) return true;
-		
+
 		// Participation/leaderboard need responses
 		if (['leaderboard', 'participationPulse'].includes(dashboardId)) return hasResponses;
-		
+
 		// Bar chart for choice-based responses
 		if (dashboardId === 'barChart') {
 			return ['singleChoice', 'multiSelect'].includes(responseType) && hasResponses;
 		}
-		
+
 		// Pie chart for choice-based responses
 		if (dashboardId === 'pieChart') {
 			return ['singleChoice', 'multiSelect'].includes(responseType) && hasResponses;
 		}
-		
+
 		// Line chart for scale responses
 		if (dashboardId === 'lineChart') {
 			return responseType === 'scale' && hasResponses;
 		}
-		
+
 		// Written response visualizations
 		if (['heatmap', 'roadmap', 'quadBubbles'].includes(dashboardId)) {
 			return responseType === 'written' && hasResponses;
 		}
-		
+
 		// Landscape needs landscape response type
 		if (dashboardId === 'response-landscape') {
 			return responseType === 'landscape' && hasResponses;
 		}
-		
+
 		// Scale visualizations
 		if (['maturityDial'].includes(dashboardId)) {
 			return responseType === 'scale' && hasResponses;
 		}
-		
+
 		return true; // Default to showing if unknown type
 	}
 
@@ -574,7 +594,9 @@
 				</p>
 				{#if activePhase}
 					<div class="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
-						<span class="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 px-3 py-1">
+						<span
+							class="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 px-3 py-1"
+						>
 							<IconSparkles class="h-3.5 w-3.5 text-brand" />
 							<span>{phaseStatusLabels[activePhase.status]}</span>
 						</span>
@@ -606,55 +628,59 @@
 					class="flex flex-wrap items-center gap-3"
 					on:submit|preventDefault={handleStartPresentation}
 				>
-				<input
-					class="w-48 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-ink-2 focus:border-cyan-400 focus:outline-none"
-					placeholder="Enter session code"
-					bind:value={joinCode}
-					maxlength="16"
-				/>
-				<button
-					type="submit"
-					class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand"
-				>
-					{activeCode ? 'Switch session' : 'Start presentation'}
-				</button>
-			</form>
-			<div class="flex items-center gap-6 text-sm text-ink-muted">
-				<span class="inline-flex items-center gap-2"
-					><IconUsers class="h-5 w-5" /> {participantsList.length} participants</span
-				>
-				<span class="inline-flex items-center gap-2">
-					<IconClock class="h-5 w-5" />
-					{#if isSessionLive}
-						<span class="inline-flex items-center gap-2">
-							<span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
-							<span class="text-green-400 font-semibold">Live</span>
-						</span>
-					{:else if isSessionEnded}
-						<span class="text-slate-400">Session Ended</span>
-					{:else if isSessionPlanned}
-						<span class="text-cyan-400">Planned</span>
-					{:else}
-						<span>{sessionInfo?.status ?? 'waiting'}</span>
-					{/if}
-				</span>
+					<input
+						class="w-48 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-ink-2 focus:border-cyan-400 focus:outline-none"
+						placeholder="Enter session code"
+						bind:value={joinCode}
+						maxlength="16"
+					/>
+					<button
+						type="submit"
+						class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand"
+					>
+						{activeCode ? 'Switch session' : 'Start presentation'}
+					</button>
+				</form>
+				<div class="flex items-center gap-6 text-sm text-ink-muted">
+					<span class="inline-flex items-center gap-2"
+						><IconUsers class="h-5 w-5" /> {participantsList.length} participants</span
+					>
+					<span class="inline-flex items-center gap-2">
+						<IconClock class="h-5 w-5" />
+						{#if isSessionLive}
+							<span class="inline-flex items-center gap-2">
+								<span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+								<span class="text-green-400 font-semibold">Live</span>
+							</span>
+						{:else if isSessionEnded}
+							<span class="text-slate-400">Session Ended</span>
+						{:else if isSessionPlanned}
+							<span class="text-cyan-400">Planned</span>
+						{:else}
+							<span>{sessionInfo?.status ?? 'waiting'}</span>
+						{/if}
+					</span>
+				</div>
 			</div>
 		</div>
 	</header>
 
-{#if !activeCode && ready}
+	{#if !activeCode && ready}
 		<div class="flex min-h-[60vh] items-center justify-center px-6">
 			<div class="max-w-4xl w-full space-y-6">
 				<div class="text-center space-y-4">
 					<h2 class="text-2xl font-semibold text-white">Select a Session</h2>
 					<p class="text-ink-muted">
-						Choose from available sessions or enter a session code manually to begin the presentation.
+						Choose from available sessions or enter a session code manually to begin the
+						presentation.
 					</p>
 				</div>
 
 				{#if loadingSessions}
 					<div class="flex items-center justify-center py-12">
-						<div class="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+						<div
+							class="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"
+						></div>
 					</div>
 				{:else if availableSessions.length > 0}
 					<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -666,7 +692,9 @@
 							>
 								<div class="flex items-center justify-between mb-3">
 									<span class="font-mono text-lg font-semibold text-brand">{session.code}</span>
-									<span class="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase text-ink-muted">
+									<span
+										class="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase text-ink-muted"
+									>
 										{session.status}
 									</span>
 								</div>
@@ -686,7 +714,9 @@
 						{/each}
 					</div>
 				{:else}
-						<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 md:p-8 text-center">
+					<div
+						class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 md:p-8 text-center"
+					>
 						<p class="text-ink-muted">No active sessions found. Enter a code manually below.</p>
 					</div>
 				{/if}
@@ -716,43 +746,56 @@
 	{:else}
 		<main class="mx-auto px-2 sm:px-4 md:px-6 py-6 md:py-8" style="max-width: 95vw;">
 			<!-- Session Status Notice -->
-		{#if isSessionEnded}
-			<div class="mb-6 rounded-xl border border-rose-700 bg-rose-600 p-4 shadow-lg shadow-rose-600/25">
-				<div class="flex items-center gap-3">
-					<div class="rounded-full bg-rose-700/40 p-2">
-						<IconClock class="h-5 w-5 text-white" />
-					</div>
-					<div>
-						<h3 class="text-sm font-semibold text-white">Session Ended</h3>
-						<p class="text-xs text-white/90">Showing final results from Supabase. Data is no longer updating in real-time.</p>
-					</div>
-				</div>
-			</div>
-		{:else if isSessionPlanned}
-			<div class="mb-6 rounded-xl border border-amber-700 bg-amber-500 p-4 shadow-lg shadow-amber-500/25">
-				<div class="flex items-center gap-3">
-					<div class="rounded-full bg-amber-700/40 p-2">
-						<IconClock class="h-5 w-5 text-white" />
-					</div>
-					<div>
-						<h3 class="text-sm font-semibold text-white">Planned Session</h3>
-						<p class="text-xs text-white/90">This session hasn't started yet. Data will update in real-time once the session goes live.</p>
+			{#if isSessionEnded}
+				<div
+					class="mb-6 rounded-xl border border-rose-700 bg-rose-600 p-4 shadow-lg shadow-rose-600/25"
+				>
+					<div class="flex items-center gap-3">
+						<div class="rounded-full bg-rose-700/40 p-2">
+							<IconClock class="h-5 w-5 text-white" />
+						</div>
+						<div>
+							<h3 class="text-sm font-semibold text-white">Session Ended</h3>
+							<p class="text-xs text-white/90">
+								Showing final results from Supabase. Data is no longer updating in real-time.
+							</p>
+						</div>
 					</div>
 				</div>
-			</div>
-		{:else if isSessionLive}
-			<div class="mb-6 rounded-xl border border-green-700 bg-green-600 p-4 shadow-lg shadow-green-600/25">
-				<div class="flex items-center gap-3">
-					<div class="rounded-full bg-green-700/40 p-2">
-						<span class="h-2 w-2 rounded-full bg-white animate-pulse inline-block"></span>
-					</div>
-					<div>
-						<h3 class="text-sm font-semibold text-white">Live Session</h3>
-						<p class="text-xs text-white/90">Data is updating in real-time as participants engage.</p>
+			{:else if isSessionPlanned}
+				<div
+					class="mb-6 rounded-xl border border-amber-700 bg-amber-500 p-4 shadow-lg shadow-amber-500/25"
+				>
+					<div class="flex items-center gap-3">
+						<div class="rounded-full bg-amber-700/40 p-2">
+							<IconClock class="h-5 w-5 text-white" />
+						</div>
+						<div>
+							<h3 class="text-sm font-semibold text-white">Planned Session</h3>
+							<p class="text-xs text-white/90">
+								This session hasn't started yet. Data will update in real-time once the session goes
+								live.
+							</p>
+						</div>
 					</div>
 				</div>
-			</div>
-		{/if}
+			{:else if isSessionLive}
+				<div
+					class="mb-6 rounded-xl border border-green-700 bg-green-600 p-4 shadow-lg shadow-green-600/25"
+				>
+					<div class="flex items-center gap-3">
+						<div class="rounded-full bg-green-700/40 p-2">
+							<span class="h-2 w-2 rounded-full bg-white animate-pulse inline-block"></span>
+						</div>
+						<div>
+							<h3 class="text-sm font-semibold text-white">Live Session</h3>
+							<p class="text-xs text-white/90">
+								Data is updating in real-time as participants engage.
+							</p>
+						</div>
+					</div>
+				</div>
+			{/if}
 
 			<!-- Phase Navigation -->
 			{#if phasesList.length > 0}
@@ -760,7 +803,8 @@
 					{#each phasesList as phase}
 						<button
 							on:click={() => (selectedPhaseKey = phase.phase_key || phase.id)}
-							class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {selectedPhaseKey === (phase.phase_key || phase.id)
+							class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {selectedPhaseKey ===
+							(phase.phase_key || phase.id)
 								? 'bg-brand text-white'
 								: 'bg-surface-muted text-secondary hover:bg-surface-elevated'}"
 						>
@@ -773,7 +817,8 @@
 					<!-- Supercloud Tab -->
 					<button
 						on:click={() => (selectedPhaseKey = 'supercloud')}
-						class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {selectedPhaseKey === 'supercloud'
+						class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {selectedPhaseKey ===
+						'supercloud'
 							? 'bg-brand text-white'
 							: 'bg-surface-muted text-secondary hover:bg-surface-elevated'}"
 					>
@@ -783,58 +828,111 @@
 			{/if}
 
 			{#if activeBoards.length === 0}
-								<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 md:p-10 text-center">
+				<div
+					class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 md:p-10 text-center"
+				>
 					<div class="space-y-4">
 						<h3 class="text-lg font-semibold text-slate-200">Waiting for content...</h3>
 						<div class="space-y-2 text-sm text-ink-muted">
-							<p>
-								Charts will appear when:
-							</p>
+							<p>Charts will appear when:</p>
 							<ul class="list-disc list-inside space-y-1 text-left max-w-md mx-auto">
 								<li>Questions are added to the session</li>
 								<li>Phases are created and activated</li>
 								<li>Participants submit responses</li>
 							</ul>
 							<p class="mt-4 text-xs">
-								Debug: {questionsList.length} questions, {responsesList.length} responses, 
+								Debug: {questionsList.length} questions, {responsesList.length} responses,
 								{phasesList.length} phases, activePhase: {activePhase?.title || 'none'}
 							</p>
 						</div>
 					</div>
 				</div>
 			{:else}
-			<!-- Single column layout for better visibility -->
-			<div class="max-w-[1600px] mx-auto space-y-6 px-2 sm:px-4">
-				<!-- Phase-based charts for selected phase OR Supercloud -->
-				{#if selectedPhaseKey && browser}
-					{#if selectedPhaseKey === 'supercloud'}
-						{#key chartRefreshKey}
-								<div class="presentation-panel rounded-2xl border border-brand/20 bg-slate-900/70 p-4 md:p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
-								<header class="mb-6">
-									<h2 class="text-2xl font-bold text-slate-100">
-										✨ Supercloud
+				<!-- Single column layout for better visibility -->
+				<div class="max-w-[1600px] mx-auto space-y-6 px-2 sm:px-4">
+					<!-- Phase-based charts for selected phase OR Supercloud -->
+					{#if selectedPhaseKey && browser}
+						{#if selectedPhaseKey === 'supercloud'}
+							{#key chartRefreshKey}
+								<div
+									class="presentation-panel rounded-2xl border border-brand/20 bg-slate-900/70 p-4 md:p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]"
+								>
+									<header class="mb-6">
+										<h2 class="text-2xl font-bold text-slate-100">✨ Supercloud</h2>
+										<p class="text-sm text-ink-muted mt-2">
+											Multi-chart aggregation: Responses sized by votes, choices by frequency,
+											scales by count.
+										</p>
+									</header>
+									<div class="w-full md:h-[700px] h-[80dvh] overflow-hidden">
+										<SupercloudChart responses={responsesForViz} questions={questionsList} />
+									</div>
+								</div>
+							{/key}
+						{:else}
+							{#key chartRefreshKey}
+								<div
+									class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-4 md:p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]"
+								>
+									<PhaseCharts phaseKey={selectedPhaseKey} width={1400} height={600} />
+								</div>
+							{/key}
+						{/if}
+					{/if}
+					<!-- Legacy board types removed - using PhaseCharts instead -->
+					{#each mainBoards as boardId}
+						{#if boardId === 'heatmap'}
+							<div
+								class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-4 md:p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
+							>
+								<header class="mb-4">
+									<h2 class="text-xl font-semibold text-slate-100">
+										{BOARD_DEFINITIONS[boardId].label}
 									</h2>
-									<p class="text-sm text-ink-muted mt-2">
-										Multi-chart aggregation: Responses sized by votes, choices by frequency, scales by count.
+									<p class="text-sm text-ink-muted">
+										{BOARD_DEFINITIONS[boardId].description}
 									</p>
 								</header>
-								<div class="w-full md:h-[700px] h-[80dvh] overflow-hidden">
-									<SupercloudChart responses={responsesForViz} questions={questionsList} />
+								<div class="w-full h-[600px] overflow-hidden">
+									<HeatmapChart responses={responsesForViz} width={1400} height={600} />
 								</div>
 							</div>
-						{/key}
-					{:else}
-						{#key chartRefreshKey}
-							<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-4 md:p-8 shadow-[0_0_40px_rgba(6,182,212,0.2)]">
-								<PhaseCharts phaseKey={selectedPhaseKey} width={1400} height={600} />
+						{:else if boardId === 'roadmap'}
+							<div
+								class="presentation-panel rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-4 md:p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+							>
+								<header class="mb-4">
+									<h2 class="text-xl font-semibold text-slate-100">
+										{BOARD_DEFINITIONS[boardId].label}
+									</h2>
+									<p class="text-sm text-ink-muted">
+										{BOARD_DEFINITIONS[boardId].description}
+									</p>
+								</header>
+								<div class="w-full h-[600px] overflow-hidden">
+									<RoadmapChart responses={responsesForViz} width={1400} height={600} />
+								</div>
 							</div>
-						{/key}
-					{/if}
-				{/if}					<!-- Legacy board types removed - using PhaseCharts instead -->
-					{#each mainBoards as boardId}
-							{#if boardId === 'heatmap'}
+						{:else if boardId === 'barChart'}
+							{@const choiceQuestions = phaseQuestions.filter((q) => {
+								const recommended = q.recommended_dashboards || [];
+								// Only show if explicitly set to barChart (not if empty or set to other charts)
+								const isBarChart =
+									Array.isArray(recommended) &&
+									recommended.some((d) => ['bar', 'barchart', 'barChart'].includes(d));
+								console.log('[BarChart Filter]', q.text?.substring(0, 50), {
+									recommended,
+									recommendedType: typeof recommended,
+									isArray: Array.isArray(recommended),
+									stringified: JSON.stringify(recommended),
+									isBarChart,
+									responseType: q.response_type
+								});
+								return isBarChart;
+							})}
+							{#if choiceQuestions.length > 0}
 								<div
-									class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-4 md:p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
+									class="presentation-panel rounded-2xl border border-blue-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(59,130,246,0.2)]"
 								>
 									<header class="mb-4">
 										<h2 class="text-xl font-semibold text-slate-100">
@@ -844,476 +942,471 @@
 											{BOARD_DEFINITIONS[boardId].description}
 										</p>
 									</header>
-									<div class="w-full h-[600px] overflow-hidden">
-										<HeatmapChart responses={responsesForViz} width={1400} height={600} />
+									<div class="space-y-8">
+										{#each choiceQuestions as question}
+											{@const qRows = responsesList.filter((r) => r.question_id === question.id)}
+											{@const built = buildChartForQuestion(question, qRows)}
+											{@const chart = built.data}
+											<div class="space-y-3">
+												<div class="flex items-center justify-between mb-2">
+													<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+												</div>
+												{#if chart && chart.series[0]?.points?.length}
+													<div
+														style="width:100%;height: min(700px, calc(70px*{Math.max(
+															3,
+															chart.series[0].points.length
+														)}));"
+													>
+														<BarChart data={chart} title={question.text} />
+													</div>
+												{:else}
+													<div class="text-ink-muted text-sm">No data yet.</div>
+												{/if}
+											</div>
+										{/each}
 									</div>
 								</div>
-							{:else if boardId === 'roadmap'}
+							{:else}
 								<div
-									class="presentation-panel rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-4 md:p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted"
 								>
-									<header class="mb-4">
-										<h2 class="text-xl font-semibold text-slate-100">
-											{BOARD_DEFINITIONS[boardId].label}
-										</h2>
-										<p class="text-sm text-ink-muted">
-											{BOARD_DEFINITIONS[boardId].description}
-										</p>
-									</header>
-									<div class="w-full h-[600px] overflow-hidden">
-										<RoadmapChart responses={responsesForViz} width={1400} height={600} />
-									</div>
+									No choice-based questions in this phase.
 								</div>
-							{:else if boardId === 'barChart'}
-								{@const choiceQuestions = phaseQuestions.filter(q => {
-									const recommended = q.recommended_dashboards || [];
-									// Only show if explicitly set to barChart (not if empty or set to other charts)
-									const isBarChart = Array.isArray(recommended) && recommended.some(d => ['bar', 'barchart', 'barChart'].includes(d));
-									console.log('[BarChart Filter]', q.text?.substring(0, 50), {
-										recommended,
-										recommendedType: typeof recommended,
-										isArray: Array.isArray(recommended),
-										stringified: JSON.stringify(recommended),
-										isBarChart,
-										responseType: q.response_type
-									});
-									return isBarChart;
-								})}
-								{#if choiceQuestions.length > 0}
-									<div
-										class="presentation-panel rounded-2xl border border-blue-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(59,130,246,0.2)]"
-									>
-										<header class="mb-4">
-											<h2 class="text-xl font-semibold text-slate-100">
-												{BOARD_DEFINITIONS[boardId].label}
-											</h2>
-											<p class="text-sm text-ink-muted">
-												{BOARD_DEFINITIONS[boardId].description}
-											</p>
-										</header>
-										<div class="space-y-8">
-											{#each choiceQuestions as question}
-												{@const qRows = responsesList.filter(r => r.question_id === question.id)}
-									{@const built = buildChartForQuestion(question, qRows)}
-												{@const chart = built.data}
-												<div class="space-y-3">
-													<div class="flex items-center justify-between mb-2">
-														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
-													</div>
-			                                {#if chart && chart.series[0]?.points?.length}
-			                                    <div style="width:100%;height: min(700px, calc(70px*{Math.max(3, chart.series[0].points.length)}));">
-			                                        <BarChart data={chart} title={question.text} />
-			                                    </div>
-			                                {:else}
-			                                    <div class="text-ink-muted text-sm">No data yet.</div>
-			                                {/if}
-												</div>
-											{/each}
-										</div>
-									</div>
-								{:else}
-									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
-										No choice-based questions in this phase.
-									</div>
-								{/if}
-							{:else if boardId === 'pieChart'}
-								{@const choiceQuestions = phaseQuestions.filter(q => {
-									const recommended = q.recommended_dashboards || [];
-									const isPieChart = Array.isArray(recommended) && recommended.some(d => ['pie', 'piechart', 'pieChart'].includes(d));
-									console.log('[PieChart Filter]', q.text?.substring(0, 50), {
-										recommended,
-										recommendedType: typeof recommended,
-										isArray: Array.isArray(recommended),
-										stringified: JSON.stringify(recommended),
-										isPieChart,
-										responseType: q.response_type
-									});
-									return isPieChart;
-								})}
-								{#if choiceQuestions.length > 0}
-									<div
-										class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
-									>
-										<header class="mb-4">
-											<h2 class="text-xl font-semibold text-slate-100">
-												{BOARD_DEFINITIONS[boardId].label}
-											</h2>
-											<p class="text-sm text-ink-muted">
-												{BOARD_DEFINITIONS[boardId].description}
-											</p>
-										</header>
-										<div class="space-y-6">
-											{#each choiceQuestions as question}
-												{@const qRows = responsesList.filter(r => r.question_id === question.id)}
-												{@const built = buildChartForQuestion(question, qRows)}
-												{@const chart = built.data}
-												<div class="space-y-4">
-													<div class="flex items-center justify-between">
-														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
-													</div>
-			                                {#if chart && chart.series[0]?.points?.length}
-			                                    <div style="width:100%;height:500px;">
-			                                        <PieChart data={chart} title={question.text} />
-			                                    </div>
-			                                {:else}
-			                                    <div class="text-ink-muted text-sm">No data yet.</div>
-			                                {/if}
-												</div>
-											{/each}
-										</div>
-									</div>
-								{:else}
-									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
-										No choice-based questions in this phase.
-									</div>
-								{/if}
-							{:else if boardId === 'lineChart'}
-								{@const scaleQuestions = phaseQuestions.filter(q => q.response_type === 'scale')}
-								{#if scaleQuestions.length > 0}
-									<div
-										class="presentation-panel rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
-									>
-										<header class="mb-4">
-											<h2 class="text-xl font-semibold text-slate-100">
-												{BOARD_DEFINITIONS[boardId].label}
-											</h2>
-											<p class="text-sm text-ink-muted">
-												{BOARD_DEFINITIONS[boardId].description}
-											</p>
-										</header>
-										<div class="space-y-6">
-											{#each scaleQuestions as question}
-												<div class="space-y-4">
-													<div class="flex items-center justify-between">
-														<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
-													</div>
-													<RealtimeLineChart
-														roomCode={activeCode}
-														questionId={question.id}
-														width={1400}
-														height={450}
-													/>
-												</div>
-											{/each}
-										</div>
-									</div>
-								{:else}
-									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
-										No scale questions in this phase.
-									</div>
-								{/if}
-							{:else if boardId === 'superline'}
-								{@const scaleQuestions = questionsList.filter(q => q.response_type === 'scale')}
-								{#if scaleQuestions.length > 0}
-									<div
-										class="presentation-panel rounded-2xl border border-teal-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(20,184,166,0.2)]"
-									>
-										<header class="mb-4">
-											<h2 class="text-xl font-semibold text-slate-100">
-												{BOARD_DEFINITIONS[boardId].label}
-											</h2>
-											<p class="text-sm text-ink-muted">
-												{BOARD_DEFINITIONS[boardId].description}
-											</p>
-										</header>
-										<div class="w-full h-[600px]">
-											<SuperlineChart responses={responsesForViz} questions={questionsList} />
-										</div>
-									</div>
-								{:else}
-									<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
-										No scale/slider questions in this session.
-									</div>
-								{/if}
-								{:else if boardId === 'quadBubbles' || boardId === 'participationPulse' || boardId === 'riskImpactMatrix'}
-									{#if activeCode}
-										{@const component = boardChartComponents[boardId]}
-										{@const dimensions =
-											boardChartDimensions[boardId] ?? { width: 1400, height: 700 }}
-										<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
-											<header class="mb-4">
-												<h2 class="text-xl font-semibold text-slate-100">
-													{BOARD_DEFINITIONS[boardId].label}
-												</h2>
-												<p class="text-sm text-ink-muted">
-													{BOARD_DEFINITIONS[boardId].description}
-												</p>
-											</header>
-											{#if component}
-												<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
-													<svelte:component
-														this={component}
-														roomCode={activeCode}
-														width={dimensions.width}
-														height={dimensions.height}
-													/>
-												</div>
-											{:else}
-												<p class="text-sm text-ink-muted">
-													This chart is unavailable for the current session.
-												</p>
-											{/if}
-										</div>
-									{:else}
-										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
-											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
-										</div>
-									{/if}
-								{:else if boardId === 'maturityDial' || boardId === 'inclusivityMeter'}
-									<!-- Render compact realtime charts in the main column when promoted -->
-									{#if activeCode}
-										{@const component = boardChartComponents[boardId]}
-										{@const dimensions =
-											boardChartDimensions[boardId] ?? { width: 420, height: 420 }}
-										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-											<header class="mb-4">
-												<h2 class="text-xl font-semibold text-slate-100">
-													{BOARD_DEFINITIONS[boardId].label}
-												</h2>
-												<p class="text-sm text-ink-muted">
-													{BOARD_DEFINITIONS[boardId].description}
-												</p>
-											</header>
-											{#if component}
-												<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
-													<svelte:component
-														this={component}
-														roomCode={activeCode}
-														width={dimensions.width}
-														height={dimensions.height}
-													/>
-												</div>
-											{:else}
-												<p class="text-sm text-ink-muted">
-													This chart is unavailable for the current session.
-												</p>
-											{/if}
-										</div>
-									{:else}
-										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
-											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
-										</div>
-								{/if}
 							{/if}
+						{:else if boardId === 'pieChart'}
+							{@const choiceQuestions = phaseQuestions.filter((q) => {
+								const recommended = q.recommended_dashboards || [];
+								const isPieChart =
+									Array.isArray(recommended) &&
+									recommended.some((d) => ['pie', 'piechart', 'pieChart'].includes(d));
+								console.log('[PieChart Filter]', q.text?.substring(0, 50), {
+									recommended,
+									recommendedType: typeof recommended,
+									isArray: Array.isArray(recommended),
+									stringified: JSON.stringify(recommended),
+									isPieChart,
+									responseType: q.response_type
+								});
+								return isPieChart;
+							})}
+							{#if choiceQuestions.length > 0}
+								<div
+									class="presentation-panel rounded-2xl border border-purple-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(168,85,247,0.2)]"
+								>
+									<header class="mb-4">
+										<h2 class="text-xl font-semibold text-slate-100">
+											{BOARD_DEFINITIONS[boardId].label}
+										</h2>
+										<p class="text-sm text-ink-muted">
+											{BOARD_DEFINITIONS[boardId].description}
+										</p>
+									</header>
+									<div class="space-y-6">
+										{#each choiceQuestions as question}
+											{@const qRows = responsesList.filter((r) => r.question_id === question.id)}
+											{@const built = buildChartForQuestion(question, qRows)}
+											{@const chart = built.data}
+											<div class="space-y-4">
+												<div class="flex items-center justify-between">
+													<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+												</div>
+												{#if chart && chart.series[0]?.points?.length}
+													<div style="width:100%;height:500px;">
+														<PieChart data={chart} title={question.text} />
+													</div>
+												{:else}
+													<div class="text-ink-muted text-sm">No data yet.</div>
+												{/if}
+											</div>
+										{/each}
+									</div>
+								</div>
+							{:else}
+								<div
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted"
+								>
+									No choice-based questions in this phase.
+								</div>
+							{/if}
+						{:else if boardId === 'lineChart'}
+							{@const scaleQuestions = phaseQuestions.filter((q) => q.response_type === 'scale')}
+							{#if scaleQuestions.length > 0}
+								<div
+									class="presentation-panel rounded-2xl border border-emerald-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+								>
+									<header class="mb-4">
+										<h2 class="text-xl font-semibold text-slate-100">
+											{BOARD_DEFINITIONS[boardId].label}
+										</h2>
+										<p class="text-sm text-ink-muted">
+											{BOARD_DEFINITIONS[boardId].description}
+										</p>
+									</header>
+									<div class="space-y-6">
+										{#each scaleQuestions as question}
+											<div class="space-y-4">
+												<div class="flex items-center justify-between">
+													<h3 class="text-sm font-medium text-slate-200">{question.text}</h3>
+												</div>
+												<RealtimeLineChart
+													roomCode={activeCode}
+													questionId={question.id}
+													width={1400}
+													height={450}
+												/>
+											</div>
+										{/each}
+									</div>
+								</div>
+							{:else}
+								<div
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted"
+								>
+									No scale questions in this phase.
+								</div>
+							{/if}
+						{:else if boardId === 'superline'}
+							{@const scaleQuestions = questionsList.filter((q) => q.response_type === 'scale')}
+							{#if scaleQuestions.length > 0}
+								<div
+									class="presentation-panel rounded-2xl border border-teal-400/20 bg-slate-900/70 p-6 shadow-[0_0_40px_rgba(20,184,166,0.2)]"
+								>
+									<header class="mb-4">
+										<h2 class="text-xl font-semibold text-slate-100">
+											{BOARD_DEFINITIONS[boardId].label}
+										</h2>
+										<p class="text-sm text-ink-muted">
+											{BOARD_DEFINITIONS[boardId].description}
+										</p>
+									</header>
+									<div class="w-full h-[600px]">
+										<SuperlineChart responses={responsesForViz} questions={questionsList} />
+									</div>
+								</div>
+							{:else}
+								<div
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted"
+								>
+									No scale/slider questions in this session.
+								</div>
+							{/if}
+						{:else if boardId === 'quadBubbles' || boardId === 'participationPulse' || boardId === 'riskImpactMatrix'}
+							{#if activeCode}
+								{@const component = boardChartComponents[boardId]}
+								{@const dimensions = boardChartDimensions[boardId] ?? { width: 1400, height: 700 }}
+								<div
+									class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6"
+								>
+									<header class="mb-4">
+										<h2 class="text-xl font-semibold text-slate-100">
+											{BOARD_DEFINITIONS[boardId].label}
+										</h2>
+										<p class="text-sm text-ink-muted">
+											{BOARD_DEFINITIONS[boardId].description}
+										</p>
+									</header>
+									{#if component}
+										<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
+											<svelte:component
+												this={component}
+												roomCode={activeCode}
+												width={dimensions.width}
+												height={dimensions.height}
+											/>
+										</div>
+									{:else}
+										<p class="text-sm text-ink-muted">
+											This chart is unavailable for the current session.
+										</p>
+									{/if}
+								</div>
+							{:else}
+								<div
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted"
+								>
+									Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
+								</div>
+							{/if}
+						{:else if boardId === 'maturityDial' || boardId === 'inclusivityMeter'}
+							<!-- Render compact realtime charts in the main column when promoted -->
+							{#if activeCode}
+								{@const component = boardChartComponents[boardId]}
+								{@const dimensions = boardChartDimensions[boardId] ?? { width: 420, height: 420 }}
+								<div
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6"
+								>
+									<header class="mb-4">
+										<h2 class="text-xl font-semibold text-slate-100">
+											{BOARD_DEFINITIONS[boardId].label}
+										</h2>
+										<p class="text-sm text-ink-muted">
+											{BOARD_DEFINITIONS[boardId].description}
+										</p>
+									</header>
+									{#if component}
+										<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
+											<svelte:component
+												this={component}
+												roomCode={activeCode}
+												width={dimensions.width}
+												height={dimensions.height}
+											/>
+										</div>
+									{:else}
+										<p class="text-sm text-ink-muted">
+											This chart is unavailable for the current session.
+										</p>
+									{/if}
+								</div>
+							{:else}
+								<div
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted"
+								>
+									Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
+								</div>
+							{/if}
+						{/if}
 					{/each}
 
 					<!-- Engagement boards (previously in sidebar) -->
 					{#each sideBoards as boardId}
-							{#if boardId === 'phase'}
-								<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 space-y-4">
-									<header class="flex items-center justify-between">
+						{#if boardId === 'phase'}
+							<div
+								class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6 space-y-4"
+							>
+								<header class="flex items-center justify-between">
+									<h3 class="text-lg font-semibold text-white">
+										{BOARD_DEFINITIONS[boardId].label}
+									</h3>
+									{#if activePhase}
+										<span
+											class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200"
+										>
+											{phaseStatusLabels[activePhase.status]}
+										</span>
+									{/if}
+								</header>
+								{#if activePhase}
+									<div class="space-y-3 text-sm text-ink-muted">
+										{#if activePhase.description}
+											<p class="leading-relaxed">{activePhase.description}</p>
+										{/if}
+										<div class="flex flex-wrap gap-2 text-xs text-ink-muted">
+											<span class="rounded border border-slate-700 px-2 py-0.5">
+												{phaseQuestions.length} focus questions
+											</span>
+											<span class="rounded border border-slate-700 px-2 py-0.5">
+												{phaseResponses.length} responses linked
+											</span>
+											{#if phaseResponses.length}
+												<span class="rounded border border-slate-700 px-2 py-0.5">
+													{phaseResponses.reduce((sum, r) => sum + (r.votes || 0), 0)} total votes
+												</span>
+											{/if}
+										</div>
+										{#if activePhase.cards?.length}
+											<div>
+												<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">
+													Anchoring cards
+												</p>
+												<ul class="mt-2 space-y-2">
+													{#each activePhase.cards.slice(0, 3) as card}
+														<li class="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+															<p class="text-sm font-medium text-white">{card.title}</p>
+															{#if card.description}
+																<p class="mt-1 text-xs text-ink-muted line-clamp-2">
+																	{card.description}
+																</p>
+															{/if}
+														</li>
+													{/each}
+												</ul>
+												{#if activePhase.cards.length > 3}
+													<p class="mt-2 text-xs text-ink-2">
+														+{activePhase.cards.length - 3} more cards in this phase
+													</p>
+												{/if}
+											</div>
+										{/if}
+										{#if upcomingPhases.length}
+											<div>
+												<p class="text-xs uppercase tracking-[0.3em] text-ink-muted">Coming up</p>
+												<ul class="mt-2 space-y-2">
+													{#each upcomingPhases as phase}
+														<li class="rounded-lg border border-slate-800 bg-slate-900/50 p-3">
+															<p class="text-sm font-semibold text-white">
+																{phase.title ?? phase.phase_key ?? 'Phase'}
+															</p>
+															{#if phase.duration_minutes}
+																<p class="text-xs text-ink-muted">
+																	{phase.duration_minutes} minute block
+																</p>
+															{/if}
+														</li>
+													{/each}
+												</ul>
+											</div>
+										{/if}
+									</div>
+								{:else}
+									<p class="text-sm text-ink-muted">
+										No phase is active yet. Activate a phase from the facilitator console to surface
+										context here.
+									</p>
+								{/if}
+							</div>
+						{:else if boardId === 'leaderboard'}
+							<div
+								class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6"
+							>
+								<header class="mb-4 flex items-center justify-between">
+									<h3 class="text-lg font-semibold text-white">
+										{BOARD_DEFINITIONS[boardId].label}
+									</h3>
+									<IconStar class="h-4 w-4 text-brand" />
+								</header>
+								{#if leaderboardList.length > 0}
+									<div class="space-y-3">
+										{#each leaderboardList.slice(0, 5) as participant, index}
+											<div
+												class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2"
+											>
+												<div class="flex items-center gap-2">
+													<span class="text-xs font-bold text-brand">#{index + 1}</span>
+													<span class="text-sm text-white truncate max-w-[140px]"
+														>{participant.name ?? 'Participant'}</span
+													>
+												</div>
+												<div class="flex items-center gap-2 ml-auto">
+													<span class="text-xs text-cyan-200 flex-shrink-0"
+														>{participant.score ?? participant.points ?? 0} pts</span
+													>
+													{#if activeCode}
+														<a
+															class="rounded border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-ink-2 hover:bg-surface-muted"
+															href={`/story?code=${activeCode}&participant=${participant.id}`}
+															>Story</a
+														>
+													{/if}
+												</div>
+											</div>
+										{/each}
+									</div>
+								{:else}
+									<p class="text-sm text-ink-muted">Waiting for the first contributions.</p>
+								{/if}
+							</div>
+						{:else if boardId === 'timeline'}
+							<div
+								class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6"
+							>
+								<h3 class="text-lg font-semibold text-white">
+									{BOARD_DEFINITIONS[boardId].label}
+								</h3>
+								<p class="text-xs text-ink-2">
+									{BOARD_DEFINITIONS[boardId].description}
+								</p>
+								<div class="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1">
+									{#if timelineList.length}
+										{#each timelineList.slice().reverse() as item}
+											<div class="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
+												<div class="flex items-center justify-between text-xs text-ink-muted">
+													<span>{item.label}</span>
+													<span>{formatTimestamp(item.created_at)}</span>
+												</div>
+												<p class="mt-2 text-sm text-slate-200">{item.item_text}</p>
+												{#if item.owner}
+													<p class="mt-1 text-xs text-ink-2">Owner: {item.owner}</p>
+												{/if}
+											</div>
+										{/each}
+									{:else}
+										<p class="text-sm text-ink-muted">No timeline entries yet.</p>
+									{/if}
+								</div>
+							</div>
+						{:else if boardId === 'chat'}
+							<div
+								class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6"
+							>
+								<h3 class="text-lg font-semibold text-white">
+									{BOARD_DEFINITIONS[boardId].label}
+								</h3>
+								<p class="text-xs text-ink-2">
+									{BOARD_DEFINITIONS[boardId].description}
+								</p>
+								<div class="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1">
+									{#if chatList.length}
+										{#each chatList.slice().reverse() as entry}
+											<div class="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
+												<p class="text-xs text-ink-muted">
+													{participantsList.find((p) => p.id === entry.participant_id)?.name ??
+														'Anonymous'} · {formatTimestamp(entry.created_at)}
+												</p>
+												<p class="mt-1 text-sm text-slate-200">{entry.message}</p>
+											</div>
+										{/each}
+									{:else}
+										<p class="text-sm text-ink-muted">The chat feed will appear here live.</p>
+									{/if}
+								</div>
+							</div>
+						{:else if boardId === 'maturityDial' || boardId === 'inclusivityMeter'}
+							{#if activeCode}
+								{@const component = boardChartComponents[boardId]}
+								{@const dimensions = boardChartDimensions[boardId] ?? { width: 360, height: 360 }}
+								<div
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6"
+								>
+									<header class="mb-4">
 										<h3 class="text-lg font-semibold text-white">
 											{BOARD_DEFINITIONS[boardId].label}
 										</h3>
-										{#if activePhase}
-											<span class="rounded-full border border-cyan-400/30 px-3 py-1 text-xs text-cyan-200">
-												{phaseStatusLabels[activePhase.status]}
-											</span>
-										{/if}
+										<p class="text-xs text-ink-2">
+											{BOARD_DEFINITIONS[boardId].description}
+										</p>
 									</header>
-									{#if activePhase}
-										<div class="space-y-3 text-sm text-ink-muted">
-											{#if activePhase.description}
-												<p class="leading-relaxed">{activePhase.description}</p>
-											{/if}
-											<div class="flex flex-wrap gap-2 text-xs text-ink-muted">
-												<span class="rounded border border-slate-700 px-2 py-0.5">
-													{phaseQuestions.length} focus questions
-												</span>
-												<span class="rounded border border-slate-700 px-2 py-0.5">
-													{phaseResponses.length} responses linked
-												</span>
-												{#if phaseResponses.length}
-													<span class="rounded border border-slate-700 px-2 py-0.5">
-														{phaseResponses.reduce((sum, r) => sum + (r.votes || 0), 0)} total votes
-													</span>
-												{/if}
-											</div>
-											{#if activePhase.cards?.length}
-												<div>
-													<p class="text-xs uppercase tracking-[0.3em] text-cyan-200">
-														Anchoring cards
-													</p>
-													<ul class="mt-2 space-y-2">
-														{#each activePhase.cards.slice(0, 3) as card}
-															<li class="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-																<p class="text-sm font-medium text-white">{card.title}</p>
-																{#if card.description}
-																	<p class="mt-1 text-xs text-ink-muted line-clamp-2">
-																		{card.description}
-																	</p>
-																{/if}
-															</li>
-														{/each}
-													</ul>
-													{#if activePhase.cards.length > 3}
-														<p class="mt-2 text-xs text-ink-2">
-															+{activePhase.cards.length - 3} more cards in this phase
-														</p>
-													{/if}
-												</div>
-											{/if}
-											{#if upcomingPhases.length}
-												<div>
-													<p class="text-xs uppercase tracking-[0.3em] text-ink-muted">
-														Coming up
-													</p>
-													<ul class="mt-2 space-y-2">
-														{#each upcomingPhases as phase}
-															<li class="rounded-lg border border-slate-800 bg-slate-900/50 p-3">
-																<p class="text-sm font-semibold text-white">
-																	{phase.title ?? phase.phase_key ?? 'Phase'}
-																</p>
-																{#if phase.duration_minutes}
-																	<p class="text-xs text-ink-muted">
-																		{phase.duration_minutes} minute block
-																	</p>
-																{/if}
-															</li>
-														{/each}
-													</ul>
-												</div>
-											{/if}
+									{#if component}
+										<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
+											<svelte:component
+												this={component}
+												roomCode={activeCode}
+												width={dimensions.width}
+												height={dimensions.height}
+											/>
 										</div>
 									{:else}
 										<p class="text-sm text-ink-muted">
-											No phase is active yet. Activate a phase from the facilitator console to surface
-											context here.
+											This chart is unavailable for the current session.
 										</p>
 									{/if}
 								</div>
-							{:else if boardId === 'leaderboard'}
-								<div class="presentation-panel rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-6">
-									<header class="mb-4 flex items-center justify-between">
-										<h3 class="text-lg font-semibold text-white">
-											{BOARD_DEFINITIONS[boardId].label}
-										</h3>
-											<IconStar class="h-4 w-4 text-brand" />
-									</header>
-									{#if leaderboardList.length > 0}
-										<div class="space-y-3">
-											{#each leaderboardList.slice(0, 5) as participant, index}
-												<div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs font-bold text-brand">#{index + 1}</span>
-                      <span class="text-sm text-white truncate max-w-[140px]"
-                        >{participant.name ?? 'Participant'}</span
-                      >
-                    </div>
-                    <div class="flex items-center gap-2 ml-auto">
-                      <span class="text-xs text-cyan-200 flex-shrink-0">{participant.score ?? participant.points ?? 0} pts</span>
-                      {#if activeCode}
-                        <a
-                          class="rounded border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-ink-2 hover:bg-surface-muted"
-                          href={`/story?code=${activeCode}&participant=${participant.id}`}
-                        >Story</a>
-                      {/if}
-                    </div>
-												</div>
-											{/each}
-										</div>
-									{:else}
-										<p class="text-sm text-ink-muted">Waiting for the first contributions.</p>
-									{/if}
+							{:else}
+								<div
+									class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted"
+								>
+									Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
 								</div>
-							{:else if boardId === 'timeline'}
-								<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-									<h3 class="text-lg font-semibold text-white">
-										{BOARD_DEFINITIONS[boardId].label}
-									</h3>
-									<p class="text-xs text-ink-2">
-										{BOARD_DEFINITIONS[boardId].description}
-									</p>
-									<div class="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1">
-										{#if timelineList.length}
-											{#each timelineList.slice().reverse() as item}
-												<div class="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
-													<div class="flex items-center justify-between text-xs text-ink-muted">
-														<span>{item.label}</span>
-														<span>{formatTimestamp(item.created_at)}</span>
-													</div>
-													<p class="mt-2 text-sm text-slate-200">{item.item_text}</p>
-													{#if item.owner}
-														<p class="mt-1 text-xs text-ink-2">Owner: {item.owner}</p>
-													{/if}
-												</div>
-											{/each}
-										{:else}
-											<p class="text-sm text-ink-muted">No timeline entries yet.</p>
-										{/if}
-									</div>
-								</div>
-							{:else if boardId === 'chat'}
-								<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-									<h3 class="text-lg font-semibold text-white">
-										{BOARD_DEFINITIONS[boardId].label}
-									</h3>
-									<p class="text-xs text-ink-2">
-										{BOARD_DEFINITIONS[boardId].description}
-									</p>
-									<div class="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1">
-										{#if chatList.length}
-											{#each chatList.slice().reverse() as entry}
-												<div class="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
-													<p class="text-xs text-ink-muted">
-														{participantsList.find((p) => p.id === entry.participant_id)?.name ??
-														'Anonymous'} · {formatTimestamp(entry.created_at)}
-													</p>
-													<p class="mt-1 text-sm text-slate-200">{entry.message}</p>
-												</div>
-											{/each}
-										{:else}
-											<p class="text-sm text-ink-muted">The chat feed will appear here live.</p>
-										{/if}
-									</div>
-								</div>
-								{:else if boardId === 'maturityDial' || boardId === 'inclusivityMeter'}
-									{#if activeCode}
-										{@const component = boardChartComponents[boardId]}
-										{@const dimensions =
-											boardChartDimensions[boardId] ?? { width: 360, height: 360 }}
-										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-											<header class="mb-4">
-												<h3 class="text-lg font-semibold text-white">
-													{BOARD_DEFINITIONS[boardId].label}
-												</h3>
-												<p class="text-xs text-ink-2">
-													{BOARD_DEFINITIONS[boardId].description}
-												</p>
-											</header>
-											{#if component}
-												<div class="w-full overflow-hidden" style="height: {dimensions.height}px">
-													<svelte:component
-														this={component}
-														roomCode={activeCode}
-														width={dimensions.width}
-														height={dimensions.height}
-													/>
-												</div>
-											{:else}
-												<p class="text-sm text-ink-muted">
-													This chart is unavailable for the current session.
-												</p>
-											{/if}
-										</div>
-									{:else}
-										<div class="presentation-panel rounded-2xl border border-slate-700 bg-slate-900/60 p-6 text-sm text-ink-muted">
-											Connect to a session to stream the {BOARD_DEFINITIONS[boardId].label}.
-										</div>
-									{/if}
 							{/if}
-						{/each}
+						{/if}
+					{/each}
 				</div>
 			{/if}
 		</main>
 	{/if}
-	</div>
+</div>
 
 <style>
-   .presentation-shell {
-	   color: hsl(var(--text-secondary));
-	   background: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-elevated)) 50%, #ffffff 100%);
-   }
+	.presentation-shell {
+		color: hsl(var(--text-secondary));
+		background: linear-gradient(
+			180deg,
+			hsl(var(--surface)) 0%,
+			hsl(var(--surface-elevated)) 50%,
+			#ffffff 100%
+		);
+	}
 
 	.presentation-header {
 		background: hsl(var(--surface-elevated) / 0.92);

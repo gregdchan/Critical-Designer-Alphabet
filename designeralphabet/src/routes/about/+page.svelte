@@ -16,12 +16,12 @@
 	const page = data.page;
 
 	const heroTitle =
-		page?.heroTitle ?? page?.title ?? 'About the Critical Designer Planner Platform';
+		page?.heroTitle ?? page?.title ?? 'About the Critical Design Planner Platform';
 	const heroSubtitle =
 		page?.heroSubtitle ??
 		page?.localizedHeroSubtitle?.en ??
 		page?.localizedHeroSubtitle?.fr ??
-		'A collaborative workshop environment inspired by The Designer’s Critical Alphabet and built for inclusive design teams.';
+		'A digital platform for justice-centered design workshops.';
 
 	function toParagraphs(text?: string | null) {
 		if (!text) return [] as string[];
@@ -48,7 +48,7 @@
 			subtitle: 'Fusing academic insight with multiplayer facilitation',
 			body: [
 				'This platform translates The Designer’s Critical Alphabet into an interactive, digital experience—preserving Dr. Lesley-Ann Noel’s justice-centered prompts while extending them into modern collaboration tooling.',
-				'We focus on accessibility, multilingual content, and the ability for teams to examine power, bias, and representation together in real time.'
+				'We focus on accessibility, and the ability for teams to examine power, bias, and their positionality aroutogether in real time.'
 			],
 			accent: 'blue',
 			icon: IconStar
@@ -101,9 +101,7 @@
 			body: [
 				'Need workshop guidance or partnership? Reach out to co-create facilitation roadmaps, integrate the platform into your organization, or explore bespoke justice-centered engagements.'
 			],
-			bullets: [
-				'Email: gregdchan@gmail.com'
-			],
+			bullets: ['Email: gregdchan@gmail.com'],
 			accent: 'emerald',
 			icon: IconLifebuoy
 		}
@@ -122,7 +120,7 @@
 			header: 'bg-brand/20 text-brand',
 			border: 'border-cyan-500/40'
 		},
-			amber: {
+		amber: {
 			header: 'bg-brand/20 text-brand',
 			border: 'border-brand/40'
 		},
@@ -168,51 +166,49 @@
 </svelte:head>
 
 <div class="space-y-12">
-   <div class="text-center space-y-4">
-	   <h1 class="text-4xl font-bold text-primary">{heroTitle}</h1>
-	   <p class="text-lg text-secondary max-w-3xl mx-auto">{heroSubtitle}</p>
-	   {#if summaryParagraphs.length}
-		   <div class="max-w-3xl mx-auto space-y-2 text-secondary">
-			   {#each summaryParagraphs as paragraph}
-				   <p>{paragraph}</p>
-			   {/each}
-		   </div>
-	   {:else if data.error}
-		   <p class="text-sm text-brand">{data.error}</p>
-	   {/if}
-   </div>
+	<div class="text-center space-y-4">
+		<h1 class="text-4xl font-bold text-primary">{heroTitle}</h1>
+		<p class="text-lg text-secondary max-w-3xl mx-auto">{heroSubtitle}</p>
+		{#if summaryParagraphs.length}
+			<div class="max-w-3xl mx-auto space-y-2 text-secondary">
+				{#each summaryParagraphs as paragraph}
+					<p>{paragraph}</p>
+				{/each}
+			</div>
+		{:else if data.error}
+			<p class="text-sm text-brand">{data.error}</p>
+		{/if}
+	</div>
 
-   {#each sections as section, index}
-	   <section
-		   class={`panel p-8 ${section.styles?.border ?? ''}`}
-	   >
-		   <div class="flex items-start gap-4 mb-6">
-			   <div
-				   class={`flex h-12 w-12 items-center justify-center rounded-lg ${section.styles?.header ?? 'bg-brand/20 text-brand'}`}
-			   >
-				   <svelte:component this={section.icon ?? icons[index % icons.length]} class="h-6 w-6" />
-			   </div>
-			   <div>
-				   <h2 class="text-2xl font-semibold text-primary mb-2">{section.title}</h2>
-				   {#if section.subtitle}
-					   <p class="text-secondary">{section.subtitle}</p>
-				   {/if}
-			   </div>
-		   </div>
+	{#each sections as section, index}
+		<section class={`panel p-8 ${section.styles?.border ?? ''}`}>
+			<div class="flex items-start gap-4 mb-6">
+				<div
+					class={`flex h-12 w-12 items-center justify-center rounded-lg ${section.styles?.header ?? 'bg-brand/20 text-brand'}`}
+				>
+					<svelte:component this={section.icon ?? icons[index % icons.length]} class="h-6 w-6" />
+				</div>
+				<div>
+					<h2 class="text-2xl font-semibold text-primary mb-2">{section.title}</h2>
+					{#if section.subtitle}
+						<p class="text-secondary">{section.subtitle}</p>
+					{/if}
+				</div>
+			</div>
 
-		   <div class="space-y-4 text-secondary">
-			   {#each section.body as paragraph}
-				   <p>{paragraph}</p>
-			   {/each}
+			<div class="space-y-4 text-secondary">
+				{#each section.body as paragraph}
+					<p>{paragraph}</p>
+				{/each}
 
-			   {#if section.bullets?.length}
-				   <ul class="list-disc list-inside space-y-2 ml-4 text-secondary">
-					   {#each section.bullets as bullet}
-						   <li>{bullet}</li>
-					   {/each}
-				   </ul>
-			   {/if}
-		   </div>
-	   </section>
-   {/each}
+				{#if section.bullets?.length}
+					<ul class="list-disc list-inside space-y-2 ml-4 text-secondary">
+						{#each section.bullets as bullet}
+							<li>{bullet}</li>
+						{/each}
+					</ul>
+				{/if}
+			</div>
+		</section>
+	{/each}
 </div>

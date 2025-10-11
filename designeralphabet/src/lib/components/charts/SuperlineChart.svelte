@@ -24,15 +24,16 @@
 	// Track which questions are visible
 	let visibleQuestions = new Set<string>();
 
-	const ro = typeof ResizeObserver !== 'undefined'
-		? new ResizeObserver((entries) => {
-				const r = entries[0]?.contentRect;
-				if (r) {
-					width = Math.max(300, r.width);
-					height = Math.max(300, r.height);
-				}
-			})
-		: null;
+	const ro =
+		typeof ResizeObserver !== 'undefined'
+			? new ResizeObserver((entries) => {
+					const r = entries[0]?.contentRect;
+					if (r) {
+						width = Math.max(300, r.width);
+						height = Math.max(300, r.height);
+					}
+				})
+			: null;
 
 	type DataPoint = {
 		timestamp: Date;
@@ -57,20 +58,20 @@
 		questions: Question[],
 		theme: ReturnType<typeof getThemeColors>
 	): QuestionSeries[] {
-		const questionMap = new Map(questions.map(q => [q.id, q]));
-		const scaleQuestions = questions.filter(q => q.response_type === 'scale');
+		const questionMap = new Map(questions.map((q) => [q.id, q]));
+		const scaleQuestions = questions.filter((q) => q.response_type === 'scale');
 
 		if (scaleQuestions.length === 0) return [];
 
 		// Initialize all as visible
 		if (visibleQuestions.size === 0) {
-			scaleQuestions.forEach(q => visibleQuestions.add(q.id));
+			scaleQuestions.forEach((q) => visibleQuestions.add(q.id));
 		}
 
 		const seriesMap = new Map<string, DataPoint[]>();
 
 		// Group responses by question
-		responses.forEach(r => {
+		responses.forEach((r) => {
 			const q = questionMap.get(r.question_id || '');
 			if (!q || q.response_type !== 'scale') return;
 
@@ -102,7 +103,7 @@
 			// Sort by timestamp
 			data.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
-			const values = data.map(d => d.value);
+			const values = data.map((d) => d.value);
 			const min = Math.min(...values);
 			const max = Math.max(...values);
 			const avg = values.reduce((a, b) => a + b, 0) / values.length;
@@ -145,7 +146,7 @@
 			return;
 		}
 
-		const visibleSeries = series.filter(s => s.visible);
+		const visibleSeries = series.filter((s) => s.visible);
 
 		const margin = { top: 40, right: 200, bottom: 60, left: 60 };
 		const innerWidth = width - margin.left - margin.right;
@@ -155,7 +156,7 @@
 		const g = svgSelection.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
 		// Get all timestamps and values
-		const allData = visibleSeries.flatMap(s => s.data);
+		const allData = visibleSeries.flatMap((s) => s.data);
 		if (allData.length === 0) {
 			g.append('text')
 				.attr('x', innerWidth / 2)
@@ -167,9 +168,9 @@
 			return;
 		}
 
-		const timeExtent = d3.extent(allData, d => d.timestamp) as [Date, Date];
+		const timeExtent = d3.extent(allData, (d) => d.timestamp) as [Date, Date];
 		const globalMin = 0; // Start at 0 for better comparison
-		const globalMax = Math.max(...visibleSeries.map(s => s.max), 10);
+		const globalMax = Math.max(...visibleSeries.map((s) => s.max), 10);
 
 		// Scales
 		const xScale = d3.scaleTime().domain(timeExtent).range([0, innerWidth]);
@@ -177,7 +178,10 @@
 		const yScale = d3.scaleLinear().domain([globalMin, globalMax]).range([innerHeight, 0]).nice();
 
 		// Axes
-		const xAxis = d3.axisBottom(xScale).ticks(6).tickFormat(d3.timeFormat('%H:%M') as any);
+		const xAxis = d3
+			.axisBottom(xScale)
+			.ticks(6)
+			.tickFormat(d3.timeFormat('%H:%M') as any);
 		const yAxis = d3.axisLeft(yScale).ticks(8);
 
 		g.append('g')
@@ -187,27 +191,28 @@
 			.selectAll('text')
 			.attr('font-size', '11px');
 
-		g.append('g')
-			.call(yAxis)
-			.attr('color', theme.ink2)
-			.selectAll('text')
-			.attr('font-size', '11px');
+		g.append('g').call(yAxis).attr('color', theme.ink2).selectAll('text').attr('font-size', '11px');
 
 		// Grid lines
 		g.append('g')
 			.attr('class', 'grid')
 			.attr('opacity', 0.1)
-			.call(d3.axisLeft(yScale).tickSize(-innerWidth).tickFormat('' as any));
+			.call(
+				d3
+					.axisLeft(yScale)
+					.tickSize(-innerWidth)
+					.tickFormat('' as any)
+			);
 
 		// Line generator
 		const line = d3
 			.line<DataPoint>()
-			.x(d => xScale(d.timestamp))
-			.y(d => yScale(d.value))
+			.x((d) => xScale(d.timestamp))
+			.y((d) => yScale(d.value))
 			.curve(d3.curveMonotoneX);
 
 		// Draw lines
-		visibleSeries.forEach(s => {
+		visibleSeries.forEach((s) => {
 			g.append('path')
 				.datum(s.data)
 				.attr('fill', 'none')
@@ -221,8 +226,8 @@
 				.data(s.data)
 				.join('circle')
 				.attr('class', `dot-${s.questionId}`)
-				.attr('cx', d => xScale(d.timestamp))
-				.attr('cy', d => yScale(d.value))
+				.attr('cx', (d) => xScale(d.timestamp))
+				.attr('cy', (d) => yScale(d.value))
 				.attr('r', 4)
 				.attr('fill', s.color)
 				.attr('stroke', 'white')
@@ -260,14 +265,14 @@
 						`
 						)
 						.style('left', event.pageX + 15 + 'px')
-						.style('top', event.pageY - 10 + 'px')
+						.style('top', event.pageY + 8 + 'px')
 						.style('opacity', 1);
 				})
 				.on('mousemove', function (event: any) {
 					d3.select('body')
 						.selectAll('.superline-tooltip')
 						.style('left', event.pageX + 15 + 'px')
-						.style('top', event.pageY - 10 + 'px');
+						.style('top', event.pageY + 8 + 'px');
 				})
 				.on('mouseleave', function () {
 					d3.select(this).transition().duration(200).attr('r', 4);
@@ -407,7 +412,13 @@
 </script>
 
 <div bind:this={container} class="relative superline-container">
-	<svg bind:this={svg} viewBox="0 0 {width} {height}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"></svg>
+	<svg
+		bind:this={svg}
+		viewBox="0 0 {width} {height}"
+		width="100%"
+		height="100%"
+		preserveAspectRatio="xMidYMid meet"
+	></svg>
 </div>
 
 <style>
@@ -429,11 +440,7 @@
 		width: 100%;
 		height: 100%;
 		min-height: 500px;
-		background: linear-gradient(
-			135deg,
-			hsl(var(--surface-muted)) 0%,
-			hsl(var(--surface)) 100%
-		);
+		background: linear-gradient(135deg, hsl(var(--surface-muted)) 0%, hsl(var(--surface)) 100%);
 		border-radius: 12px;
 	}
 </style>

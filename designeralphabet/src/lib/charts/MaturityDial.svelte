@@ -4,7 +4,7 @@
 	import { scaleLinear } from 'd3-scale';
 	import { interpolate } from 'd3-interpolate';
 	import BaseChart from './BaseChart.svelte';
-import { getMaturityColor, getThemeColors } from '$lib/utils/colors';
+	import { getMaturityColor, getThemeColors } from '$lib/utils/colors';
 	import type { ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
@@ -59,11 +59,11 @@ import { getMaturityColor, getThemeColors } from '$lib/utils/colors';
 		chart.selectAll('*').remove();
 
 		// Create background arcs for all stages
-	chart
-		.selectAll('.background-arc')
-		.data(stages)
-		.enter()
-		.append('path')
+		chart
+			.selectAll('.background-arc')
+			.data(stages)
+			.enter()
+			.append('path')
 			.attr('class', 'background-arc')
 			.attr('transform', `translate(${centerX}, ${centerY})`)
 			.attr('d', (d, i) => {
@@ -74,20 +74,20 @@ import { getMaturityColor, getThemeColors } from '$lib/utils/colors';
 					outerRadius: radius * 0.9
 				});
 			})
-		.attr('fill', 'hsl(var(--surface) / 0.12)')
-		.attr('stroke', 'hsl(var(--border-subtle) / 0.35)')
+			.attr('fill', 'hsl(var(--surface) / 0.12)')
+			.attr('stroke', 'hsl(var(--border-subtle) / 0.35)')
 			.attr('stroke-width', 1);
 
 		// Create progress arcs
-	const progressArcs = chart
-		.selectAll('.progress-arc')
-		.data(stages.slice(0, maturityLevel))
-		.enter()
-		.append('path')
+		const progressArcs = chart
+			.selectAll('.progress-arc')
+			.data(stages.slice(0, maturityLevel))
+			.enter()
+			.append('path')
 			.attr('class', 'progress-arc')
 			.attr('transform', `translate(${centerX}, ${centerY})`)
-		.attr('fill', (d, i) => maturityPalette[i] ?? themeColors.brand)
-		.attr('stroke', (d, i) => maturityPalette[i] ?? themeColors.brand)
+			.attr('fill', (d, i) => maturityPalette[i] ?? themeColors.brand)
+			.attr('stroke', (d, i) => maturityPalette[i] ?? themeColors.brand)
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#neon-glow)')
 			.attr('opacity', 0);
@@ -159,10 +159,10 @@ import { getMaturityColor, getThemeColors } from '$lib/utils/colors';
 			.attr('transform', `translate(${centerX}, ${centerY})`);
 
 		// Center circle
-	centerGroup
-		.append('circle')
-		.attr('r', radius * 0.5)
-		.attr('fill', 'hsl(var(--surface) / 0.92)')
+		centerGroup
+			.append('circle')
+			.attr('r', radius * 0.5)
+			.attr('fill', 'hsl(var(--surface) / 0.92)')
 			.attr('stroke', getMaturityColor(maturityLevel))
 			.attr('stroke-width', 3)
 			.attr('filter', 'url(#neon-glow)')

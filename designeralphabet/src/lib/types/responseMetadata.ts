@@ -84,7 +84,10 @@ export type ResponseMetadata =
 /**
  * Helper to create risk assessment metadata
  */
-export function createRiskAssessmentMetadata(impact: number, likelihood: number): RiskAssessmentMetadata {
+export function createRiskAssessmentMetadata(
+	impact: number,
+	likelihood: number
+): RiskAssessmentMetadata {
 	return {
 		type: 'riskAssessment',
 		impact: Math.max(1, Math.min(5, impact)),
@@ -95,7 +98,10 @@ export function createRiskAssessmentMetadata(impact: number, likelihood: number)
 /**
  * Helper to create maturity dial metadata
  */
-export function createMaturityDialMetadata(level: number, stageName?: string): MaturityDialMetadata {
+export function createMaturityDialMetadata(
+	level: number,
+	stageName?: string
+): MaturityDialMetadata {
 	return {
 		type: 'maturityDial',
 		level: Math.max(1, Math.min(5, level)),
@@ -106,7 +112,10 @@ export function createMaturityDialMetadata(level: number, stageName?: string): M
 /**
  * Helper to create inclusivity meter metadata
  */
-export function createInclusivityMeterMetadata(score: number, dimension?: string): InclusivityMeterMetadata {
+export function createInclusivityMeterMetadata(
+	score: number,
+	dimension?: string
+): InclusivityMeterMetadata {
 	return {
 		type: 'inclusivityMeter',
 		score: Math.max(0, Math.min(100, score)),
@@ -117,7 +126,12 @@ export function createInclusivityMeterMetadata(score: number, dimension?: string
 /**
  * Helper to create landscape metadata
  */
-export function createLandscapeMetadata(x: number, y: number, xLabel?: string, yLabel?: string): LandscapeMetadata {
+export function createLandscapeMetadata(
+	x: number,
+	y: number,
+	xLabel?: string,
+	yLabel?: string
+): LandscapeMetadata {
 	return {
 		type: 'landscape',
 		x,

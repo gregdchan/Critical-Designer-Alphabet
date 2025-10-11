@@ -215,10 +215,30 @@
 			</text>
 
 			<!-- Min/Max labels -->
-			<text x={padding} y={canvasHeight - padding + 25} text-anchor="middle" fill="gray" font-size="10">{minX}</text>
-			<text x={canvasWidth - padding} y={canvasHeight - padding + 25} text-anchor="middle" fill="gray" font-size="10">{maxX}</text>
-			<text x={padding - 20} y={canvasHeight - padding + 5} text-anchor="end" fill="gray" font-size="10">{minY}</text>
-			<text x={padding - 20} y={padding + 5} text-anchor="end" fill="gray" font-size="10">{maxY}</text>
+			<text
+				x={padding}
+				y={canvasHeight - padding + 25}
+				text-anchor="middle"
+				fill="gray"
+				font-size="10">{minX}</text
+			>
+			<text
+				x={canvasWidth - padding}
+				y={canvasHeight - padding + 25}
+				text-anchor="middle"
+				fill="gray"
+				font-size="10">{maxX}</text
+			>
+			<text
+				x={padding - 20}
+				y={canvasHeight - padding + 5}
+				text-anchor="end"
+				fill="gray"
+				font-size="10">{minY}</text
+			>
+			<text x={padding - 20} y={padding + 5} text-anchor="end" fill="gray" font-size="10"
+				>{maxY}</text
+			>
 
 			<!-- Marker -->
 			<g>

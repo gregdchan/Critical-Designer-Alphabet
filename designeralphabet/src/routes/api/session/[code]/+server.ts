@@ -15,8 +15,8 @@ export const GET: RequestHandler = async ({ params, setHeaders }) => {
 		// Prevent caching to ensure fresh data from Supabase
 		setHeaders({
 			'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-			'Pragma': 'no-cache',
-			'Expires': '0'
+			Pragma: 'no-cache',
+			Expires: '0'
 		});
 
 		const session = await getSession(params.code);

@@ -6,7 +6,7 @@
 	export let width = 600;
 	export let height = 400;
 	export let margins: ChartMargins = { top: 20, right: 20, bottom: 30, left: 40 };
-export let theme: 'dark' | 'light' = 'light';
+	export let theme: 'dark' | 'light' = 'light';
 	export let title = '';
 	export let className = '';
 	export let ariaLabel = '';
@@ -82,29 +82,29 @@ export let theme: 'dark' | 'light' = 'light';
 		class="chart-svg w-full h-full"
 		aria-labelledby={title ? 'chart-title' : undefined}
 	>
-			<defs>
-				<!-- Soft glow filter -->
-				<filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
-					<feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-					<feMerge>
-						<feMergeNode in="coloredBlur" />
-						<feMergeNode in="SourceGraphic" />
-					</feMerge>
-				</filter>
+		<defs>
+			<!-- Soft glow filter -->
+			<filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+				<feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+				<feMerge>
+					<feMergeNode in="coloredBlur" />
+					<feMergeNode in="SourceGraphic" />
+				</feMerge>
+			</filter>
 
-				<!-- Gradient definitions -->
-				<linearGradient id="neon-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-					<stop offset="0%" style="stop-color:var(--chart-1);stop-opacity:1" />
-					<stop offset="50%" style="stop-color:var(--chart-5);stop-opacity:1" />
-					<stop offset="100%" style="stop-color:var(--chart-3);stop-opacity:1" />
-				</linearGradient>
+			<!-- Gradient definitions -->
+			<linearGradient id="neon-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+				<stop offset="0%" style="stop-color:var(--chart-1);stop-opacity:1" />
+				<stop offset="50%" style="stop-color:var(--chart-5);stop-opacity:1" />
+				<stop offset="100%" style="stop-color:var(--chart-3);stop-opacity:1" />
+			</linearGradient>
 
-				<radialGradient id="radial-glow" cx="50%" cy="50%" r="50%">
-					<stop offset="0%" style="stop-color:var(--chart-2);stop-opacity:0.6" />
-					<stop offset="70%" style="stop-color:var(--chart-2);stop-opacity:0.2" />
-					<stop offset="100%" style="stop-color:var(--chart-2);stop-opacity:0" />
-				</radialGradient>
-			</defs>
+			<radialGradient id="radial-glow" cx="50%" cy="50%" r="50%">
+				<stop offset="0%" style="stop-color:var(--chart-2);stop-opacity:0.6" />
+				<stop offset="70%" style="stop-color:var(--chart-2);stop-opacity:0.2" />
+				<stop offset="100%" style="stop-color:var(--chart-2);stop-opacity:0" />
+			</radialGradient>
+		</defs>
 
 		<!-- Chart content area -->
 		<g class="chart-content" transform="translate({margins.left},{margins.top})">

@@ -76,7 +76,9 @@
 				<path
 					d="M {x1} {y1} A 90 90 0 {largeArc} 1 {x2} {y2}"
 					fill="none"
-					stroke={selectedLevel === stage.level ? 'hsl(var(--brand))' : `hsl(var(--chart-${(i % 5) + 1}))`}
+					stroke={selectedLevel === stage.level
+						? 'hsl(var(--brand))'
+						: `hsl(var(--chart-${(i % 5) + 1}))`}
 					stroke-width="20"
 					stroke-linecap="round"
 					opacity={selectedLevel === stage.level ? 1 : 0.4}
@@ -117,7 +119,7 @@
 				<div class="flex items-center gap-3">
 					<div
 						class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-all"
-						style="background-color: hsl(var(--chart-{(stage.level - 1) % 5 + 1}))"
+						style="background-color: hsl(var(--chart-{((stage.level - 1) % 5) + 1}))"
 						class:scale-110={selectedLevel === stage.level}
 					>
 						{stage.level}
@@ -129,7 +131,11 @@
 					{#if selectedLevel === stage.level}
 						<div class="text-blue-500">
 							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"
+								/>
 							</svg>
 						</div>
 					{/if}

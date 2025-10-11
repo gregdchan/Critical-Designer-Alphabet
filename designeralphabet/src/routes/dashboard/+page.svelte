@@ -173,7 +173,9 @@
 			{:else}
 				<!-- Key Metrics -->
 				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div
+						class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow"
+					>
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-brand"
@@ -187,7 +189,9 @@
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div
+						class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow"
+					>
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 text-green-600"
@@ -203,7 +207,9 @@
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div
+						class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow"
+					>
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600"
@@ -217,7 +223,9 @@
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div
+						class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow"
+					>
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10 text-brand"
@@ -231,7 +239,9 @@
 						</div>
 					</div>
 
-					<div class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
+					<div
+						class="surface rounded-xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow"
+					>
 						<div class="flex items-center gap-3">
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-accent-critical"
@@ -282,8 +292,8 @@
 									</button>
 								{/each}
 							</div>
-				</div>
-			</div>
+						</div>
+					</div>
 
 					<!-- Session Details -->
 					<div class="lg:col-span-2">
@@ -361,7 +371,9 @@
 									</h3>
 									<div class="space-y-3">
 										{#each leaderboard as participant, index}
-											<div class="flex items-center gap-4 p-3 rounded-lg border border-line hover:bg-surface-muted transition-colors">
+											<div
+												class="flex items-center gap-4 p-3 rounded-lg border border-line hover:bg-surface-muted transition-colors"
+											>
 												<div class="flex items-center gap-3">
 													<span class="text-lg font-semibold text-primary w-6 text-center"
 														>#{index + 1}</span
@@ -375,12 +387,13 @@
 													<div>
 														<p class="text-sm font-medium text-primary">{participant.name}</p>
 														<p class="text-xs text-secondary">
-															{participant.contributionCount} ideas • {participant.votesReceived} votes received
+															{participant.contributionCount} ideas • {participant.votesReceived} votes
+															received
 														</p>
 													</div>
 												</div>
-                <div class="ml-auto flex items-center gap-2">
-                  {#if participant.badges && participant.badges.length > 0}
+												<div class="ml-auto flex items-center gap-2">
+													{#if participant.badges && participant.badges.length > 0}
 														<div class="flex -space-x-1">
 															{#each participant.badges.slice(0, 3) as badge}
 																<span class="inline-block text-sm" title={badge.name || badge}
@@ -394,13 +407,13 @@
 															{/if}
 														</div>
 													{/if}
-                  <span class="text-lg font-semibold text-brand">{participant.score}</span>
-                  <a
-                    class="rounded-md border border-line px-2 py-1 text-xs text-ink-2 hover:bg-surface-muted"
-                    href={`/story?code=${selectedSession.code}&participant=${participant.id}`}
-                    title="Open participant story"
-                  >Story</a>
-                </div>
+													<span class="text-lg font-semibold text-brand">{participant.score}</span>
+													<a
+														class="rounded-md border border-line px-2 py-1 text-xs text-ink-2 hover:bg-surface-muted"
+														href={`/story?code=${selectedSession.code}&participant=${participant.id}`}
+														title="Open participant story">Story</a
+													>
+												</div>
 											</div>
 										{/each}
 									</div>

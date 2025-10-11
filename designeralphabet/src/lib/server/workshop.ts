@@ -401,7 +401,13 @@ export async function addParticipant({
 	email?: string;
 	deviceId?: string;
 }) {
-	console.log('[addParticipant] Creating participant:', { code, name, role, email: email ? '***' : null, deviceId: deviceId ? '***' : null });
+	console.log('[addParticipant] Creating participant:', {
+		code,
+		name,
+		role,
+		email: email ? '***' : null,
+		deviceId: deviceId ? '***' : null
+	});
 
 	// Check if participant with this email already exists in this session
 	if (email) {
@@ -413,7 +419,10 @@ export async function addParticipant({
 			.maybeSingle();
 
 		if (existing.data) {
-			console.log('[addParticipant] Found existing participant by email, returning:', existing.data.id);
+			console.log(
+				'[addParticipant] Found existing participant by email, returning:',
+				existing.data.id
+			);
 			const participants = await getParticipants(code);
 			broadcast(code, { type: 'PRESENCE', participants });
 			return asParticipant(existing.data);
@@ -430,7 +439,10 @@ export async function addParticipant({
 			.maybeSingle();
 
 		if (existing.data) {
-			console.log('[addParticipant] Found existing participant by device_id, returning:', existing.data.id);
+			console.log(
+				'[addParticipant] Found existing participant by device_id, returning:',
+				existing.data.id
+			);
 			const participants = await getParticipants(code);
 			broadcast(code, { type: 'PRESENCE', participants });
 			return asParticipant(existing.data);
@@ -565,11 +577,9 @@ export async function getQuestions(code: string): Promise<Question[]> {
 	const questions = ensureArray(response, 'getQuestions');
 
 	// Ensure recommended_dashboards is always an array (Supabase auto-parses JSONB)
-	return questions.map(q => ({
+	return questions.map((q) => ({
 		...q,
-		recommended_dashboards: Array.isArray(q.recommended_dashboards)
-			? q.recommended_dashboards
-			: []
+		recommended_dashboards: Array.isArray(q.recommended_dashboards) ? q.recommended_dashboards : []
 	})) as Question[];
 }
 

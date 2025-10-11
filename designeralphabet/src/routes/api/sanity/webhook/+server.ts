@@ -29,10 +29,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 
 			const body = await request.text();
-			const hash = crypto
-				.createHmac('sha256', SANITY_WEBHOOK_SECRET)
-				.update(body)
-				.digest('hex');
+			const hash = crypto.createHmac('sha256', SANITY_WEBHOOK_SECRET).update(body).digest('hex');
 
 			if (signature !== hash) {
 				console.error('[Sanity Webhook] Invalid signature');
@@ -117,25 +114,25 @@ async function handleWebhook(payload: any) {
 		order_index: question.orderIndex ?? question.order_index ?? 0,
 		recommended_dashboards: Array.isArray(question.recommendedDashboards)
 			? question.recommendedDashboards
-			: (question.recommended_dashboards || [])
+			: question.recommended_dashboards || []
 	};
 
-       // Always upsert (insert or update) the question to ensure config/options are synced
-       const { data, error } = await supabaseAdmin
-	       .from('questions')
-	       .upsert([questionData], { onConflict: 'room_code,text' })
-	       .select('id')
-	       .maybeSingle();
+	// Always upsert (insert or update) the question to ensure config/options are synced
+	const { data, error } = await supabaseAdmin
+		.from('questions')
+		.upsert([questionData], { onConflict: 'room_code,text' })
+		.select('id')
+		.maybeSingle();
 
-       if (error) {
-	       console.error('[Sanity Webhook] Upsert failed:', error);
-	       return json({ success: false, error: error.message }, { status: 500 });
-       }
+	if (error) {
+		console.error('[Sanity Webhook] Upsert failed:', error);
+		return json({ success: false, error: error.message }, { status: 500 });
+	}
 
-       console.log('[Sanity Webhook] Question upserted successfully');
-       return json({
-	       success: true,
-	       message: 'Question upserted',
-	       questionId: data?.id
-       });
+	console.log('[Sanity Webhook] Question upserted successfully');
+	return json({
+		success: true,
+		message: 'Question upserted',
+		questionId: data?.id
+	});
 }

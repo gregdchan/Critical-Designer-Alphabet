@@ -5,8 +5,8 @@
 	import { scaleLinear, scaleTime } from 'd3-scale';
 	import { extent, max } from 'd3-array';
 	import BaseChart from './BaseChart.svelte';
-import { useTimeline } from '$lib/hooks/useSupabaseRealtime';
-import { getThemeColors } from '$lib/utils/colors';
+	import { useTimeline } from '$lib/hooks/useSupabaseRealtime';
+	import { getThemeColors } from '$lib/utils/colors';
 	import type { ParticipationPoint, ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
@@ -211,17 +211,17 @@ import { getThemeColors } from '$lib/utils/colors';
 			.attr('stroke-dashoffset', 0);
 
 		// Add data points
-	chart
-		.selectAll('.pulse-dot')
-		.data(participationData)
-		.enter()
-		.append('circle')
-		.attr('class', 'pulse-dot')
-		.attr('cx', (d) => xScale(d.timestamp))
-		.attr('cy', (d) => yScale(d.submissions))
-		.attr('r', 0)
-		.attr('fill', primary)
-		.attr('stroke', 'white')
+		chart
+			.selectAll('.pulse-dot')
+			.data(participationData)
+			.enter()
+			.append('circle')
+			.attr('class', 'pulse-dot')
+			.attr('cx', (d) => xScale(d.timestamp))
+			.attr('cy', (d) => yScale(d.submissions))
+			.attr('r', 0)
+			.attr('fill', primary)
+			.attr('stroke', 'white')
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#neon-glow)')
 			.transition()
@@ -304,14 +304,14 @@ import { getThemeColors } from '$lib/utils/colors';
 				.attr('class', 'fairness-indicator')
 				.attr('transform', `translate(${innerWidth - 100}, 20)`);
 
-		multiplierGroup
-			.append('rect')
-			.attr('width', 90)
-			.attr('height', 40)
-			.attr('rx', 5)
-			.attr('fill', 'hsl(var(--surface) / 0.92)')
-			.attr('stroke', themeColors.accentWarm)
-			.attr('stroke-width', 1);
+			multiplierGroup
+				.append('rect')
+				.attr('width', 90)
+				.attr('height', 40)
+				.attr('rx', 5)
+				.attr('fill', 'hsl(var(--surface) / 0.92)')
+				.attr('stroke', themeColors.accentWarm)
+				.attr('stroke-width', 1);
 
 			multiplierGroup
 				.append('text')
@@ -323,16 +323,16 @@ import { getThemeColors } from '$lib/utils/colors';
 				.attr('font-size', '10px')
 				.text('Fairness');
 
-		multiplierGroup
-			.append('text')
-			.attr('x', 45)
-			.attr('y', 30)
-			.attr('text-anchor', 'middle')
-			.attr('fill', themeColors.accentWarm)
-			.attr('font-family', 'Orbitron, sans-serif')
-			.attr('font-size', '12px')
-			.attr('font-weight', 'bold')
-			.text(`×${latestData.fairnessMultiplier.toFixed(1)}`);
+			multiplierGroup
+				.append('text')
+				.attr('x', 45)
+				.attr('y', 30)
+				.attr('text-anchor', 'middle')
+				.attr('fill', themeColors.accentWarm)
+				.attr('font-family', 'Orbitron, sans-serif')
+				.attr('font-size', '12px')
+				.attr('font-weight', 'bold')
+				.text(`×${latestData.fairnessMultiplier.toFixed(1)}`);
 		}
 	}
 

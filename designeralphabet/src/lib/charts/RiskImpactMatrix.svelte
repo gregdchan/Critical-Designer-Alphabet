@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { select } from 'd3-selection';
 	import { scaleLinear, scaleSqrt } from 'd3-scale';
-import BaseChart from './BaseChart.svelte';
-import { useResponses } from '$lib/hooks/useSupabaseRealtime';
-import { getRiskColor, getThemeColors } from '$lib/utils/colors';
+	import BaseChart from './BaseChart.svelte';
+	import { useResponses } from '$lib/hooks/useSupabaseRealtime';
+	import { getRiskColor, getThemeColors } from '$lib/utils/colors';
 	import type { RiskDatum, ChartDimensions } from '$lib/types/charts';
 
 	export let roomCode: string;
@@ -82,7 +82,7 @@ import { getRiskColor, getThemeColors } from '$lib/utils/colors';
 		if (!svgElement || !dimensions || !riskData.length) return;
 
 		const { innerWidth, innerHeight } = dimensions;
- 		const themeColors = getThemeColors();
+		const themeColors = getThemeColors();
 
 		// Scales
 		const xScale = scaleLinear().domain([0.5, 5.5]).range([0, innerWidth]);
@@ -134,40 +134,40 @@ import { getRiskColor, getThemeColors } from '$lib/utils/colors';
 			}
 		];
 
-	chart
-		.selectAll('.quadrant')
-		.data(quadrants)
-		.enter()
-		.append('rect')
-		.attr('class', 'quadrant')
-		.attr('x', (d) => d.x)
-		.attr('y', (d) => d.y)
-		.attr('width', (d) => d.width)
-		.attr('height', (d) => d.height)
-		.attr('fill', (d) => {
-			switch (d.risk) {
-				case 'low':
-					return 'hsl(var(--risk-low) / 0.12)';
-				case 'medium':
-					return 'hsl(var(--risk-medium) / 0.12)';
-				case 'high':
-					return 'hsl(var(--risk-high) / 0.12)';
-				default:
-					return 'hsl(var(--surface) / 0.08)';
-			}
-		})
-		.attr('stroke', (d) => {
-			switch (d.risk) {
-				case 'low':
-					return themeColors.risk.low;
-				case 'medium':
-					return themeColors.risk.medium;
-				case 'high':
-					return themeColors.risk.high;
-				default:
-					return 'hsl(var(--border-subtle) / 0.35)';
-			}
-		})
+		chart
+			.selectAll('.quadrant')
+			.data(quadrants)
+			.enter()
+			.append('rect')
+			.attr('class', 'quadrant')
+			.attr('x', (d) => d.x)
+			.attr('y', (d) => d.y)
+			.attr('width', (d) => d.width)
+			.attr('height', (d) => d.height)
+			.attr('fill', (d) => {
+				switch (d.risk) {
+					case 'low':
+						return 'hsl(var(--risk-low) / 0.12)';
+					case 'medium':
+						return 'hsl(var(--risk-medium) / 0.12)';
+					case 'high':
+						return 'hsl(var(--risk-high) / 0.12)';
+					default:
+						return 'hsl(var(--surface) / 0.08)';
+				}
+			})
+			.attr('stroke', (d) => {
+				switch (d.risk) {
+					case 'low':
+						return themeColors.risk.low;
+					case 'medium':
+						return themeColors.risk.medium;
+					case 'high':
+						return themeColors.risk.high;
+					default:
+						return 'hsl(var(--border-subtle) / 0.35)';
+				}
+			})
 			.attr('stroke-width', 1)
 			.attr('stroke-dasharray', '5,5')
 			.attr('opacity', 0.5);
@@ -329,12 +329,12 @@ import { getRiskColor, getThemeColors } from '$lib/utils/colors';
 			.attr('class', 'legend')
 			.attr('transform', `translate(${innerWidth - 150}, 20)`);
 
-	const legendData = [
-		{ color: themeColors.risk.low, label: 'Low Risk' },
-		{ color: themeColors.risk.medium, label: 'Medium Risk' },
-		{ color: themeColors.risk.high, label: 'High Risk' },
-		{ color: themeColors.risk.critical, label: 'Critical Risk' }
-	];
+		const legendData = [
+			{ color: themeColors.risk.low, label: 'Low Risk' },
+			{ color: themeColors.risk.medium, label: 'Medium Risk' },
+			{ color: themeColors.risk.high, label: 'High Risk' },
+			{ color: themeColors.risk.critical, label: 'Critical Risk' }
+		];
 
 		legend
 			.selectAll('.legend-item')

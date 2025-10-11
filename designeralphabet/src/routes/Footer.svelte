@@ -1,4 +1,6 @@
-<footer class="relative border-t border-line bg-surface-elevated/90 text-sm text-ink-2 backdrop-blur">
+<footer
+	class="relative border-t border-line bg-surface-elevated/90 text-sm text-ink-2 backdrop-blur"
+>
 	<div
 		class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-300 to-transparent"
 	/>

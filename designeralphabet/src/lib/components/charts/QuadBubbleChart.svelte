@@ -20,21 +20,23 @@
 	let tooltipEl: HTMLDivElement;
 	let mounted = false;
 
-const lensOrder = [
-	'Risk',
-	'Work',
-	'Sustainability',
-	'Ethics',
-	'Justice',
-	'Community',
-	'Agency'
-] as const;
+	const lensOrder = [
+		'Risk',
+		'Work',
+		'Sustainability',
+		'Ethics',
+		'Justice',
+		'Community',
+		'Agency'
+	] as const;
 
-function normaliseLens(raw?: string) {
-	if (!raw) return 'General';
-	const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
-	return match ?? raw;
-}
+	function normaliseLens(raw?: string) {
+		if (!raw) return 'General';
+		const match = (lensOrder as readonly string[]).find(
+			(key) => key.toLowerCase() === raw.toLowerCase()
+		);
+		return match ?? raw;
+	}
 
 	const impactLabels = {
 		high: 'HIGH IMPACT',
@@ -107,11 +109,11 @@ function normaliseLens(raw?: string) {
 		vy?: number;
 	} & d3.SimulationNodeDatum;
 
-function buildNodes(
-	data: ResponseNode[],
-	resolver: ReturnType<typeof createLensColorResolver>
-): BubbleNode[] {
-	if (!data.length) return [];
+	function buildNodes(
+		data: ResponseNode[],
+		resolver: ReturnType<typeof createLensColorResolver>
+	): BubbleNode[] {
+		if (!data.length) return [];
 
 		const voteValues = data.map((d) => Math.max(0, d.votes ?? 0));
 		const cardValues = data.map((d) => (Array.isArray(d.cards) ? d.cards.length : 0));
@@ -128,25 +130,25 @@ function buildNodes(
 			.domain([0, d3.max(voteValues) || 1])
 			.range([18, 56]);
 
-	return data.map((response, index) => {
-		const votes = Math.max(0, response.votes ?? 0);
-		const cards = Array.isArray(response.cards) ? response.cards.length : 0;
-		const lens = normaliseLens(response.lens);
-		return {
-			id: response.id ?? `bubble-${index}`,
-			raw: response,
-			label: response.text ?? '—',
-			lens,
-			votes,
-			cards,
-			participant: response.participantName ?? 'Anonymous',
-			targetX: impactScale(votes),
-			targetY: 1 - effortScale(cards * 1.5 + (response.text?.length ?? 0) / 160),
-			radius: radiusScale(votes),
-			baseColor: resolver.resolve(lens, resolver.fallback)
-		} satisfies BubbleNode;
-	});
-}
+		return data.map((response, index) => {
+			const votes = Math.max(0, response.votes ?? 0);
+			const cards = Array.isArray(response.cards) ? response.cards.length : 0;
+			const lens = normaliseLens(response.lens);
+			return {
+				id: response.id ?? `bubble-${index}`,
+				raw: response,
+				label: response.text ?? '—',
+				lens,
+				votes,
+				cards,
+				participant: response.participantName ?? 'Anonymous',
+				targetX: impactScale(votes),
+				targetY: 1 - effortScale(cards * 1.5 + (response.text?.length ?? 0) / 160),
+				radius: radiusScale(votes),
+				baseColor: resolver.resolve(lens, resolver.fallback)
+			} satisfies BubbleNode;
+		});
+	}
 
 	function renderChart() {
 		if (!mounted || !svg || !tooltipEl) return;
@@ -170,24 +172,24 @@ function buildNodes(
 
 		const defs = root.append('defs');
 
-	const gradient = defs
-		.append('radialGradient')
-		.attr('id', 'quad-bubble-bg')
-		.attr('cx', '50%')
-		.attr('cy', '50%')
-		.attr('r', '85%');
+		const gradient = defs
+			.append('radialGradient')
+			.attr('id', 'quad-bubble-bg')
+			.attr('cx', '50%')
+			.attr('cy', '50%')
+			.attr('r', '85%');
 
-	[
-		{ offset: '0%', color: theme.brand, opacity: 0.35 },
-		{ offset: '45%', color: theme.accentCritical, opacity: 0.18 },
-		{ offset: '100%', color: theme.surface, opacity: 0.96 }
-	].forEach(({ offset, color, opacity }) => {
-		gradient
-			.append('stop')
-			.attr('offset', offset)
-			.attr('stop-color', color)
-			.attr('stop-opacity', opacity);
-	});
+		[
+			{ offset: '0%', color: theme.brand, opacity: 0.35 },
+			{ offset: '45%', color: theme.accentCritical, opacity: 0.18 },
+			{ offset: '100%', color: theme.surface, opacity: 0.96 }
+		].forEach(({ offset, color, opacity }) => {
+			gradient
+				.append('stop')
+				.attr('offset', offset)
+				.attr('stop-color', color)
+				.attr('stop-opacity', opacity);
+		});
 
 		const glow = defs
 			.append('filter')
@@ -207,15 +209,15 @@ function buildNodes(
 			.append('g')
 			.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-	container
-		.append('rect')
-		.attr('width', chartWidth)
-		.attr('height', chartHeight)
-		.attr('rx', 24)
-		.attr('fill', 'url(#quad-bubble-bg)')
-		.attr('stroke', 'hsl(var(--border-subtle) / 0.45)')
-		.attr('stroke-opacity', 0.4)
-		.attr('stroke-width', 1.5);
+		container
+			.append('rect')
+			.attr('width', chartWidth)
+			.attr('height', chartHeight)
+			.attr('rx', 24)
+			.attr('fill', 'url(#quad-bubble-bg)')
+			.attr('stroke', 'hsl(var(--border-subtle) / 0.45)')
+			.attr('stroke-opacity', 0.4)
+			.attr('stroke-width', 1.5);
 
 		if (hasData) {
 			const grid = container.append('g').attr('class', 'gridlines');
@@ -234,75 +236,75 @@ function buildNodes(
 				.attr('class', 'grid-y')
 				.call(effortAxis.tickSize(-chartWidth).tickFormat(() => ''));
 
-		grid
-			.selectAll('line')
-			.attr('stroke', 'hsl(var(--border-subtle) / 0.25)')
-			.attr('stroke-dasharray', '4 10');
+			grid
+				.selectAll('line')
+				.attr('stroke', 'hsl(var(--border-subtle) / 0.25)')
+				.attr('stroke-dasharray', '4 10');
 		}
 
-	container
-		.append('line')
-		.attr('x1', chartWidth / 2)
-		.attr('y1', 24)
-		.attr('x2', chartWidth / 2)
-		.attr('y2', chartHeight - 24)
-		.attr('stroke', 'hsl(var(--surface-elevated) / 0.16)')
+		container
+			.append('line')
+			.attr('x1', chartWidth / 2)
+			.attr('y1', 24)
+			.attr('x2', chartWidth / 2)
+			.attr('y2', chartHeight - 24)
+			.attr('stroke', 'hsl(var(--surface-elevated) / 0.16)')
 			.attr('stroke-width', 1.5)
 			.attr('stroke-dasharray', '6 14');
 
-	container
-		.append('line')
-		.attr('x1', 24)
-		.attr('y1', chartHeight / 2)
-		.attr('x2', chartWidth - 24)
-		.attr('y2', chartHeight / 2)
-		.attr('stroke', 'hsl(var(--surface-elevated) / 0.16)')
+		container
+			.append('line')
+			.attr('x1', 24)
+			.attr('y1', chartHeight / 2)
+			.attr('x2', chartWidth - 24)
+			.attr('y2', chartHeight / 2)
+			.attr('stroke', 'hsl(var(--surface-elevated) / 0.16)')
 			.attr('stroke-width', 1.5)
 			.attr('stroke-dasharray', '6 14');
 
 		const titleGroup = container.append('g');
 
-	titleGroup
-		.append('text')
-		.attr('x', chartWidth / 2)
-		.attr('y', -24)
-		.attr('text-anchor', 'middle')
-		.attr('fill', 'hsl(var(--text-on-teal))')
+		titleGroup
+			.append('text')
+			.attr('x', chartWidth / 2)
+			.attr('y', -24)
+			.attr('text-anchor', 'middle')
+			.attr('fill', 'hsl(var(--text-on-teal))')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-weight', 600)
 			.attr('font-size', 18)
 			.text('Impact vs. Effort — Neon Quad');
 
-	titleGroup
-		.append('text')
-		.attr('x', chartWidth / 2)
-		.attr('y', -4)
-		.attr('text-anchor', 'middle')
-		.attr('fill', theme.ink2)
+		titleGroup
+			.append('text')
+			.attr('x', chartWidth / 2)
+			.attr('y', -4)
+			.attr('text-anchor', 'middle')
+			.attr('fill', theme.ink2)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 12)
 			.text('Vote-weighted bubbles sized by community energy');
 
 		const axisLabelGroup = container.append('g');
 
-	axisLabelGroup
-		.append('text')
-		.attr('x', chartWidth / 2)
-		.attr('y', chartHeight + 36)
-		.attr('text-anchor', 'middle')
-		.attr('fill', theme.brand)
+		axisLabelGroup
+			.append('text')
+			.attr('x', chartWidth / 2)
+			.attr('y', chartHeight + 36)
+			.attr('text-anchor', 'middle')
+			.attr('fill', theme.brand)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 13)
 			.attr('letter-spacing', 2)
 			.text(`${impactLabels.low} ↔ ${impactLabels.high}`);
 
-	axisLabelGroup
-		.append('text')
-		.attr('x', -44)
-		.attr('y', chartHeight / 2)
-		.attr('transform', `rotate(-90, ${-44}, ${chartHeight / 2})`)
-		.attr('text-anchor', 'middle')
-		.attr('fill', theme.accentCritical)
+		axisLabelGroup
+			.append('text')
+			.attr('x', -44)
+			.attr('y', chartHeight / 2)
+			.attr('transform', `rotate(-90, ${-44}, ${chartHeight / 2})`)
+			.attr('text-anchor', 'middle')
+			.attr('fill', theme.accentCritical)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 13)
 			.attr('letter-spacing', 2)
@@ -376,11 +378,11 @@ function buildNodes(
 			.duration(900)
 			.attr('r', (d) => d.radius + 10);
 
-	nodeGroup
-		.append('text')
-		.attr('text-anchor', 'middle')
-		.attr('dy', '0.35em')
-		.attr('fill', 'hsl(var(--text-on-teal))')
+		nodeGroup
+			.append('text')
+			.attr('text-anchor', 'middle')
+			.attr('dy', '0.35em')
+			.attr('fill', 'hsl(var(--text-on-teal))')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-weight', 600)
 			.attr('font-size', 12)
@@ -458,13 +460,13 @@ function buildNodes(
 			.attr('class', 'legend')
 			.attr('transform', `translate(${chartWidth - 200}, ${chartHeight - 120})`);
 
-	legend
-		.append('text')
-		.attr('fill', theme.ink)
-		.attr('font-size', 12)
-		.attr('font-family', 'Orbitron, sans-serif')
-		.attr('font-weight', 600)
-		.text('Lens palette');
+		legend
+			.append('text')
+			.attr('fill', theme.ink)
+			.attr('font-size', 12)
+			.attr('font-family', 'Orbitron, sans-serif')
+			.attr('font-weight', 600)
+			.text('Lens palette');
 
 		const legendItems = legend
 			.append('g')
@@ -475,26 +477,26 @@ function buildNodes(
 			.append('g')
 			.attr('transform', (_, i) => `translate(0, ${i * 20})`);
 
-	legendItems
-		.append('circle')
-		.attr('r', 5)
-		.attr('fill', (lens) => lensColorMap.get(lens) ?? theme.ink2);
+		legendItems
+			.append('circle')
+			.attr('r', 5)
+			.attr('fill', (lens) => lensColorMap.get(lens) ?? theme.ink2);
 
-	legendItems
-		.append('text')
-		.attr('x', 12)
-		.attr('y', 0)
-		.attr('dy', '0.35em')
-		.attr('fill', theme.ink2)
-		.attr('font-size', 11)
-		.attr('font-family', 'Orbitron, sans-serif')
-		.text((lens) => lens);
+		legendItems
+			.append('text')
+			.attr('x', 12)
+			.attr('y', 0)
+			.attr('dy', '0.35em')
+			.attr('fill', theme.ink2)
+			.attr('font-size', 11)
+			.attr('font-family', 'Orbitron, sans-serif')
+			.text((lens) => lens);
 
-	legend
-		.append('text')
-		.attr('x', 0)
-		.attr('y', legendItems.size() * 20 + 20)
-		.attr('fill', theme.inkMuted)
+		legend
+			.append('text')
+			.attr('x', 0)
+			.attr('y', legendItems.size() * 20 + 20)
+			.attr('fill', theme.inkMuted)
 			.attr('font-size', 10)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.text('Ring thickness shows linked cards.');

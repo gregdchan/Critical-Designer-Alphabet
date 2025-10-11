@@ -21,7 +21,8 @@
 	<header class="text-center mb-10">
 		<h1 class="text-5xl font-extrabold text-primary mb-3 tracking-tight">Credits & Attribution</h1>
 		<p class="text-lg text-secondary max-w-2xl mx-auto">
-			Recognizing the foundations, creators, and communities that inspire the Critical Design Planner.
+			Recognizing the foundations, creators, and communities that inspire the Critical Design
+			Planner.
 		</p>
 	</header>
 
@@ -34,16 +35,22 @@
 			<div>
 				<h2 class="text-2xl font-bold text-primary mb-1">Intellectual Foundations</h2>
 				<p class="text-secondary text-base">
-					Inspired by <strong>The Designer's Critical Alphabet</strong> by <span class="text-brand font-medium">Dr. Lesley-Ann Noel</span>
+					Inspired by <strong>The Designer's Critical Alphabet</strong> by
+					<span class="text-brand font-medium">Dr. Lesley-Ann Noel</span>
 				</p>
 			</div>
 		</div>
 		<div class="space-y-4 text-secondary text-base">
 			<p>
-				The Critical Design Planner builds on the concepts introduced in <strong>The Designer's Critical Alphabet</strong>, a card deck created by <span class="text-brand font-medium">Dr. Lesley-Ann Noel</span>—Dean of Design at OCAD University and advocate for inclusive, justice-centered design.
+				The Critical Design Planner builds on the concepts introduced in <strong
+					>The Designer's Critical Alphabet</strong
+				>, a card deck created by
+				<span class="text-brand font-medium">Dr. Lesley-Ann Noel</span>—Dean of Design at OCAD
+				University and advocate for inclusive, justice-centered design.
 			</p>
 			<p>
-				Her work encourages designers to reflect on power, bias, sustainability, and justice. The digital platform adapts these prompts for collaborative, real-time workshops.
+				Her work encourages designers to reflect on power, bias, sustainability, and justice. The
+				digital platform adapts these prompts for collaborative, real-time workshops.
 			</p>
 			<div class="flex flex-wrap gap-4 mt-6">
 				<a
@@ -69,17 +76,23 @@
 	<!-- Platform Credits -->
 	<section class="panel p-8 rounded-2xl shadow-lg bg-white/80">
 		<div class="flex items-center gap-5 mb-6">
-			<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-retro-purple/15 text-retro-purple">
+			<div
+				class="flex h-14 w-14 items-center justify-center rounded-xl bg-retro-purple/15 text-retro-purple"
+			>
 				<Users class="h-7 w-7" />
 			</div>
 			<div>
 				<h2 class="text-2xl font-bold text-primary mb-1">About the Platform</h2>
-				<p class="text-secondary text-base">Critical Design Planner – digital facilitation & gamified workshops</p>
+				<p class="text-secondary text-base">
+					Critical Design Planner – digital facilitation & gamified workshops
+				</p>
 			</div>
 		</div>
 		<div class="space-y-4 text-secondary text-base">
 			<p>
-				Designed and developed by <span class="font-medium text-retro-purple">Gregory D. Chan</span>, this platform transforms the Critical Alphabet into an interactive, real-time workshop tool for design thinking and policy innovation.
+				Designed and developed by <span class="font-medium text-retro-purple">Gregory D. Chan</span
+				>, this platform transforms the Critical Alphabet into an interactive, real-time workshop
+				tool for design thinking and policy innovation.
 			</p>
 			<ul class="list-disc list-inside space-y-2 ml-4">
 				<li>Facilitator dashboard for session setup and rules</li>
@@ -104,7 +117,8 @@
 		</div>
 		<div class="space-y-4">
 			<div class="surface-muted border border-brand/30 rounded-lg p-4 text-brand">
-				<strong>The Designer's Critical Alphabet</strong> (physical deck) is the intellectual property of Dr. Lesley-Ann Noel. Always credit her when referencing or using the original cards.
+				<strong>The Designer's Critical Alphabet</strong> (physical deck) is the intellectual property
+				of Dr. Lesley-Ann Noel. Always credit her when referencing or using the original cards.
 			</div>
 			<div class="surface-muted border border-retro-purple/30 rounded-lg p-4 text-retro-purple">
 				Critical Design Planner web application &copy; Gregory D. Chan. All rights reserved.
@@ -119,11 +133,15 @@
 	<!-- Resources -->
 	<section class="panel p-8 rounded-2xl shadow-lg bg-white/80">
 		<div class="flex items-center gap-5 mb-6">
-			<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-pastel-green/30 text-pastel-green">
+			<div
+				class="flex h-14 w-14 items-center justify-center rounded-xl bg-pastel-green/30 text-pastel-green"
+			>
 				<Heart class="h-7 w-7" />
 			</div>
 			<div>
-				<h2 class="text-2xl font-bold text-primary mb-1">🌍 Resources for Inclusive & Pluriversal Design</h2>
+				<h2 class="text-2xl font-bold text-primary mb-1">
+					🌍 Resources for Inclusive & Pluriversal Design
+				</h2>
 				<p class="text-secondary text-base">
 					Communities and networks advancing justice-centered design
 				</p>
@@ -180,25 +198,26 @@
 	</section>
 
 	<!-- Acknowledgements -->
-	<section class="panel bg-gradient-to-r from-brand/10 to-retro-purple/10 p-8 rounded-2xl shadow-lg">
+	<section
+		class="panel bg-gradient-to-r from-brand/10 to-retro-purple/10 p-8 rounded-2xl shadow-lg"
+	>
 		<h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
 			<Heart class="h-7 w-7 text-neon-pink" />
 			Acknowledgements
 		</h2>
 		<div class="space-y-3 text-secondary text-base">
 			<p>
-				<span class="font-medium text-brand">Dr. Lesley-Ann Noel</span> — for the original Critical Alphabet and her leadership in inclusive design.
+				<span class="font-medium text-brand">Dr. Lesley-Ann Noel</span> — for the original Critical Alphabet
+				and her leadership in inclusive design.
 			</p>
 			<p>
-				<span class="font-medium">Design Justice Network, Liberatory Design, Pluriversal Design SIG, Decolonising Design Group</span> — for frameworks and research shaping equity-centered practice.
+				<span class="font-medium"
+					>Design Justice Network, Liberatory Design, Pluriversal Design SIG, Decolonising Design
+					Group</span
+				> — for frameworks and research shaping equity-centered practice.
 			</p>
 			<p>
 				<span class="font-medium">Open-source communities</span> — SvelteKit, TailwindCSS, D3.js, MariaDB.
-			</p>
-		</div>
-		<div class="mt-8 pt-6 border-t border-brand/30">
-			<p class="text-center text-secondary italic">
-				✨ The Critical Design Planner is an original digital platform by Gregory D. Chan, inspired by pluriversal and inclusive design theory, and the foundational work of Dr. Lesley-Ann Noel.
 			</p>
 		</div>
 	</section>

@@ -53,7 +53,8 @@
 		// Count occurrences of each value
 		const valueCounts = new Map<number, number>();
 		questionResponses.forEach((response) => {
-			const value = typeof response.value === 'string' ? parseFloat(response.value) : response.value;
+			const value =
+				typeof response.value === 'string' ? parseFloat(response.value) : response.value;
 			if (!isNaN(value)) {
 				valueCounts.set(value, (valueCounts.get(value) || 0) + 1);
 			}

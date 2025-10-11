@@ -29,13 +29,13 @@
 	let isPanelExpanded = true;
 
 	const CATEGORIES = ['theory', 'practice', 'lens', 'mindset', 'method'];
-const CATEGORY_COLORS: Record<string, string> = {
-	theory: 'text-primary border-line',
-	practice: 'text-brand border-line',
-	lens: 'text-accent-critical border-line',
-	mindset: 'text-brand border-line',
-	method: 'text-brand border-line'
-};
+	const CATEGORY_COLORS: Record<string, string> = {
+		theory: 'text-primary border-line',
+		practice: 'text-brand border-line',
+		lens: 'text-accent-critical border-line',
+		mindset: 'text-brand border-line',
+		method: 'text-brand border-line'
+	};
 
 	onMount(async () => {
 		try {
@@ -67,9 +67,9 @@ const CATEGORY_COLORS: Record<string, string> = {
 	}
 
 	function getCategoryColor(category?: string): string {
-	return category
-		? CATEGORY_COLORS[category] || 'text-ink-muted border-line'
-		: 'text-ink-muted border-line';
+		return category
+			? CATEGORY_COLORS[category] || 'text-ink-muted border-line'
+			: 'text-ink-muted border-line';
 	}
 </script>
 
@@ -173,11 +173,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 							<button
 								on:click={() => handleCardClick(card)}
 								{disabled}
-				class="group relative rounded-xl border p-3 text-left transition {selected
-					? 'border-brand bg-brand/10 shadow-brand'
-					: disabled
-						? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
-						: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
+								class="group relative rounded-xl border p-3 text-left transition {selected
+									? 'border-brand bg-brand/10 shadow-brand'
+									: disabled
+										? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
+										: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
 							>
 								{#if selected}
 									<div
@@ -314,11 +314,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 							<button
 								on:click={() => handleCardClick(card)}
 								{disabled}
-				class="group relative w-full rounded-lg border p-3 text-left transition {selected
-					? 'border-brand bg-brand/10 shadow-brand'
-					: disabled
-						? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
-						: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
+								class="group relative w-full rounded-lg border p-3 text-left transition {selected
+									? 'border-brand bg-brand/10 shadow-brand'
+									: disabled
+										? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
+										: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
 							>
 								{#if selected}
 									<div

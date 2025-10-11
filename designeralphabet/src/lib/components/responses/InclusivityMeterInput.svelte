@@ -49,7 +49,9 @@
 	<!-- Visual Meter -->
 	<div class="relative w-full max-w-md mx-auto">
 		<!-- Thermometer/Meter visualization -->
-		<div class="relative h-48 bg-gray-100 rounded-full w-24 mx-auto border-4 border-gray-300 overflow-hidden">
+		<div
+			class="relative h-48 bg-gray-100 rounded-full w-24 mx-auto border-4 border-gray-300 overflow-hidden"
+		>
 			<!-- Fill -->
 			<div
 				class="absolute bottom-0 w-full transition-all duration-500 ease-out"
@@ -88,9 +90,7 @@
 					/>
 				</div>
 				{#if meetsTarget}
-					<p class="text-center text-sm font-semibold text-green-600 mt-2">
-						✓ Meets target
-					</p>
+					<p class="text-center text-sm font-semibold text-green-600 mt-2">✓ Meets target</p>
 				{/if}
 			</div>
 		{/if}
@@ -130,7 +130,11 @@
 			<div class="text-red-600">0-39</div>
 			<div class="text-gray-600">Low</div>
 		</div>
-		<div class="p-2 rounded" class:bg-yellow-100={score >= 40 && score < 70} class:font-semibold={score >= 40 && score < 70}>
+		<div
+			class="p-2 rounded"
+			class:bg-yellow-100={score >= 40 && score < 70}
+			class:font-semibold={score >= 40 && score < 70}
+		>
 			<div class="text-yellow-600">40-69</div>
 			<div class="text-gray-600">Moderate</div>
 		</div>

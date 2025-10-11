@@ -5,6 +5,7 @@
 This guide documents the **phase-based, question-specific** chart architecture for consistent rendering across facilitator and presentation pages.
 
 ### Key Principles
+
 1. **Each PHASE has multiple QUESTIONS**
 2. **Each QUESTION has ONE specific chart** (type determined by Sanity)
 3. **Charts show data ONLY for their question** (not aggregated)
@@ -43,9 +44,11 @@ lib/stores/charts.ts (metadata enrichment)
 ## Key Files
 
 ### 1. `src/lib/types/charts.ts`
+
 Unified type definitions for all charts.
 
 **Key Types:**
+
 - `ChartData` - Main chart data structure
 - `ChartSeries` - Data series with points
 - `ChartPoint` - Individual data point
@@ -53,18 +56,22 @@ Unified type definitions for all charts.
 - `WordCloudData`, `LandscapePoint`, etc. - Chart-specific types
 
 ### 2. `src/lib/utils/sanity.ts`
+
 Utilities for fetching static metadata from Sanity CMS.
 
 **Functions:**
+
 - `getSanitySessionData(code)` - Fetch session metadata
 - `getSanityTemplate(slug)` - Fetch template configuration
 - `getChartColor(index)` - Get color from design tokens
 - `getCachedSanityData(key, fetcher)` - SWR-style caching
 
 ### 3. `src/lib/stores/charts.ts`
+
 Centralized chart stores that combine Supabase + Sanity data.
 
 **Exported Stores:**
+
 - `charts.responseTally` - Response count by option
 - `charts.wordCloud` - Text response word cloud
 - `charts.landscape` - 2D scatter plot data
@@ -74,15 +81,18 @@ Centralized chart stores that combine Supabase + Sanity data.
 - `charts.summary` - Session summary stats
 
 **Features:**
+
 -  Realtime updates from Supabase
 -  Throttled updates (~10fps) for performance
 -  Derived from existing `realtime.ts` stores
 -  No database schema changes
 
 ### 4. `src/lib/components/charts/BarChart.svelte`
+
 Refactored chart component supporting both old and new APIs.
 
 **Props:**
+
 - `chartData: ChartData | null` - **New unified approach**
 - `data: Array<{...}>` - Legacy backward-compatible prop
 - `ariaLabel: string` - Accessibility label
@@ -96,33 +106,34 @@ Refactored chart component supporting both old and new APIs.
 
 ```svelte
 <script lang="ts">
-  import { phases, sessionDetails } from '$lib/realtime';
-  import PhaseCharts from '$lib/components/PhaseCharts.svelte';
-  import { browser } from '$app/environment';
+	import { phases, sessionDetails } from '$lib/realtime';
+	import PhaseCharts from '$lib/components/PhaseCharts.svelte';
+	import { browser } from '$app/environment';
 
-  // Currently active phase (or selected phase)
-  $: activePhaseKey = $sessionDetails?.active_phase_key;
+	// Currently active phase (or selected phase)
+	$: activePhaseKey = $sessionDetails?.active_phase_key;
 </script>
 
 <!-- Phase Tabs/Buttons -->
 <nav class="phase-navigation">
-  {#each $phases as phase}
-    <button
-      class={activePhaseKey === phase.phase_key ? 'active' : ''}
-      on:click={() => selectPhase(phase.phase_key)}
-    >
-      {phase.title}
-    </button>
-  {/each}
+	{#each $phases as phase}
+		<button
+			class={activePhaseKey === phase.phase_key ? 'active' : ''}
+			on:click={() => selectPhase(phase.phase_key)}
+		>
+			{phase.title}
+		</button>
+	{/each}
 </nav>
 
 <!-- Charts for Selected Phase -->
 {#if activePhaseKey && browser}
-  <PhaseCharts phaseKey={activePhaseKey} width={900} height={520} />
+	<PhaseCharts phaseKey={activePhaseKey} width={900} height={520} />
 {/if}
 ```
 
 **How it works:**
+
 - User clicks a phase button
 - `PhaseCharts` component automatically:
   - Finds all questions for that phase
@@ -134,21 +145,21 @@ Refactored chart component supporting both old and new APIs.
 
 ```svelte
 <script lang="ts">
-  import { charts } from '$lib/stores/charts';
-  import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
-  import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
-  import { browser } from '$app/environment';
+	import { charts } from '$lib/stores/charts';
+	import WordCloudChart from '$lib/components/charts/WordCloudChart.svelte';
+	import LandscapeChart from '$lib/components/charts/LandscapeChart.svelte';
+	import { browser } from '$app/environment';
 </script>
 
 <!-- Immersive dashboard view -->
 <div class="presentation-mode">
-  {#if browser}
-    {#if $charts.wordCloud}
-      <WordCloudChart data={$charts.wordCloud} width={900} height={520} />
-    {:else}
-      <p>Waiting for responses...</p>
-    {/if}
-  {/if}
+	{#if browser}
+		{#if $charts.wordCloud}
+			<WordCloudChart data={$charts.wordCloud} width={900} height={520} />
+		{:else}
+			<p>Waiting for responses...</p>
+		{/if}
+	{/if}
 </div>
 ```
 
@@ -157,14 +168,14 @@ Refactored chart component supporting both old and new APIs.
 ```svelte
 <!-- Old approach still works! -->
 <BarChart
-  data={[
-    { label: 'Option A', value: 10, percentage: 50 },
-    { label: 'Option B', value: 5, percentage: 25 },
-    { label: 'Option C', value: 5, percentage: 25 }
-  ]}
-  width={800}
-  height={400}
-  totalResponses={20}
+	data={[
+		{ label: 'Option A', value: 10, percentage: 50 },
+		{ label: 'Option B', value: 5, percentage: 25 },
+		{ label: 'Option C', value: 5, percentage: 25 }
+	]}
+	width={800}
+	height={400}
+	totalResponses={20}
 />
 ```
 
@@ -178,14 +189,14 @@ Your pages should already be using `lib/realtime.ts`. The chart stores automatic
 
 ```svelte
 <script lang="ts">
-  import { connectSession } from '$lib/realtime';
-  import { page } from '$app/stores';
+	import { connectSession } from '$lib/realtime';
+	import { page } from '$app/stores';
 
-  const sessionCode = $page.params.code;
+	const sessionCode = $page.params.code;
 
-  onMount(() => {
-    connectSession(sessionCode);
-  });
+	onMount(() => {
+		connectSession(sessionCode);
+	});
 </script>
 ```
 
@@ -193,7 +204,7 @@ Your pages should already be using `lib/realtime.ts`. The chart stores automatic
 
 ```svelte
 <script lang="ts">
-  import { charts } from '$lib/stores/charts';
+	import { charts } from '$lib/stores/charts';
 </script>
 ```
 
@@ -201,7 +212,7 @@ Your pages should already be using `lib/realtime.ts`. The chart stores automatic
 
 ```svelte
 {#if $charts.responseTally}
-  <BarChart chartData={$charts.responseTally} width={800} height={400} />
+	<BarChart chartData={$charts.responseTally} width={800} height={400} />
 {/if}
 ```
 
@@ -211,11 +222,11 @@ Always wrap D3-based charts with `{#if browser}` to prevent SSR issues:
 
 ```svelte
 <script>
-  import { browser } from '$app/environment';
+	import { browser } from '$app/environment';
 </script>
 
 {#if browser}
-  <BarChart chartData={$charts.responseTally} />
+	<BarChart chartData={$charts.responseTally} />
 {/if}
 ```
 
@@ -224,6 +235,7 @@ Always wrap D3-based charts with `{#if browser}` to prevent SSR issues:
 ## Performance Optimizations
 
 ### 1. Throttled Updates
+
 Chart updates are throttled to ~10fps (100ms) to prevent excessive re-renders:
 
 ```ts
@@ -231,6 +243,7 @@ const CHART_UPDATE_THROTTLE = 100; // ms
 ```
 
 ### 2. SWR Caching
+
 Sanity data is cached for 5 minutes:
 
 ```ts
@@ -238,14 +251,16 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 ```
 
 ### 3. Derived Stores
+
 Charts use Svelte's `derived()` for efficient reactivity - only recalculate when dependencies change.
 
 ### 4. Browser Guards
+
 Prevent SSR rendering of D3 charts:
 
 ```svelte
 {#if browser}
-  <Chart data={$chartStore} />
+	<Chart data={$chartStore} />
 {/if}
 ```
 
@@ -254,6 +269,7 @@ Prevent SSR rendering of D3 charts:
 ## Accessibility
 
 All charts include:
+
 -  `role="img"` on SVG elements
 -  `aria-label` with descriptive text
 -  Fallback `<p>Loading data...</p>` messages
@@ -267,10 +283,10 @@ Use CSS custom properties for consistent, accessible colors:
 
 ```css
 --chart-1: #007172; /* Teal */
---chart-2: #F29325; /* Orange */
+--chart-2: #f29325; /* Orange */
 --chart-3: #025259; /* Dark teal */
---chart-4: #D94F04; /* Dark orange */
---chart-5: #F4E2DE; /* Cream */
+--chart-4: #d94f04; /* Dark orange */
+--chart-5: #f4e2de; /* Cream */
 --chart-6: #00a0a3; /* Light teal */
 --chart-7: #ff9f1c; /* Light orange */
 --chart-8: #013840; /* Navy */
@@ -289,11 +305,13 @@ const color = getChartColor(index); // 'var(--chart-1)'
 ## Testing
 
 ### Unit Tests
+
 ```bash
 npm run test
 ```
 
 ### Visual Testing
+
 1. Start dev server: `npm run dev`
 2. Navigate to facilitator page: `/facilitator/[code]`
 3. Add responses via participant page: `/session/[code]`
@@ -301,6 +319,7 @@ npm run test
 5. Check presentation page: `/presentation/[code]`
 
 ### Performance Testing
+
 - Open browser DevTools > Performance
 - Record while adding ~20 responses
 - Verify chart updates don't cause jank
@@ -311,17 +330,20 @@ npm run test
 ## Troubleshooting
 
 ### Charts not updating?
+
 - Check browser console for errors
 - Verify `connectSession()` is called in `onMount()`
 - Ensure realtime subscription is active
 - Check Supabase connection
 
 ### SSR errors?
+
 - Wrap charts in `{#if browser}` blocks
 - Use `onMount()` for D3 operations
 - Don't access `window` or `document` at module scope
 
 ### Missing data?
+
 - Verify Supabase tables have data
 - Check network tab for failed API calls
 - Confirm session code is valid
@@ -350,6 +372,7 @@ npm run test
  Uses design system tokens
 
 **Next Steps:**
+
 1. Update facilitator page to use `charts` store
 2. Update presentation page to use `charts` store
 3. Refactor remaining chart components (WordCloud, Landscape, etc.)

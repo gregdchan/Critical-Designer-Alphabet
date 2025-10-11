@@ -7,7 +7,8 @@ export const GET: RequestHandler = async () => {
 	return new Response(
 		JSON.stringify({
 			error: 'WebSocket endpoint disabled',
-			message: 'This endpoint has been removed. All realtime functionality now uses Supabase Realtime. Please update your client code.'
+			message:
+				'This endpoint has been removed. All realtime functionality now uses Supabase Realtime. Please update your client code.'
 		}),
 		{
 			status: 410, // Gone

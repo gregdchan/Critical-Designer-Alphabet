@@ -37,7 +37,7 @@ module.exports = {
 					600: '#007172',
 					700: '#025259',
 					800: '#025259',
-					900: '#013840',
+					900: '#013840'
 				},
 
 				chart: {
@@ -48,28 +48,29 @@ module.exports = {
 					5: 'var(--chart-5)',
 					6: 'var(--chart-6)',
 					7: 'var(--chart-7)',
-					8: 'var(--chart-8)',
+					8: 'var(--chart-8)'
 				},
 
-			/* Legacy aliases to avoid breakage */
-			'teal-dark': '#025259',
-			teal: '#007172',
-			'teal-light': '#00a0a3',
-			orange: '#F29325',
-			'orange-dark': '#D94F04',
-			cream: '#F4E2DE',
+				/* Legacy aliases to avoid breakage */
+				'teal-dark': '#025259',
+				teal: '#007172',
+				'teal-light': '#00a0a3',
+				orange: '#F29325',
+				'orange-dark': '#D94F04',
+				cream: '#F4E2DE',
 
-			'neon-cyan': 'hsl(var(--brand))',
+				'neon-cyan': 'hsl(var(--brand))',
 
-			primary: 'hsl(var(--brand))',
-			secondary: 'hsl(var(--text-secondary))', // Changed from accent-warm to text-secondary
-			accent: 'hsl(var(--accent-critical))',
-			success: 'hsl(var(--teal-lite))',
-			warning: 'hsl(var(--accent-warm))',
-			error: 'hsl(var(--accent-critical))',				darkBg: 'hsl(var(--surface-muted))',
+				primary: 'hsl(var(--brand))',
+				secondary: 'hsl(var(--text-secondary))', // Changed from accent-warm to text-secondary
+				accent: 'hsl(var(--accent-critical))',
+				success: 'hsl(var(--teal-lite))',
+				warning: 'hsl(var(--accent-warm))',
+				error: 'hsl(var(--accent-critical))',
+				darkBg: 'hsl(var(--surface-muted))',
 				surfaceBase: 'hsl(var(--surface-elevated))',
 				card: 'hsl(var(--surface-elevated))',
-				midnight: 'hsl(var(--brand-soft))',
+				midnight: 'hsl(var(--brand-soft))'
 			},
 			fontFamily: {
 				sans: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
@@ -82,16 +83,16 @@ module.exports = {
 				xl: '1rem',
 				'2xl': '1.5rem',
 				neon: '1.75rem',
-				playful: '2.5rem',
+				playful: '2.5rem'
 			},
 			boxShadow: {
 				soft: '0 4px 6px -1px rgba(2, 82, 89, 0.08), 0 2px 4px -1px rgba(2, 82, 89, 0.04)',
 				medium: '0 10px 15px -3px rgba(2, 82, 89, 0.10), 0 4px 6px -2px rgba(2, 82, 89, 0.06)',
 				card: '0 1px 3px 0 rgba(2, 82, 89, 0.10), 0 1px 2px 0 rgba(2, 82, 89, 0.04)',
 				brand: '0 4px 14px 0 hsl(var(--brand) / 0.25)',
-				'teal': '0 4px 14px 0 rgba(0, 113, 114, 0.25)',
-				'orange': '0 4px 14px 0 rgba(242, 147, 37, 0.25)',
-				'playful': '0 8px 32px 0 rgba(0, 113, 114, 0.12), 0 1.5px 8px 0 rgba(242, 147, 37, 0.12)',
+				teal: '0 4px 14px 0 rgba(0, 113, 114, 0.25)',
+				orange: '0 4px 14px 0 rgba(242, 147, 37, 0.25)',
+				playful: '0 8px 32px 0 rgba(0, 113, 114, 0.12), 0 1.5px 8px 0 rgba(242, 147, 37, 0.12)'
 			},
 			keyframes: {
 				'fade-in': {

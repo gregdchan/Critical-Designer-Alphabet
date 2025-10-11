@@ -47,7 +47,9 @@
 
 	function normaliseLens(raw?: string) {
 		if (!raw) return 'Community';
-		const match = (lensOrder as readonly string[]).find((key) => key.toLowerCase() === raw.toLowerCase());
+		const match = (lensOrder as readonly string[]).find(
+			(key) => key.toLowerCase() === raw.toLowerCase()
+		);
 		return match ?? raw;
 	}
 
@@ -153,7 +155,10 @@
 			.attr('y2', '100%');
 
 		bgGradient.append('stop').attr('offset', '0%').attr('stop-color', 'hsl(var(--surface) / 0.95)');
-		bgGradient.append('stop').attr('offset', '100%').attr('stop-color', 'hsl(var(--surface-muted) / 0.98)');
+		bgGradient
+			.append('stop')
+			.attr('offset', '100%')
+			.attr('stop-color', 'hsl(var(--surface-muted) / 0.98)');
 
 		const glow = defs
 			.append('filter')
@@ -404,20 +409,20 @@
 			.append('g')
 			.attr('transform', `translate(${chartWidth - 210}, ${chartHeight + 44})`);
 
-	const legendItems: Array<{ label: string; caption: string; color: string }> = [
-		{ label: 'High', caption: 'Ready to activate', color: theme.accentWarm },
-		{ label: 'Medium', caption: 'Staging next', color: theme.brand },
-		{ label: 'Watch', caption: 'Signals to nurture', color: theme.accentCritical }
-	];
+		const legendItems: Array<{ label: string; caption: string; color: string }> = [
+			{ label: 'High', caption: 'Ready to activate', color: theme.accentWarm },
+			{ label: 'Medium', caption: 'Staging next', color: theme.brand },
+			{ label: 'Watch', caption: 'Signals to nurture', color: theme.accentCritical }
+		];
 
-	legend
-		.append('text')
-		.attr('x', 0)
-		.attr('y', -12)
-		.attr('fill', theme.inkMuted)
-		.attr('font-family', 'Orbitron, sans-serif')
-		.attr('font-size', 10)
-		.text('Priority legend');
+		legend
+			.append('text')
+			.attr('x', 0)
+			.attr('y', -12)
+			.attr('fill', theme.inkMuted)
+			.attr('font-family', 'Orbitron, sans-serif')
+			.attr('font-size', 10)
+			.text('Priority legend');
 
 		const legendGroup = legend
 			.selectAll('g')
@@ -431,37 +436,37 @@
 			.attr('r', 6)
 			.attr('fill', (d) => d.color);
 
-	legendGroup
-		.append('text')
-		.attr('x', 12)
-		.attr('y', 0)
-		.attr('dy', '0.35em')
-		.attr('fill', theme.ink)
-		.attr('font-family', 'Orbitron, sans-serif')
-		.attr('font-size', 11)
-		.text((d) => d.label);
+		legendGroup
+			.append('text')
+			.attr('x', 12)
+			.attr('y', 0)
+			.attr('dy', '0.35em')
+			.attr('fill', theme.ink)
+			.attr('font-family', 'Orbitron, sans-serif')
+			.attr('font-size', 11)
+			.text((d) => d.label);
 
-	legendGroup
-		.append('text')
-		.attr('x', 60)
-		.attr('y', 0)
-		.attr('dy', '0.35em')
-		.attr('fill', theme.inkMuted)
+		legendGroup
+			.append('text')
+			.attr('x', 60)
+			.attr('y', 0)
+			.attr('dy', '0.35em')
+			.attr('fill', theme.inkMuted)
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', 9)
 			.text((d) => d.caption);
 
-	if (cards.length === 0) {
-		container
-			.append('text')
-			.attr('x', chartWidth / 2)
-			.attr('y', chartHeight / 2)
-			.attr('text-anchor', 'middle')
-			.attr('fill', theme.ink2)
-			.attr('font-family', 'Orbitron, sans-serif')
-			.attr('font-size', 14)
-			.text('Add responses to populate the roadmap.');
-	}
+		if (cards.length === 0) {
+			container
+				.append('text')
+				.attr('x', chartWidth / 2)
+				.attr('y', chartHeight / 2)
+				.attr('text-anchor', 'middle')
+				.attr('fill', theme.ink2)
+				.attr('font-family', 'Orbitron, sans-serif')
+				.attr('font-size', 14)
+				.text('Add responses to populate the roadmap.');
+		}
 	}
 
 	function wrapText(text: string, width: number) {
