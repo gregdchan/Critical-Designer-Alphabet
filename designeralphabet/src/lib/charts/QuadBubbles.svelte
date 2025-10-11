@@ -12,7 +12,7 @@
 	export let width = 800;
 	export let height = 600;
 
-	let svgElement: SVGSVGElement;
+	let svgElement: SVGSVGElement | undefined;
 	let dimensions: ChartDimensions;
 	let fallbackDimensions: ChartDimensions = {
 		width,
@@ -49,6 +49,25 @@
 		Innovation: { x: 0.1, y: 0.5 },
 		Governance: { x: 0.9, y: 0.5 }
 	};
+
+	const lensOrder = [
+		'Risk',
+		'Work',
+		'Sustainability',
+		'Ethics',
+		'Justice',
+		'Culture',
+		'Innovation',
+		'Governance'
+	] as const;
+
+	function normaliseLens(raw?: string) {
+		if (!raw) return 'General';
+		const match = (lensOrder as readonly string[]).find(
+			(key) => key.toLowerCase() === raw.toLowerCase()
+		);
+		return match ?? raw;
+	}
 
 	const lensColorCache = new Map<string, string>();
 
@@ -310,7 +329,10 @@
 	ariaLabel="Bubble chart showing responses grouped by critical design lens"
 	on:resize={(event) => handleResize(event.detail)}
 >
-	<svelte:fragment slot="default">
+	<svelte:fragment slot="default" let:svgElement={svg}>
+		{#if svg && !svgElement}
+			{((svgElement = svg), '')}
+		{/if}
 		{#if loading}
 			<text
 				x={getCenterX()}

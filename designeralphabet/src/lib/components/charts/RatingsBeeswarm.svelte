@@ -4,7 +4,7 @@
 	import { select } from 'd3-selection';
 	import ChartFrame from '$lib/components/charts/ChartFrame.svelte';
 
-	export type RatingPoint = { value: number; lens?: string; question?: string; t?: Date };
+	type RatingPoint = { value: number; lens?: string; question?: string; t?: Date };
 	export let title = 'Ratings Beeswarm';
 	export let points: RatingPoint[] = [];
 	export let min = 0;

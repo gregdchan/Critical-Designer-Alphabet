@@ -3,7 +3,13 @@
 	import * as d3 from 'd3';
 	import { getThemeColors } from '$lib/utils/colors';
 	// Accept minimal Question shape from either realtime/workshop sources
-	type AnyQuestion = { id: string; text?: string; response_type?: string | null; config?: any };
+	type AnyQuestion = {
+		id: string;
+		text?: string;
+		response_type?: string | null;
+		config?: any;
+		phase_key?: string | null;
+	};
 
 	type Response = {
 		id: string;
@@ -34,6 +40,7 @@
 	// Filter state for interactive legends
 	let activeTypeFilter: string | null = null; // 'written', 'choice', 'scale', or null (all)
 	let activeLensFilter: string | null = null; // lens name or null (all)
+	let activePhaseFilter: string | null = null; // phase_key or null (all)
 
 	const ro =
 		typeof ResizeObserver !== 'undefined'
@@ -70,6 +77,7 @@
 		value: number; // votes for written, count for choice, avg for scale
 		type: 'written' | 'choice' | 'scale';
 		lens: string; // Added lens field
+		phase: string; // Added phase field
 		questionText: string;
 		radius: number;
 		x: number;
@@ -135,12 +143,14 @@
 		writtenResponses.forEach((r) => {
 			const q = questionMap.get(r.question_id || '');
 			const lensLabel = normaliseLens(r.lens);
+			const phaseLabel = q?.phase_key || 'No Phase';
 			bubbles.push({
 				id: r.id,
 				text: r.text,
 				value: r.votes || 0,
 				type: 'written',
 				lens: lensLabel,
+				phase: phaseLabel,
 				questionText: q?.text || 'Unknown',
 				radius: 0, // will be calculated
 				x: 0,
@@ -160,13 +170,14 @@
 		// Count occurrences
 		const choiceCounts = new Map<
 			string,
-			{ count: number; questionId: string; questionText: string; lens: string }
+			{ count: number; questionId: string; questionText: string; lens: string; phase: string }
 		>();
 		choiceResponses.forEach((r) => {
 			const key = `${r.question_id}:${r.text}`;
 			const existing = choiceCounts.get(key);
 			const q = questionMap.get(r.question_id || '');
 			const lensLabel = normaliseLens(r.lens);
+			const phaseLabel = q?.phase_key || 'No Phase';
 			if (existing) {
 				existing.count++;
 			} else {
@@ -174,7 +185,8 @@
 					count: 1,
 					questionId: r.question_id || '',
 					questionText: q?.text || 'Unknown',
-					lens: lensLabel
+					lens: lensLabel,
+					phase: phaseLabel
 				});
 			}
 		});
@@ -187,6 +199,7 @@
 				value: data.count,
 				type: 'choice',
 				lens: data.lens,
+				phase: data.phase,
 				questionText: data.questionText,
 				radius: 0,
 				x: 0,
@@ -205,7 +218,7 @@
 
 		const scaleByQuestion = new Map<
 			string,
-			{ values: number[]; questionText: string; lens: string }
+			{ values: number[]; questionText: string; lens: string; phase: string }
 		>();
 		scaleResponses.forEach((r) => {
 			const q = questionMap.get(r.question_id || '');
@@ -214,6 +227,7 @@
 			if (isNaN(value)) return;
 
 			const lensLabel = normaliseLens(r.lens);
+			const phaseLabel = q?.phase_key || 'No Phase';
 			const existing = scaleByQuestion.get(r.question_id || '');
 			if (existing) {
 				existing.values.push(value);
@@ -221,7 +235,8 @@
 				scaleByQuestion.set(r.question_id || '', {
 					values: [value],
 					questionText: q.text || 'Unknown',
-					lens: lensLabel
+					lens: lensLabel,
+					phase: phaseLabel
 				});
 			}
 		});
@@ -237,6 +252,7 @@
 				value: data.values.length, // size by response count
 				type: 'scale',
 				lens: data.lens,
+				phase: data.phase,
 				questionText: data.questionText,
 				radius: 0,
 				x: 0,

@@ -4,7 +4,7 @@
 	import ChartFrame from '$lib/components/charts/ChartFrame.svelte';
 	import { getThemeColors } from '$lib/utils/colors';
 
-	export type PhaseStack = { phase: string; stacks: Array<{ lens: string; value: number }> };
+	type PhaseStack = { phase: string; stacks: Array<{ lens: string; value: number }> };
 	export let title = 'Phase Engagement';
 	export let data: PhaseStack[] = [];
 

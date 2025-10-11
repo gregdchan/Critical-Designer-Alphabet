@@ -4,7 +4,7 @@
 	import ChartFrame from '$lib/components/charts/ChartFrame.svelte';
 	import { getThemeColors } from '$lib/utils/colors';
 
-	export type Idea = {
+	type Idea = {
 		id: string;
 		label: string;
 		votes: number;
@@ -13,7 +13,7 @@
 		lens?: string | null;
 	};
 
-	export type PhaseIdeas = { phase: string; items: Idea[] };
+	type PhaseIdeas = { phase: string; items: Idea[] };
 
 	export let title = 'Top Ideas by Phase';
 	export let data: PhaseIdeas[] = [];

@@ -11,7 +11,7 @@
 	export let width = 600;
 	export let height = 500;
 
-	let svgElement: SVGSVGElement;
+	let svgElement: SVGSVGElement | undefined;
 	let dimensions: ChartDimensions;
 	let fallbackDimensions: ChartDimensions = {
 		width,
@@ -63,12 +63,13 @@
 			const impact = hasRiskMetadata ? metadata.impact : 3;
 			const likelihood = hasRiskMetadata ? metadata.likelihood : 3;
 
+			const votes = Number(response.votes) || 0;
 			return {
 				id: response.id,
 				risk: response.text,
 				impact: Math.max(1, Math.min(5, impact)),
 				likelihood: Math.max(1, Math.min(5, likelihood)),
-				votes: voteCount,
+				votes: votes,
 				text: response.text
 			};
 		});
@@ -436,7 +437,10 @@
 	ariaLabel="Risk impact matrix showing identified risks plotted by likelihood and impact"
 	on:resize={(event) => handleResize(event.detail)}
 >
-	<svelte:fragment slot="default">
+	<svelte:fragment slot="default" let:svgElement={svg}>
+		{#if svg && !svgElement}
+			{((svgElement = svg), '')}
+		{/if}
 		{#if loading}
 			<text
 				x={getCenterX()}

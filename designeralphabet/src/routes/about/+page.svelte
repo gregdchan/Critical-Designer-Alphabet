@@ -15,8 +15,7 @@
 
 	const page = data.page;
 
-	const heroTitle =
-		page?.heroTitle ?? page?.title ?? 'About the Critical Design Planner Platform';
+	const heroTitle = page?.heroTitle ?? page?.title ?? 'About the Critical Design Planner Platform';
 	const heroSubtitle =
 		page?.heroSubtitle ??
 		page?.localizedHeroSubtitle?.en ??

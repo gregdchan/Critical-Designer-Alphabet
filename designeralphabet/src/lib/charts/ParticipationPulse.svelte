@@ -14,7 +14,7 @@
 	export let width = 600;
 	export let height = 300;
 
-	let svgElement: SVGSVGElement;
+	let svgElement: SVGSVGElement | undefined;
 	let dimensions: ChartDimensions;
 	let updateInterval: NodeJS.Timeout;
 	let fallbackDimensions: ChartDimensions = {
@@ -357,7 +357,10 @@
 	ariaLabel="Real-time participation activity showing submissions per minute over the last 5 minutes"
 	on:resize={(event) => handleResize(event.detail)}
 >
-	<svelte:fragment slot="default">
+	<svelte:fragment slot="default" let:svgElement={svg}>
+		{#if svg && !svgElement}
+			{((svgElement = svg), '')}
+		{/if}
 		{#if loading}
 			<text
 				x={getCenterX()}

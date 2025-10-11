@@ -28,9 +28,12 @@
 
 	// Group by lens and position for aggregation
 	$: aggregated = (() => {
-		const map = new Map<string, Map<number, { votes: number; count: number; text: string; phase?: string }>>();
+		const map = new Map<
+			string,
+			Map<number, { votes: number; count: number; text: string; phase?: string }>
+		>();
 
-		orderedWithPositions.forEach(p => {
+		orderedWithPositions.forEach((p) => {
 			if (!map.has(p.lens)) map.set(p.lens, new Map());
 			const lensMap = map.get(p.lens)!;
 			const pos = p.questionPosition || 0;
@@ -45,7 +48,13 @@
 			if (!cell.phase && p.phase) cell.phase = p.phase;
 		});
 
-		const result: Array<{ lens: string; position: number; engagement: number; text: string; phase?: string }> = [];
+		const result: Array<{
+			lens: string;
+			position: number;
+			engagement: number;
+			text: string;
+			phase?: string;
+		}> = [];
 		map.forEach((lensMap, lens) => {
 			lensMap.forEach((data, position) => {
 				result.push({
@@ -61,8 +70,8 @@
 		return result;
 	})();
 
-	$: maxPosition = Math.max(0, ...orderedWithPositions.map(p => p.questionPosition || 0));
-	$: maxEngagement = Math.max(1, ...aggregated.map(d => d.engagement));
+	$: maxPosition = Math.max(0, ...orderedWithPositions.map((p) => p.questionPosition || 0));
+	$: maxEngagement = Math.max(1, ...aggregated.map((d) => d.engagement));
 
 	function render(root: SVGGElement, innerWidth: number, innerHeight: number) {
 		const g = select(root);
@@ -76,10 +85,7 @@
 			.padding(0.5);
 
 		// Y scale: lenses
-		const y = scalePoint<string>()
-			.domain(lenses)
-			.range([0, innerHeight])
-			.padding(0.5);
+		const y = scalePoint<string>().domain(lenses).range([0, innerHeight]).padding(0.5);
 
 		// Horizontal lens guide lines
 		g.append('g')
@@ -109,9 +115,7 @@
 			.text((d) => d);
 
 		// Bubble size scale based on engagement
-		const r = scaleLinear()
-			.domain([0, maxEngagement])
-			.range([4, 18]);
+		const r = scaleLinear().domain([0, maxEngagement]).range([4, 18]);
 
 		// Bubbles
 		g.append('g')
@@ -172,12 +176,18 @@
 			.attr('text-anchor', 'middle')
 			.attr('fill', 'hsl(var(--text-secondary))')
 			.style('font-size', '10px')
-			.style('opacity', (d) => d % showEveryNth === 0 ? 1 : 0.3)
+			.style('opacity', (d) => (d % showEveryNth === 0 ? 1 : 0.3))
 			.text((d) => d);
 	}
 </script>
 
-<ChartFrame {title} ariaLabel="Participant journey" margin={{ top: 24, right: 24, bottom: 40, left: 100 }} let:innerWidth let:innerHeight>
+<ChartFrame
+	{title}
+	ariaLabel="Participant journey"
+	margin={{ top: 24, right: 24, bottom: 40, left: 100 }}
+	let:innerWidth
+	let:innerHeight
+>
 	<g bind:this={rootEl}>
 		{@html (render(rootEl, innerWidth, innerHeight), '')}
 	</g>
