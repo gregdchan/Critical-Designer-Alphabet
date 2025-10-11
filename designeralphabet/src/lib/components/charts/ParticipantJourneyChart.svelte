@@ -21,10 +21,12 @@
 
 	let tooltipEl: HTMLDivElement | null = null;
 	let rootEl: SVGGElement;
+	let mounted = false;
 
-	// Initialize tooltip element
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+
 	onMount(() => {
+		// Create and append tooltip
 		tooltipEl = document.createElement('div');
 		tooltipEl.style.position = 'fixed';
 		tooltipEl.style.pointerEvents = 'none';
@@ -40,12 +42,14 @@
 		tooltipEl.style.boxShadow = '0 6px 18px hsl(var(--brand) / 0.15)';
 		tooltipEl.style.maxWidth = '300px';
 		document.body.appendChild(tooltipEl);
+		mounted = true;
+	});
 
-		return () => {
-			if (tooltipEl && document.body.contains(tooltipEl)) {
-				document.body.removeChild(tooltipEl);
-			}
-		};
+	onDestroy(() => {
+		mounted = false;
+		if (tooltipEl && document.body.contains(tooltipEl)) {
+			document.body.removeChild(tooltipEl);
+		}
 	});
 
 	const theme = getThemeColors();
@@ -87,6 +91,13 @@
 	})();
 
 	function render(root: SVGGElement, innerWidth: number, innerHeight: number, _points: JourneyPoint[]) {
+		console.log('ParticipantJourneyChart render called with:', { 
+			pointsCount: _points.length, 
+			points: _points,
+			tooltipEl,
+			mounted 
+		});
+		
 		const g = select(root);
 		g.selectAll("*").remove();
 
@@ -134,7 +145,7 @@
 			.range([8, 24]);
 
 		// Engagement level categorization
-		const getEngagementLevel = (votes) => {
+		const getEngagementLevel = (votes: number) => {
 			if (votes === 0) return 'none';
 			if (votes <= 2) return 'low';
 			if (votes <= 5) return 'medium';
@@ -289,8 +300,8 @@
 				return 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
 			})
 			.on('mouseover', function(event, d) {
-				console.log('Mouseover event:', event, d);
-
+				console.log('Mouseover event triggered:', { event, d, tooltipEl });
+	
 				const circle = select(this);
 				const originalRadius = sizeScale(d.votes || 0);
 
@@ -314,11 +325,8 @@
 				}
 
 				// Enhanced tooltip
-				console.log('Tooltip element:', tooltipEl);
 				if (tooltipEl) {
-					const level = getEngagementLevel(d.votes || 0);
-					console.log('Setting tooltip content for:', d.lens);
-
+					console.log('Showing tooltip for:', d);
 					tooltipEl.style.opacity = '1';
 					tooltipEl.style.left = event.clientX + 8 + 'px';
 					tooltipEl.style.top = event.clientY + 8 + 'px';
@@ -330,8 +338,17 @@
 						<div><strong>Responses:</strong> ${d.votes || 0}</div>
 						${d.text ? `<div style="margin-top:4px;max-width:200px;font-size:11px;font-style:italic;">"${d.text}"</div>` : ''}
 					`;
+				} else {
+					console.log('tooltipEl is null or undefined');
 				}
 			})
+		.on('mousemove', function(event) {
+			// Update tooltip position as mouse moves
+			if (tooltipEl && tooltipEl.style.opacity === '1') {
+				tooltipEl.style.left = event.clientX + 8 + 'px';
+				tooltipEl.style.top = event.clientY + 8 + 'px';
+			}
+		})
 			.on('mouseout', function(_event, d) {
 				const circle = select(this);
 				const originalRadius = sizeScale(d.votes || 0);
@@ -515,6 +532,6 @@
 	let:innerHeight
 >
 	<g bind:this={rootEl}>
-		{@html (rootEl && render(rootEl, innerWidth, innerHeight, points), "")}
+		{@html (rootEl && mounted && render(rootEl, innerWidth, innerHeight, points), "")}
 	</g>
 </ChartFrame>
