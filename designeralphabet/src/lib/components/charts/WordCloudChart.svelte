@@ -189,6 +189,7 @@
 		const wordBubbles = calculateWordBubbles(responses, theme);
 		if (wordBubbles.length === 0) return;
 
+
 		// Responsive layout: On mobile, legend goes below chart; on desktop, to the right
 		const isMobile = width < 768;
 		const legendWidth = isMobile ? 0 : 170;
@@ -197,7 +198,30 @@
 		const chartWidth = Math.max(300, width - legendWidth);
 		const chartHeight = Math.max(300, height - topMargin - bottomMargin);
 
-		const positionedBubbles = packBubbles(wordBubbles, chartWidth, chartHeight);
+		// Always pack to the SVG's full width/height for true centering
+		const positionedBubbles = packBubbles(wordBubbles, width, height);
+		// Centering logic: find bounding box of all bubbles and offset to center in SVG
+		if (positionedBubbles.length > 0) {
+			let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+			for (const b of positionedBubbles) {
+				const x0 = b.x - b.radius;
+				const x1 = b.x + b.radius;
+				const y0 = b.y - b.radius;
+				const y1 = b.y + b.radius;
+				if (x0 < minX) minX = x0;
+				if (x1 > maxX) maxX = x1;
+				if (y0 < minY) minY = y0;
+				if (y1 > maxY) maxY = y1;
+			}
+			const cloudWidth = maxX - minX;
+			const cloudHeight = maxY - minY;
+			const offsetX = width / 2 - (minX + cloudWidth / 2);
+			const offsetY = height / 2 - (minY + cloudHeight / 2);
+			positionedBubbles.forEach(b => {
+				b.x += offsetX;
+				b.y += offsetY;
+			});
+		}
 		const lensColorByName = new Map<string, string>();
 		positionedBubbles.forEach((bubble) => {
 			if (!lensColorByName.has(bubble.lens)) {
@@ -211,16 +235,16 @@
 		const svgSel = d3.select(svg).attr('width', width).attr('height', height);
 
 		// Create INTERACTIVE layer (bubbles) - this will be zoomed/panned
-		// Center the chart horizontally within the available space
-		const leftMargin = (width - chartWidth - legendWidth) / 2;
+		// No left margin for true centering
+		const leftMargin = 0;
 		const interactiveGroup = svgSel
 			.append('g')
 			.attr('class', 'interactive-layer')
-			.attr('transform', `translate(${leftMargin}, ${topMargin})`);
+			.attr('transform', `translate(${leftMargin}, 0)`);
 
 		rootGroup = interactiveGroup;
 		// preserve previous pan/zoom
-		rootGroup.attr('transform', `translate(${leftMargin}, ${topMargin}) ${currentTransform.toString()}`);
+		rootGroup.attr('transform', `translate(${leftMargin}, 0) ${currentTransform.toString()}`);
 
 		// Create FIXED UI layer (title, legend, stats) - this stays put
 		const uiGroup = svgSel.append('g').attr('class', 'ui-layer').style('pointer-events', 'none'); // Don't block interactions with bubbles
@@ -228,8 +252,8 @@
 		// enable pinch zoom and panning ONLY on interactive layer
 		const pad = 0.5;
 		const translateExtent: [[number, number], [number, number]] = [
-			[-chartWidth * pad, -chartHeight * pad],
-			[chartWidth * (1 + pad), chartHeight * (1 + pad)]
+			[-width * pad, -height * pad],
+			[width * (1 + pad), height * (1 + pad)]
 		];
 
 		zoomBehavior = d3
@@ -287,7 +311,20 @@
 			.attr('stroke-width', 2)
 			.style('cursor', 'pointer')
 			.on('mouseenter', function (event: any, d: any) {
-				d3.select(this).transition().duration(200).attr('opacity', 1).attr('stroke-width', 3);
+				// Highlight circle
+				d3.select(this).interrupt().transition().duration(180).attr('opacity', 1).attr('stroke-width', 3);
+
+				// Subtle nudge animation on the whole bubble group
+				const group = d3.select(this.parentNode as SVGGElement);
+				const maxNudge = Math.min(8, d.radius * 0.12);
+				const offsetX = (Math.random() - 0.5) * 2 * maxNudge;
+				const offsetY = (Math.random() - 0.5) * 2 * maxNudge;
+				group
+					.interrupt()
+					.transition()
+					.duration(180)
+					.ease(d3.easeCubicOut)
+					.attr('transform', `translate(${d.x + offsetX},${d.y + offsetY}) scale(1.03)`);
 
 				// Show tooltip
 				const tooltip = d3.select('body').selectAll('.word-cloud-tooltip').data([null]);
@@ -338,6 +375,15 @@
 					.duration(200)
 					.attr('opacity', isTopTier ? 0.9 : 0.65)
 					.attr('stroke-width', isTopTier ? 3 : 2);
+
+				// Return the bubble group to its original position/scale
+				const group = d3.select(this.parentNode as SVGGElement);
+				group
+					.interrupt()
+					.transition()
+					.duration(220)
+					.ease(d3.easeCubicOut)
+					.attr('transform', `translate(${d.x},${d.y}) scale(1)`);
 
 				d3.select('body').selectAll('.word-cloud-tooltip').remove();
 			});
@@ -429,12 +475,12 @@
 			.text((d: any) => d.votes);
 
 		// ===== FIXED UI LAYER (title, legend, stats) =====
-		// Add title to fixed UI layer
+		// Add title to fixed UI layer, top left
 		uiGroup
 			.append('text')
-			.attr('x', width / 2)
-			.attr('y', 25)
-			.attr('text-anchor', 'middle')
+			.attr('x', 10)
+			.attr('y', 28)
+			.attr('text-anchor', 'start')
 			.attr('fill', theme.ink)
 			.attr('font-size', '16px')
 			.attr('font-weight', '700')
