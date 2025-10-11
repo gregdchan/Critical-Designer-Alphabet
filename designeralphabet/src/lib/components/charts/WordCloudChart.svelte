@@ -17,8 +17,8 @@
 	export let question = '';
 
 	let container: HTMLDivElement | null = null;
-	export let width: number = 900;
-	export let height: number = 600;
+	let width: number = 900;
+	let height: number = 600;
 	let svg: SVGSVGElement;
 	let mounted = false;
 
@@ -28,15 +28,15 @@
 	let currentTransform = d3.zoomIdentity;
 
 	const ro =
-		typeof ResizeObserver !== 'undefined'
-			? new ResizeObserver((entries) => {
-					const r = entries[0]?.contentRect;
-					if (r) {
-						width = Math.max(300, r.width);
-						height = Math.max(300, r.height);
-					}
-				})
-			: null;
+	       typeof ResizeObserver !== 'undefined'
+		       ? new ResizeObserver((entries) => {
+				       const r = entries[0]?.contentRect;
+				       if (r) {
+					       width = Math.max(300, r.width);
+					       height = Math.max(300, r.height);
+				       }
+			       })
+		       : null;
 
 	const lensOrder = [
 		'Risk',
@@ -515,13 +515,13 @@
 
 
 <div bind:this={container} class="word-cloud-container">
-       <svg
-	       bind:this={svg}
-	       viewBox="0 0 {width} {height}"
-	       width="100%"
-	       height="100%"
-	       preserveAspectRatio="xMidYMid meet"
-       ></svg>
+	<svg
+		bind:this={svg}
+		viewBox={`0 0 ${width} ${height}`}
+		width={width}
+		height={height}
+		preserveAspectRatio="xMidYMid meet"
+	></svg>
 </div>
 
 <style>
