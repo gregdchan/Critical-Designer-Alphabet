@@ -27,7 +27,8 @@ export const GET: RequestHandler = async () => {
 
 		// Calculate aggregated metrics by getting counts for each session
 		let totalParticipants = 0;
-		let totalResponses = 0;
+		let totalIdeas = 0; // written entries only
+		let totalSharedValues = 0; // written ideas with votes >= 1
 		let activeSessions = 0;
 
 		const sessionsWithCounts = await Promise.all(
@@ -38,11 +39,12 @@ export const GET: RequestHandler = async () => {
 					.select('*', { count: 'exact', head: true })
 					.eq('room_code', session.code);
 
-				// Get response count
-				const { count: responseCount } = await supabaseAdmin
+				// Get written idea count (responses joined to questions filtered to written/text)
+				const { count: ideaCount } = await supabaseAdmin
 					.from('responses')
-					.select('*', { count: 'exact', head: true })
-					.eq('room_code', session.code);
+					.select('id, questions!inner(response_type)', { count: 'exact', head: true })
+					.eq('room_code', session.code)
+					.in('questions.response_type', ['written', 'text']);
 
 				// Get question count
 				const { count: questionCount } = await supabaseAdmin
@@ -50,8 +52,61 @@ export const GET: RequestHandler = async () => {
 					.select('*', { count: 'exact', head: true })
 					.eq('room_code', session.code);
 
+				// Count shared values (written ideas with 1+ votes)
+				const { count: sharedWritten } = await supabaseAdmin
+					.from('responses')
+					.select('id, questions!inner(response_type)', { count: 'exact', head: true })
+					.eq('room_code', session.code)
+					.in('questions.response_type', ['written', 'text'])
+					.gte('votes', 1);
+
+				// Count shared values for multiple-choice responses where the same selection
+				// was chosen by 2 or more participants within the same question.
+				const { data: choiceRows, error: choiceErr } = await supabaseAdmin
+					.from('responses')
+					.select('question_id, text, questions!inner(response_type)')
+					.eq('room_code', session.code)
+					.in('questions.response_type', ['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect']);
+
+				if (choiceErr) throw new Error(choiceErr.message);
+
+				let sharedChoices = 0;
+				if (Array.isArray(choiceRows) && choiceRows.length > 0) {
+					const counts = new Map<string, number>();
+					for (const row of choiceRows) {
+						const text = (row as any).text || '';
+						const qid = (row as any).question_id || '';
+						// Split by semicolon first, else by comma
+						let choices: string[] = [];
+						if (text.includes(';')) {
+							choices = text
+								.split(';')
+								.map((s) => s.trim())
+								.filter((s) => s.length > 0);
+						} else if (text.includes(',')) {
+							choices = text
+								.split(',')
+								.map((s) => s.trim())
+								.filter((s) => s.length > 0);
+						} else if (text.trim().length > 0) {
+							choices = [text.trim()];
+						}
+
+						for (const c of choices) {
+							// Normalize choice for grouping (case-insensitive, trimmed)
+							const norm = c.toLowerCase();
+							const key = JSON.stringify([qid, norm]);
+							counts.set(key, (counts.get(key) || 0) + 1);
+						}
+					}
+					sharedChoices = Array.from(counts.values()).filter((n) => n >= 2).length;
+				}
+
+				const sharedCount = (sharedWritten || 0) + sharedChoices;
+
 				totalParticipants += participantCount || 0;
-				totalResponses += responseCount || 0;
+				totalIdeas += ideaCount || 0;
+				totalSharedValues += sharedCount || 0;
 
 				if (session.status === 'live') {
 					activeSessions++;
@@ -63,8 +118,9 @@ export const GET: RequestHandler = async () => {
 					status: session.status,
 					createdAt: session.created_at,
 					participantCount: participantCount || 0,
-					responseCount: responseCount || 0,
+					ideaCount: ideaCount || 0,
 					questionCount: questionCount || 0,
+					sharedCount: sharedCount || 0,
 					template: session.template_slug || 'Unknown Template',
 					facilitator: session.facilitator_email || 'Unknown',
 					challenge: session.challenge
@@ -74,15 +130,16 @@ export const GET: RequestHandler = async () => {
 
 		const avgEngagement =
 			sessionsWithCounts.length > 0
-				? Math.round((totalResponses / Math.max(totalParticipants, 1)) * 10) / 10
+				? Math.round((totalIdeas / Math.max(totalParticipants, 1)) * 10) / 10
 				: 0;
 
 		const dashboardMetrics = {
 			totalSessions: sessionsWithCounts.length,
 			totalParticipants,
-			totalIdeas: totalResponses,
+			totalIdeas: totalIdeas,
 			avgEngagement,
-			activeSessions
+			activeSessions,
+			sharedValues: totalSharedValues
 		};
 
 		return json({
@@ -97,14 +154,15 @@ export const GET: RequestHandler = async () => {
 				success: false,
 				error: error?.message ?? 'Internal server error',
 				sessions: [],
-				metrics: {
-					totalSessions: 0,
-					totalParticipants: 0,
-					totalIdeas: 0,
-					avgEngagement: 0,
-					activeSessions: 0
-				}
-			},
+					metrics: {
+						totalSessions: 0,
+						totalParticipants: 0,
+						totalIdeas: 0,
+						avgEngagement: 0,
+						activeSessions: 0,
+						sharedValues: 0
+					}
+				},
 			{ status: 500 }
 		);
 	}

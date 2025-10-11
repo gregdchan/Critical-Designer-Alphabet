@@ -349,8 +349,12 @@
 				});
 			}
 
-			// Always split for supercloud if multiple values detected
-			if (shouldSplit) {
+			// Only split responses that are explicitly multi-choice types
+			const isChoiceType = ['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect'].includes(
+				responseType || ''
+			);
+
+			if (isChoiceType && shouldSplit) {
 				console.log('[Presentation] ✓ Splitting response into', choices.length, 'bubbles');
 				// Multiple choices - create separate bubbles for each
 				return choices.map((choice, idx) => ({

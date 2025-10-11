@@ -144,10 +144,11 @@
 			const q = questionMap.get(r.question_id || '');
 			const lensLabel = normaliseLens(r.lens);
 			const phaseLabel = q?.phase_key || 'No Phase';
+			const votes = Number(r.votes ?? 0) || 0;
 			bubbles.push({
 				id: r.id,
 				text: r.text,
-				value: r.votes || 0,
+				value: votes,
 				type: 'written',
 				lens: lensLabel,
 				phase: phaseLabel,
@@ -157,7 +158,7 @@
 				y: 0,
 				color: responseTypeColors.written,
 				lensColor: resolveLensColor(lensLabel),
-				metadata: `${r.votes || 0} votes`
+				metadata: `${votes} votes`
 			});
 		});
 
@@ -167,16 +168,17 @@
 			return ['singleChoice', 'multiSelect'].includes(q?.response_type || '') && r.text?.trim();
 		});
 
-		// Count occurrences
+		// Count occurrences PER question + choice text + lens
 		const choiceCounts = new Map<
 			string,
-			{ count: number; questionId: string; questionText: string; lens: string; phase: string }
+			{ count: number; questionId: string; questionText: string; lens: string; phase: string; text: string }
 		>();
 		choiceResponses.forEach((r) => {
-			const key = `${r.question_id}:${r.text}`;
-			const existing = choiceCounts.get(key);
 			const q = questionMap.get(r.question_id || '');
 			const lensLabel = normaliseLens(r.lens);
+			const normText = (r.text || '').trim();
+			const key = JSON.stringify([r.question_id || '', normText, lensLabel]);
+			const existing = choiceCounts.get(key);
 			const phaseLabel = q?.phase_key || 'No Phase';
 			if (existing) {
 				existing.count++;
@@ -186,15 +188,16 @@
 					questionId: r.question_id || '',
 					questionText: q?.text || 'Unknown',
 					lens: lensLabel,
-					phase: phaseLabel
+					phase: phaseLabel,
+					text: normText
 				});
 			}
 		});
 
-		choiceCounts.forEach((data, key) => {
-			const text = key.split(':')[1];
+		choiceCounts.forEach((data) => {
+			const text = data.text;
 			bubbles.push({
-				id: key,
+				id: JSON.stringify(['choice', data.questionId, text, data.lens]),
 				text,
 				value: data.count,
 				type: 'choice',
@@ -216,7 +219,8 @@
 			return q?.response_type === 'scale';
 		});
 
-		const scaleByQuestion = new Map<
+		// Group scale values PER question + lens so filtering by lens works correctly
+		const scaleByQuestionLens = new Map<
 			string,
 			{ values: number[]; questionText: string; lens: string; phase: string }
 		>();
@@ -228,11 +232,12 @@
 
 			const lensLabel = normaliseLens(r.lens);
 			const phaseLabel = q?.phase_key || 'No Phase';
-			const existing = scaleByQuestion.get(r.question_id || '');
+			const key = JSON.stringify([r.question_id || '', lensLabel]);
+			const existing = scaleByQuestionLens.get(key);
 			if (existing) {
 				existing.values.push(value);
 			} else {
-				scaleByQuestion.set(r.question_id || '', {
+				scaleByQuestionLens.set(key, {
 					values: [value],
 					questionText: q.text || 'Unknown',
 					lens: lensLabel,
@@ -241,15 +246,16 @@
 			}
 		});
 
-		scaleByQuestion.forEach((data, questionId) => {
+		scaleByQuestionLens.forEach((data, key) => {
+			const [questionId] = JSON.parse(key);
 			const avg = data.values.reduce((a, b) => a + b, 0) / data.values.length;
 			const q = questionMap.get(questionId);
 			const scaleMax = (q?.config?.scale as any)?.max || 10;
 
 			bubbles.push({
-				id: questionId,
+				id: JSON.stringify(['scale', questionId, data.lens]), // stable identity per question+lens
 				text: `${data.questionText.substring(0, 30)}...`,
-				value: data.values.length, // size by response count
+				value: data.values.length, // size by response count for this lens
 				type: 'scale',
 				lens: data.lens,
 				phase: data.phase,
@@ -269,14 +275,35 @@
 	function calculateSizes(bubbles: AggregatedBubble[]): AggregatedBubble[] {
 		if (bubbles.length === 0) return [];
 
-		const maxValue = Math.max(...bubbles.map((b) => b.value), 1);
-		const minRadius = 20;
-		const maxRadius = 80;
+		// Floor all values at 1 - if something exists, it has at least "1 unit of importance"
+		const values = bubbles.map((b) => Math.max(b.value, 1));
+		const minValue = Math.min(...values);
+		const maxValue = Math.max(...values);
 
-		return bubbles.map((b) => ({
-			...b,
-			radius: minRadius + Math.pow(b.value / maxValue, 0.6) * (maxRadius - minRadius)
-		}));
+		const minRadius = 30;
+		const maxRadius = 65;
+		const avgRadius = (minRadius + maxRadius) / 2;
+
+		console.log('Supercloud sizing:', { minValue, maxValue, bubbleCount: bubbles.length, rawValues: bubbles.map(b => b.value).sort((a,b) => b-a).slice(0,10) });
+
+		// If all values are the same, give them average radius
+		if (minValue === maxValue) {
+			return bubbles.map((b) => ({ ...b, radius: avgRadius }));
+		}
+
+		return bubbles.map((b) => {
+			// Floor value at 1
+			const effectiveValue = Math.max(b.value, 1);
+			// Normalize relative to the actual min/max range (not 0 to max)
+			const normalized = (effectiveValue - minValue) / (maxValue - minValue);
+			// Apply gentle power curve to prevent extreme differences
+			const curved = Math.pow(normalized, 0.65);
+			const radius = minRadius + curved * (maxRadius - minRadius);
+			return {
+				...b,
+				radius
+			};
+		});
 	}
 
 	function packBubbles(

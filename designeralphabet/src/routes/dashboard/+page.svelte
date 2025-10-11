@@ -3,7 +3,7 @@
 	import {
 		IconChartBar as BarChart,
 		IconUsers as Users,
-		IconClock as Clock,
+		IconUsersGroup as Shared,
 		IconTrophy as Trophy,
 		IconDownload as Download,
 		IconEye as Eye,
@@ -31,10 +31,18 @@
 		totalParticipants: 0,
 		totalIdeas: 0,
 		avgEngagement: 0,
-		activeSessions: 0
+		activeSessions: 0,
+		sharedValues: 0
 	};
 
 	let leaderboard: any[] = [];
+
+	// Derived metrics for selected session
+	$: writtenResponses = (responses || []).filter(
+		(r) => (r.type || r.questions?.response_type || 'written') === 'written' || (r.type || '').toLowerCase() === 'text'
+	);
+	$: totalVotesWritten = writtenResponses.reduce((sum: number, r: any) => sum + (Number(r.votes) || 0), 0);
+	$: avgVotesPerIdea = writtenResponses.length > 0 ? Math.round((totalVotesWritten / writtenResponses.length) * 10) / 10 : 0;
 
 	onMount(async () => {
 		await loadDashboardData();
@@ -246,11 +254,11 @@
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-accent-critical"
 							>
-								<Clock class="h-5 w-5" />
+								<Shared class="h-5 w-5" />
 							</div>
 							<div>
-								<p class="text-sm text-secondary">Active Sessions</p>
-								<p class="text-2xl font-semibold text-primary">{dashboardMetrics.activeSessions}</p>
+								<p class="text-sm text-secondary">Shared Values</p>
+								<p class="text-2xl font-semibold text-primary">{dashboardMetrics.sharedValues}</p>
 							</div>
 						</div>
 					</div>
@@ -286,7 +294,7 @@
 										<div class="text-sm text-secondary space-y-1">
 											<p>Code: <span class="font-mono text-primary">{session.code}</span></p>
 											<p>Facilitator: {session.facilitator}</p>
-											<p>{session.participantCount} participants • {session.responseCount} ideas</p>
+											<p>{session.participantCount} participants • {session.ideaCount} ideas</p>
 											<p class="text-xs">{formatDate(session.createdAt)}</p>
 										</div>
 									</button>
@@ -341,23 +349,15 @@
 											<p class="text-sm text-secondary">Participants</p>
 										</div>
 										<div class="text-center">
-											<p class="text-2xl font-semibold text-primary">{responses.length}</p>
-											<p class="text-sm text-secondary">Ideas</p>
+											<p class="text-2xl font-semibold text-primary">{writtenResponses.length}</p>
+											<p class="text-sm text-secondary" title="Count of written responses">Ideas</p>
 										</div>
 										<div class="text-center">
-											<p class="text-2xl font-semibold text-primary">
-												{responses.reduce((sum, r) => sum + (Number(r.votes) || 0), 0)}
-											</p>
+											<p class="text-2xl font-semibold text-primary">{totalVotesWritten}</p>
 											<p class="text-sm text-secondary">Total Votes</p>
 										</div>
 										<div class="text-center">
-											<p class="text-2xl font-semibold text-primary">
-												{Math.round(
-													(responses.reduce((sum, r) => sum + (Number(r.votes) || 0), 0) /
-														responses.length) *
-														10
-												) / 10 || 0}
-											</p>
+											<p class="text-2xl font-semibold text-primary">{avgVotesPerIdea}</p>
 											<p class="text-sm text-secondary">Avg Votes/Idea</p>
 										</div>
 									</div>

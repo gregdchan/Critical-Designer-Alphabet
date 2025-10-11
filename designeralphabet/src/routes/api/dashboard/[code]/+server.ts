@@ -99,7 +99,11 @@ export const GET: RequestHandler = async ({ params }) => {
 				const question = Array.isArray(response.questions)
 					? response.questions[0]
 					: response.questions;
-				const voteCount = Number(response.votes ?? 0);
+				// Robustly coerce votes to a number: supports numeric, numeric string, or array length
+				const rawVotes: any = (response as any).votes;
+				const voteCount = Array.isArray(rawVotes)
+					? rawVotes.length
+					: (Number(rawVotes) && Number.isFinite(Number(rawVotes)) ? Number(rawVotes) : 0);
 				const responseLength = response.text?.length || 0;
 
 				// Calculate meaningful metrics instead of random values
