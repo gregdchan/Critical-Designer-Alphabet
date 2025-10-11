@@ -313,10 +313,11 @@
 		const aggregated = aggregateData(responses, questions, theme);
 		const sized = calculateSizes(aggregated);
 
-		// Reserve space for legends (right side) and stats (bottom)
-		const legendWidth = 180;
+		// Responsive layout: On mobile, legends go below chart; on desktop, to the right
+		const isMobile = width < 768;
+		const legendWidth = isMobile ? 0 : 180;
 		const topMargin = 20;
-		const bottomMargin = 35;
+		const bottomMargin = isMobile ? 280 : 35; // Extra space for 3 legends on mobile
 		const chartWidth = Math.max(400, width - legendWidth);
 		const chartHeight = Math.max(300, height - topMargin - bottomMargin);
 
@@ -328,14 +329,16 @@
 		const svgSel = d3.select(svg).attr('width', width).attr('height', height);
 
 		// Create INTERACTIVE layer (bubbles) - this will be zoomed/panned
+		// Center the chart horizontally within the available space
+		const leftMargin = (width - chartWidth - legendWidth) / 2;
 		const interactiveGroup = svgSel
 			.append('g')
 			.attr('class', 'interactive-layer')
-			.attr('transform', `translate(0, ${topMargin})`);
+			.attr('transform', `translate(${leftMargin}, ${topMargin})`);
 
 		rootGroup = interactiveGroup;
 		// Preserve existing transform between renders
-		rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
+		rootGroup.attr('transform', `translate(${leftMargin}, ${topMargin}) ${currentTransform.toString()}`);
 
 		// Create FIXED UI layer (legends, stats) - this stays put
 		const uiGroup = svgSel.append('g').attr('class', 'ui-layer');
@@ -363,7 +366,7 @@
 			.on('zoom', (event: any) => {
 				currentTransform = event.transform;
 				if (rootGroup) {
-					rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
+					rootGroup.attr('transform', `translate(${leftMargin}, ${topMargin}) ${currentTransform.toString()}`);
 				}
 			});
 
@@ -391,8 +394,10 @@
 
 		// ===== FIXED UI LAYER (legends, stats) =====
 		// Legends - Response Types and Lenses
-		const legendX = width - 170;
-		const legendY = 50;
+		// On mobile: position legends below chart in horizontal layout
+		// On desktop: position legends to the right in vertical layout
+		const legendX = isMobile ? 20 : width - 170;
+		const legendY = isMobile ? height - bottomMargin + 20 : 50;
 
 		// Response Type Legend
 		const responseTypeLegend = uiGroup
@@ -419,7 +424,9 @@
 			.data(responseTypes)
 			.join('g')
 			.attr('class', 'type-legend-item')
-			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.attr('transform', (d: any, i: number) =>
+				isMobile ? `translate(${i * 85}, 15)` : `translate(0, ${i * 20 + 15})`
+			)
 			.style('cursor', 'pointer')
 			.on('click', function (_event: any, item: any) {
 				// Toggle filter: click again to deactivate
@@ -448,12 +455,15 @@
 					.attr('font-size', '10px')
 					.attr('font-weight', activeTypeFilter === item.type ? '700' : '400')
 					.text(item.label);
-			}); // Lens Legend
-		const lensLegendY = legendY + responseTypes.length * 20 + 40;
+			});
+
+		// Lens Legend
+		const lensLegendX = isMobile ? legendX : legendX;
+		const lensLegendY = isMobile ? legendY + 70 : legendY + responseTypes.length * 20 + 40;
 		const uniqueLenses = Array.from(new Set(positioned.map((b: any) => b.lens)));
 		const lensLegend = uiGroup
 			.append('g')
-			.attr('transform', `translate(${legendX}, ${lensLegendY})`);
+			.attr('transform', `translate(${lensLegendX}, ${lensLegendY})`);
 
 		lensLegend
 			.append('text')
@@ -469,7 +479,9 @@
 			.data(uniqueLenses)
 			.join('g')
 			.attr('class', 'lens-legend-item')
-			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.attr('transform', (_d: any, i: number) =>
+				isMobile ? `translate(${i * 75}, 15)` : `translate(0, ${i * 20 + 15})`
+			)
 			.style('cursor', 'pointer')
 			.on('click', function (_event: any, lens: any) {
 				// Toggle filter: click again to deactivate
@@ -505,11 +517,12 @@
 			});
 
 		// Phase Legend
-		const phaseLegendY = lensLegendY + uniqueLenses.length * 20 + 40;
+		const phaseLegendX = isMobile ? legendX : legendX;
+		const phaseLegendY = isMobile ? legendY + 140 : lensLegendY + uniqueLenses.length * 20 + 40;
 		const uniquePhases = Array.from(new Set(positioned.map((b: any) => b.phase)));
 		const phaseLegend = uiGroup
 			.append('g')
-			.attr('transform', `translate(${legendX}, ${phaseLegendY})`);
+			.attr('transform', `translate(${phaseLegendX}, ${phaseLegendY})`);
 
 		phaseLegend
 			.append('text')
@@ -525,7 +538,9 @@
 			.data(uniquePhases)
 			.join('g')
 			.attr('class', 'phase-legend-item')
-			.attr('transform', (d: any, i: number) => `translate(0, ${i * 20 + 15})`)
+			.attr('transform', (_d: any, i: number) =>
+				isMobile ? `translate(${i * 90}, 15)` : `translate(0, ${i * 20 + 15})`
+			)
 			.style('cursor', 'pointer')
 			.on('click', function (_event: any, phase: any) {
 				// Toggle filter: click again to deactivate
@@ -661,7 +676,7 @@
 					.style('left', event.pageX + 15 + 'px')
 					.style('top', event.pageY + 8 + 'px');
 			})
-			.on('mouseleave', function (event: any, d: any) {
+			.on('mouseleave', function (_event: any, d: any) {
 				const isTopTier = d.value >= topTierThreshold;
 				d3.select(this)
 					.transition()

@@ -233,11 +233,12 @@
 
 		// Responsive layout: On mobile, legend goes below chart; on desktop, to the right
 		const isMobile = width < 768;
-		const uniqueLenses = Array.from(new Set(parsedPoints.map((p) => p.lens)));
+		// Distinct lens labels used for legend and layout calculations
+		const lensLabels = Array.from(new Set(parsedPoints.map((p) => p.lens)));
 		const margin = {
 			top: 60,
 			right: isMobile ? 20 : 120,
-			bottom: isMobile ? Math.min(uniqueLenses.length * 22 + 100, 250) : 80,
+			bottom: isMobile ? Math.min(lensLabels.length * 22 + 100, 250) : 80,
 			left: 80
 		};
 		const chartWidth = width - margin.left - margin.right;
@@ -455,7 +456,7 @@
 
 		legend
 			.selectAll('.legend-item')
-			.data(uniqueLenses)
+			.data(lensLabels)
 			.join('g')
 			.attr('class', 'legend-item')
 			.attr('transform', (d, i) => `translate(0, ${i * 22})`)
@@ -488,7 +489,7 @@
 
 		// Statistics summary
 		const statsX = isMobile ? 0 : chartWidth + 20;
-		const statsY = isMobile ? chartHeight + 40 + uniqueLenses.length * 22 + 30 : uniqueLenses.length * 22 + 30;
+		const statsY = isMobile ? chartHeight + 40 + lensLabels.length * 22 + 30 : lensLabels.length * 22 + 30;
 		const stats = g
 			.append('g')
 			.attr('transform', `translate(${statsX}, ${statsY})`);

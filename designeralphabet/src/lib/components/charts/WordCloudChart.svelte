@@ -211,14 +211,16 @@
 		const svgSel = d3.select(svg).attr('width', width).attr('height', height);
 
 		// Create INTERACTIVE layer (bubbles) - this will be zoomed/panned
+		// Center the chart horizontally within the available space
+		const leftMargin = (width - chartWidth - legendWidth) / 2;
 		const interactiveGroup = svgSel
 			.append('g')
 			.attr('class', 'interactive-layer')
-			.attr('transform', `translate(0, ${topMargin})`);
+			.attr('transform', `translate(${leftMargin}, ${topMargin})`);
 
 		rootGroup = interactiveGroup;
 		// preserve previous pan/zoom
-		rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
+		rootGroup.attr('transform', `translate(${leftMargin}, ${topMargin}) ${currentTransform.toString()}`);
 
 		// Create FIXED UI layer (title, legend, stats) - this stays put
 		const uiGroup = svgSel.append('g').attr('class', 'ui-layer').style('pointer-events', 'none'); // Don't block interactions with bubbles
@@ -243,7 +245,7 @@
 			.on('zoom', (event: any) => {
 				currentTransform = event.transform;
 				if (rootGroup) {
-					rootGroup.attr('transform', `translate(0, ${topMargin}) ${currentTransform.toString()}`);
+					rootGroup.attr('transform', `translate(${leftMargin}, ${topMargin}) ${currentTransform.toString()}`);
 				}
 			});
 
@@ -511,14 +513,15 @@
 	});
 </script>
 
-<div bind:this={container} class="relative word-cloud-container">
-	<svg
-		bind:this={svg}
-		viewBox="0 0 {width} {height}"
-		width="100%"
-		height="100%"
-		preserveAspectRatio="xMidYMid meet"
-	></svg>
+
+<div bind:this={container} class="word-cloud-container">
+       <svg
+	       bind:this={svg}
+	       viewBox="0 0 {width} {height}"
+	       width="100%"
+	       height="100%"
+	       preserveAspectRatio="xMidYMid meet"
+       ></svg>
 </div>
 
 <style>
@@ -526,9 +529,11 @@
 		width: 100%;
 		max-width: 100%;
 		overflow: hidden;
-		/* Allow flexible height with aspect fallback */
 		height: 100%;
-		aspect-ratio: 16/9; /* Landscape on desktop */
+		aspect-ratio: 16/9;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		/* Allow touch gestures (pan/pinch) without page scrolling */
 		touch-action: none;
 	}
