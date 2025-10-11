@@ -12,6 +12,7 @@
 <script lang="ts">
 	import { scalePoint, scaleLinear } from "d3-scale";
 	import { select } from "d3-selection";
+	import "d3-transition";
 	import { line, curveMonotoneX } from "d3-shape";
 	import ChartFrame from "$lib/components/charts/ChartFrame.svelte";
 	import { getThemeColors } from "$lib/utils/colors";
@@ -21,7 +22,6 @@
 
 	let tooltipEl: HTMLDivElement | null = null;
 	let rootEl: SVGGElement;
-	let mounted = false;
 
 	import { onMount, onDestroy } from 'svelte';
 
@@ -41,12 +41,11 @@
 		tooltipEl.style.color = 'hsl(var(--text-primary))';
 		tooltipEl.style.boxShadow = '0 6px 18px hsl(var(--brand) / 0.15)';
 		tooltipEl.style.maxWidth = '300px';
+		tooltipEl.style.border = '1px solid hsl(var(--border-subtle))';
 		document.body.appendChild(tooltipEl);
-		mounted = true;
 	});
 
 	onDestroy(() => {
-		mounted = false;
 		if (tooltipEl && document.body.contains(tooltipEl)) {
 			document.body.removeChild(tooltipEl);
 		}
@@ -91,6 +90,11 @@
 	})();
 
 	function render(root: SVGGElement, innerWidth: number, innerHeight: number, _points: JourneyPoint[]) {
+		if (!tooltipEl) {
+			console.warn('[JourneyChart] Tooltip element not ready, skipping render');
+			return;
+		}
+
 		const g = select(root);
 		g.selectAll("*").remove();
 
@@ -318,6 +322,7 @@
 
 				// Enhanced tooltip
 				if (tooltipEl) {
+				console.log('[JourneyChart] Mouseover - tooltip:', tooltipEl, 'clientX:', event.clientX, 'clientY:', event.clientY);
 					tooltipEl.style.opacity = '1';
 					tooltipEl.style.left = event.clientX + 8 + 'px';
 					tooltipEl.style.top = event.clientY + 8 + 'px';
@@ -521,6 +526,6 @@
 	let:innerHeight
 >
 	<g bind:this={rootEl}>
-		{@html (rootEl && mounted && render(rootEl, innerWidth, innerHeight, points), "")}
+		{@html (rootEl && render(rootEl, innerWidth, innerHeight, points), "")}
 	</g>
 </ChartFrame>

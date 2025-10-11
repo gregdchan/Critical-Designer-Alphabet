@@ -5,6 +5,7 @@
 	import PhaseStackedBar from '$lib/components/charts/PhaseStackedBar.svelte';
 	import PhaseTopIdeasBubbles from '$lib/components/charts/PhaseTopIdeasBubbles.svelte';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 
 	type ApiResponse = {
 		success: boolean;
@@ -90,18 +91,20 @@
 	// Pull query params to prefill
 	let hasLoadedFromParams = false;
 	$: {
-		const url = $page?.url;
-		if (url && !hasLoadedFromParams) {
-			const code = url.searchParams.get('code');
-			const pid = url.searchParams.get('participant');
-			if (code && code !== sessionCode) {
-				sessionCode = code;
-				hasLoadedFromParams = true;
-				// load session automatically
-				loadSession();
-			}
-			if (pid && pid !== selectedParticipantId) {
-				selectedParticipantId = pid;
+		if (browser) {
+			const url = $page?.url;
+			if (url && !hasLoadedFromParams) {
+				const code = url.searchParams.get('code');
+				const pid = url.searchParams.get('participant');
+				if (code && code !== sessionCode) {
+					sessionCode = code;
+					hasLoadedFromParams = true;
+					// load session automatically
+					loadSession();
+				}
+				if (pid && pid !== selectedParticipantId) {
+					selectedParticipantId = pid;
+				}
 			}
 		}
 	}
@@ -284,10 +287,11 @@
 
 		<!-- Top ideas by phase (most popular) -->
 		{#if phaseIdeas.length > 0}
+			{@const mobileHeight = phaseIdeas.length * 366 + 64}
 			<div class="rounded-2xl border border-line bg-surface-elevated p-4 mt-6">
 				<h2 class="mb-3 text-sm font-semibold text-ink">Most Popular Ideas by Phase</h2>
 				<!-- Increase height on mobile to accommodate taller phase cells -->
-				<div class="phase-bubbles-container">
+				<div class="phase-bubbles-container" style="--mobile-height: {mobileHeight}px;">
 					<PhaseTopIdeasBubbles
 						title="Top Ideas"
 						data={phaseIdeas}
@@ -323,8 +327,10 @@
 	}
 	@media (max-width: 640px) {
 		.phase-bubbles-container {
-			height: auto;
+			/* Dynamic height based on number of phases */
+			height: var(--mobile-height, 1200px);
 			min-height: 800px;
+			overflow: visible;
 		}
 	}
 </style>

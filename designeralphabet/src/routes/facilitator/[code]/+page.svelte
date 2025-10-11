@@ -98,8 +98,6 @@
 							<div class="w-full md:h-[520px] h-[70dvh]">
 								<WordCloudChart
 									responses={qResponses}
-									width={1300}
-									height={520}
 									question={q.text || ''}
 								/>
 							</div>

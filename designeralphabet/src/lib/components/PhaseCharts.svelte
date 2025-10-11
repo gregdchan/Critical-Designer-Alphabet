@@ -152,15 +152,15 @@
 								{height}
 							/>
 						{:else if type === 'voting' || type === 'openText'}
-							<WordCloudChart
-								responses={enrichResponses(
-									$responses.filter((r) => r.question_id === question.id),
-									question
-								)}
-								{width}
-								{height}
-								question={question.text || ''}
-							/>
+							<div class="w-full md:h-[520px] h-[90dvh] min-h-[600px]">
+								<WordCloudChart
+									responses={enrichResponses(
+										$responses.filter((r) => r.question_id === question.id),
+										question
+									)}
+									question={question.text || ''}
+								/>
+							</div>
 						{:else if type === 'multipleChoiceBar' && data}
 							<BarChart {data} title={question.text || ''} />
 						{:else if type === 'multipleChoicePie' && data}

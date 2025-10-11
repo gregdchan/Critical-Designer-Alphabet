@@ -35,7 +35,7 @@
 		const cellGap = 16;
 		const cellWidth = Math.floor((innerWidth - cellGap * (cols - 1)) / cols);
 		const rows = Math.ceil(phases.length / cols);
-		// On mobile, make each phase taller for better readability
+		// On mobile, make each phase taller to utilize vertical space
 		const baseCellHeight = Math.floor((innerHeight - cellGap * (rows - 1)) / Math.max(1, rows));
 		const cellHeight = isMobile ? Math.max(baseCellHeight, 350) : baseCellHeight;
 

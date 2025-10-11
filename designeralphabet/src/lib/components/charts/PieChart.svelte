@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { pie, arc } from 'd3-shape';
 	import { select } from 'd3-selection';
+	import 'd3-transition';
 	import ChartFrame from '$lib/components/charts/ChartFrame.svelte';
 	import type { ChartData, ChartPoint } from '$lib/types/charts';
 
