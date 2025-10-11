@@ -665,15 +665,15 @@
 						</div>
 					`
 					)
-					.style('left', event.pageX + 15 + 'px')
-					.style('top', event.pageY + 8 + 'px')
+					.style('left', event.clientX + 8 + 'px')
+					.style('top', event.clientY + 8 + 'px')
 					.style('opacity', 1);
 			})
 			.on('mousemove', function (event: any) {
 				d3.select('body')
 					.selectAll('.supercloud-tooltip')
-					.style('left', event.pageX + 15 + 'px')
-					.style('top', event.pageY + 8 + 'px');
+					.style('left', event.clientX + 8 + 'px')
+					.style('top', event.clientY + 8 + 'px');
 			})
 			.on('mouseleave', function (_event: any, d: any) {
 				const isTopTier = d.value >= topTierThreshold;

@@ -10,9 +10,9 @@
 </script>
 
 <script lang="ts">
-	import { scaleLinear } from "d3-scale";
+	import { scalePoint, scaleLinear } from "d3-scale";
 	import { select } from "d3-selection";
-	import { onMount } from "svelte";
+	import { line, curveMonotoneX } from "d3-shape";
 	import ChartFrame from "$lib/components/charts/ChartFrame.svelte";
 	import { getThemeColors } from "$lib/utils/colors";
 
@@ -21,12 +21,25 @@
 
 	let tooltipEl: HTMLDivElement | null = null;
 	let rootEl: SVGGElement;
-	let mounted = false;
 
+	// Initialize tooltip element
+	import { onMount } from 'svelte';
 	onMount(() => {
-		mounted = true;
+		tooltipEl = document.createElement('div');
+		tooltipEl.style.position = 'fixed';
+		tooltipEl.style.pointerEvents = 'none';
+		tooltipEl.style.zIndex = '99999';
+		tooltipEl.style.opacity = '0';
+		tooltipEl.style.transition = 'opacity 0.2s ease';
+		tooltipEl.style.display = 'block';
+		document.body.appendChild(tooltipEl);
+
+		console.log('Tooltip element created:', tooltipEl);
+
 		return () => {
-			mounted = false;
+			if (tooltipEl && document.body.contains(tooltipEl)) {
+				document.body.removeChild(tooltipEl);
+			}
 		};
 	});
 
@@ -50,10 +63,10 @@
 		const totalVotes = orderedWithPositions.reduce((sum, p) => sum + (p.votes || 0), 0);
 		const avgVotes = totalVotes / orderedWithPositions.length;
 		const mostEngagedPost = orderedWithPositions.reduce((max, p) => (p.votes || 0) > (max.votes || 0) ? p : max, orderedWithPositions[0]);
-		const lensDistribution = orderedWithPositions.reduce((acc, p) => {
+		const lensDistribution = orderedWithPositions.reduce((acc: Record<string, number>, p) => {
 			acc[p.lens] = (acc[p.lens] || 0) + 1;
 			return acc;
-		}, {});
+		}, {} as Record<string, number>);
 		const primaryLens = Object.keys(lensDistribution).reduce((a, b) => lensDistribution[a] > lensDistribution[b] ? a : b);
 		const engagementTrend = orderedWithPositions.slice(-3).reduce((sum, p) => sum + (p.votes || 0), 0) / 3;
 		
@@ -124,7 +137,7 @@
 			return 'viral';
 		};
 
-		const getEngagementColor = (votes, baseColor) => {
+		const getEngagementColor = (votes: number, baseColor: string) => {
 			const level = getEngagementLevel(votes);
 			switch (level) {
 				case 'none': return `${baseColor}80`; // 50% opacity
@@ -270,7 +283,9 @@
 				if (level === 'high') return 'drop-shadow(0 0 8px #00D9FF)';
 				return 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
 			})
-			.on('mouseenter', function(_event, d) {
+			.on('mouseover', function(event, d) {
+				console.log('Mouseover event:', event, d);
+
 				const circle = select(this);
 				const originalRadius = sizeScale(d.votes || 0);
 
@@ -293,29 +308,48 @@
 						.style('opacity', '1');
 				}
 
-				// Set tooltip content
+				// Enhanced tooltip
+				console.log('Tooltip element:', tooltipEl);
 				if (tooltipEl) {
 					const level = getEngagementLevel(d.votes || 0);
+					console.log('Setting tooltip content for:', d.lens);
 
 					tooltipEl.style.opacity = '1';
-					tooltipEl.style.border = `1px solid ${lensColors.get(d.lens) || theme.brand}`;
-					tooltipEl.innerHTML = `
-						<div style="font-weight:700;margin-bottom:4px;">${d.lens}</div>
-						${d.phase ? `<div><strong>Phase:</strong> ${d.phase}</div>` : ''}
-						<div><strong>Question:</strong> #${d.questionPosition || ''}</div>
-						<div><strong>Responses:</strong> ${d.votes || 0}</div>
-						${d.text ? `<div style="margin-top:4px;max-width:200px;font-size:11px;font-style:italic;">"${d.text}"</div>` : ''}
-					`;
-				}
-			})
-			.on('mousemove', function(event) {
-				// Update tooltip position to follow cursor
-				if (tooltipEl) {
 					tooltipEl.style.left = event.pageX + 12 + 'px';
 					tooltipEl.style.top = event.pageY + 12 + 'px';
+					tooltipEl.style.transition = 'opacity 0.2s ease';
+					tooltipEl.style.background = '#ffffff';
+					tooltipEl.style.border = `2px solid ${lensColors.get(d.lens) || theme.brand}`;
+					tooltipEl.style.borderRadius = '12px';
+					tooltipEl.style.padding = '16px';
+					tooltipEl.style.boxShadow = '0 12px 24px rgba(0,0,0,0.2)';
+					tooltipEl.style.backdropFilter = 'blur(12px)';
+					tooltipEl.style.fontSize = '13px';
+					tooltipEl.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+					tooltipEl.style.lineHeight = '1.6';
+					tooltipEl.style.maxWidth = '350px';
+					tooltipEl.style.color = '#000000';
+					tooltipEl.innerHTML = `
+						<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+							<div style="width:8px;height:8px;border-radius:50%;background:${lensColors.get(d.lens) || theme.brand};"></div>
+							<div style="font-weight:700;color:${lensColors.get(d.lens) || theme.brand};font-size:14px;">${d.lens}</div>
+						</div>
+						${d.phase ? `<div style="font-size:11px;opacity:0.7;margin-bottom:8px;"><strong>Phase:</strong> ${d.phase}</div>` : ''}
+						<div style="font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+							<span style="opacity:0.7;">Question #${d.questionPosition || ''}</span>
+							<span style="opacity:0.4;">•</span>
+							<span style="color:${level === 'viral' ? '#FF6B35' : level === 'high' ? '#00D9FF' : 'inherit'};font-weight:600;">${d.votes || 0} response${(d.votes || 0) === 1 ? '' : 's'}</span>
+						</div>
+						<div style="font-size:11px;opacity:0.6;margin-bottom:8px;">${d.t ? d.t.toLocaleString() : ''}</div>
+						${d.text ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:12px;line-height:1.5;font-style:italic;">"${d.text}"</div>` : ''}
+					`;
+
+					console.log('Tooltip displayed at:', event.pageX, event.pageY, 'Opacity:', tooltipEl.style.opacity);
+				} else {
+					console.warn('Tooltip element not found!');
 				}
 			})
-			.on('mouseleave', function(_event, d) {
+			.on('mouseout', function(_event, d) {
 				const circle = select(this);
 				const originalRadius = sizeScale(d.votes || 0);
 
@@ -500,9 +534,4 @@
 	<g bind:this={rootEl}>
 		{@html (rootEl && render(rootEl, innerWidth, innerHeight, points), "")}
 	</g>
-	<div
-		slot="tooltip"
-		bind:this={tooltipEl}
-		style="position:fixed;opacity:0;pointer-events:none;background:hsl(var(--surface-elevated));border:1px solid hsl(var(--brand));border-radius:8px;padding:8px 10px;font-size:12px;color:hsl(var(--text-primary));box-shadow:0 6px 18px hsl(var(--brand) / 0.15);max-width:300px;z-index:99999;"
-	/>
 </ChartFrame>
