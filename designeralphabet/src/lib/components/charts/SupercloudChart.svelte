@@ -103,14 +103,38 @@
 			default: '#6366F1' // Indigo - fallback
 		};
 
-		// Lens color mapping
+		// Lens color mapping (distinct, high-contrast palette)
+		// Prefer D3 categorical schemes for clearer separation; fall back to theme colors
+		const distinctSets: string[] = [
+			...(Array.isArray((d3 as any).schemeTableau10) ? (d3 as any).schemeTableau10 : []),
+			...(Array.isArray((d3 as any).schemeSet2) ? (d3 as any).schemeSet2 : []),
+			...(Array.isArray((d3 as any).schemeDark2) ? (d3 as any).schemeDark2 : []),
+			...(Array.isArray((d3 as any).schemeSet3) ? (d3 as any).schemeSet3 : [])
+		].filter(Boolean);
+
+		const distinctPalette = distinctSets.length > 0
+			? distinctSets
+			: [
+				'#1f77b4', // blue
+				'#ff7f0e', // orange
+				'#2ca02c', // green
+				'#d62728', // red
+				'#9467bd', // purple
+				'#8c564b', // brown
+				'#e377c2', // pink
+				'#7f7f7f', // gray
+				'#bcbd22', // olive
+				'#17becf' // teal
+			];
+
 		const basePalette = Object.fromEntries(
 			(lensOrder as readonly string[]).map((lens, idx) => [
 				lens,
-				theme.chart[idx % theme.chart.length] ?? theme.brand
+				distinctPalette[idx % distinctPalette.length] ?? theme.chart[idx % theme.chart.length] ?? theme.brand
 			])
 		);
 		const fallbackPalette = [
+			...distinctPalette,
 			...theme.chart,
 			theme.brand,
 			theme.brandSoft,

@@ -28,6 +28,10 @@
 		const maxTotal = Math.max(1, ...totals);
 
 		const isMobile = innerWidth < 560;
+		// Reserve space on the left for phase labels (desktop) and on the right for legend
+		const leftPad = isMobile ? 0 : 100;
+		const legendWidth = isMobile ? 0 : 220; // widen to prevent overlap with bars
+
 		const y = scaleBand<string>()
 			.domain(data.map((d) => d.phase))
 			.range([0, innerHeight])
@@ -35,7 +39,8 @@
 
 		const x = scaleLinear()
 			.domain([0, maxTotal])
-			.range([0, innerWidth - (isMobile ? 0 : 80)]);
+			// Bars stop before the legend area on desktop
+			.range([0, innerWidth - (leftPad + legendWidth)]);
 
 		const row = g.selectAll('g.row').data(data).join('g').attr('class', 'row');
 
@@ -44,7 +49,8 @@
 			.append('rect')
 			.attr('x', 0)
 			.attr('y', (d) => y(d.phase) || 0)
-			.attr('width', innerWidth)
+			// Background width excludes legend area so it doesn't sit behind labels
+			.attr('width', innerWidth - legendWidth)
 			.attr('height', y.bandwidth())
 			.attr('fill', 'hsl(var(--surface-muted))');
 
@@ -52,7 +58,7 @@
 		if (!isMobile) {
 			row
 				.append('text')
-				.attr('x', 4)
+				.attr('x', 8)
 				.attr('y', (d) => (y(d.phase) || 0) + y.bandwidth() / 2)
 				.attr('text-anchor', 'start')
 				.attr('fill', 'hsl(var(--text-primary))')
@@ -63,7 +69,7 @@
 
 		// stacked bars
 		row.each(function (d, idx) {
-			let offset = isMobile ? 0 : 80; // leave space for labels on desktop
+			let offset = leftPad; // leave space for labels on desktop
 			const r = select(this);
 			const total = d.stacks.reduce((s, v) => s + (v.value || 0), 0) || 1;
 			d.stacks
@@ -99,8 +105,10 @@
 				});
 		});
 
-		// simple legend
-		const legend = g.append('g').attr('transform', `translate(${innerWidth - 160}, 0)`);
+		// Legend sits in reserved right area on desktop; compact on mobile
+		const legendX = isMobile ? 0 : innerWidth - legendWidth + 10;
+		const legendY = 0;
+		const legend = g.append('g').attr('transform', `translate(${Math.max(0, legendX)}, ${legendY})`);
 		legend
 			.selectAll('g')
 			.data(lenses)
