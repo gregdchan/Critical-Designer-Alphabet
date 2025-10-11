@@ -6,7 +6,6 @@
 		IconUsersGroup as Shared,
 		IconTrophy as Trophy,
 		IconDownload as Download,
-		IconEye as Eye,
 		IconTarget as Target,
 		IconBulb as Lightbulb,
 		IconTrendingUp as TrendingUp
@@ -123,7 +122,8 @@
 
 	async function exportSessionData(sessionCode: string) {
 		try {
-			window.open(`/api/export/${sessionCode}`, '_blank');
+			// Open the printable export sheet; users can save as PDF from there
+			window.open(`/export/${sessionCode}?print=1`, '_blank');
 		} catch (err) {
 			console.error('Failed to export session data:', err);
 			alert('Failed to export session data');
@@ -329,8 +329,7 @@
 													}
 												}}
 											>
-												<Eye class="h-4 w-4" />
-												{selectedSession.status === 'done' ? 'View Results' : 'View Live'}
+												{selectedSession.status === 'done' ? 'Results' : 'View Live'}
 											</button>
 											<button
 												class="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
