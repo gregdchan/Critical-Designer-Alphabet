@@ -347,15 +347,23 @@
 								{disabled}
 								class="group relative w-full rounded-lg border p-3 text-left transition {selected
 									? 'border-brand bg-brand/10 shadow-brand'
-									: disabled
-										? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
-										: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
+									: recommended
+										? 'border-yellow-500 bg-yellow-500/10 hover:border-yellow-400 hover:bg-yellow-500/20 shadow-yellow-500/20'
+										: disabled
+											? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
+											: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
 							>
 								{#if selected}
 									<div
 										class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-ink"
 									>
 										<IconCheck class="h-3 w-3" />
+									</div>
+								{:else if recommended}
+									<div
+										class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-500 text-ink"
+									>
+										<IconStar class="h-3 w-3 fill-current" />
 									</div>
 								{/if}
 
@@ -367,15 +375,22 @@
 									>
 										{card.letter || '?'}
 									</span>
-									<h4 class="flex-1 font-medium text-white text-sm">{card.title}</h4>
+									<div class="flex-1">
+										<div class="flex items-center gap-2">
+											<h4 class="font-medium text-white text-sm">{card.title}</h4>
+											{#if recommended}
+												<IconStar class="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
+											{/if}
+										</div>
+									</div>
 								</div>
 
 								{#if card.description}
 									<p class="text-xs text-ink-muted line-clamp-2">{card.description}</p>
 								{/if}
 
-								{#if card.category}
-									<div class="mt-2">
+								<div class="mt-2 flex items-center gap-2 flex-wrap">
+									{#if card.category}
 										<span
 											class="rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider {getCategoryColor(
 												card.category
@@ -383,8 +398,13 @@
 										>
 											{card.category}
 										</span>
-									</div>
-								{/if}
+									{/if}
+									{#if recommended}
+										<span class="text-[10px] font-semibold text-yellow-500 uppercase tracking-wide">
+											Recommended
+										</span>
+									{/if}
+								</div>
 							</button>
 						{/each}
 					</div>

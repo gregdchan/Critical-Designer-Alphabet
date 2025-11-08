@@ -193,6 +193,7 @@
 	$: isSessionPlanned = sessionInfo?.status === 'planned';
 	$: currentQuestion = questionsList.find((q) => q.id === selectedQuestionId) ?? null;
 	$: currentQuestionConfig = (currentQuestion?.config as Record<string, unknown>) ?? {};
+	$: recommendedCardsForQuestion = (currentQuestion?.recommended_cards as string[]) ?? [];
 	$: modalResponseType = (currentQuestion?.response_type as string) ?? 'written';
 	$: modalOptions = Array.isArray((currentQuestionConfig as { options?: unknown[] }).options)
 		? ((currentQuestionConfig as { options?: unknown[] }).options ?? []).filter(
@@ -2277,6 +2278,7 @@
 					maxSelection={5}
 					onCardToggle={(card) => cardStore.toggleCard(card)}
 					isOpen={true}
+				recommendedCards={recommendedCardsForQuestion}
 					isMobile={false}
 				/>
 			</aside>
@@ -2289,6 +2291,7 @@
 				maxSelection={5}
 				onCardToggle={(card) => cardStore.toggleCard(card)}
 				isOpen={isCardPanelOpen}
+			recommendedCards={recommendedCardsForQuestion}
 				isMobile={true}
 			/>
 		{/if}
