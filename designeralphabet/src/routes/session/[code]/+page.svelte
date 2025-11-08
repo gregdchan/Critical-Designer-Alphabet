@@ -61,7 +61,9 @@
 	import { createSessionCardStore } from '$lib/stores/sessionCards';
 	import type { Card } from '$lib/Cards';
 	import PortableText from '$lib/components/PortableText.svelte';
-	import { getLeaderboard } from '$lib/gamification';
+	import { getLeaderboard, getNewlyEarnedBadges, type Badge } from '$lib/gamification';
+	import BadgeNotification from '$lib/components/session/BadgeNotification.svelte';
+	import LiveLeaderboard from '$lib/components/session/LiveLeaderboard.svelte';
 
 	export let data: { sessionCode: string; role: string };
 
@@ -139,6 +141,13 @@
 
 	// Track user votes (stored in localStorage)
 	let userVotes: Set<string> = new Set();
+
+	// Badge notification state
+	let newBadge: Badge | null = null;
+	let previousBadgeIds: string[] = [];
+
+	// Leaderboard state
+	let isLeaderboardOpen = false;
 
 	// Subscribe to card store
 	$: selectedCards = $cardStore.selectedCards;
@@ -743,6 +752,30 @@
 			.filter(Boolean);
 		const allCards = [...selectedCardTitles, ...additionalCards];
 
+		// CARD VALIDATION: Check if required cards count is met
+		const requiredCardsCount = (currentQuestion?.required_cards_count as number) ?? 0;
+		if (requiredCardsCount > 0 && allCards.length < requiredCardsCount) {
+			alert(
+				`Please select at least ${requiredCardsCount} card${requiredCardsCount > 1 ? 's' : ''} before submitting your response.`
+			);
+			return;
+		}
+
+		// OPTIONAL: Keyword validation for card concepts
+		const cardValidation = currentQuestion?.card_validation as
+			| { enabled?: boolean; validation_prompt?: string }
+			| undefined;
+		if (cardValidation?.enabled && allCards.length > 0 && normalizedResponseText.length > 0) {
+			// Simple validation: check if response is long enough to meaningfully reference cards
+			if (normalizedResponseText.length < 50) {
+				const proceed = confirm(
+					cardValidation.validation_prompt ||
+						'Your response seems brief. Are you sure it applies the concepts from your selected cards?'
+				);
+				if (!proceed) return;
+			}
+		}
+
 		await apiAddResponse(sessionCode, {
 			questionId: selectedQuestionId,
 			participantId: currentParticipant.id,
@@ -750,6 +783,20 @@
 			cards: allCards,
 			metadata: responseMetadata
 		});
+
+		// Check for newly earned badges
+		const newlyEarned = getNewlyEarnedBadges(
+			currentParticipant,
+			responsesList,
+			timelineList,
+			previousBadgeIds
+		);
+		if (newlyEarned.length > 0) {
+			// Show notification for the first new badge
+			newBadge = newlyEarned[0];
+			previousBadgeIds = [...previousBadgeIds, ...newlyEarned.map((b) => b.id)];
+		}
+
 		responseModalOpen = false;
 		responseText = '';
 		responseMetadata = null;
@@ -1755,6 +1802,14 @@
 									<span class="hidden sm:inline">Arcade Chat</span>
 									<span class="sm:hidden">Chat</span>
 								</button>
+								<button
+									class="flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap border border-line text-secondary hover:border-brand/40 hover:text-cyan-200"
+									on:click={() => (isLeaderboardOpen = true)}
+								>
+									<IconChartDots3 class="h-4 w-4 flex-shrink-0" />
+									<span class="hidden md:inline">Leaderboard</span>
+									<span class="md:hidden">🏆</span>
+								</button>
 								{#if isFacilitator()}
 									<button
 										class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
@@ -2594,6 +2649,19 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Badge Notification (appears when new badge is earned) -->
+<BadgeNotification badge={newBadge} onDismiss={() => (newBadge = null)} />
+
+<!-- Live Leaderboard Modal -->
+<LiveLeaderboard
+	participants={participantsList}
+	responses={responsesList}
+	timeline={timelineList}
+	currentParticipantId={currentParticipant?.id}
+	isOpen={isLeaderboardOpen}
+	onClose={() => (isLeaderboardOpen = false)}
+/>
 
 <style>
 	.session-shell {

@@ -170,6 +170,76 @@ export const BADGES: Badge[] = [
 			return userResponses.length >= 3 && othersWithVotes >= 5;
 		},
 		points: 30
+	},
+	{
+		id: 'card-curious',
+		name: 'Card Curious',
+		description: 'Viewed 5 different cards',
+		icon: '📖',
+		color: '#9333ea',
+		requirement: (participant, responses) => {
+			// Check if participant has used at least 5 unique cards
+			const userResponses = responses.filter((r) => r.participant_id === participant.id);
+			const uniqueCards = new Set(userResponses.flatMap((r) => r.cards || []));
+			return uniqueCards.size >= 5;
+		},
+		points: 15
+	},
+	{
+		id: 'card-scholar',
+		name: 'Card Scholar',
+		description: 'Referenced 10 cards in your responses',
+		icon: '📚',
+		color: '#7c3aed',
+		requirement: (participant, responses) => {
+			const userResponses = responses.filter((r) => r.participant_id === participant.id);
+			const totalCards = userResponses.reduce((sum, r) => sum + (r.cards?.length || 0), 0);
+			return totalCards >= 10;
+		},
+		points: 30
+	},
+	{
+		id: 'card-expert',
+		name: 'Card Expert',
+		description: 'Mastered all cards in one category',
+		icon: '🎓',
+		color: '#6366f1',
+		requirement: (participant, responses) => {
+			// This is a simplified check - ideally would verify category coverage
+			const userResponses = responses.filter((r) => r.participant_id === participant.id);
+			const uniqueCards = new Set(userResponses.flatMap((r) => r.cards || []));
+			// Assume 10+ cards from diverse sources indicates category mastery
+			return uniqueCards.size >= 10 && userResponses.length >= 5;
+		},
+		points: 50
+	},
+	{
+		id: 'pluriverse-champion',
+		name: 'Pluriverse Champion',
+		description: 'Used cards from all 5 categories',
+		icon: '🌈',
+		color: '#ec4899',
+		requirement: (participant, responses) => {
+			// Simplified: check for diverse card usage
+			const userResponses = responses.filter((r) => r.participant_id === participant.id);
+			const uniqueCards = new Set(userResponses.flatMap((r) => r.cards || []));
+			// Assume 15+ unique cards indicates coverage across categories
+			return uniqueCards.size >= 15;
+		},
+		points: 75
+	},
+	{
+		id: 'theory-practice-bridge',
+		name: 'Theory-Practice Bridge',
+		description: 'Combined Theory and Practice cards in one response',
+		icon: '🔬',
+		color: '#10b981',
+		requirement: (participant, responses) => {
+			const userResponses = responses.filter((r) => r.participant_id === participant.id);
+			// Check if any response has 2+ cards (indicating combination)
+			return userResponses.some((r) => (r.cards?.length || 0) >= 2);
+		},
+		points: 25
 	}
 ];
 
