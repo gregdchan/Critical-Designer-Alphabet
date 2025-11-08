@@ -340,6 +340,7 @@
 					<div class="space-y-2">
 						{#each filteredCards as card}
 							{@const selected = isCardSelected(card)}
+						{@const recommended = isCardRecommended(card)}
 							{@const disabled = !selected && !canSelectMore}
 							<button
 								on:click={() => handleCardClick(card)}
