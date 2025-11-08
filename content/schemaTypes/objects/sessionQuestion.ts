@@ -360,6 +360,60 @@ export const sessionQuestion = defineField({
       options: {
         layout: 'list'
       }
+    }),
+    defineField({
+      name: 'recommendedCards',
+      type: 'array',
+      title: 'Recommended Cards',
+      description: 'Suggest Critical Designer Alphabet cards for participants to consider when responding. These cards will be highlighted in the card panel during the session.',
+      of: [
+        {
+          type: 'reference',
+          to: [{ type: 'card' }]
+        }
+      ],
+      options: {
+        layout: 'list'
+      }
+    }),
+    defineField({
+      name: 'requiredCardsCount',
+      type: 'number',
+      title: 'Required Cards Count',
+      description: 'Minimum number of cards participants must select before submitting a response. Set to 0 for optional card selection.',
+      initialValue: 0,
+      validation: (rule) => rule.min(0).max(5).integer()
+    }),
+    defineField({
+      name: 'cardValidation',
+      type: 'object',
+      title: 'Card Validation Settings',
+      description: 'Configure how cards are validated and integrated with responses',
+      fields: [
+        defineField({
+          name: 'enabled',
+          type: 'boolean',
+          title: 'Enable Card Validation',
+          description: 'Check if responses mention concepts from selected cards',
+          initialValue: false
+        }),
+        defineField({
+          name: 'validationPrompt',
+          type: 'text',
+          title: 'Validation Guidance',
+          description: 'Instructions shown to participants about how to use cards',
+          placeholder: 'Your response should apply concepts from at least one of the recommended cards. Explain how the card\'s framework shapes your thinking.',
+          rows: 3
+        }),
+        defineField({
+          name: 'bonusPoints',
+          type: 'number',
+          title: 'Bonus Points for Card Usage',
+          description: 'Extra points awarded when participants effectively use recommended cards (0 = no bonus)',
+          initialValue: 0,
+          validation: (rule) => rule.min(0).max(50).integer()
+        })
+      ]
     })
   ],
   preview: {

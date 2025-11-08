@@ -67,6 +67,13 @@ export interface Question {
 	order_index: number | null;
 	recommended_dashboards: string[];
 	enable_voting: boolean | null;
+	recommended_cards?: string[]; // Card IDs or titles
+	required_cards_count?: number;
+	card_validation?: {
+		enabled?: boolean;
+		validation_prompt?: string;
+		bonus_points?: number;
+	};
 	created_at: string;
 }
 
