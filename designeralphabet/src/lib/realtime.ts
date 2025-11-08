@@ -270,55 +270,103 @@ function handleWebSocketMessage(message: any, code: string) {
 function setupDataSubscriptions(code: string) {
 	if (!browser) return;
 
-	// Set up Supabase Realtime subscriptions for all data tables
+	// Set up Supabase Realtime subscriptions for all data tables with incremental updates
 	supabaseChannel = supabase
 		.channel(`session:${code}`)
 		.on(
 			'postgres_changes',
 			{ event: '*', schema: 'public', table: 'participants', filter: `room_code=eq.${code}` },
-			async () => {
-				console.log('[Realtime] Participants updated');
-				await fetchBundle(code);
+			async (payload) => {
+				console.log('[Realtime] Participants updated', payload.eventType);
+				if (payload.eventType === 'INSERT') {
+					participants.update((current) => [...current, payload.new as Participant]);
+				} else if (payload.eventType === 'UPDATE') {
+					participants.update((current) =>
+						current.map((p) => (p.id === payload.new.id ? (payload.new as Participant) : p))
+					);
+				} else if (payload.eventType === 'DELETE') {
+					participants.update((current) => current.filter((p) => p.id !== payload.old.id));
+				}
 			}
 		)
 		.on(
 			'postgres_changes',
 			{ event: '*', schema: 'public', table: 'responses', filter: `room_code=eq.${code}` },
 			async (payload) => {
-				console.log('[Realtime] Responses updated!', payload);
-				await fetchBundle(code);
+				console.log('[Realtime] Responses updated!', payload.eventType);
+				if (payload.eventType === 'INSERT') {
+					responses.update((current) => [...current, payload.new as Response]);
+				} else if (payload.eventType === 'UPDATE') {
+					responses.update((current) =>
+						current.map((r) => (r.id === payload.new.id ? (payload.new as Response) : r))
+					);
+				} else if (payload.eventType === 'DELETE') {
+					responses.update((current) => current.filter((r) => r.id !== payload.old.id));
+				}
 			}
 		)
 		.on(
 			'postgres_changes',
 			{ event: '*', schema: 'public', table: 'questions', filter: `room_code=eq.${code}` },
-			async () => {
-				console.log('[Realtime] Questions updated');
-				await fetchBundle(code);
+			async (payload) => {
+				console.log('[Realtime] Questions updated', payload.eventType);
+				if (payload.eventType === 'INSERT') {
+					questions.update((current) => [...current, payload.new as Question]);
+				} else if (payload.eventType === 'UPDATE') {
+					questions.update((current) =>
+						current.map((q) => (q.id === payload.new.id ? (payload.new as Question) : q))
+					);
+				} else if (payload.eventType === 'DELETE') {
+					questions.update((current) => current.filter((q) => q.id !== payload.old.id));
+				}
 			}
 		)
 		.on(
 			'postgres_changes',
 			{ event: '*', schema: 'public', table: 'timeline', filter: `room_code=eq.${code}` },
-			async () => {
-				console.log('[Realtime] Timeline updated');
-				await fetchBundle(code);
+			async (payload) => {
+				console.log('[Realtime] Timeline updated', payload.eventType);
+				if (payload.eventType === 'INSERT') {
+					timeline.update((current) => [...current, payload.new as TimelineEntry]);
+				} else if (payload.eventType === 'UPDATE') {
+					timeline.update((current) =>
+						current.map((t) => (t.id === payload.new.id ? (payload.new as TimelineEntry) : t))
+					);
+				} else if (payload.eventType === 'DELETE') {
+					timeline.update((current) => current.filter((t) => t.id !== payload.old.id));
+				}
 			}
 		)
 		.on(
 			'postgres_changes',
 			{ event: '*', schema: 'public', table: 'chat', filter: `room_code=eq.${code}` },
-			async () => {
-				console.log('[Realtime] Chat updated');
-				await fetchBundle(code);
+			async (payload) => {
+				console.log('[Realtime] Chat updated', payload.eventType);
+				if (payload.eventType === 'INSERT') {
+					chat.update((current) => [...current, payload.new as ChatMessage]);
+				} else if (payload.eventType === 'UPDATE') {
+					chat.update((current) =>
+						current.map((c) => (c.id === payload.new.id ? (payload.new as ChatMessage) : c))
+					);
+				} else if (payload.eventType === 'DELETE') {
+					chat.update((current) => current.filter((c) => c.id !== payload.old.id));
+				}
 			}
 		)
 		.on(
 			'postgres_changes',
 			{ event: '*', schema: 'public', table: 'session_phases', filter: `session_code=eq.${code}` },
-			async () => {
-				console.log('[Realtime] Phases updated');
-				await fetchBundle(code);
+			async (payload) => {
+				console.log('[Realtime] Phases updated', payload.eventType);
+				if (payload.eventType === 'INSERT') {
+					phases.update((current) => [...current, payload.new as Phase]);
+				} else if (payload.eventType === 'UPDATE') {
+					phases.update((current) =>
+						current.map((p) => (p.id === payload.new.id ? (payload.new as Phase) : p))
+					);
+				} else if (payload.eventType === 'DELETE') {
+					phases.update((current) => current.filter((p) => p.id !== payload.old.id));
+				}
 			}
 		)
 		.subscribe((status) => {

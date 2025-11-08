@@ -638,14 +638,22 @@ export async function addResponse({
 	return result;
 }
 
-export async function getResponses(code: string): Promise<ResponseRow[]> {
-	const response = await supabaseAdmin
+export async function getResponses(
+	code: string,
+	options?: { limit?: number; offset?: number }
+): Promise<ResponseRow[]> {
+	let query = supabaseAdmin
 		.from('responses')
 		.select('*')
 		.eq('room_code', code)
 		.order('created_at', { ascending: true });
 
-	return ensureArray(response, 'getResponses').map(asResponse);
+	// Add pagination if specified (default: fetch all, but can limit for performance)
+	if (options?.limit) {
+		query = query.range(options.offset || 0, (options.offset || 0) + options.limit - 1);
+	}
+
+	return ensureArray(query, 'getResponses').map(asResponse);
 }
 
 export async function voteResponse({ responseId, delta }: { responseId: string; delta: number }) {

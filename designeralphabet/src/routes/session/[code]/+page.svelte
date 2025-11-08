@@ -53,13 +53,13 @@
 		IconPlus,
 		IconThumbUp,
 		IconGridDots,
-		// IconCards, // Temporarily hidden - not usable with current exercise
+		IconCards,
 		IconChartDots3,
 		IconCloud
 	} from '@tabler/icons-svelte';
-	// import CardPanel from '$lib/components/session/CardPanel.svelte'; // Temporarily hidden - not usable with current exercise
-	// import { createSessionCardStore } from '$lib/stores/sessionCards'; // Temporarily hidden - not usable with current exercise
-	// import type { Card } from '$lib/Cards'; // Temporarily hidden - not usable with current exercise
+	import CardPanel from '$lib/components/session/CardPanel.svelte';
+	import { createSessionCardStore } from '$lib/stores/sessionCards';
+	import type { Card } from '$lib/Cards';
 	import PortableText from '$lib/components/PortableText.svelte';
 	import { getLeaderboard } from '$lib/gamification';
 
@@ -87,7 +87,7 @@
 	let selectedQuestionId: string | null = null;
 	let responseText = '';
 	let responseMetadata: any = null;
-	// let linkedCardsText = ''; // Temporarily hidden - not usable with current exercise
+	let linkedCardsText = '';
 	let currentQuestion: any = null;
 	let currentQuestionConfig: Record<string, unknown> = {};
 	let modalResponseType = 'written';
@@ -131,18 +131,18 @@
 	let primaryChart: ChartType = 'quadBubbles';
 	let sidebarCharts: ChartType[] = ['participationPulse', 'inclusivityMeter'];
 
-	// Card integration - Temporarily hidden - not usable with current exercise
-	// const cardStore = createSessionCardStore(sessionCode);
-	// let selectedCards: Card[] = [];
-	// let isCardPanelOpen = false;
+	// Card integration
+	const cardStore = createSessionCardStore(sessionCode);
+	let selectedCards: Card[] = [];
+	let isCardPanelOpen = false;
 	let isMobile = false;
 
 	// Track user votes (stored in localStorage)
 	let userVotes: Set<string> = new Set();
 
-	// Subscribe to card store - Temporarily hidden - not usable with current exercise
-	// $: selectedCards = $cardStore.selectedCards;
-	// $: isCardPanelOpen = $cardStore.isCardPanelOpen;
+	// Subscribe to card store
+	$: selectedCards = $cardStore.selectedCards;
+	$: isCardPanelOpen = $cardStore.isCardPanelOpen;
 
 	// Load user votes from localStorage
 	$: if (browser && sessionCode) {
@@ -734,25 +734,25 @@
 			questionId: selectedQuestionId
 		});
 
-		// Combine selected cards from panel with additional cards from text input - Temporarily hidden - not usable with current exercise
-		// const selectedCardTitles = selectedCards.map((card) => card.title);
-		// const additionalCards = linkedCardsText
-		// 	.split(',')
-		// 	.map((card) => card.trim())
-		// 	.filter(Boolean);
-		// const allCards = [...selectedCardTitles, ...additionalCards];
+		// Combine selected cards from panel with additional cards from text input
+		const selectedCardTitles = selectedCards.map((card) => card.title);
+		const additionalCards = linkedCardsText
+			.split(',')
+			.map((card) => card.trim())
+			.filter(Boolean);
+		const allCards = [...selectedCardTitles, ...additionalCards];
 
 		await apiAddResponse(sessionCode, {
 			questionId: selectedQuestionId,
 			participantId: currentParticipant.id,
 			text: normalizedResponseText,
-			cards: [], // Temporarily empty - cards feature hidden
+			cards: allCards,
 			metadata: responseMetadata
 		});
 		responseModalOpen = false;
 		responseText = '';
 		responseMetadata = null;
-		// linkedCardsText = ''; // Temporarily commented out
+		linkedCardsText = '';
 		selectedQuestionId = null;
 	}
 
@@ -1152,8 +1152,7 @@
 																	{/if}
 																</div>
 																<p class="text-secondary">{response.text}</p>
-																<!-- Temporarily hidden - not usable with current exercise -->
-																<!-- {#if response.cards?.length}
+																{#if response.cards?.length}
 																<div class="mt-2 flex flex-wrap gap-1">
 																	{#each response.cards as card}
 																		<span class="px-1.5 py-0.5 text-xs rounded bg-brand/20 text-brand"
@@ -1161,7 +1160,7 @@
 																		>
 																	{/each}
 																</div>
-															{/if} -->
+															{/if}
 															</div>
 														{/each}
 													</div>
@@ -2252,8 +2251,8 @@
 			</div>
 			<!-- End Main Content Area -->
 
-			<!-- Mobile Floating Action Button - Temporarily hidden - not usable with current exercise -->
-			<!-- {#if isMobile}
+			<!-- Mobile Floating Action Button -->
+			{#if isMobile}
 			<button
 				on:click={() => cardStore.toggleCardPanel()}
 				class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-primary shadow-lg shadow-cyan-500/50 transition hover:bg-brand active:scale-95"
@@ -2268,10 +2267,10 @@
 					</span>
 				{/if}
 			</button>
-		{/if} -->
+		{/if}
 
-			<!-- Desktop Card Panel - Temporarily hidden - not usable with current exercise -->
-			<!-- {#if !isMobile}
+			<!-- Desktop Card Panel -->
+			{#if !isMobile}
 			<aside class="w-80 h-screen sticky top-0 overflow-hidden">
 				<CardPanel
 					selectedCards={selectedCards}
@@ -2281,10 +2280,10 @@
 					isMobile={false}
 				/>
 			</aside>
-		{/if} -->
+		{/if}
 
-			<!-- Mobile Card Panel (Bottom Drawer) - Temporarily hidden - not usable with current exercise -->
-			<!-- {#if isMobile}
+			<!-- Mobile Card Panel (Bottom Drawer) -->
+			{#if isMobile}
 			<CardPanel
 				selectedCards={selectedCards}
 				maxSelection={5}
@@ -2292,7 +2291,7 @@
 				isOpen={isCardPanelOpen}
 				isMobile={true}
 			/>
-		{/if} -->
+		{/if}
 		</div>
 	{:else}
 		<div
@@ -2464,8 +2463,8 @@
 					</label>
 				{/if}
 
-				<!-- Selected Cards Display - Temporarily hidden - not usable with current exercise -->
-				<!-- {#if selectedCards.length > 0}
+				<!-- Selected Cards Display -->
+				{#if selectedCards.length > 0}
 					<div class="flex flex-col gap-2">
 						<div class="flex items-center justify-between">
 							<p class="text-sm text-secondary">Your selected cards</p>
@@ -2491,7 +2490,7 @@
 							These cards will be automatically linked to your response
 						</p>
 					</div>
-				{/if} -->
+				{/if}
 			</div>
 			<!-- Submit buttons (hidden for advanced response types which have their own) -->
 			{#if !['riskAssessment', 'maturityDial', 'inclusivityMeter'].includes(modalResponseType)}
