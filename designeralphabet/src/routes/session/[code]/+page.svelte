@@ -64,6 +64,12 @@
 	import { getLeaderboard, getNewlyEarnedBadges, type Badge } from '$lib/gamification';
 	import BadgeNotification from '$lib/components/session/BadgeNotification.svelte';
 	import LiveLeaderboard from '$lib/components/session/LiveLeaderboard.svelte';
+	// Phase 4: Advanced Analytics Components
+	import CardImpactChart from '$lib/components/charts/CardImpactChart.svelte';
+	import ParticipantCardJourney from '$lib/components/charts/ParticipantCardJourney.svelte';
+	import CardInfluenceNetwork from '$lib/components/charts/CardInfluenceNetwork.svelte';
+	import RealTimeEngagementPulse from '$lib/components/charts/RealTimeEngagementPulse.svelte';
+	import ParticipationEquityChart from '$lib/components/charts/ParticipationEquityChart.svelte';
 
 	export let data: { sessionCode: string; role: string };
 
@@ -84,7 +90,8 @@
 		| 'response-landscape'
 		| 'timeline'
 		| 'chat'
-		| 'participants' = 'overview';
+		| 'participants'
+		| 'analytics' = 'overview';
 	let responseModalOpen = false;
 	let selectedQuestionId: string | null = null;
 	let responseText = '';
@@ -1810,6 +1817,14 @@
 									<span class="hidden md:inline">Leaderboard</span>
 									<span class="md:hidden">🏆</span>
 								</button>
+								<button
+									class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'analytics' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
+									on:click={() => (activeTab = 'analytics')}
+								>
+									<IconChartBubble class="h-4 w-4 flex-shrink-0" />
+									<span class="hidden md:inline">Card Analytics</span>
+									<span class="md:hidden">Analytics</span>
+								</button>
 								{#if isFacilitator()}
 									<button
 										class={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm transition-colors whitespace-nowrap ${activeTab === 'participants' ? 'bg-brand text-white font-semibold' : 'border border-line text-secondary hover:border-brand/40 hover:text-cyan-200'}`}
@@ -2235,6 +2250,53 @@
 															{/if}
 														</div>
 													{/each}
+												</div>
+											</div>
+										{:else if activeTab === 'analytics'}
+											<!-- Phase 4: Card Analytics Dashboard -->
+											<div class="space-y-6">
+												<div class="mb-4">
+													<h3 class="text-2xl font-semibold text-ink">Card & Engagement Analytics</h3>
+													<p class="text-sm text-ink-muted mt-1">
+														Deep insights into card usage, participant journeys, and participation equity
+													</p>
+												</div>
+
+												<!-- Row 1: Real-Time Pulse + Participation Equity -->
+												<div class="grid gap-6 lg:grid-cols-2">
+													<div class="rounded-xl border border-line bg-surface-muted p-6">
+														<RealTimeEngagementPulse
+															responses={responsesList}
+															participants={participantsList}
+															timeWindowMinutes={30}
+														/>
+													</div>
+													<div class="rounded-xl border border-line bg-surface-muted p-6">
+														<ParticipationEquityChart
+															responses={responsesList}
+															participants={participantsList}
+															height={300}
+														/>
+													</div>
+												</div>
+
+												<!-- Row 2: Card Impact Chart (Full Width) -->
+												<div class="rounded-xl border border-line bg-surface-muted p-6">
+													<CardImpactChart responses={responsesList} height={450} />
+												</div>
+
+												<!-- Row 3: Card Network + Personal Journey -->
+												<div class="grid gap-6 lg:grid-cols-2">
+													<div class="rounded-xl border border-line bg-surface-muted p-6">
+														<CardInfluenceNetwork responses={responsesList} height={500} />
+													</div>
+													<div class="rounded-xl border border-line bg-surface-muted p-6">
+														<ParticipantCardJourney
+															responses={responsesList}
+															participant={currentParticipant}
+															height={500}
+														/>
+													</div>
 												</div>
 											</div>
 										{/if}
