@@ -240,6 +240,53 @@ export const BADGES: Badge[] = [
 			return userResponses.some((r) => (r.cards?.length || 0) >= 2);
 		},
 		points: 25
+	},
+	// Phase 5: Quality-focused badges
+	{
+		id: 'thoughtful-contributor',
+		name: 'Thoughtful Contributor',
+		description: 'Consistently produce high-quality ideas that resonate with others',
+		icon: '💎',
+		color: '#a855f7',
+		requirement: (participant, responses) => {
+			const userResponses = responses.filter((r) => r.participant_id === participant.id);
+			if (userResponses.length < 3) return false;
+			const avgVotes = userResponses.reduce((sum, r) => sum + (r.votes || 0), 0) / userResponses.length;
+			// Average 3+ votes per contribution
+			return avgVotes >= 3;
+		},
+		points: 50
+	},
+	{
+		id: 'deep-thinker',
+		name: 'Deep Thinker',
+		description: 'Provide detailed, substantive contributions with 200+ characters',
+		icon: '🧠',
+		color: '#0ea5e9',
+		requirement: (participant, responses) => {
+			const userResponses = responses.filter((r) => r.participant_id === participant.id);
+			// At least 5 responses with 200+ characters each
+			const detailedResponses = userResponses.filter((r) => r.text.length >= 200);
+			return detailedResponses.length >= 5;
+		},
+		points: 40
+	},
+	{
+		id: 'gem-finder',
+		name: 'Gem Finder',
+		description: 'Identify and amplify high-quality contributions from others',
+		icon: '🔎',
+		color: '#f97316',
+		requirement: (participant, responses) => {
+			// Find responses from others that this participant might have voted on
+			// Since we track total votes, we'll approximate by checking if user is active in voting
+			const userResponses = responses.filter((r) => r.participant_id === participant.id);
+			const totalResponses = responses.filter((r) => r.participant_id !== participant.id);
+			const highQualityOthers = totalResponses.filter((r) => (r.votes || 0) >= 5);
+			// Active participant who contributes while others get voted up
+			return userResponses.length >= 3 && highQualityOthers.length >= 5;
+		},
+		points: 35
 	}
 ];
 
@@ -302,4 +349,97 @@ export function getNewlyEarnedBadges(
 ): Badge[] {
 	const currentBadges = getEarnedBadges(participant, responses, timeline);
 	return currentBadges.filter((badge) => !previousBadgeIds.includes(badge.id));
+}
+
+// Phase 5: Quality metrics
+export function calculateQualityScore(participant: Participant, responses: Response[]): number {
+	const userResponses = responses.filter((r) => r.participant_id === participant.id);
+	if (userResponses.length === 0) return 0;
+
+	// Calculate card diversity (unique cards used)
+	const uniqueCards = new Set(userResponses.flatMap((r) => r.cards || []));
+	const cardDiversity = uniqueCards.size;
+
+	// Calculate total votes received
+	const totalVotes = userResponses.reduce((sum, r) => sum + (r.votes || 0), 0);
+
+	// Quality score = votes × card diversity multiplier
+	// Higher diversity amplifies the value of votes
+	const diversityMultiplier = 1 + cardDiversity * 0.1; // 10% bonus per unique card
+	return Math.round(totalVotes * diversityMultiplier);
+}
+
+// Phase 5: Facilitator awards
+export interface FacilitatorAward {
+	id: string;
+	name: string;
+	description: string;
+	icon: string;
+	color: string;
+	recipientId: string;
+	recipientName: string;
+	awardedBy: string;
+	awardedAt: string;
+	points: number;
+}
+
+export const FACILITATOR_AWARD_TYPES = [
+	{
+		id: 'most-inspiring',
+		name: 'Most Inspiring',
+		description: 'Sparked creative thinking in others',
+		icon: '✨',
+		color: '#fbbf24',
+		points: 50
+	},
+	{
+		id: 'best-question',
+		name: 'Best Question Asker',
+		description: 'Asked thought-provoking questions',
+		icon: '❓',
+		color: '#8b5cf6',
+		points: 40
+	},
+	{
+		id: 'team-player',
+		name: 'Ultimate Team Player',
+		description: 'Supported and elevated teammates',
+		icon: '🤝',
+		color: '#10b981',
+		points: 45
+	},
+	{
+		id: 'innovation-champion',
+		name: 'Innovation Champion',
+		description: 'Pushed boundaries with bold ideas',
+		icon: '🚀',
+		color: '#ec4899',
+		points: 55
+	},
+	{
+		id: 'bridge-builder',
+		name: 'Bridge Builder',
+		description: 'Connected diverse perspectives',
+		icon: '🌉',
+		color: '#06b6d4',
+		points: 45
+	}
+];
+
+export function awardFacilitatorBadge(
+	recipientId: string,
+	recipientName: string,
+	awardTypeId: string,
+	facilitatorName: string
+): FacilitatorAward | null {
+	const awardType = FACILITATOR_AWARD_TYPES.find((a) => a.id === awardTypeId);
+	if (!awardType) return null;
+
+	return {
+		...awardType,
+		recipientId,
+		recipientName,
+		awardedBy: facilitatorName,
+		awardedAt: new Date().toISOString()
+	};
 }
