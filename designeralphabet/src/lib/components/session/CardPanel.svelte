@@ -16,6 +16,7 @@
 	export let onCardToggle: (card: Card) => void = () => {};
 	export let isOpen = false;
 	export let isMobile = false;
+	export let recommendedCards: string[] = []; // Card IDs or titles to highlight
 
 	// Function to close the panel (for mobile)
 	function closePanel() {
@@ -47,17 +48,28 @@
 		}
 	});
 
-	$: filteredCards = cards.filter((card) => {
-		const matchesSearch =
-			searchTerm === '' ||
-			card.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			card.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			card.letter?.toLowerCase().includes(searchTerm.toLowerCase());
-		const matchesCategory = !categoryFilter || card.category === categoryFilter;
-		return matchesSearch && matchesCategory;
-	});
+	$: filteredCards = cards
+		.filter((card) => {
+			const matchesSearch =
+				searchTerm === '' ||
+				card.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				card.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				card.letter?.toLowerCase().includes(searchTerm.toLowerCase());
+			const matchesCategory = !categoryFilter || card.category === categoryFilter;
+			return matchesSearch && matchesCategory;
+		})
+		.sort((a, b) => {
+			// Sort: recommended cards first, then alphabetically
+			const aRec = isCardRecommended(a);
+			const bRec = isCardRecommended(b);
+			if (aRec && !bRec) return -1;
+			if (!aRec && bRec) return 1;
+			return (a.title || '').localeCompare(b.title || '');
+		});
 
 	$: isCardSelected = (card: Card) => selectedCards.some((c) => c._id === card._id);
+	$: isCardRecommended = (card: Card) =>
+		recommendedCards.some((recCard) => recCard === card._id || recCard === card.title);
 	$: canSelectMore = selectedCards.length < maxSelection;
 
 	function handleCardClick(card: Card) {
@@ -169,21 +181,30 @@
 					<div class="grid grid-cols-2 gap-3">
 						{#each filteredCards as card}
 							{@const selected = isCardSelected(card)}
+							{@const recommended = isCardRecommended(card)}
 							{@const disabled = !selected && !canSelectMore}
 							<button
 								on:click={() => handleCardClick(card)}
 								{disabled}
 								class="group relative rounded-xl border p-3 text-left transition {selected
 									? 'border-brand bg-brand/10 shadow-brand'
-									: disabled
-										? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
-										: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
+									: recommended
+										? 'border-yellow-500 bg-yellow-500/10 hover:border-yellow-400 hover:bg-yellow-500/20 shadow-yellow-500/20'
+										: disabled
+											? 'border-line bg-surface-muted text-ink-muted cursor-not-allowed'
+											: 'border-line bg-surface-muted hover:border-line-strong hover:bg-surface'}"
 							>
 								{#if selected}
 									<div
 										class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-brand text-ink"
 									>
 										<IconCheck class="h-4 w-4" />
+									</div>
+								{:else if recommended}
+									<div
+										class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-yellow-500 text-ink"
+									>
+										<IconStar class="h-4 w-4 fill-current" />
 									</div>
 								{/if}
 
@@ -205,6 +226,15 @@
 										</span>
 									{/if}
 								</div>
+
+								{#if recommended}
+									<div class="mb-1 flex items-center gap-1">
+										<IconStar class="h-3 w-3 text-yellow-500 fill-current" />
+										<span class="text-[10px] font-semibold text-yellow-500 uppercase tracking-wide">
+											Recommended
+										</span>
+									</div>
+								{/if}
 
 								<h4 class="font-medium text-white text-sm line-clamp-2">{card.title}</h4>
 								{#if card.description}
@@ -310,6 +340,7 @@
 					<div class="space-y-2">
 						{#each filteredCards as card}
 							{@const selected = isCardSelected(card)}
+						{@const recommended = isCardRecommended(card)}
 							{@const disabled = !selected && !canSelectMore}
 							<button
 								on:click={() => handleCardClick(card)}
