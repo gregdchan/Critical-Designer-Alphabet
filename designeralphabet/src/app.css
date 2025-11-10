@@ -7,89 +7,271 @@
 :root {
 	color-scheme: light;
 
-	/* Brand palette (HSL triplets, so we can use / <alpha>) */
-	--teal-dark: 220 80% 18%;
-	--teal: 220 82% 28%;
-	--teal-lite: 220 80% 40%;
-	--orange: 32 88% 54%;
-	--orange-dk: 21 96% 43%;
-	--cream: 10 50% 91%;
+	/* ========================================
+	   CORE BRAND PALETTE - Soft & Balanced
+	   HSL format for alpha control
+	   ======================================== */
 
-	/* Semantic tokens */
-	--brand: var(--teal);
-	--brand-soft: var(--teal-dark);
-	--accent-warm: var(--orange);
-	--accent-critical: var(--orange-dk);
+	/* Primary Brand - Sophisticated Teal (softer than before) */
+	--brand-50: 185 65% 95%;
+	--brand-100: 185 60% 90%;
+	--brand-200: 185 55% 80%;
+	--brand-300: 185 50% 65%;
+	--brand-400: 185 55% 50%;
+	--brand-500: 185 60% 40%; /* Main brand */
+	--brand-600: 185 65% 32%;
+	--brand-700: 185 70% 25%;
+	--brand-800: 185 75% 18%;
+	--brand-900: 185 80% 12%;
 
-	/* Surfaces */
-	--surface: 10 40% 98%;
-	--surface-elevated: 0 0% 100%;
-	--surface-muted: 10 30% 95%;
-	--surface-subtle: 180 20% 95%;
+	/* Accent Warm - Soft Coral/Peach (mellowed orange) */
+	--accent-50: 25 85% 95%;
+	--accent-100: 25 80% 88%;
+	--accent-200: 25 75% 78%;
+	--accent-300: 25 70% 65%;
+	--accent-400: 25 72% 55%;
+	--accent-500: 25 75% 48%; /* Main accent */
+	--accent-600: 25 78% 42%;
+	--accent-700: 20 80% 38%;
+	--accent-800: 18 82% 32%;
+	--accent-900: 15 85% 25%;
 
-	/* Text (targets WCAG AA/AAA) */
-	--text-primary: 210 15% 12%;
-	--text-secondary: 210 10% 28%;
-	--text-muted: 210 8% 43%;
-	--text-on-teal: 0 0% 100%;
-	--text-on-orange: 0 0% 10%;
+	/* Secondary - Soft Purple (for diversity) */
+	--secondary-50: 270 60% 97%;
+	--secondary-100: 270 55% 92%;
+	--secondary-200: 270 50% 82%;
+	--secondary-300: 270 48% 68%;
+	--secondary-400: 270 50% 58%;
+	--secondary-500: 270 52% 48%;
+	--secondary-600: 270 55% 40%;
+	--secondary-700: 270 58% 32%;
+	--secondary-800: 270 60% 25%;
+	--secondary-900: 270 62% 18%;
 
-	/* Borders / focus */
-	--border-subtle: 12 14% 85%;
-	--border-strong: 180 30% 40%;
-	--ring: var(--teal);
+	/* Tertiary - Soft Sage/Green (earthy balance) */
+	--tertiary-50: 140 35% 96%;
+	--tertiary-100: 140 32% 90%;
+	--tertiary-200: 140 30% 80%;
+	--tertiary-300: 140 32% 65%;
+	--tertiary-400: 140 35% 52%;
+	--tertiary-500: 140 38% 42%;
+	--tertiary-600: 140 40% 35%;
+	--tertiary-700: 140 42% 28%;
+	--tertiary-800: 140 45% 22%;
+	--tertiary-900: 140 48% 16%;
 
-	/* Chart tokens */
-	--chart-1: #007172;
-	--chart-2: #f29325;
-	--chart-3: #025259;
-	--chart-4: #d94f04;
-	--chart-5: #f4e2de;
-	--chart-6: #00a0a3;
-	--chart-7: #ff9f1c;
-	--chart-8: #013840;
+	/* Neutral - Warm Gray (replacing pure gray) */
+	--neutral-50: 30 15% 98%;
+	--neutral-100: 30 12% 95%;
+	--neutral-200: 30 10% 88%;
+	--neutral-300: 30 8% 75%;
+	--neutral-400: 30 6% 60%;
+	--neutral-500: 30 5% 45%;
+	--neutral-600: 30 6% 35%;
+	--neutral-700: 30 8% 25%;
+	--neutral-800: 30 10% 15%;
+	--neutral-900: 30 12% 8%;
 
-	/* Risk & Maturity */
-	--risk-low: #22a06b;
-	--risk-medium: #f6b042;
-	--risk-high: #f7745e;
-	--risk-critical: #d63f5c;
+	/* ========================================
+	   SEMANTIC COLOR TOKENS
+	   ======================================== */
 
-	--maturity-1: #94a3b8;
-	--maturity-2: #4c6ef5;
-	--maturity-3: #22a06b;
-	--maturity-4: #f6b042;
-	--maturity-5: #9b5de5;
+	/* Brand */
+	--brand: var(--brand-500);
+	--brand-hover: var(--brand-600);
+	--brand-active: var(--brand-700);
+	--brand-subtle: var(--brand-50);
+	--brand-muted: var(--brand-100);
+
+	/* Accent */
+	--accent: var(--accent-500);
+	--accent-hover: var(--accent-600);
+	--accent-active: var(--accent-700);
+	--accent-subtle: var(--accent-50);
+	--accent-muted: var(--accent-100);
+
+	/* Surfaces - Soft, layered elevation */
+	--surface-base: var(--neutral-50);
+	--surface: 30 18% 98%;
+	--surface-raised: 0 0% 100%;
+	--surface-overlay: var(--neutral-100);
+	--surface-sunken: 30 15% 94%;
+
+	/* Legacy aliases */
+	--surface-elevated: var(--surface-raised);
+	--surface-muted: var(--surface-sunken);
+	--surface-subtle: var(--neutral-100);
+
+	/* Text - WCAG AA compliant hierarchy */
+	--text-primary: var(--neutral-900);
+	--text-secondary: var(--neutral-700);
+	--text-tertiary: var(--neutral-500);
+	--text-disabled: var(--neutral-300);
+	--text-inverse: var(--neutral-50);
+	--text-brand: var(--brand-600);
+	--text-accent: var(--accent-600);
+
+	/* Borders - Subtle & refined */
+	--border-subtle: var(--neutral-200);
+	--border-default: var(--neutral-300);
+	--border-strong: var(--neutral-400);
+	--border-brand: var(--brand-400);
+	--border-accent: var(--accent-400);
+
+	/* Legacy aliases */
+	--border-subtle: var(--neutral-200);
+	--border-strong: var(--border-default);
+
+	/* Interactive States */
+	--interactive-default: var(--brand-500);
+	--interactive-hover: var(--brand-600);
+	--interactive-active: var(--brand-700);
+	--interactive-disabled: var(--neutral-200);
+
+	/* Focus & Selection */
+	--focus-ring: var(--brand-400);
+	--selection-bg: var(--brand-100);
+	--selection-text: var(--neutral-900);
+
+	/* Legacy */
+	--ring: var(--focus-ring);
+
+	/* ========================================
+	   SEMANTIC STATUS COLORS
+	   ======================================== */
+
+	/* Success - Soft Green */
+	--success-50: 145 50% 95%;
+	--success-500: 145 55% 45%;
+	--success-700: 145 60% 35%;
+
+	/* Warning - Soft Amber */
+	--warning-50: 40 80% 95%;
+	--warning-500: 40 85% 55%;
+	--warning-700: 40 88% 45%;
+
+	/* Error - Soft Red */
+	--error-50: 0 65% 95%;
+	--error-500: 0 70% 55%;
+	--error-700: 0 75% 45%;
+
+	/* Info - Soft Blue */
+	--info-50: 210 70% 95%;
+	--info-500: 210 75% 50%;
+	--info-700: 210 80% 40%;
+
+	/* ========================================
+	   CHART COLORS - Diverse & Accessible
+	   ======================================== */
+
+	--chart-1: hsl(var(--brand-500));
+	--chart-2: hsl(var(--accent-500));
+	--chart-3: hsl(var(--secondary-500));
+	--chart-4: hsl(var(--tertiary-500));
+	--chart-5: hsl(145 55% 50%); /* Green */
+	--chart-6: hsl(280 50% 55%); /* Purple */
+	--chart-7: hsl(40 85% 60%); /* Amber */
+	--chart-8: hsl(200 65% 50%); /* Blue */
+	--chart-9: hsl(340 60% 55%); /* Rose */
+	--chart-10: hsl(160 45% 50%); /* Mint */
+
+	/* ========================================
+	   CARD CATEGORY COLORS - Soft Vibrant
+	   ======================================== */
+
+	/* Practice - Soft Teal/Cyan */
+	--card-practice-from: 185 60% 55%;
+	--card-practice-to: 185 65% 45%;
+	--card-practice-border: 185 70% 40%;
+
+	/* Lens - Soft Magenta */
+	--card-lens-from: 330 65% 60%;
+	--card-lens-to: 330 70% 50%;
+	--card-lens-border: 330 75% 45%;
+
+	/* Mindset - Soft Lime */
+	--card-mindset-from: 75 60% 55%;
+	--card-mindset-to: 75 65% 45%;
+	--card-mindset-border: 75 70% 40%;
+
+	/* Theory - Soft Violet */
+	--card-theory-from: 270 60% 65%;
+	--card-theory-to: 270 65% 55%;
+	--card-theory-border: 270 70% 50%;
+
+	/* Method - Soft Coral */
+	--card-method-from: 15 75% 60%;
+	--card-method-to: 15 80% 50%;
+	--card-method-border: 15 82% 45%;
+
+	/* ========================================
+	   LEGACY COMPATIBILITY
+	   ======================================== */
+
+	--teal-dark: var(--brand-700);
+	--teal: var(--brand-500);
+	--teal-lite: var(--brand-400);
+	--orange: var(--accent-500);
+	--orange-dk: var(--accent-700);
+	--cream: var(--accent-50);
+
+	--accent-warm: var(--accent-500);
+	--accent-critical: var(--error-500);
+
+	/* Risk & Maturity (slightly softened) */
+	--risk-low: hsl(145 55% 45%);
+	--risk-medium: hsl(40 85% 55%);
+	--risk-high: hsl(15 75% 60%);
+	--risk-critical: hsl(0 70% 55%);
+
+	--maturity-1: hsl(var(--neutral-400));
+	--maturity-2: hsl(220 70% 55%);
+	--maturity-3: hsl(145 55% 45%);
+	--maturity-4: hsl(40 85% 55%);
+	--maturity-5: hsl(270 60% 60%);
 }
 
 :root.dark {
 	color-scheme: dark;
 
-	--surface: 210 20% 12%;
-	--surface-elevated: 210 18% 16%;
-	--surface-muted: 210 16% 18%;
-	--surface-subtle: 210 16% 20%;
+	/* Dark mode - adjusted for softer contrast */
+	--surface-base: var(--neutral-900);
+	--surface: 30 12% 10%;
+	--surface-raised: 30 10% 14%;
+	--surface-overlay: 30 12% 16%;
+	--surface-sunken: 30 14% 8%;
 
-	--text-primary: 0 0% 98%;
-	--text-secondary: 0 0% 85%;
-	--text-muted: 0 0% 70%;
+	/* Legacy */
+	--surface-elevated: var(--surface-raised);
+	--surface-muted: var(--surface-sunken);
 
-	--brand: 180 100% 35%;
-	--brand-soft: 184 95% 25%;
+	--text-primary: var(--neutral-50);
+	--text-secondary: var(--neutral-300);
+	--text-tertiary: var(--neutral-500);
 
-	--border-subtle: 210 12% 28%;
-	--border-strong: 180 25% 70%;
+	--brand: var(--brand-400);
+	--brand-hover: var(--brand-300);
+	--accent: var(--accent-400);
+
+	--border-subtle: var(--neutral-700);
+	--border-default: var(--neutral-600);
+	--border-strong: var(--neutral-500);
 }
 
 @media (prefers-contrast: more) {
 	:root {
-		--border-subtle: 210 10% 65%;
+		--border-subtle: var(--neutral-400);
+		--border-default: var(--neutral-500);
 	}
 	*:focus-visible {
-		outline: 3px solid hsl(var(--brand));
+		outline: 3px solid hsl(var(--focus-ring));
 		outline-offset: 3px;
 	}
 }
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
 
 html {
 	scroll-behavior: smooth;
@@ -99,12 +281,11 @@ body {
 	@apply min-h-screen antialiased;
 	background: linear-gradient(
 		135deg,
-		hsl(210 25% 88%) 0%,
-		hsl(10 35% 85%) 50%,
-		hsl(180 18% 88%) 100%
+		hsl(var(--surface-base)) 0%,
+		hsl(var(--accent-50)) 50%,
+		hsl(var(--brand-50)) 100%
 	);
 	color: hsl(var(--text-primary));
-	/* Functional, clean system stack */
 	font-family:
 		ui-sans-serif,
 		system-ui,
@@ -118,13 +299,7 @@ body {
 		'Segoe UI Emoji';
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	/* Align headings with body for cleaner look */
+h1, h2, h3, h4, h5, h6 {
 	font-family:
 		ui-sans-serif,
 		system-ui,
@@ -141,91 +316,93 @@ h6 {
 
 a:hover,
 a:focus-visible {
-	/* Use brand for emphasis; keep underline for affordance */
-	color: hsl(var(--brand));
+	color: hsl(var(--interactive-hover));
 	text-decoration: underline;
 	text-decoration-color: currentColor;
 }
 
 a:focus-visible {
-	outline: 3px solid hsl(var(--ring));
+	outline: 3px solid hsl(var(--focus-ring));
 	outline-offset: 3px;
 }
 
 ::selection {
-	background: hsl(var(--brand) / 0.2);
-	color: hsl(var(--text-primary));
+	background: hsl(var(--selection-bg));
+	color: hsl(var(--selection-text));
 }
+
+/* ========================================
+   SEMANTIC COMPONENT CLASSES
+   ======================================== */
 
 .skip-link {
 	@apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2;
-	background: hsl(var(--surface-elevated));
-	border: 1px solid hsl(var(--border-subtle));
-	box-shadow: 0 16px 45px rgba(15, 23, 42, 0.12);
+	background: hsl(var(--surface-raised));
+	border: 1px solid hsl(var(--border-default));
+	box-shadow: 0 16px 45px hsl(var(--neutral-900) / 0.1);
 	color: hsl(var(--text-primary));
 }
 
 .focus-ring:focus-visible {
-	outline: 3px solid hsl(var(--ring));
+	outline: 3px solid hsl(var(--focus-ring));
 	outline-offset: 3px;
 }
 
 .surface {
-	background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
+	background: linear-gradient(
+		135deg,
+		hsl(var(--surface-raised)),
+		hsl(var(--surface-sunken)) 80%
+	);
 	border: 2px solid hsl(var(--border-subtle));
-	box-shadow: 0 4px 16px 0 hsl(var(--teal-dark) / 0.08);
+	box-shadow: 0 4px 16px 0 hsl(var(--brand-900) / 0.06);
 	color: hsl(var(--text-secondary));
 	border-radius: 1.5rem;
 }
 
 .surface-muted {
-	background: hsl(var(--surface-muted));
+	background: hsl(var(--surface-sunken));
 	border: 1px solid hsl(var(--border-subtle));
 	color: hsl(var(--text-secondary));
 }
 
 .surface-soft {
-	background: hsl(var(--surface-subtle));
+	background: hsl(var(--surface-overlay));
 	border: 1px solid hsl(var(--border-subtle) / 0.8);
 	color: hsl(var(--text-secondary));
 }
 
 .panel {
-	background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
+	background: linear-gradient(
+		135deg,
+		hsl(var(--surface-raised)),
+		hsl(var(--surface-sunken)) 80%
+	);
 	border: 2px solid hsl(var(--border-subtle));
-	box-shadow: 0 4px 16px 0 hsl(var(--teal-dark) / 0.08);
+	box-shadow: 0 4px 16px 0 hsl(var(--brand-900) / 0.06);
 	color: hsl(var(--text-secondary));
 	border-radius: 1.5rem;
 }
 
-.panel h1,
-.panel h2,
-.panel h3,
-.panel h4,
-.panel h5,
-.panel h6 {
+.panel h1, .panel h2, .panel h3, .panel h4, .panel h5, .panel h6 {
 	color: hsl(var(--text-primary));
 }
 
 .chart-card {
-	background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
+	background: linear-gradient(
+		135deg,
+		hsl(var(--surface-raised)),
+		hsl(var(--surface-sunken)) 80%
+	);
 	border: 2px solid hsl(var(--border-subtle));
-	box-shadow: 0 4px 16px 0 hsl(var(--brand-soft) / 0.12);
-	border-radius: 1.25rem;
-}
-
-.chart-card {
-	background: linear-gradient(135deg, hsl(var(--surface-elevated)), hsl(var(--surface-muted)) 80%);
-	border: 2px solid hsl(var(--border-subtle));
-	box-shadow: 0 4px 16px 0 hsl(var(--teal-dark) / 0.08);
+	box-shadow: 0 4px 16px 0 hsl(var(--brand-900) / 0.08);
 	border-radius: 1.25rem;
 }
 
 /* ========================================
-   CARD SYSTEM - Vibrant Category Colors
+   CARD SYSTEM - Soft Vibrant Categories
    ======================================== */
 
-/* Base card styles */
 .card {
 	@apply rounded-[2rem] p-5 shadow-xl transition-all duration-300;
 	border: 3px solid;
@@ -246,10 +423,14 @@ a:focus-visible {
 	@apply ring-4 ring-white scale-105;
 }
 
-/* Cyan cards (Practice) - Playful Teal/Turquoise */
+/* Cyan/Teal cards (Practice) */
 .card-cyan {
-	background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-	border-color: #0891b2;
+	background: linear-gradient(
+		135deg,
+		hsl(var(--card-practice-from)) 0%,
+		hsl(var(--card-practice-to)) 100%
+	);
+	border-color: hsl(var(--card-practice-border));
 	color: #ffffff;
 }
 
@@ -271,10 +452,14 @@ a:focus-visible {
 	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
-/* Pink cards (Lens) - Vibrant Magenta/Pink */
+/* Pink/Magenta cards (Lens) */
 .card-pink {
-	background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-	border-color: #db2777;
+	background: linear-gradient(
+		135deg,
+		hsl(var(--card-lens-from)) 0%,
+		hsl(var(--card-lens-to)) 100%
+	);
+	border-color: hsl(var(--card-lens-border));
 	color: #ffffff;
 }
 
@@ -296,10 +481,14 @@ a:focus-visible {
 	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
-/* Lime cards (Mindset) - Bright Lime/Yellow-Green */
+/* Lime cards (Mindset) */
 .card-lime {
-	background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
-	border-color: #65a30d;
+	background: linear-gradient(
+		135deg,
+		hsl(var(--card-mindset-from)) 0%,
+		hsl(var(--card-mindset-to)) 100%
+	);
+	border-color: hsl(var(--card-mindset-border));
 	color: #ffffff;
 }
 
@@ -321,10 +510,14 @@ a:focus-visible {
 	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
-/* Purple cards (Theory) - Deep Purple/Violet */
+/* Purple/Violet cards (Theory) */
 .card-purple {
-	background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-	border-color: #7c3aed;
+	background: linear-gradient(
+		135deg,
+		hsl(var(--card-theory-from)) 0%,
+		hsl(var(--card-theory-to)) 100%
+	);
+	border-color: hsl(var(--card-theory-border));
 	color: #ffffff;
 }
 
@@ -346,10 +539,14 @@ a:focus-visible {
 	@apply border-[3px] border-white/50 bg-white/25 backdrop-blur;
 }
 
-/* Orange cards (Method) - Vibrant Orange/Amber */
+/* Orange/Coral cards (Method) */
 .card-orange {
-	background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-	border-color: #ea580c;
+	background: linear-gradient(
+		135deg,
+		hsl(var(--card-method-from)) 0%,
+		hsl(var(--card-method-to)) 100%
+	);
+	border-color: hsl(var(--card-method-border));
 	color: #ffffff;
 }
 
@@ -413,7 +610,10 @@ a:focus-visible {
 	@apply border-white/40 bg-surface-elevated/20 backdrop-blur hover:bg-surface-elevated/40;
 }
 
-/* Legacy dark-theme overrides */
+/* ========================================
+   LEGACY COMPATIBILITY OVERRIDES
+   ======================================== */
+
 :global(.text-white),
 :global(.text-slate-50),
 :global(.text-slate-100) {
@@ -427,234 +627,137 @@ a:focus-visible {
 
 :global(.text-ink-muted),
 :global(.text-ink-2) {
-	color: hsl(var(--text-muted)) !important;
+	color: hsl(var(--text-tertiary)) !important;
 }
 
 :global(.text-cyan-100),
 :global(.text-cyan-200),
 :global(.text-cyan-300) {
-	color: #1a2332 !important; /* Dark navy - high contrast */
+	color: hsl(var(--brand-700)) !important;
 }
 
 :global(.hover\:text-cyan-300:hover) {
-	color: #025259 !important;
+	color: hsl(var(--brand-600)) !important;
 }
 
 :global(.hover\:border-cyan-300:hover) {
-	border-color: #025259 !important;
+	border-color: hsl(var(--brand-600)) !important;
 }
 
 :global(.bg-slate-900),
 :global(.bg-slate-900\/95),
-:global(.bg-slate-900\/90),
-:global(.bg-slate-900\/85),
-:global(.bg-slate-900\/80),
-:global(.bg-slate-900\/75),
-:global(.bg-slate-900\/70),
-:global(.bg-slate-900\/60),
-:global(.bg-slate-900\/50),
-:global(.bg-slate-900\/40) {
-	background-color: hsl(var(--surface-elevated) / 0.95) !important;
+:global(.bg-slate-900\/90) {
+	background-color: hsl(var(--surface-raised) / 0.95) !important;
 	color: hsl(var(--text-secondary)) !important;
 }
 
 :global(.bg-slate-800),
 :global(.bg-slate-800\/90),
-:global(.bg-slate-800\/80),
-:global(.bg-slate-800\/70),
-:global(.bg-slate-800\/60),
-:global(.bg-slate-800\/50),
-:global(.bg-slate-800\/30) {
-	background-color: hsl(var(--surface-muted) / 0.95) !important;
-	color: hsl(var(--text-secondary)) !important;
-}
-
-:global(.bg-slate-700),
-:global(.bg-slate-700\/80),
-:global(.bg-slate-700\/60) {
-	background-color: hsl(var(--surface-subtle) / 0.9) !important;
-	color: hsl(var(--text-secondary)) !important;
-}
-
-:global(.bg-slate-600),
-:global(.bg-slate-600\/80),
-:global(.bg-slate-600\/60),
-:global(.bg-slate-600\/40),
-:global(.bg-slate-600\/30) {
-	background-color: hsl(var(--surface-subtle) / 0.85) !important;
-	color: hsl(var(--text-secondary)) !important;
-}
-
-:global(.bg-midnight\/95),
-:global(.bg-midnight\/90),
-:global(.bg-midnight\/80),
-:global(.bg-midnight\/75),
-:global(.bg-midnight\/70) {
-	background-color: hsl(var(--surface-muted) / 0.92) !important;
+:global(.bg-slate-800\/80) {
+	background-color: hsl(var(--surface-sunken) / 0.95) !important;
 	color: hsl(var(--text-secondary)) !important;
 }
 
 :global(.border-slate-800),
 :global(.border-slate-700),
-:global(.border-slate-600),
-:global(.border-slate-500) {
+:global(.border-slate-600) {
 	border-color: hsl(var(--border-subtle)) !important;
 }
 
-:global(.border-cyan-400\/30),
-:global(.border-cyan-400\/20) {
-	border-color: hsl(var(--brand) / 0.25) !important;
-}
-
-:global(.border-purple-400\/30),
-:global(.border-purple-400\/20) {
-	border-color: rgba(155, 93, 229, 0.3) !important;
-}
-
-:global(.border-emerald-400\/30),
-:global(.border-emerald-400\/20) {
-	border-color: rgba(34, 160, 107, 0.28) !important;
-}
-
-/* ========================================
-   HIGH CONTRAST ACCENT ELEMENTS
-   ======================================== */
-
-/* Primary action buttons - Teal with white text */
+/* Primary action buttons */
 :global(.bg-brand),
 :global(.bg-blue-700) {
-	background-color: #007172 !important; /* Teal */
+	background-color: hsl(var(--interactive-default)) !important;
 	color: #ffffff !important;
 	font-weight: 600 !important;
-	border: 2px solid #025259 !important; /* Teal dark */
-	box-shadow: 0 4px 12px rgba(0, 113, 114, 0.35) !important;
+	border: 2px solid hsl(var(--brand-600)) !important;
+	box-shadow: 0 4px 12px hsl(var(--brand-600) / 0.3) !important;
 }
 
 :global(.bg-brand:hover),
 :global(.hover\:bg-blue-700:hover) {
-	background-color: #025259 !important; /* Teal dark on hover */
-	box-shadow: 0 6px 16px rgba(0, 113, 114, 0.45) !important;
+	background-color: hsl(var(--interactive-hover)) !important;
+	box-shadow: 0 6px 16px hsl(var(--brand-600) / 0.4) !important;
 	transform: translateY(-1px);
 }
 
-/* Critical/danger buttons - Deep orange with white text */
-:global(.bg-accent-critical),
+/* Error/Critical buttons */
 :global(.bg-accent-critical) {
-	background-color: #d94f04 !important; /* Orange dark */
+	background-color: hsl(var(--error-500)) !important;
 	color: #ffffff !important;
 	font-weight: 700 !important;
-	border: 2px solid #bf4304 !important;
-	box-shadow: 0 4px 12px rgba(217, 79, 4, 0.4) !important;
+	border: 2px solid hsl(var(--error-700)) !important;
+	box-shadow: 0 4px 12px hsl(var(--error-600) / 0.35) !important;
 }
 
-:global(.bg-accent-critical:hover),
-:global(.hover\:bg-accent-critical:hover) {
-	background-color: #bf4304 !important;
-	box-shadow: 0 6px 16px rgba(217, 79, 4, 0.5) !important;
-	transform: translateY(-1px);
+:global(.bg-accent-critical:hover) {
+	background-color: hsl(var(--error-700)) !important;
+	box-shadow: 0 6px 16px hsl(var(--error-700) / 0.45) !important;
 }
 
-/* Warning/alert buttons - Vibrant orange with black text */
+/* Warning buttons */
 :global(.bg-yellow-400),
 :global(.bg-yellow-500),
 :global(.bg-yellow-600) {
-	background-color: #f29325 !important; /* Orange */
-	color: #0f172a !important;
+	background-color: hsl(var(--warning-500)) !important;
+	color: hsl(var(--neutral-900)) !important;
 	font-weight: 700 !important;
-	border: 2px solid #d94f04 !important;
-	box-shadow: 0 4px 12px rgba(242, 147, 37, 0.4) !important;
+	border: 2px solid hsl(var(--warning-700)) !important;
+	box-shadow: 0 4px 12px hsl(var(--warning-500) / 0.35) !important;
 }
 
-/* Success buttons - Teal with white text */
+/* Success buttons */
 :global(.bg-green-400),
 :global(.bg-green-500),
 :global(.bg-green-600) {
-	background-color: #00a0a3 !important; /* Light teal */
+	background-color: hsl(var(--success-500)) !important;
 	color: #ffffff !important;
 	font-weight: 600 !important;
-	border: 2px solid #007172 !important;
-	box-shadow: 0 4px 12px rgba(0, 160, 163, 0.35) !important;
+	border: 2px solid hsl(var(--success-700)) !important;
+	box-shadow: 0 4px 12px hsl(var(--success-500) / 0.3) !important;
 }
 
-/* Status badges - high contrast */
+/* Status badges */
 :global(.bg-green-400\/20),
 :global(.bg-green-400\/10) {
-	background-color: #00a0a3 !important;
-	color: #ffffff !important;
+	background-color: hsl(var(--success-50)) !important;
+	color: hsl(var(--success-700)) !important;
 	font-weight: 700 !important;
 	padding: 0.5rem 1rem !important;
-	border: 2px solid #007172 !important;
+	border: 2px solid hsl(var(--success-500)) !important;
 }
 
 :global(.bg-yellow-400\/20),
 :global(.bg-yellow-400\/10) {
-	background-color: #f29325 !important;
-	color: #0f172a !important;
+	background-color: hsl(var(--warning-50)) !important;
+	color: hsl(var(--warning-700)) !important;
 	font-weight: 700 !important;
 	padding: 0.5rem 1rem !important;
-	border: 2px solid #d94f04 !important;
+	border: 2px solid hsl(var(--warning-500)) !important;
 }
 
 :global(.bg-brand\/20),
 :global(.bg-brand\/10) {
-	background-color: #007172 !important;
-	color: #ffffff !important;
+	background-color: hsl(var(--brand-50)) !important;
+	color: hsl(var(--brand-700)) !important;
 	font-weight: 700 !important;
 	padding: 0.5rem 1rem !important;
-	border: 2px solid #025259 !important;
+	border: 2px solid hsl(var(--brand-500)) !important;
 }
 
-/* Text colors for badges */
+/* Text colors */
+:global(.text-brand) {
+	color: hsl(var(--text-brand)) !important;
+}
+
 :global(.text-green-300),
 :global(.text-green-400) {
-	color: #16a34a !important; /* readable green */
+	color: hsl(var(--success-700)) !important;
 }
 
 :global(.text-yellow-300),
 :global(.text-yellow-400) {
-	color: #854d0e !important; /* readable dark amber */
-}
-
-/* Ensure brand text renders as brand color, not forced white */
-:global(.text-brand) {
-	color: hsl(var(--brand)) !important;
-}
-
-/* Icon backgrounds */
-:global(.bg-blue-50) {
-	background-color: #007172 !important;
-	color: #ffffff !important;
-	border: 2px solid #025259 !important;
-}
-
-/* Remove forced white brand text on purple/teal icon backgrounds */
-
-:global(.bg-green-50) {
-	background-color: #00a0a3 !important;
-	color: #ffffff !important;
-	border: 2px solid #007172 !important;
-}
-
-:global(.text-green-600),
-:global(.text-green-500) {
-	color: #ffffff !important;
-}
-
-:global(.bg-purple-50) {
-	background-color: #025259 !important;
-	color: #ffffff !important;
-	border: 2px solid #013840 !important;
-}
-
-:global(.text-purple-600),
-:global(.text-purple-500) {
-	color: #ffffff !important;
-}
-
-/* Border colors for accents */
-:global(.border-blue-100),
-:global(.border-blue-200) {
-	border-color: #007172 !important;
+	color: hsl(var(--warning-700)) !important;
 }
 
 [data-reduced-motion='true'] *,
