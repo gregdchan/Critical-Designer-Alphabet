@@ -40,7 +40,7 @@
 
 ## Test Data & Fixtures
 
-- Supabase seed scripts exist in `designeralphabet/database/schema.sql` (optional TEST123 entries).
+- Use `designeralphabet/supabase/migrations` to provision schema for local/CI environments.
 - For isolated testing, use unique session codes (Playwright can generate random values).
 
 ## Mocking & Utilities

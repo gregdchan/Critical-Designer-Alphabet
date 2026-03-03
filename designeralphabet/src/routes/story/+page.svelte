@@ -22,6 +22,7 @@
 			questions?: { text?: string; section?: string } | null;
 		}>;
 		questions?: any[];
+		phases?: any[];
 		error?: string;
 	};
 
@@ -145,7 +146,7 @@
 				phaseKeyToTitle.set(phase.phase_key, phase.title);
 			}
 		}
-		
+
 		// Map question IDs to phase titles (not keys)
 		for (const q of questions || []) {
 			if (q?.id && q?.phase_key) {

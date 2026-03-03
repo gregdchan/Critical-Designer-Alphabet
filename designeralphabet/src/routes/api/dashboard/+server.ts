@@ -66,7 +66,12 @@ export const GET: RequestHandler = async () => {
 					.from('responses')
 					.select('question_id, text, questions!inner(response_type)')
 					.eq('room_code', session.code)
-					.in('questions.response_type', ['singleChoice', 'multiSelect', 'multiple_choice', 'multiselect']);
+					.in('questions.response_type', [
+						'singleChoice',
+						'multiSelect',
+						'multiple_choice',
+						'multiselect'
+					]);
 
 				if (choiceErr) throw new Error(choiceErr.message);
 
@@ -81,13 +86,13 @@ export const GET: RequestHandler = async () => {
 						if (text.includes(';')) {
 							choices = text
 								.split(';')
-								.map((s) => s.trim())
-								.filter((s) => s.length > 0);
+								.map((s: string) => s.trim())
+								.filter((s: string) => s.length > 0);
 						} else if (text.includes(',')) {
 							choices = text
 								.split(',')
-								.map((s) => s.trim())
-								.filter((s) => s.length > 0);
+								.map((s: string) => s.trim())
+								.filter((s: string) => s.length > 0);
 						} else if (text.trim().length > 0) {
 							choices = [text.trim()];
 						}
@@ -154,15 +159,15 @@ export const GET: RequestHandler = async () => {
 				success: false,
 				error: error?.message ?? 'Internal server error',
 				sessions: [],
-					metrics: {
-						totalSessions: 0,
-						totalParticipants: 0,
-						totalIdeas: 0,
-						avgEngagement: 0,
-						activeSessions: 0,
-						sharedValues: 0
-					}
-				},
+				metrics: {
+					totalSessions: 0,
+					totalParticipants: 0,
+					totalIdeas: 0,
+					avgEngagement: 0,
+					activeSessions: 0,
+					sharedValues: 0
+				}
+			},
 			{ status: 500 }
 		);
 	}

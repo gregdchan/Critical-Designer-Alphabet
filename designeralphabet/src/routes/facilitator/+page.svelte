@@ -24,7 +24,7 @@
 		title: string;
 		slug?: { current?: string } | string;
 		description?: string;
-		challenge?: string;
+		challenge?: unknown;
 		lenses?: string[];
 		sections?: {
 			onboarding?: {
@@ -52,6 +52,7 @@
 			description?: string;
 			durationMinutes?: number | null;
 			dashboards?: string[] | null;
+			breakoutRounds?: TemplateRound[] | null;
 		}>;
 		facilitation?: {
 			roles?: string[];
@@ -156,28 +157,7 @@
 	$: {
 		const nextTemplateId = selectedTemplate?._id ?? null;
 		if (nextTemplateId !== lastTemplateId) {
-			// Handle challenge field - could be string or block content object
-			const challenge = selectedTemplate?.challenge;
-			if (typeof challenge === 'string') {
-				sessionChallenge = challenge;
-			} else if (Array.isArray(challenge)) {
-				// Block content array - extract text from blocks
-				sessionChallenge = challenge
-					.filter((block: any) => block._type === 'block')
-					.map(
-						(block: any) =>
-							block.children
-								?.filter((child: any) => child._type === 'span')
-								?.map((child: any) => child.text)
-								?.join('') ?? ''
-					)
-					.join('\n');
-			} else if (challenge && typeof challenge === 'object') {
-				// Single block or other object - try to stringify
-				sessionChallenge = JSON.stringify(challenge);
-			} else {
-				sessionChallenge = '';
-			}
+			sessionChallenge = getChallengeText(selectedTemplate?.challenge);
 			lastTemplateId = nextTemplateId;
 		}
 	}
@@ -278,7 +258,8 @@
 					code: sessionCode,
 					title: sessionTitle,
 					templateSlug,
-					challenge: sessionChallenge.trim() || selectedTemplate.challenge || null,
+					challenge:
+						sessionChallenge.trim() || getChallengeText(selectedTemplate.challenge) || null,
 					facilitatorEmail: facilitatorEmail.trim().toLowerCase(),
 					phases: selectedTemplate.phases ?? []
 				})

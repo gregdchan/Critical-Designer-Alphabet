@@ -6,7 +6,7 @@
 - **Automatic question seeding** – Breakout rounds defined in the template are seeded into Supabase when a session is created (`designeralphabet/src/routes/facilitator/+page.svelte:136`).
 - **Rejoin with email** – The facilitator email captured at launch is stored on the session, enabling re-authentication on new devices (`designeralphabet/src/routes/api/session/facilitator/+server.ts:1`).
 - **Live control panel** – Facilitators can toggle session status, start/stop breakout timers (template or custom), and export summaries from the in-session dashboard (`designeralphabet/src/routes/session/[code]/+page.svelte:199`).
-- **Realtime oversight** – Presence lists, response streams, timeline updates, and chat messages surface instantly via the WebSocket gateway (`designeralphabet/src/routes/ws/+server.ts:17`).
+- **Realtime oversight** – Presence lists, response streams, timeline updates, and chat messages surface via Supabase Realtime subscriptions (`designeralphabet/src/lib/realtime.ts:286`).
 
 ## Participant Experience
 
@@ -28,7 +28,7 @@
 
 ## Platform Utilities
 
-- **Realtime API** – WebSocket messages route through `/session/ws` to fan out Supabase writes and presence updates (`designeralphabet/src/routes/ws/+server.ts:17`).
+- **Realtime API** – Postgres change subscriptions stream updates from Supabase to clients (`designeralphabet/src/lib/realtime.ts:286`).
 - **REST APIs** – Endpoints handle session creation, participant joins, facilitator login, status updates, round control, timeline, responses, chat, and exporting (`designeralphabet/src/routes/api`).
 - **Environment-aware builds** – Dockerfiles bake environment defaults and prune dev dependencies for lean production images (`designeralphabet/Dockerfile:1`).
 

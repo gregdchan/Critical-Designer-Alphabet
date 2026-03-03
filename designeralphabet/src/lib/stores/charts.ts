@@ -163,9 +163,9 @@ function buildWordCloudChart(question: Question, questionResponses: Response[]):
 		const words = r.response_text
 			.toLowerCase()
 			.split(/\W+/)
-			.filter((w) => w.length > 3); // Filter short words
+			.filter((w: string) => w.length > 3); // Filter short words
 
-		words.forEach((word) => {
+		words.forEach((word: string) => {
 			wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
 		});
 	});

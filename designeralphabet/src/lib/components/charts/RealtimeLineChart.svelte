@@ -2,13 +2,14 @@
 	import { onMount } from 'svelte';
 	import { useResponses, useQuestions } from '$lib/hooks/useSupabaseRealtime';
 	import LineChart from './LineChart.svelte';
+	import type { ChartData } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let questionId: string;
 	export let width = 800;
 	export let height = 400;
 
-	let data: Array<{ value: number; count: number }> = [];
+	let data: ChartData | null = null;
 	let scaleSettings = { min: 0, max: 10, minLabel: 'Min', maxLabel: 'Max' };
 	let question = '';
 	let totalResponses = 0;
@@ -35,14 +36,14 @@
 	function updateData() {
 		if (!questionId || !responses.length || !questions.length) {
 			if (!loading) {
-				data = [];
+				data = null;
 			}
 			return;
 		}
 
 		const questionData = questions.find((q) => q.id === questionId);
 		if (!questionData) {
-			data = [];
+			data = null;
 			return;
 		}
 
@@ -61,11 +62,26 @@
 		});
 
 		// Convert to array and sort
-		data = Array.from(valueCounts.entries())
+		const points = Array.from(valueCounts.entries())
 			.map(([value, count]) => ({ value, count }))
 			.sort((a, b) => a.value - b.value);
 
-		totalResponses = data.reduce((sum, d) => sum + d.count, 0);
+		totalResponses = points.reduce((sum, d) => sum + d.count, 0);
+		data = {
+			title: question || 'Rating distribution',
+			series: [
+				{
+					id: questionId,
+					points: points.map((point) => ({
+						id: `${questionId}-${point.value}`,
+						label: String(point.value),
+						value: point.count
+					}))
+				}
+			],
+			total: totalResponses,
+			meta: { scaleSettings }
+		};
 	}
 </script>
 
@@ -80,7 +96,7 @@
 			<p>Error: {error}</p>
 		</div>
 	{:else}
-		<LineChart {data} {scaleSettings} {totalResponses} {width} {height} {question} />
+		<LineChart {data} title={question || 'Rating distribution'} />
 	{/if}
 </div>
 

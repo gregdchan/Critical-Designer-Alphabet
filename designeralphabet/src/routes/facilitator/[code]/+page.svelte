@@ -82,8 +82,9 @@
 								{/if}
 							</div>
 							<div class="flex items-center gap-2">
-								<label class="text-xs text-secondary">Chart</label>
+								<label class="text-xs text-secondary" for={`chart-${q.id}`}>Chart</label>
 								<select
+									id={`chart-${q.id}`}
 									class="text-sm surface-input border border-line rounded px-2 py-1"
 									on:change={(e) => handleOverrideEvent(q.id, e)}
 								>
@@ -96,10 +97,7 @@
 
 						{#if chartType === 'voting' || chartType === 'openText'}
 							<div class="w-full md:h-[520px] h-[70dvh]">
-								<WordCloudChart
-									responses={qResponses}
-									question={q.text || ''}
-								/>
+								<WordCloudChart responses={qResponses} question={q.text || ''} />
 							</div>
 						{:else if built?.data}
 							<div class="w-full md:h-[520px] h-[70dvh]">

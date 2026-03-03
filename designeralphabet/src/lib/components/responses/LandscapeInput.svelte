@@ -148,6 +148,8 @@
 			bind:this={canvasElement}
 			viewBox="0 0 {canvasWidth} {canvasHeight}"
 			class="w-full border-2 border-gray-300 rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 cursor-crosshair touch-none"
+			role="img"
+			aria-label="Interactive landscape positioning chart"
 			on:mousedown={handleMouseDown}
 			on:mousemove={handleMouseMove}
 			on:touchstart={handleTouchStart}

@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { select } from 'd3-selection';
-	import { forceSimulation, forceManyBody, forceCenter, forceX, forceY } from 'd3-force';
+	import {
+		forceSimulation,
+		forceManyBody,
+		forceCenter,
+		forceX,
+		forceY,
+		forceCollide
+	} from 'd3-force';
 	import { scaleSqrt } from 'd3-scale';
 	import BaseChart from './BaseChart.svelte';
 	import { useResponses } from '$lib/hooks/useSupabaseRealtime';
@@ -39,7 +46,7 @@
 	let bubbles: any;
 
 	// Lens centers for force positioning
-	const lensPositions = {
+	const lensPositions: Record<string, { x: number; y: number }> = {
 		Risk: { x: 0.2, y: 0.3 },
 		Work: { x: 0.8, y: 0.3 },
 		Sustainability: { x: 0.2, y: 0.7 },
@@ -103,7 +110,7 @@
 		}
 
 		// Group responses by lens and aggregate
-		const lensGroups = responses.reduce((acc, response) => {
+		const lensGroups = responses.reduce((acc: Record<string, any[]>, response: any) => {
 			const lens = normaliseLens(response.questions?.lens);
 			if (!acc[lens]) {
 				acc[lens] = [];
@@ -113,7 +120,7 @@
 		}, {});
 
 		// Create bubble data
-		bubbleData = Object.entries(lensGroups).map(([lens, items]: [string, any[]]) => {
+		bubbleData = (Object.entries(lensGroups) as Array<[string, any[]]>).map(([lens, items]) => {
 			const totalVotes = items.reduce((sum, item) => sum + (Number(item.votes) || 0), 0);
 			const totalCards = items.reduce((sum, item) => sum + (item.cards?.length || 0), 0);
 
@@ -167,20 +174,20 @@
 			.force('center', forceCenter(innerWidth / 2, innerHeight / 2))
 			.force(
 				'collision',
-				forceManyBody()
+				forceCollide()
+					.radius((d: any) => d.radius + 10)
 					.strength(1)
-					.distanceMax((d) => d.radius + 10)
 			)
 			.force(
 				'x',
 				forceX()
-					.x((d) => (lensPositions[d.lens]?.x || 0.5) * innerWidth)
+					.x((d: any) => (lensPositions[d.lens]?.x || 0.5) * innerWidth)
 					.strength(0.3)
 			)
 			.force(
 				'y',
 				forceY()
-					.y((d) => (lensPositions[d.lens]?.y || 0.5) * innerHeight)
+					.y((d: any) => (lensPositions[d.lens]?.y || 0.5) * innerHeight)
 					.strength(0.3)
 			)
 			.alpha(0.8)
@@ -190,7 +197,7 @@
 		const chart = select(svgElement).select('.chart-content');
 
 		// Bind data
-		bubbles = chart.selectAll('.bubble-group').data(bubbleData, (d) => d.id);
+		bubbles = chart.selectAll('.bubble-group').data(bubbleData, (d: any) => d.id);
 
 		// Remove old bubbles
 		bubbles.exit().transition().duration(300).attr('opacity', 0).remove();
@@ -207,8 +214,8 @@
 			.append('circle')
 			.attr('class', 'bubble')
 			.attr('r', 0)
-			.attr('fill', (d) => d.color ?? resolveLensColor(d.lens))
-			.attr('stroke', (d) => d.color ?? resolveLensColor(d.lens))
+			.attr('fill', (d: any) => d.color ?? resolveLensColor(d.lens))
+			.attr('stroke', (d: any) => d.color ?? resolveLensColor(d.lens))
 			.attr('stroke-width', 2)
 			.attr('filter', 'url(#neon-glow)')
 			.style('cursor', 'pointer');
@@ -223,7 +230,7 @@
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '14px')
 			.attr('font-weight', 'bold')
-			.text((d) => d.lens);
+			.text((d: any) => d.lens);
 
 		// Add vote count
 		bubblesEnter
@@ -234,7 +241,7 @@
 			.attr('fill', 'white')
 			.attr('font-family', 'Orbitron, sans-serif')
 			.attr('font-size', '12px')
-			.text((d) => `${d.votes} votes`);
+			.text((d: any) => `${d.votes} votes`);
 
 		// Merge enter and update selections
 		bubbles = bubblesEnter.merge(bubbles);
@@ -246,7 +253,7 @@
 			.select('.bubble')
 			.transition()
 			.duration(500)
-			.attr('r', (d) => d.radius);
+			.attr('r', (d: any) => d.radius);
 
 		// Set up interactions
 		bubbles
@@ -257,7 +264,7 @@
 
 		// Update positions during simulation
 		simulation.on('tick', () => {
-			bubbles.attr('transform', (d) => `translate(${d.x},${d.y})`);
+			bubbles.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
 		});
 	}
 
@@ -270,7 +277,7 @@
 		};
 
 		// Highlight bubble
-		select(event.currentTarget)
+		select(event.currentTarget as Element)
 			.select('.bubble')
 			.transition()
 			.duration(200)
@@ -295,7 +302,7 @@
 		};
 
 		// Reset bubble
-		select(event.currentTarget)
+		select(event.currentTarget as Element)
 			.select('.bubble')
 			.transition()
 			.duration(200)

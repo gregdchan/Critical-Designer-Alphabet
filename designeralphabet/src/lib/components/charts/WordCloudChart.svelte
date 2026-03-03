@@ -28,15 +28,15 @@
 	let currentTransform = d3.zoomIdentity;
 
 	const ro =
-	       typeof ResizeObserver !== 'undefined'
-		       ? new ResizeObserver((entries) => {
-				       const r = entries[0]?.contentRect;
-				       if (r) {
-					       width = Math.max(300, r.width);
-					       height = Math.max(300, r.height);
-				       }
-			       })
-		       : null;
+		typeof ResizeObserver !== 'undefined'
+			? new ResizeObserver((entries) => {
+					const r = entries[0]?.contentRect;
+					if (r) {
+						width = Math.max(300, r.width);
+						height = Math.max(300, r.height);
+					}
+				})
+			: null;
 
 	const lensOrder = [
 		'Risk',
@@ -189,7 +189,6 @@
 		const wordBubbles = calculateWordBubbles(responses, theme);
 		if (wordBubbles.length === 0) return;
 
-
 		// Responsive layout: On mobile, legend goes below chart; on desktop, to the right
 		const isMobile = width < 768;
 		const legendWidth = isMobile ? 0 : 170;
@@ -202,7 +201,10 @@
 		const positionedBubbles = packBubbles(wordBubbles, width, height);
 		// Centering logic: find bounding box of all bubbles and offset to center in SVG
 		if (positionedBubbles.length > 0) {
-			let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+			let minX = Infinity,
+				maxX = -Infinity,
+				minY = Infinity,
+				maxY = -Infinity;
 			for (const b of positionedBubbles) {
 				const x0 = b.x - b.radius;
 				const x1 = b.x + b.radius;
@@ -217,7 +219,7 @@
 			const cloudHeight = maxY - minY;
 			const offsetX = width / 2 - (minX + cloudWidth / 2);
 			const offsetY = height / 2 - (minY + cloudHeight / 2);
-			positionedBubbles.forEach(b => {
+			positionedBubbles.forEach((b) => {
 				b.x += offsetX;
 				b.y += offsetY;
 			});
@@ -269,7 +271,10 @@
 			.on('zoom', (event: any) => {
 				currentTransform = event.transform;
 				if (rootGroup) {
-					rootGroup.attr('transform', `translate(${leftMargin}, ${topMargin}) ${currentTransform.toString()}`);
+					rootGroup.attr(
+						'transform',
+						`translate(${leftMargin}, ${topMargin}) ${currentTransform.toString()}`
+					);
 				}
 			});
 
@@ -312,7 +317,12 @@
 			.style('cursor', 'pointer')
 			.on('mouseenter', function (event: any, d: any) {
 				// Highlight circle
-				d3.select(this).interrupt().transition().duration(180).attr('opacity', 1).attr('stroke-width', 3);
+				d3.select(this)
+					.interrupt()
+					.transition()
+					.duration(180)
+					.attr('opacity', 1)
+					.attr('stroke-width', 3);
 
 				// Pop and giggle animation on the whole bubble group
 				const group = d3.select(this.parentNode as SVGGElement);
@@ -325,7 +335,10 @@
 					.transition()
 					.duration(250)
 					.ease(d3.easeCubicOut)
-					.attr('transform', `translate(${d.x + offsetX},${d.y + offsetY}) scale(1.12) rotate(${rotate})`);
+					.attr(
+						'transform',
+						`translate(${d.x + offsetX},${d.y + offsetY}) scale(1.12) rotate(${rotate})`
+					);
 
 				// Show tooltip
 				const tooltip = d3.select('body').selectAll('.word-cloud-tooltip').data([null]);
@@ -345,7 +358,7 @@
 					.style('backdrop-filter', 'blur(8px)')
 					.style('z-index', '99999');
 
-				const tooltipMerge = tooltipEnter.merge(tooltip);
+				const tooltipMerge = (tooltipEnter as any).merge(tooltip as any);
 
 				tooltipMerge
 					.html(
@@ -560,13 +573,12 @@
 	});
 </script>
 
-
 <div bind:this={container} class="word-cloud-container">
 	<svg
 		bind:this={svg}
 		viewBox={`0 0 ${width} ${height}`}
-		width={width}
-		height={height}
+		{width}
+		{height}
 		preserveAspectRatio="xMidYMid meet"
 	></svg>
 </div>

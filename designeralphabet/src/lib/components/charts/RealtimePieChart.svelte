@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { useResponses, useQuestions } from '$lib/hooks/useSupabaseRealtime';
 	import PieChart from './PieChart.svelte';
+	import type { ChartData } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let questionId: string;
@@ -9,7 +10,7 @@
 	export let height = 400;
 	export let showLegend = true;
 
-	let data: Array<{ label: string; value: number; percentage: number }> = [];
+	let data: ChartData | null = null;
 	let question = '';
 	let loading = true;
 	let error: string | null = null;
@@ -34,14 +35,14 @@
 	function updateData() {
 		if (!questionId || !responses.length || !questions.length) {
 			if (!loading) {
-				data = [];
+				data = null;
 			}
 			return;
 		}
 
 		const questionData = questions.find((q) => q.id === questionId);
 		if (!questionData) {
-			data = [];
+			data = null;
 			return;
 		}
 
@@ -61,15 +62,27 @@
 			return { label: option, value: count };
 		});
 
-		const totalCount = responseCounts.reduce((sum, rc) => sum + rc.value, 0);
+		const totalCount = responseCounts.reduce(
+			(sum: number, rc: { label: string; value: number }) => sum + rc.value,
+			0
+		);
 
-		data = responseCounts
-			.filter((rc) => rc.value > 0)
-			.map((rc) => ({
-				label: rc.label,
-				value: rc.value,
-				percentage: totalCount > 0 ? (rc.value / totalCount) * 100 : 0
-			}));
+		data = {
+			title: question || 'Responses',
+			series: [
+				{
+					id: questionId,
+					points: responseCounts
+						.filter((rc: { label: string; value: number }) => rc.value > 0)
+						.map((rc: { label: string; value: number }, index: number) => ({
+							id: `${questionId}-${index}`,
+							label: rc.label,
+							value: rc.value
+						}))
+				}
+			],
+			total: totalCount
+		};
 	}
 </script>
 
@@ -84,7 +97,7 @@
 			<p>Error: {error}</p>
 		</div>
 	{:else}
-		<PieChart {data} {width} {height} {showLegend} {question} />
+		<PieChart {data} title={question || 'Responses'} />
 	{/if}
 </div>
 

@@ -1,10 +1,30 @@
-export type ChartPoint = { id: string; label: string; value: number };
-export type ChartSeries = { id: string; points: ChartPoint[] };
+export type ChartPoint = {
+	id?: string;
+	label: string;
+	value: number;
+	color?: string;
+	metadata?: Record<string, unknown>;
+};
+export type ChartSeries = { id: string; label?: string; points: ChartPoint[] };
 export type ChartData = {
 	title?: string;
 	series: ChartSeries[];
 	total?: number;
 	meta?: Record<string, unknown>;
+};
+
+export type QuestionOption = {
+	id: string;
+	label: string;
+	color?: string;
+};
+
+export type Question = {
+	id: string;
+	title?: string;
+	section?: string;
+	type?: string;
+	options?: QuestionOption[];
 };
 
 // Chart dimension and layout types
@@ -32,6 +52,7 @@ export type BubbleDatum = {
 	cardsCount: number;
 	count: number;
 	color: string;
+	radius?: number;
 	x?: number;
 	y?: number;
 };
@@ -50,3 +71,8 @@ export type ParticipationPoint = {
 	submissions: number;
 	fairnessMultiplier?: number;
 };
+
+export type WordCloudData = ChartPoint[];
+export type LandscapePoint = ChartPoint;
+export type RoadmapItem = ChartPoint;
+export type HeatmapData = ChartPoint[];

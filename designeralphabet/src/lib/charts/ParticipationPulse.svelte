@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { select } from 'd3-selection';
-	import { line, curveCardinal } from 'd3-shape';
+	import { line, area, curveCardinal } from 'd3-shape';
 	import { scaleLinear, scaleTime } from 'd3-scale';
 	import { extent, max } from 'd3-array';
 	import BaseChart from './BaseChart.svelte';
@@ -34,6 +34,11 @@
 	// Chart settings
 	const maxDataPoints = 30; // Last 5 minutes in 10-second intervals
 	const updateIntervalMs = 10000; // Update every 10 seconds
+	type ParticipationBucket = {
+		timestamp: Date;
+		submissions: number;
+		events: any[];
+	};
 
 	// Set up realtime data subscription
 	useTimeline(roomCode, (state) => {
@@ -72,7 +77,7 @@
 		const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
 		// Create time buckets for the last 5 minutes
-		const buckets = [];
+		const buckets: ParticipationBucket[] = [];
 		for (let i = 0; i < maxDataPoints; i++) {
 			const time = new Date(
 				now.getTime() - (maxDataPoints - 1 - i) * ((5 * 60 * 1000) / maxDataPoints)
@@ -173,10 +178,10 @@
 			.attr('stop-opacity', 0.1);
 
 		// Add area under curve
-		const areaGenerator = line<ParticipationPoint>()
+		const areaGenerator = area<ParticipationPoint>()
 			.x((d) => xScale(d.timestamp))
 			.y0(innerHeight)
-			.y1((d) => yScale(d.submissions))
+			.y1((d: ParticipationPoint) => yScale(d.submissions))
 			.curve(curveCardinal);
 
 		chart
@@ -332,7 +337,7 @@
 				.attr('font-family', 'Orbitron, sans-serif')
 				.attr('font-size', '12px')
 				.attr('font-weight', 'bold')
-				.text(`×${latestData.fairnessMultiplier.toFixed(1)}`);
+				.text(`×${(latestData.fairnessMultiplier ?? 1).toFixed(1)}`);
 		}
 	}
 
@@ -407,7 +412,7 @@
 	}
 
 	:global(.participation-pulse-chart .pulse-dot:hover) {
-		r: 5;
+		opacity: 0.9;
 	}
 
 	:global(.participation-pulse-chart .fairness-indicator) {

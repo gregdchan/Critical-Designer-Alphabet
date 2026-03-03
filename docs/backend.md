@@ -2,7 +2,7 @@
 
 ## Overview
 
-The backend is implemented entirely through SvelteKit server routes and Supabase Admin SDK helpers. It exposes REST endpoints and a WebSocket gateway that coordinate session data, participants, and live collaboration.
+The backend is implemented entirely through SvelteKit server routes and Supabase Admin SDK helpers. It exposes REST endpoints, while realtime fan-out is handled by Supabase Postgres change subscriptions in the client.
 
 ## Supabase Data Model
 
@@ -15,14 +15,14 @@ The backend is implemented entirely through SvelteKit server routes and Supabase
 | `timeline` | Now/Next/Later roadmap items | `room_code`, `label`, `item_text`, `owner`, `metric`, `risk_note` |
 | `chat` | In-session chat feed | `room_code`, `participant_id`, `message` |
 
-Policies in `designeralphabet/database/schema.sql` and migrations in `designeralphabet/supabase/migrations` keep the schema synchronized with production.
+Schema evolution is managed in `designeralphabet/supabase/migrations`.
 
 ## Core Modules
 
 ### `src/lib/server/workshop.ts`
 - Wraps Supabase Admin client operations with type-safe helpers.
 - Provides session lifecycle management: create session, update status, set active round, fetch lists, add participants/questions/responses/timeline/chat, and scoring updates.
-- Broadcasts significant events via `broadcast` so websocket clients refresh.
+- Broadcast helpers remain in code for legacy compatibility, but active clients use Supabase Realtime subscriptions.
 
 ### `src/lib/realtime.ts`
 - Client-side store fetches session bundles via `/api/session/[code]` and polls every five seconds.
@@ -49,23 +49,11 @@ Policies in `designeralphabet/database/schema.sql` and migrations in `designeral
 
 Each endpoint interacts with Supabase via helper functions and returns JSON with `success` flags and payloads.
 
-## WebSocket Gateway (`/session/ws`)
+## Realtime Behavior
 
-- Uses `WebSocketPair` within SvelteKit’s server to handle upgrade requests (`designeralphabet/src/routes/ws/+server.ts:17`).
-- After a `HELLO` handshake, clients receive presence membership and can send the following messages:
-
-| Type | Payload | Description |
-| --- | --- | --- |
-| `ADD_RESPONSE` | `{ code, questionId, participantId, text, cards[] }` | Adds a new response. |
-| `CAST_VOTE` | `{ responseId, delta }` | Updates votes on a response. |
-| `ADD_TIMELINE` | `{ code, label, itemText, owner?, metric?, riskNote? }` | Adds a timeline item. |
-| `ADD_QUESTION` | `{ code, section, text }` | Adds a new question. |
-| `SEND_CHAT` | `{ code, participantId?, message }` | Sends a chat message. |
-| `CHANGE_STEP` | `{ code, status }` | Moves session between planned/live/done. |
-| `SYNC_TIMER` | `{ code, remaining, state }` | Pushes timer synchronization messages. |
-| `SCORE_UPDATE` | `{ participantId, delta, badge? }` | Adjusts participant scores/badges. |
-
-- Server responds with targeted broadcasts (e.g., `RESPONSE_ADDED`, `TIMELINE_ADDED`, `ROUND_UPDATE`) using `broadcast` from `src/lib/server/realtime.ts`.
+- `src/lib/realtime.ts` subscribes to Supabase Postgres changes for `sessions`, `participants`, `questions`, `responses`, `timeline`, `chat`, and `session_phases`.
+- Realtime subscriptions are active when a session is `live`; planned/done sessions use slower polling.
+- The legacy endpoint at `src/routes/ws/+server.ts` is intentionally disabled and returns HTTP 410.
 
 ## Authentication & Authorization
 
@@ -76,8 +64,7 @@ Each endpoint interacts with Supabase via helper functions and returns JSON with
 ## Error Handling
 
 - REST endpoints wrap Supabase operations with try/catch and return `{ success: false, error }` on failure.
-- WebSocket handler sends `ERROR` messages back to clients when exceptions occur.
-- Client-side join screen bubbles up fetch errors via alert dialogues.
+- Client-side flows surface fetch errors to the UI and continue polling/realtime retries where possible.
 
 ## Adding New API Endpoints
 

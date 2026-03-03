@@ -9,7 +9,7 @@
 | `docs/` | Documentation set (this directory) |
 | `docker-compose.yml` | Multi-service orchestration for local/prod builds |
 | `run-all.sh` / `start-all.sh` | Helper scripts for dev/prod environments |
-| `supabase/` | Supabase CLI metadata (config + migrations) |
+| `designeralphabet/supabase/` | Supabase CLI metadata (config + migrations) |
 
 ## Environment Variables
 

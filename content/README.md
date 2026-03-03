@@ -1,9 +1,24 @@
-# Sanity Clean Content Studio
+# CDA Content Studio
 
-Congratulations, you have now installed the Sanity Content Studio, an open-source real-time content editing environment connected to the Sanity backend.
+Sanity Studio for managing:
 
-Now you can do the following things:
+- workshop templates
+- card library content
+- visual themes
 
-- [Read “getting started” in the docs](https://www.sanity.io/docs/introduction/getting-started?utm_source=readme)
-- [Join the community Slack](https://slack.sanity.io/?utm_source=readme)
-- [Extend and build plugins](https://www.sanity.io/docs/content-studio/extending?utm_source=readme)
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Schemas
+
+Primary schemas live under `schemaTypes/`:
+
+- `WorkshopTemplate.ts`
+- `Cards.ts`
+- `Theme.ts`
+
+Studio configuration entrypoint: `sanity.config.ts`.

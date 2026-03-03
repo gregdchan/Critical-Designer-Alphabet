@@ -2,13 +2,14 @@
 	import { onMount } from 'svelte';
 	import { useResponses, useQuestions } from '$lib/hooks/useSupabaseRealtime';
 	import BarChart from './BarChart.svelte';
+	import type { ChartData } from '$lib/types/charts';
 
 	export let roomCode: string;
 	export let questionId: string;
 	export let width = 800;
 	export let height = 400;
 
-	let data: Array<{ label: string; value: number; percentage: number }> = [];
+	let data: ChartData | null = null;
 	let question = '';
 	let totalResponses = 0;
 	let loading = true;
@@ -34,14 +35,14 @@
 	function updateData() {
 		if (!questionId || !responses.length || !questions.length) {
 			if (!loading) {
-				data = [];
+				data = null;
 			}
 			return;
 		}
 
 		const questionData = questions.find((q) => q.id === questionId);
 		if (!questionData) {
-			data = [];
+			data = null;
 			return;
 		}
 
@@ -61,13 +62,25 @@
 			return { label: option, value: count };
 		});
 
-		totalResponses = responseCounts.reduce((sum, rc) => sum + rc.value, 0);
+		totalResponses = responseCounts.reduce(
+			(sum: number, rc: { label: string; value: number }) => sum + rc.value,
+			0
+		);
 
-		data = responseCounts.map((rc) => ({
-			label: rc.label,
-			value: rc.value,
-			percentage: totalResponses > 0 ? (rc.value / totalResponses) * 100 : 0
-		}));
+		data = {
+			title: question || 'Responses',
+			series: [
+				{
+					id: questionId,
+					points: responseCounts.map((rc: { label: string; value: number }, index: number) => ({
+						id: `${questionId}-${index}`,
+						label: rc.label,
+						value: rc.value
+					}))
+				}
+			],
+			total: totalResponses
+		};
 	}
 </script>
 
@@ -82,7 +95,7 @@
 			<p>Error: {error}</p>
 		</div>
 	{:else}
-		<BarChart {data} {width} {height} {question} {totalResponses} />
+		<BarChart {data} title={question || 'Responses'} />
 	{/if}
 </div>
 

@@ -261,7 +261,7 @@
 						.style('z-index', '1000')
 						.style('max-width', '300px');
 
-					const tooltipMerge = tooltipEnter.merge(tooltip);
+					const tooltipMerge = (tooltipEnter as any).merge(tooltip as any);
 
 					tooltipMerge
 						.html(
@@ -395,7 +395,9 @@
 
 		// Instructions
 		const instructionsX = isMobile ? 0 : innerWidth + 20;
-		const instructionsY = isMobile ? innerHeight + 40 + series.length * 80 + 20 : series.length * 80 + 20;
+		const instructionsY = isMobile
+			? innerHeight + 40 + series.length * 80 + 20
+			: series.length * 80 + 20;
 		g.append('text')
 			.attr('x', instructionsX)
 			.attr('y', instructionsY)

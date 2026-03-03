@@ -1,38 +1,28 @@
-# create-svelte
+# Critical Designer Alphabet Web App
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+SvelteKit application for running live CDA workshops.
 
-## Creating a project
+## Key Routes
 
-If you're seeing this, you've probably already done this step. Congrats!
+- `/` landing page
+- `/facilitator` create and launch sessions
+- `/join` participant/facilitator join flow
+- `/session/[code]` live collaboration room
+- `/presentation?code=ABC123` large-screen display mode
+- `/dashboard` session analytics overview
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Scripts
 
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
+npm run check
+npm run lint
+npm run test:unit -- --run
+npm run test:integration
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+## Realtime
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+Realtime updates use Supabase Postgres changes subscriptions (`src/lib/realtime.ts`).
+The legacy WebSocket endpoint is intentionally disabled (`src/routes/ws/+server.ts` returns HTTP 410).

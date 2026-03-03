@@ -1,11 +1,11 @@
 # System Architecture
 
 ```
-┌──────────────┐     HTTP/WS      ┌──────────────────┐
+┌──────────────┐      HTTP        ┌──────────────────┐
 │  SvelteKit   │ <──────────────> │  Supabase (Postgres│
 │  Frontend    │                  │  + Realtime)       │
 └────┬─────────┘                  └────────┬──────────┘
-     │ REST / WS                                │
+     │ REST                                     │
      │                                           │
      │ Static assets                             │
 ┌────▼─────────┐                        ┌────────▼─────────┐
@@ -24,12 +24,12 @@
 
 ### Backend Services
 - **REST endpoints** under `designeralphabet/src/routes/api` implemented as SvelteKit server routes.
-- **WebSocket gateway** at `/session/ws` for realtime collaboration; handles HELLO, responses, votes, timeline, chat, timers, and scoring (`designeralphabet/src/routes/ws/+server.ts:17`).
-- **Supabase SDK** wrappers in `designeralphabet/src/lib/server/workshop.ts` manage CRUD operations and fan-out via `broadcast`.
-- **Reusable realtime helpers** in `designeralphabet/src/lib/realtime.ts` (polling, profile persistence, API convenience).
+- **Supabase SDK** wrappers in `designeralphabet/src/lib/server/workshop.ts` manage CRUD operations.
+- **Realtime client helpers** in `designeralphabet/src/lib/realtime.ts` handle polling + Supabase Postgres subscriptions.
+- **Legacy websocket endpoint** exists only as disabled compatibility surface (`/ws` returns HTTP 410).
 
 ### Supabase (Postgres + Realtime)
-- Tables: `sessions`, `participants`, `questions`, `responses`, `timeline`, `chat` (`designeralphabet/database/schema.sql:7`).
+- Tables: `sessions`, `participants`, `questions`, `responses`, `timeline`, `chat`, `session_phases`.
 - Columns capture facilitator emails, active rounds, and challenge statements.
 - Row Level Security policies allow open read/write for session participants.
 - Migrations stored in `designeralphabet/supabase/migrations/` keep production schema current.
@@ -48,9 +48,9 @@
 
 1. Facilitator creates a session from the console. REST API writes to Supabase, seeding breakout questions based on the Sanity template.
 2. Participants discover active sessions via `/api/session/list` or by direct code entry.
-3. Clients call `/api/participants/join` (participants) or `/api/session/facilitator` (facilitators) to persist presence, then connect to `/session/ws` for realtime updates.
-4. Responses, votes, timeline entries, and chat messages hit REST endpoints that write to Supabase. WebSocket broadcast notifies connected clients.
-5. Session dashboards render data through stores in `designeralphabet/src/lib/realtime.ts`, refreshing via polling + WebSocket messages.
+3. Clients call `/api/participants/join` (participants) or `/api/session/facilitator` (facilitators) to persist presence.
+4. Responses, votes, timeline entries, and chat messages hit REST endpoints that write to Supabase.
+5. Session dashboards render data through stores in `designeralphabet/src/lib/realtime.ts`, refreshing via polling + Supabase change subscriptions.
 6. Presentation view consumes the same REST endpoints for read-only display, enabling large-screen mode.
 
 ## Key Dependencies

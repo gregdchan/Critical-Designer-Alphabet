@@ -79,6 +79,17 @@ export type SessionBundle = {
 	phases: Phase[];
 };
 
+export type PersistedParticipantProfile = Partial<Participant> & {
+	id?: string;
+	participantId?: string;
+	sessionCode?: string;
+	name?: string;
+	role?: 'facilitator' | 'participant';
+	color?: string;
+	email?: string | null;
+	deviceId?: string;
+};
+
 const POLL_INTERVAL = 5000;
 
 export const sessionDetails = writable<Session | null>(null);
@@ -673,7 +684,7 @@ export function getParticipantProfile(code: string) {
 	return null;
 }
 
-export function storeParticipantProfile(code: string, profile: Participant) {
+export function storeParticipantProfile(code: string, profile: PersistedParticipantProfile) {
 	if (!browser) return;
 	try {
 		const normalized = {

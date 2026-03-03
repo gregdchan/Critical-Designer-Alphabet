@@ -26,6 +26,13 @@ export interface Response {
 	cards: string[];
 	votes: number;
 	created_at: string;
+	// Legacy/alternate fields used by some chart builders.
+	response_text?: string;
+	option_id?: string;
+	scale_value?: number;
+	landscape_x?: number;
+	landscape_y?: number;
+	value?: string | number | string[] | null;
 	// Populated from joins
 	questions?: {
 		lens: string | null;

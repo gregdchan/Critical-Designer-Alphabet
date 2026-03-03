@@ -192,7 +192,7 @@
 			.enter()
 			.append('tspan')
 			.attr('x', function () {
-				return select(this.parentNode).attr('x');
+				return select(this.parentNode as SVGTSpanElement | SVGTextElement).attr('x');
 			})
 			.attr('dy', (d, i) => (i === 0 ? 0 : '1.2em'))
 			.text((d) => d);
@@ -374,12 +374,12 @@
 		};
 
 		// Highlight bubble
-		select(event.currentTarget)
+		select(event.currentTarget as Element)
 			.transition()
 			.duration(200)
 			.attr('stroke-width', 4)
 			.attr('r', function () {
-				return Number(select(this).attr('r')) * 1.2;
+				return Number(select(this as SVGCircleElement).attr('r')) * 1.2;
 			});
 	}
 
@@ -404,11 +404,11 @@
 			.domain([0, Math.max(...riskData.map((d) => d.votes))])
 			.range([8, 30]);
 
-		select(event.currentTarget)
+		select(event.currentTarget as Element)
 			.transition()
 			.duration(200)
 			.attr('stroke-width', 2)
-			.attr('r', (d: RiskDatum) => radiusScale(d.votes || 5));
+			.attr('r', (d: any) => radiusScale((d?.votes as number) || 5));
 	}
 
 	function handleClick(event: MouseEvent, d: RiskDatum) {

@@ -9,7 +9,7 @@ Welcome to the documentation hub for the Critical Designer Alphabet (CDA) platfo
 | [Features](features.md) | Product capabilities from facilitator launch to live collaboration. |
 | [Architecture](architecture.md) | High-level system diagram covering frontend, backend, database, and content studio. |
 | [Frontend Guide](frontend.md) | SvelteKit application structure, component catalogue, and styling approach. |
-| [Backend & APIs](backend.md) | Supabase data model, REST endpoints, WebSocket gateway, and realtime flows. |
+| [Backend & APIs](backend.md) | Supabase data model, REST endpoints, and Supabase Realtime flows. |
 | [Content Studio](content-studio.md) | Sanity schemas, template authoring, and editorial workflows. |
 | [DevOps & Deployment](devops.md) | Local development, Docker images, Railway deployment, and environment configuration. |
 | [Testing & QA](testing.md) | Available test harnesses, how to run them, and recommended coverage. |
